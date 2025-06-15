@@ -18,6 +18,11 @@ Your project is live at:
 
 ## Build your app
 
+## Environment Variables
+
+Copy `env.example` to `.env.local` and fill in the variables.
+
+
 Continue building your app on:
 
 **[https://v0.dev/chat/projects/zVc3ijHfuT4](https://v0.dev/chat/projects/zVc3ijHfuT4)**
