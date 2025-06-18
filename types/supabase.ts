@@ -20,6 +20,7 @@ export interface Database {
           contract_valid_from?: string | null
           contract_valid_until?: string | null
           job_title?: string | null
+          status?: string | null
           work_location?: string | null
           contract_start_date?: string | null // YYYY-MM-DD
           contract_end_date?: string | null // YYYY-MM-DD
@@ -37,6 +38,7 @@ export interface Database {
           contract_valid_from?: string | null
           contract_valid_until?: string | null
           job_title?: string | null
+          status?: string | null
           work_location?: string | null
           contract_start_date?: string | null
           contract_end_date?: string | null
@@ -54,6 +56,7 @@ export interface Database {
           contract_valid_from?: string | null
           contract_valid_until?: string | null
           job_title?: string | null
+          status?: string | null
           work_location?: string | null
           contract_start_date?: string | null
           contract_end_date?: string | null
