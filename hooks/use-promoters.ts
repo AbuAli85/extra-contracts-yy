@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 import type { Promoter } from "@/types/custom"
@@ -17,9 +18,27 @@ const fetchPromoters = async (): Promise<Promoter[]> => {
 }
 
 export const usePromoters = () => {
-  return useQuery<Promoter[], Error>({
-    queryKey: ["promoters"],
+  const queryClient = useQueryClient()
+  const queryKey = ["promoters"]
+
+  const queryResult = useQuery<Promoter[], Error>({
+    queryKey,
     queryFn: fetchPromoters,
     staleTime: 1000 * 60 * 5,
   })
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("public-promoters-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, () => {
+        queryClient.invalidateQueries({ queryKey })
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [queryClient])
+
+  return queryResult
 }
