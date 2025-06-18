@@ -1,1 +1,2 @@
-export { default } from "../loading"
+import Loading from '../loading'
+export default Loading

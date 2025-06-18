@@ -1,3 +1,4 @@
 "use client"
 
-export { default } from "@/error"
+import ErrorPage from '@/error'
+export default ErrorPage
