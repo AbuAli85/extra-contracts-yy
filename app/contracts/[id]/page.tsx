@@ -1,4 +1,5 @@
 import type React from "react"
+import { Suspense } from "react"
 import { supabase } from "@/lib/supabase"
 import type { ContractRecord } from "@/lib/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -107,7 +108,7 @@ function SectionCard({
   )
 }
 
-export default async function ContractDetailPage({ params }: { params: { id: string } }) {
+async function ContractDetail({ params }: { params: { id: string } }) {
   const contract = await getContractDetails(params.id)
 
   if (!contract) {
@@ -312,5 +313,14 @@ export default async function ContractDetailPage({ params }: { params: { id: str
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ContractDetailPage({ params }: { params: { id: string } }) {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-4">Loading...</div>}>
+      {/* @ts-expect-error Async Server Component */}
+      <ContractDetail params={params} />
+    </Suspense>
   )
 }
