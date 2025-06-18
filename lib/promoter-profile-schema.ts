@@ -1,4 +1,5 @@
 import { z } from "zod"
+// Utility provides browser-aware validation helpers
 import { createOptionalFileSchema } from "./utils"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
