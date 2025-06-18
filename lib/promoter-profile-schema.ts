@@ -1,8 +1,8 @@
 import { z } from "zod"
+import { isBrowser } from "./utils"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
-const isBrowser = typeof window !== "undefined" && typeof File !== "undefined"
 
 const fileSchema = z
   .any()
