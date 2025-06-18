@@ -13,6 +13,8 @@ jest.mock("@/hooks/use-promoters")
 const mockUseParties = useParties as jest.Mock
 const mockUsePromoters = usePromoters as jest.Mock
 
+const originalFetch = global.fetch
+
 const employerParty = {
   id: "party-employer-1",
   name_en: "Test Employer EN",
@@ -70,6 +72,10 @@ describe("ContractGeneratorForm", () => {
           }),
       }),
     ) as jest.Mock
+  })
+
+  afterEach(() => {
+    global.fetch = originalFetch
   })
 
   test("shows validation errors when required fields are missing", async () => {
