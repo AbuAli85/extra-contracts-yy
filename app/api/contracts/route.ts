@@ -3,10 +3,11 @@ import { type NextRequest, NextResponse } from "next/server"
 import { getSupabaseAdmin } from "@/lib/supabase/admin"
 import { createServerComponentClient } from "@/lib/supabaseServer"
 import { contractGeneratorSchema } from "@/types/custom" // Your Zod schema for validation
+import type { BilingualPdfData } from "@/lib/types"
 // Removed direct import of Database type from here, as it's handled in admin.ts
 
 // Placeholder for your PDF generation logic (e.g., calling Google Docs API via Make.com)
-async function generateBilingualPdf(contractData: any, contractId: string): Promise<string | null> {
+async function generateBilingualPdf(contractData: BilingualPdfData, contractId: string): Promise<string | null> {
   const supabaseAdmin = getSupabaseAdmin() // Get client instance
   const makeWebhookUrl = process.env.MAKE_WEBHOOK_URL
   if (!makeWebhookUrl) {
@@ -115,17 +116,20 @@ export async function POST(request: NextRequest) {
       supabase.from("promoters").select("name_en, name_ar").eq("id", newContract.promoter_id).single(),
     ])
 
-    const fullContractDataForPdf = {
-      ...newContract,
+    const pdfData: BilingualPdfData = {
       first_party_name_en: party1.data?.name_en,
       first_party_name_ar: party1.data?.name_ar,
       second_party_name_en: party2.data?.name_en,
       second_party_name_ar: party2.data?.name_ar,
       promoter_name_en: promoterDetails.data?.name_en,
       promoter_name_ar: promoterDetails.data?.name_ar,
+      contract_start_date: newContract.contract_start_date,
+      contract_end_date: newContract.contract_end_date,
+      job_title: newContract.job_title,
+      email: newContract.email,
     }
 
-    const pdfUrl = await generateBilingualPdf(fullContractDataForPdf, newContract.id)
+    const pdfUrl = await generateBilingualPdf(pdfData, newContract.id)
 
     let finalContractData = newContract
     if (pdfUrl) {
