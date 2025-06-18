@@ -7,10 +7,12 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {
   promoterProfileSchema,
   type PromoterProfileFormData,
+} from "@/lib/promoter-profile-schema"
+import {
   sampleEmployers,
   sampleClients,
   promoterStatuses,
-} from "@/lib/promoter-profile-schema"
+} from "@/lib/fixtures/promoter-profile"
 import type { PromoterProfile } from "@/lib/types" // Assuming PromoterProfile is defined in lib/types.ts
 import { useToast } from "@/hooks/use-toast"
 
