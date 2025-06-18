@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 // Import the lazy-initialized admin client
 import { getSupabaseAdmin } from "@/lib/supabase/admin"
 import { createServerComponentClient } from "@/lib/supabaseServer"
-import { contractGeneratorSchema } from "@/types/custom" // Your Zod schema for validation
+import { contractGeneratorSchema } from "@/lib/schema-generator" // Your Zod schema for validation
 import type { BilingualPdfData } from "@/lib/types"
 // Removed direct import of Database type from here, as it's handled in admin.ts
 
