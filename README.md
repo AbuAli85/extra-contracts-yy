@@ -18,6 +18,19 @@ Your project is live at:
 
 ## Build your app
 
+Install dependencies using `pnpm`:
+
+```bash
+pnpm install
+```
+
+You need these packages before running lint:
+
+```bash
+npm run lint
+```
+
+
 ## Environment Variables
 
 Copy `env.example` to `.env.local` and fill in the variables.
