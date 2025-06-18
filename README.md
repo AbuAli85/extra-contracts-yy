@@ -41,3 +41,20 @@ Continue building your app on:
 2. Deploy your chats from the v0 interface
 3. Changes are automatically pushed to this repository
 4. Vercel deploys the latest version from this repository
+
+## Generate Supabase Types
+
+Install the [Supabase CLI](https://supabase.com/docs/guides/cli) globally:
+
+```bash
+npm install -g supabase
+```
+
+After installing, generate TypeScript definitions for your database:
+
+```bash
+npx supabase gen types typescript --project-id <YOUR_PROJECT_REF> --schema public > types/supabase.ts
+```
+
+Running this command whenever your database schema changes will keep
+`types/supabase.ts` in sync with your Supabase project.
