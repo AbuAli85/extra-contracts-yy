@@ -46,3 +46,16 @@ export interface ContractRecord {
   contract_end_date?: string | null
   [key: string]: any
 }
+
+export interface BilingualPdfData {
+  first_party_name_en?: string
+  first_party_name_ar?: string
+  second_party_name_en?: string
+  second_party_name_ar?: string
+  promoter_name_en?: string
+  promoter_name_ar?: string
+  contract_start_date: string | null
+  contract_end_date: string | null
+  job_title?: string | null
+  email: string | null
+}
