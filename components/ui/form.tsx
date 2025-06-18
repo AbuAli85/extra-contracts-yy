@@ -24,8 +24,8 @@ type FormFieldContextValue<
   name: TName
 }
 
-const FormFieldContext = React.createContext<FormFieldContextValue>(
-  {} as FormFieldContextValue
+const FormFieldContext = React.createContext<FormFieldContextValue | undefined>(
+  undefined,
 )
 
 const FormField = <
@@ -44,13 +44,18 @@ const FormField = <
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
   const itemContext = React.useContext(FormItemContext)
+
+  if (!fieldContext) {
+    throw new Error("useFormField must be used within a <FormField> component")
+  }
+
+  if (!itemContext) {
+    throw new Error("useFormField must be used within a <FormItem> component")
+  }
+
   const { getFieldState, formState } = useFormContext()
 
   const fieldState = getFieldState(fieldContext.name, formState)
-
-  if (!fieldContext) {
-    throw new Error("useFormField should be used within <FormField>")
-  }
 
   const { id } = itemContext
 
@@ -68,8 +73,8 @@ type FormItemContextValue = {
   id: string
 }
 
-const FormItemContext = React.createContext<FormItemContextValue>(
-  {} as FormItemContextValue
+const FormItemContext = React.createContext<FormItemContextValue | undefined>(
+  undefined,
 )
 
 const FormItem = React.forwardRef<
