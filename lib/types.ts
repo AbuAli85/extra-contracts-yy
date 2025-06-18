@@ -5,7 +5,6 @@ export interface Party {
   crn: string
   type?: string | null
   created_at?: string | null
-  [key: string]: any
 }
 
 export interface Promoter {
@@ -28,12 +27,13 @@ export interface Promoter {
   notify_before_contract_expiry_days?: number | null
   notes?: string | null
   created_at?: string | null
-  [key: string]: any
+  active_contracts_count?: number
 }
 
 export interface PromoterProfile extends Promoter {}
 
-export interface ContractRecord {
+export interface ContractRecord<Extra extends Record<string, unknown> = {}>
+  extends Extra {
   id: string
   created_at?: string | null
   first_party_name_en?: string | null
@@ -44,5 +44,4 @@ export interface ContractRecord {
   error_details?: string | null
   contract_start_date?: string | null
   contract_end_date?: string | null
-  [key: string]: any
 }
