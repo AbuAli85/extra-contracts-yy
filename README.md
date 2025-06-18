@@ -97,3 +97,14 @@ npx supabase gen types typescript --project-id <YOUR_PROJECT_REF> --schema publi
 
 Running this command whenever your database schema changes will keep
 `types/supabase.ts` in sync with your Supabase project.
+
+## Running Tests
+
+Ensure you have **Node.js** and **pnpm** installed. After installing project
+dependencies with `pnpm install`, execute the Jest test suite with:
+
+```bash
+pnpm test
+```
+
+This command runs all unit tests defined in the repository.
