@@ -18,16 +18,26 @@ Your project is live at:
 
 ## Build your app
 
-Install dependencies using `pnpm`:
+Install dependencies before running any scripts:
 
 ```bash
 pnpm install
+# or
+npm install
 ```
 
-You need these packages before running lint:
+After the dependencies are installed you can lint the project:
 
 ```bash
 npm run lint
+```
+
+If `next lint` reports "not found," install Next.js:
+
+```bash
+pnpm add next
+# or
+npm install next
 ```
 
 
