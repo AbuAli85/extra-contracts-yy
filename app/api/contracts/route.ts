@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 // Import the lazy-initialized admin client
 import { getSupabaseAdmin } from "@/lib/supabase/admin"
+import { createServerComponentClient } from "@/lib/supabaseServer"
 import { contractGeneratorSchema } from "@/types/custom" // Your Zod schema for validation
 // Removed direct import of Database type from here, as it's handled in admin.ts
 
@@ -63,7 +64,8 @@ async function generateBilingualPdf(contractData: any, contractId: string): Prom
 }
 
 export async function POST(request: NextRequest) {
-  const supabaseAdmin = getSupabaseAdmin() // Get client instance within the handler
+  const supabase = createServerComponentClient()
+  const supabaseAdmin = getSupabaseAdmin() // Service role client
   try {
     const body = await request.json()
     const validation = contractGeneratorSchema.safeParse(body)
@@ -73,9 +75,9 @@ export async function POST(request: NextRequest) {
     }
 
     const { data: validatedData } = validation
-    const {
-      data: { user },
-    } = await supabaseAdmin.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
     const contractToInsert = {
       // Explicitly type this if Database["public"]["Tables"]["contracts"]["Insert"] is needed
@@ -90,7 +92,7 @@ export async function POST(request: NextRequest) {
       user_id: user?.id,
     }
 
-    const { data: newContract, error: insertError } = await supabaseAdmin
+    const { data: newContract, error: insertError } = await supabase
       .from("contracts")
       .insert(contractToInsert)
       .select()
@@ -108,9 +110,9 @@ export async function POST(request: NextRequest) {
     }
 
     const [party1, party2, promoterDetails] = await Promise.all([
-      supabaseAdmin.from("parties").select("name_en, name_ar").eq("id", newContract.first_party_id).single(),
-      supabaseAdmin.from("parties").select("name_en, name_ar").eq("id", newContract.second_party_id).single(),
-      supabaseAdmin.from("promoters").select("name_en, name_ar").eq("id", newContract.promoter_id).single(),
+      supabase.from("parties").select("name_en, name_ar").eq("id", newContract.first_party_id).single(),
+      supabase.from("parties").select("name_en, name_ar").eq("id", newContract.second_party_id).single(),
+      supabase.from("promoters").select("name_en, name_ar").eq("id", newContract.promoter_id).single(),
     ])
 
     const fullContractDataForPdf = {
@@ -127,7 +129,7 @@ export async function POST(request: NextRequest) {
 
     let finalContractData = newContract
     if (pdfUrl) {
-      const { data: updatedContractWithPdf, error: updateError } = await supabaseAdmin
+      const { data: updatedContractWithPdf, error: updateError } = await supabase
         .from("contracts")
         .update({ pdf_url: pdfUrl }) // Ensure this is pdf_url
         .eq("id", newContract.id)
