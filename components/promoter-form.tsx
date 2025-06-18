@@ -3,10 +3,10 @@ import { useState, useEffect } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
-  promoterFormSchema,
-  type PromoterFormData, // Assuming PromoterFormData is also in types/custom.ts or derived from promoterFormSchema
-  promoterStatusesList,
-} from "@/types/custom"
+  promoterProfileSchema,
+  type PromoterProfileFormData,
+} from "@/lib/promoter-profile-schema"
+import { promoterStatusesList } from "@/types/custom"
 import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
@@ -68,8 +68,8 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
   const isEditScreen = !!promoterToEdit
   const [isEditable, setIsEditable] = useState(!isEditScreen)
 
-  const form = useForm<PromoterFormData>({
-    resolver: zodResolver(promoterFormSchema),
+  const form = useForm<PromoterProfileFormData>({
+    resolver: zodResolver(promoterProfileSchema),
     defaultValues: {
       name_en: "",
       name_ar: "",
@@ -168,7 +168,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
     return currentUrl
   }
 
-  async function onSubmit(values: PromoterFormData) {
+  async function onSubmit(values: PromoterProfileFormData) {
     if (!isEditable) {
       toast({ title: "Form Locked", description: "Enable 'Editable Mode' to make changes.", variant: "default" })
       return
