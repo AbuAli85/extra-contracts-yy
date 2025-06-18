@@ -198,6 +198,12 @@ importers:
       typescript:
         specifier: ^5
         version: 5.0.2
+      jest:
+        specifier: ^29
+        version: 29.7.0
+      ts-jest:
+        specifier: ^29
+        version: 29.1.1_jest@29.7.0(@types/jest@29.5.11)(typescript@5.0.2)
 
 packages:
 
