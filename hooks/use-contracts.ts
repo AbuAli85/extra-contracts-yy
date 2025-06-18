@@ -1,7 +1,8 @@
 "use client"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase" // Assuming supabase client is exported from here
+import { supabase } from "@/lib/supabase" // Supabase client for reads
+import { createContract, deleteContract } from "@/app/actions/contracts"
 import { devLog } from "@/lib/dev-log"
 import type { Database } from "@/types/supabase"
 import { useEffect } from "react"
@@ -84,29 +85,10 @@ export const useContracts = () => {
 }
 
 // Create a new contract
-const createContractInSupabase = async (newContract: ContractInsert): Promise<ContractWithRelations> => {
-  const { data, error } = await supabase
-    .from("contracts")
-    .insert(newContract)
-    .select(`
-      id,
-      created_at,
-      job_title,
-      contract_valid_from,
-      contract_valid_until,
-      status,
-      pdf_url,
-      first_party_id,
-      second_party_id,
-      promoter_id,
-      parties!contracts_employer_id_fkey (id, name_en, name_ar),
-      parties!contracts_client_id_fkey (id, name_en, name_ar),
-      promoters (id, name_en, name_ar)
-    `)
-    .single()
-
-  if (error) throw new Error(error.message)
-  if (!data) throw new Error("Contract creation failed, no data returned.")
+const createContractInSupabase = async (
+  newContract: ContractInsert,
+): Promise<ContractWithRelations> => {
+  const data = await createContract(newContract)
   return data as ContractWithRelations
 }
 
@@ -122,8 +104,7 @@ export const useCreateContractMutation = () => {
 
 // Delete a contract
 const deleteContractInSupabase = async (contractId: string): Promise<void> => {
-  const { error } = await supabase.from("contracts").delete().eq("id", contractId)
-  if (error) throw new Error(error.message)
+  await deleteContract(contractId)
 }
 
 export const useDeleteContractMutation = () => {
