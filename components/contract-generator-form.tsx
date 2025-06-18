@@ -12,6 +12,7 @@ import { format } from "date-fns"
 import { contractGeneratorSchema, type ContractGeneratorFormData } from "@/types/custom"
 import { useParties, type Party as PartyType } from "@/hooks/use-parties" // Import Party type if needed
 import { usePromoters } from "@/hooks/use-promoters"
+import type { Promoter } from "@/types/custom"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -44,6 +45,8 @@ export default function ContractGeneratorForm() {
   } = useParties("Client")
 
   const { data: promoters, isLoading: isLoadingPromoters } = usePromoters()
+
+  const [selectedPromoter, setSelectedPromoter] = useState<Promoter | null>(null)
 
   // Debug output only in development
   useEffect(() => {
@@ -87,6 +90,17 @@ export default function ContractGeneratorForm() {
       )
     }
   }, [promoters])
+
+  const watchedPromoterId = form.watch("promoter_id")
+
+  useEffect(() => {
+    if (watchedPromoterId && promoters) {
+      const promoter = promoters.find((p) => p.id === watchedPromoterId) || null
+      setSelectedPromoter(promoter)
+    } else {
+      setSelectedPromoter(null)
+    }
+  }, [watchedPromoterId, promoters])
 
   const { mutate: createContract, isLoading: isSubmitting } = useMutation({
     mutationFn: async (data: ContractGeneratorFormData) => {
@@ -267,6 +281,21 @@ export default function ContractGeneratorForm() {
               </FormItem>
             )}
           />
+          {selectedPromoter ? (
+            <div className="p-3 border rounded-md bg-muted/50 space-y-1 text-sm">
+              <p>
+                <span className="font-medium">Name (EN):</span> {selectedPromoter.name_en}
+              </p>
+              <p dir="rtl">
+                <span className="font-medium">Name (AR):</span> {selectedPromoter.name_ar}
+              </p>
+              <p>
+                <span className="font-medium">ID Card:</span> {selectedPromoter.id_card_number}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Select a promoter to view details.</p>
+          )}
         </motion.div>
 
         {/* Contract Period Section */}
