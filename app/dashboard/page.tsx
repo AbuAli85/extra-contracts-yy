@@ -9,6 +9,7 @@ import NotificationSystem from "@/components/dashboard/notification-system"
 import AdminTools from "@/components/dashboard/admin-tools"
 import AuditLogs from "@/components/dashboard/audit-logs"
 import { supabase } from "@/lib/supabase"
+import { devLog } from "@/lib/dev-log"
 import type { SummaryWidgetData, ContractStats } from "@/lib/dashboard-types"
 import { FileText, FileCheck, FileX, CalendarClock, Users, Building } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
@@ -79,7 +80,7 @@ export default function DashboardPage() {
     const contractsChannel = supabase
       .channel("public:contracts:kpis") // Unique channel name for KPIs
       .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, (payload) => {
-        console.log("Contracts table change for KPIs received!", payload)
+        devLog("Contracts table change for KPIs received!", payload)
         fetchInitialStats()
         toast({
           title: "Dashboard Stats Updated",

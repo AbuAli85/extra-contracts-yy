@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Download, Search, ArrowUpDown, Loader2 } from "lucide-react"
 import type { ContractReportItem } from "@/lib/dashboard-types"
 import { supabase } from "@/lib/supabase"
+import { devLog } from "@/lib/dev-log"
 import { format, parseISO, isValid } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import { useToast } from "@/hooks/use-toast"
@@ -62,7 +63,7 @@ export default function ContractReportsTable() {
     // For views, Supabase Realtime listens to changes on the underlying tables.
     // So, we subscribe to `contracts`, `promoters`, and `parties`.
     const handleTableChange = (payload: any, tableName: string) => {
-      console.log(`${tableName} table change for view:`, payload)
+      devLog(`${tableName} table change for view:`, payload)
       toast({ title: "Contract Data Updated", description: `Refreshing contract list due to changes in ${tableName}.` })
       fetchContracts() // Refetch data from the view
     }
