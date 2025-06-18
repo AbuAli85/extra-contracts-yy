@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import PartyForm from "@/components/party-form"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { EditIcon, PlusCircleIcon, ArrowLeftIcon, BuildingIcon, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
-export default function ManagePartiesPage() {
+function ManagePartiesPageContent() {
   const [parties, setParties] = useState<Party[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedParty, setSelectedParty] = useState<Party | null>(null)
@@ -138,5 +138,19 @@ export default function ManagePartiesPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ManagePartiesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center min-h-screen">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <ManagePartiesPageContent />
+    </Suspense>
   )
 }
