@@ -4,6 +4,8 @@ import type React from "react"
 import { Inter, Lexend } from "next/font/google" // Lexend as display font
 import { Toaster } from "@/components/ui/toaster"
 import { Providers } from "./providers" // Assuming this includes ThemeProvider
+import { Suspense } from "react"
+import Loading from "./loading"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { MobileNav } from "@/components/mobile-nav" // New component
 import { cn } from "@/lib/utils"
@@ -77,7 +79,9 @@ export default function ClientLayout({
 
             {/* MAIN CONTENT */}
             <main className="flex-1">
-              <div className="container py-8 md:py-12">{children}</div>
+              <Suspense fallback={<Loading />}>
+                <div className="container py-8 md:py-12">{children}</div>
+              </Suspense>
             </main>
 
             {/* FOOTER */}
