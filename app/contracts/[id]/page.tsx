@@ -20,7 +20,19 @@ import LifecycleStatusIndicator from "@/components/lifecycle-status-indicator"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 
-async function getContractDetails(id: string): Promise<ContractRecord | null> {
+type ContractDetail = ContractRecord<{
+  first_party: { name_en: string; name_ar: string; crn: string }
+  second_party: { name_en: string; name_ar: string; crn: string }
+  promoter: {
+    name_en: string
+    name_ar: string
+    id_card_number: string
+    id_card_url?: string | null
+    passport_url?: string | null
+  }
+}>
+
+async function getContractDetails(id: string): Promise<ContractDetail | null> {
   const supabase = createServerComponentClient()
   const { data, error } = await supabase
     .from("contracts")
@@ -39,17 +51,7 @@ async function getContractDetails(id: string): Promise<ContractRecord | null> {
     console.error("Error fetching contract details:", error)
     return null
   }
-  return data as unknown as ContractRecord & {
-    first_party: { name_en: string; name_ar: string; crn: string }
-    second_party: { name_en: string; name_ar: string; crn: string }
-    promoter: {
-      name_en: string
-      name_ar: string
-      id_card_number: string
-      id_card_url?: string | null
-      passport_url?: string | null
-    }
-  }
+  return data as unknown as ContractDetail
 }
 
 function DetailItem({
@@ -134,9 +136,9 @@ export default async function ContractDetailPage({ params }: { params: { id: str
     )
   }
 
-  const firstParty = contract.first_party as any
-  const secondParty = contract.second_party as any
-  const promoter = contract.promoter as any
+  const firstParty = contract.first_party
+  const secondParty = contract.second_party
+  const promoter = contract.promoter
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 py-8 sm:py-12 px-4 md:px-6 lg:px-8">
