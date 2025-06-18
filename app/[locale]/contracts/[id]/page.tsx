@@ -1,4 +1,5 @@
 import { getContract } from "@/lib/data"
+import { Suspense } from "react"
 
 interface Props {
   params: {
@@ -7,7 +8,7 @@ interface Props {
   }
 }
 
-export default async function ContractPage({ params: { id, locale } }: Props) {
+async function ContractContent({ params: { id, locale } }: Props) {
   const contract = await getContract(id)
 
   if (!contract) {
@@ -21,5 +22,14 @@ export default async function ContractPage({ params: { id, locale } }: Props) {
       <p>Name: {contract.name}</p>
       {/* Add more contract details here */}
     </div>
+  )
+}
+
+export default function ContractPage({ params }: Props) {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-4">Loading...</div>}>
+      {/* @ts-expect-error Async Server Component */}
+      <ContractContent params={params} />
+    </Suspense>
   )
 }
