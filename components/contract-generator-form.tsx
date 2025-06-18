@@ -3,7 +3,7 @@
 import { FormDescription } from "@/components/ui/form"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -91,7 +91,10 @@ export default function ContractGeneratorForm() {
     }
   }, [promoters])
 
-  const watchedPromoterId = form.watch("promoter_id")
+  const watchedPromoterId = useWatch({
+    control: form.control,
+    name: "promoter_id",
+  })
 
   useEffect(() => {
     if (watchedPromoterId && promoters) {
