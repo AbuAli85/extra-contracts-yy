@@ -1,4 +1,4 @@
-import type { ContractWithRelations } from "@/types/custom"
+import type { ContractWithRelations } from "@/hooks/use-contracts"
 import { supabaseServer } from "@/lib/supabase/server"
 
 export const getContract = async (
@@ -15,22 +15,18 @@ export const getContract = async (
     .from("contracts")
     .select(`
       id,
-      contract_name,
-      party_a_id,
-      party_b_id,
-      promoter_id,
-      start_date,
-      end_date,
-      status,
-      contract_terms_en,
-      contract_terms_fr,
       created_at,
-      updated_at,
-      user_id,
-      pdf_url, 
-      party_a:parties!contracts_party_a_id_fkey(id, name, address, representative_name),
-      party_b:parties!contracts_party_b_id_fkey(id, name, address, representative_name),
-      promoter:promoters!contracts_promoter_id_fkey(id, name, contact_email)
+      job_title,
+      contract_valid_from,
+      contract_valid_until,
+      status,
+      pdf_url,
+      first_party_id,
+      second_party_id,
+      promoter_id,
+      parties!contracts_employer_id_fkey (id, name_en, name_ar),
+      parties!contracts_client_id_fkey (id, name_en, name_ar),
+      promoters (id, name_en, name_ar)
     `)
     .eq("id", contractId)
     .single()
