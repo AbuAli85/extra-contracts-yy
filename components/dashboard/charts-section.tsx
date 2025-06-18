@@ -29,6 +29,21 @@ interface MonthlyRevenueData {
   revenue: number
 }
 
+const MONTH_MAP: Record<string, string> = {
+  Jan: "يناير",
+  Feb: "فبراير",
+  Mar: "مارس",
+  Apr: "أبريل",
+  May: "مايو",
+  Jun: "يونيو",
+  Jul: "يوليو",
+  Aug: "أغسطس",
+  Sep: "سبتمبر",
+  Oct: "أكتوبر",
+  Nov: "نوفمبر",
+  Dec: "ديسمبر",
+}
+
 const chartConfig = {
   contracts: { label: "Contracts", labelAr: "العقود", color: "hsl(var(--chart-1))" },
   revenue: { label: "Revenue ($)", labelAr: "الإيرادات ($)", color: "hsl(var(--chart-2))" },
@@ -59,7 +74,12 @@ export default function ChartsSection() {
 
       const { data: monthlyResult, error: monthlyError } = await supabase.rpc("get_monthly_contract_revenue")
       if (monthlyError) throw monthlyError
-      setMonthlyData(monthlyResult.map((m: any) => ({ ...m, monthAr: m.month /* TODO: Arabic month name */ })))
+      setMonthlyData(
+        monthlyResult.map((m: any) => ({
+          ...m,
+          monthAr: MONTH_MAP[m.month as keyof typeof MONTH_MAP] || m.month,
+        }))
+      )
     } catch (error: any) {
       console.error("Error fetching chart data:", error)
       toast({ title: "Error Fetching Chart Data", description: error.message, variant: "destructive" })
@@ -157,10 +177,23 @@ export default function ChartsSection() {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={monthlyData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
+                <XAxis
+                  dataKey="month"
+                  tickFormatter={(value) =>
+                    MONTH_MAP[value as keyof typeof MONTH_MAP] || value
+                  }
+                />
                 <YAxis yAxisId="left" stroke="var(--color-contracts)" />
                 <YAxis yAxisId="right" orientation="right" stroke="var(--color-revenue)" />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      labelFormatter={(label) =>
+                        MONTH_MAP[label as keyof typeof MONTH_MAP] || label
+                      }
+                    />
+                  }
+                />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Line
                   yAxisId="left"
