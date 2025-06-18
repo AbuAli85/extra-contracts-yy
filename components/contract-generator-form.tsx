@@ -20,6 +20,7 @@ import { Loader2 } from "lucide-react"
 import { DatePickerWithManualInput } from "./date-picker-with-manual-input"
 import ComboboxField from "@/components/combobox-field"
 import { motion } from "framer-motion"
+import { devLog } from "@/lib/dev-log"
 
 const sectionVariants = {
   hidden: { opacity: 0, x: -20 },
@@ -44,10 +45,10 @@ export default function ContractGeneratorForm() {
 
   const { data: promoters, isLoading: isLoadingPromoters } = usePromoters()
 
-  // Console log for debugging
+  // Debug output only in development
   useEffect(() => {
-    console.log("Employer Parties Data:", employerParties)
-    console.log("Client Parties Data:", clientParties)
+    devLog("Employer Parties Data:", employerParties)
+    devLog("Client Parties Data:", clientParties)
   }, [employerParties, clientParties])
 
   useEffect(() => {

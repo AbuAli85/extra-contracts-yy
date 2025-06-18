@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase" // Assuming supabase client is exported from here
+import { devLog } from "@/lib/dev-log"
 import type { Database } from "@/types/supabase"
 import { useEffect } from "react"
 
@@ -59,12 +60,12 @@ export const useContracts = () => {
     const channel = supabase
       .channel("public-contracts-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, (payload) => {
-        console.log("Realtime contract change received!", payload)
+        devLog("Realtime contract change received!", payload)
         queryClient.invalidateQueries({ queryKey: queryKey })
       })
       .subscribe((status, err) => {
         if (status === "SUBSCRIBED") {
-          console.log("Subscribed to contracts channel!")
+          devLog("Subscribed to contracts channel!")
         }
         if (status === "CHANNEL_ERROR") {
           console.error("Channel error:", err)
