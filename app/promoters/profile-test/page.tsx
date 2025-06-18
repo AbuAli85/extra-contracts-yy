@@ -5,6 +5,7 @@
 
 import PromoterProfileForm from "@/components/promoter-profile-form"
 import type { PromoterProfile } from "@/lib/types"
+import { devLog } from "@/lib/dev-log"
 
 // Sample data for editing (optional)
 const samplePromoterToEdit: PromoterProfile = {
@@ -28,7 +29,7 @@ const samplePromoterToEdit: PromoterProfile = {
 
 export default function PromoterProfileTestPage() {
   const handleFormSubmit = (data: any) => {
-    console.log("Form submitted on test page:", data)
+    devLog("Form submitted on test page:", data)
     // You can add navigation or other actions here
   }
 
