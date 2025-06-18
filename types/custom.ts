@@ -28,24 +28,3 @@ export const promoterStatusesList = [
   { value: "pending_review", label: "Pending Review" },
   // Add other statuses if needed
 ]
-
-// Zod schema for the Contract Generator Form
-// This should align with the fields in ContractGeneratorForm and the API payload
-export const contractGeneratorSchema = z
-  .object({
-    first_party_id: z.string().uuid("Please select Party A."),
-    second_party_id: z.string().uuid("Please select Party B."),
-    promoter_id: z.string().uuid("Please select a Promoter."),
-    contract_start_date: z.date({ required_error: "Contract start date is required." }),
-    contract_end_date: z.date({ required_error: "Contract end date is required." }),
-    email: z.string().email("Please enter a valid email address for notifications."),
-    job_title: z.string().optional().nullable(), // Example optional field
-    work_location: z.string().optional().nullable(), // Example optional field
-    // Add other fields as necessary
-  })
-  .refine((data) => data.contract_end_date > data.contract_start_date, {
-    message: "End date must be after start date.",
-    path: ["contract_end_date"], // Path of error
-  })
-
-export type ContractGeneratorFormData = z.infer<typeof contractGeneratorSchema>
