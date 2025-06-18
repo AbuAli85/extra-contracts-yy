@@ -32,6 +32,12 @@ After the dependencies are installed you can lint the project:
 npm run lint
 ```
 
+The form at `public/index.html` is generated from `index.html` using the
+`NEXT_PUBLIC_MAKE_WEBHOOK_URL` environment variable. When you run `npm run dev`
+or `npm run build`, the script `scripts/build-form.js` replaces the placeholder
+`__MAKE_WEBHOOK_URL__` in `index.html` and writes the result to
+`public/index.html`.
+
 If `next lint` reports "not found," install Next.js:
 
 ```bash
@@ -59,7 +65,7 @@ others should remain server-side. Important keys include:
 | `NEXT_PUBLIC_SUPABASE_URL` | Base URL of your Supabase project | client |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key used by the browser | client |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key for Supabase admin operations | server |
-| `NEXT_PUBLIC_MAKE_WEBHOOK_URL` | Public URL for Make.com form submissions | client |
+| `NEXT_PUBLIC_MAKE_WEBHOOK_URL` | Public URL for Make.com form submissions; used to generate `public/index.html` | client |
 | `MAKE_WEBHOOK_URL` | Make.com endpoint for generating PDFs | server |
 | `MAKE_WEBHOOK_SECRET` | Optional secret for Make.com, not referenced yet | server |
 | `GOOGLE_CREDENTIALS_JSON` | Google service account credentials | server |
