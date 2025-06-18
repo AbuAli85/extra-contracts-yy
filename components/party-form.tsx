@@ -4,13 +4,15 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { partyFormSchema, type PartyFormData } from "@/lib/party-schema"
 import type { Party } from "@/lib/types"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Loader2 } from "lucide-react"
+
+const supabase = createBrowserClient()
 
 interface PartyFormProps {
   partyToEdit?: Party | null

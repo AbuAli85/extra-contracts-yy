@@ -3,12 +3,14 @@ import { useEffect, useState } from "react"
 import PartyForm from "@/components/party-form"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import type { Party } from "@/lib/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EditIcon, PlusCircleIcon, ArrowLeftIcon, BuildingIcon, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+
+const supabase = createBrowserClient()
 
 export default function ManagePartiesPage() {
   const [parties, setParties] = useState<Party[]>([])

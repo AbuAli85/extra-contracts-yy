@@ -10,11 +10,13 @@ import { DatePickerWithRange } from "@/components/date-picker-with-range"
 import { Badge } from "@/components/ui/badge"
 import { Download, Search, ArrowUpDown, Loader2 } from "lucide-react"
 import type { ContractReportItem } from "@/lib/dashboard-types"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
 import { format, parseISO, isValid } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import { useToast } from "@/hooks/use-toast"
+
+const supabase = createBrowserClient()
 
 type SortKey =
   | keyof ContractReportItem

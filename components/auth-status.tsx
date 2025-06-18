@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import type { User } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import { LogInIcon, LogOutIcon, UserCircle } from "lucide-react"
+
+const supabase = createBrowserClient()
 
 export default function AuthStatus() {
   const [user, setUser] = useState<User | null>(null)

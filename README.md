@@ -45,7 +45,9 @@ npm install next
 
 Copy `env.example` to `.env.local` and fill in the variables. Environment
 variables prefixed with `NEXT_PUBLIC_` are required on the client, while the
-others should remain server-side. Important keys include:
+others should remain server-side. **At a minimum you must define `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`**
+to allow the application to connect to Supabase. Consult `env.example` for the full list.
+Important keys include:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`

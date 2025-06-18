@@ -8,11 +8,13 @@ import ReviewPanel from "@/components/dashboard/review-panel"
 import NotificationSystem from "@/components/dashboard/notification-system"
 import AdminTools from "@/components/dashboard/admin-tools"
 import AuditLogs from "@/components/dashboard/audit-logs"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
 import type { SummaryWidgetData, ContractStats } from "@/lib/dashboard-types"
 import { FileText, FileCheck, FileX, CalendarClock, Users, Building } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+
+const supabase = createBrowserClient()
 
 const initialStats: ContractStats = {
   totalContracts: 0,

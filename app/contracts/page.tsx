@@ -1,13 +1,15 @@
 "use client"
 
 import type React from "react"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import type { ContractRecord } from "@/lib/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+
+const supabase = createBrowserClient()
 import {
   ExternalLinkIcon,
   ArrowLeftIcon,

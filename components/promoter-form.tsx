@@ -7,7 +7,7 @@ import {
   type PromoterFormData, // Assuming PromoterFormData is also in types/custom.ts or derived from promoterFormSchema
   promoterStatusesList,
 } from "@/types/custom"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,6 +15,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Form, FormControl, FormField, FormItem, FormLabel as ShadcnFormLabel, FormMessage } from "@/components/ui/form"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+const supabase = createBrowserClient()
 import { Switch } from "@/components/ui/switch"
 import { Loader2, Edit3Icon, LockIcon, FileWarningIcon as WarningIcon } from "lucide-react"
 import type { Promoter } from "@/lib/types"

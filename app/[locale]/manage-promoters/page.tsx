@@ -5,7 +5,7 @@ import type React from "react"
 import PromoterForm from "@/components/promoter-form"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import type { Promoter } from "@/lib/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -26,6 +26,8 @@ import { useToast } from "@/hooks/use-toast"
 import { format, parseISO, differenceInDays, isPast } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+
+const supabase = createBrowserClient()
 
 // Helper function to determine document status
 const getDocumentStatus = (

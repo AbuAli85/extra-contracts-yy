@@ -5,11 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
 import { Search, Loader2, ArrowUpDown } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
 import type { AuditLogItem } from "@/lib/dashboard-types"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
+
+const supabase = createBrowserClient()
 
 type AuditSortKey = keyof AuditLogItem | "user" | "action" | "ipAddress" | "timestamp" | "details" | null
 

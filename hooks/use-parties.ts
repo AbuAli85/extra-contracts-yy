@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase" // Your Supabase client instance
+import { createBrowserClient } from "@/lib/supabase" // Your Supabase client instance
 import type { Database } from "@/types/supabase" // Assuming generated Supabase types
 import { toast } from "sonner" // For error notifications
+
+const supabase = createBrowserClient()
 
 // Define the structure of a Party based on your select query
 export type Party = Pick<Database["public"]["Tables"]["parties"]["Row"], "id" | "name_en" | "name_ar" | "crn" | "type">

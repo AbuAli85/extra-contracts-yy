@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import type { Promoter, ContractRecord, Party } from "@/lib/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -25,6 +25,8 @@ import { format, parseISO, differenceInDays, isPast } from "date-fns"
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import LifecycleStatusIndicator from "@/components/lifecycle-status-indicator"
+
+const supabase = createBrowserClient()
 
 interface PromoterDetails extends Promoter {
   contracts: ContractRecord<{ first_party?: Party; second_party?: Party }>[]

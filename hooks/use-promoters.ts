@@ -1,9 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect } from "react"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
 import { toast } from "sonner"
 import type { Promoter } from "@/types/custom"
+
+const supabase = createBrowserClient()
 
 const fetchPromoters = async (): Promise<Promoter[]> => {
   const { data, error } = await supabase

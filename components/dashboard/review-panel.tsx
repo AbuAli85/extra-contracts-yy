@@ -6,11 +6,13 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { ThumbsUp, ThumbsDown, MessageSquare, Loader2 } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
 import type { ReviewItem } from "@/lib/dashboard-types" // Ensure this type is defined
 import { useToast } from "@/hooks/use-toast"
 import { formatDistanceToNow } from "date-fns"
+
+const supabase = createBrowserClient()
 
 export default function ReviewPanel() {
   const [reviewItems, setReviewItems] = useState<ReviewItem[]>([])

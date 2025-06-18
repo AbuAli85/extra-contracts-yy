@@ -1,11 +1,13 @@
 "use client"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase" // Supabase client for reads
+import { createBrowserClient } from "@/lib/supabase" // Supabase client for reads
 import { createContract, deleteContract } from "@/app/actions/contracts"
 import { devLog } from "@/lib/dev-log"
 import type { Database } from "@/types/supabase"
 import { useEffect } from "react"
+
+const supabase = createBrowserClient()
 
 // Define a more detailed Contract type that includes potential related data
 // This should align with what your `fetchContracts` select query returns
