@@ -27,7 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import LifecycleStatusIndicator from "@/components/lifecycle-status-indicator"
 
 interface PromoterDetails extends Promoter {
-  contracts: (ContractRecord & { first_party?: Party; second_party?: Party })[]
+  contracts: ContractRecord<{ first_party?: Party; second_party?: Party }>[]
 }
 
 // Re-using helper from manage-promoters page
@@ -149,7 +149,11 @@ export default function PromoterDetailPage() {
 
       setPromoterDetails({
         ...promoterData,
-        contracts: (contractsData as any[]) || [], // Type assertion
+        contracts:
+          (contractsData as ContractRecord<{
+            first_party?: Party
+            second_party?: Party
+          }>[]) || [],
       })
       setIsLoading(false)
     }
