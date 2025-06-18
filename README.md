@@ -21,6 +21,12 @@ Your project is live at:
 ## Environment Variables
 
 Copy `env.example` to `.env.local` and fill in the variables.
+Important keys include:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_MAKE_WEBHOOK_URL`
+- `MAKE_WEBHOOK_SECRET`
 
 
 Continue building your app on:
