@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 // Import the lazy-initialized admin client
 import { getSupabaseAdmin } from "@/lib/supabase/admin"
-import { createServerComponentClient } from "@/lib/supabaseServer"
+import { supabaseServer } from "@/lib/supabase/server"
 import { contractGeneratorSchema } from "@/types/custom" // Your Zod schema for validation
 import type { BilingualPdfData } from "@/lib/types"
 // Removed direct import of Database type from here, as it's handled in admin.ts
@@ -65,7 +65,7 @@ async function generateBilingualPdf(contractData: BilingualPdfData, contractId: 
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = createServerComponentClient()
+  const supabase = supabaseServer()
   const supabaseAdmin = getSupabaseAdmin() // Service role client
   try {
     const body = await request.json()

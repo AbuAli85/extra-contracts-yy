@@ -1,4 +1,5 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js"
+import { createServerClient, type SupabaseClient } from "@supabase/ssr"
+import { cookies } from "next/headers"
 import type { Database } from "@/types/supabase"
 
 /**
@@ -18,10 +19,19 @@ export function supabaseServer(): SupabaseClient<Database> {
     )
   }
 
-  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
+  const cookieStore = cookies()
+
+  return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value
+      },
+      set(name: string, value: string, options) {
+        cookieStore.set({ name, value, ...options })
+      },
+      remove(name: string, options) {
+        cookieStore.delete({ name, ...options })
+      }
+    }
   })
 }
