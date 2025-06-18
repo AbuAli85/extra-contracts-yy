@@ -18,7 +18,9 @@ export default async function ContractPage({ params: { id, locale } }: Props) {
     <div>
       <h1>Contract Details</h1>
       <p>ID: {contract.id}</p>
-      <p>Job Title: {contract.job_title}</p>
+      <p>
+        Promoter: {contract.promoter_name_en || contract.promoters?.name_en || contract.promoters?.name_ar || "N/A"}
+      </p>
       {/* Add more contract details here */}
     </div>
   )
