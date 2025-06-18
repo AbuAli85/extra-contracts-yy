@@ -43,28 +43,31 @@ npm install next
 
 ## Environment Variables
 
-Copy `env.example` to `.env.local` and fill in the variables.
-Important keys include:
+Copy `env.example` to `.env.local` and fill in the variables. Environment
+variables prefixed with `NEXT_PUBLIC_` are required on the client, while the
+others should remain server-side. Important keys include:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `NEXT_PUBLIC_MAKE_WEBHOOK_URL`
+- `MAKE_WEBHOOK_URL`
 - `MAKE_WEBHOOK_SECRET`
 
-- `MAKE_WEBHOOK_URL` – the Make.com webhook endpoint used to generate PDF documents.
-
-| Variable | Purpose |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Base URL of your Supabase project |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key for Supabase admin operations |
-| `MAKE_WEBHOOK_URL` | Make.com endpoint for generating PDFs |
-| `MAKE_WEBHOOK_SECRET` | Optional secret for Make.com, not referenced yet |
-| `GOOGLE_CREDENTIALS_JSON` | Google service account credentials |
-| `GOOGLE_DOCS_TEMPLATE_ID` | ID of the Google Docs template contract |
-| `SMTP_HOST` | SMTP server host for sending PDF emails |
-| `SMTP_PORT` | SMTP server port |
-| `SMTP_USER` | Username or email for SMTP authentication |
-| `SMTP_PASS` | Password for SMTP authentication |
+| Variable | Purpose | Scope |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Base URL of your Supabase project | client |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key used by the browser | client |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key for Supabase admin operations | server |
+| `NEXT_PUBLIC_MAKE_WEBHOOK_URL` | Public URL for Make.com form submissions | client |
+| `MAKE_WEBHOOK_URL` | Make.com endpoint for generating PDFs | server |
+| `MAKE_WEBHOOK_SECRET` | Optional secret for Make.com, not referenced yet | server |
+| `GOOGLE_CREDENTIALS_JSON` | Google service account credentials | server |
+| `GOOGLE_DOCS_TEMPLATE_ID` | ID of the Google Docs template contract | server |
+| `SMTP_HOST` | SMTP server host for sending PDF emails | server |
+| `SMTP_PORT` | SMTP server port | server |
+| `SMTP_USER` | Username or email for SMTP authentication | server |
+| `SMTP_PASS` | Password for SMTP authentication | server |
 
 
 Continue building your app on:
