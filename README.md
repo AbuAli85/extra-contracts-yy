@@ -69,6 +69,12 @@ others should remain server-side. Important keys include:
 | `SMTP_USER` | Username or email for SMTP authentication | server |
 | `SMTP_PASS` | Password for SMTP authentication | server |
 
+## Static HTML Form
+
+The static request form integrated with Make.com is served from
+`public/index.html`. Update the webhook URL in this file if you change
+the `MAKE_WEBHOOK_URL` environment variable. Access the form in the app
+via `/index.html` or the "View Static HTML Form" button.
 
 Continue building your app on:
 
