@@ -14,13 +14,18 @@ export default async function ContractPage({ params: { id, locale } }: Props) {
     return <div>Contract not found</div>
   }
 
+  const promoterName =
+    contract.promoter_name_en ||
+    (locale === "ar"
+      ? contract.promoters?.name_ar || contract.promoters?.name_en
+      : contract.promoters?.name_en || contract.promoters?.name_ar) ||
+    "N/A"
+
   return (
     <div>
       <h1>Contract Details</h1>
       <p>ID: {contract.id}</p>
-      <p>
-        Promoter: {contract.promoter_name_en || contract.promoters?.name_en || contract.promoters?.name_ar || "N/A"}
-      </p>
+      <p>Promoter: {promoterName}</p>
       {/* Add more contract details here */}
     </div>
   )
