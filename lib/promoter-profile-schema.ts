@@ -7,12 +7,19 @@ const isBrowser = typeof window !== "undefined" && typeof File !== "undefined"
 const fileSchema = z
   .any()
   .refine(
-    (file) => !file || (isBrowser && file instanceof File && file.size <= MAX_FILE_SIZE),
+    (file) =>
+      !file ||
+      (isBrowser
+        ? file instanceof File && file.size <= MAX_FILE_SIZE
+        : file.size <= MAX_FILE_SIZE),
     `Max file size is 5MB.`,
   )
   .refine(
     (file) =>
-      !file || (isBrowser && file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type)),
+      !file ||
+      (isBrowser
+        ? file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type)
+        : ACCEPTED_IMAGE_TYPES.includes(file.type)),
     ".jpg, .jpeg, .png and .webp files are accepted.",
   )
   .optional()
