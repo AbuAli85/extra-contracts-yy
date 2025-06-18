@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
 import { Search, Loader2, ArrowUpDown } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import { devLog } from "@/lib/dev-log"
 import type { AuditLogItem } from "@/lib/dashboard-types"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
@@ -55,7 +56,7 @@ export default function AuditLogs() {
       .channel("public:audit_logs:feed") // Unique channel name
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "audit_logs" }, (payload) => {
         const newLog = payload.new as any
-        console.log("New audit log received:", newLog)
+        devLog("New audit log received:", newLog)
         toast({
           title: "New Audit Log Entry",
           description: `${newLog.user_email || "System"} performed action: ${newLog.action}`,

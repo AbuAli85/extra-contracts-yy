@@ -5,6 +5,7 @@ import { BellRing, CheckCircle, XCircle, AlertTriangle, Info, Loader2 } from "lu
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
+import { devLog } from "@/lib/dev-log"
 import type { NotificationItem } from "@/lib/dashboard-types"
 import { useToast } from "@/hooks/use-toast"
 import { formatDistanceToNow } from "date-fns"
@@ -74,7 +75,7 @@ export default function NotificationSystem() {
       .channel("public:notifications:feed") // Unique channel name
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, (payload) => {
         const newNotif = payload.new as any
-        console.log("New notification received:", newNotif)
+        devLog("New notification received:", newNotif)
         toast({ title: "New Notification", description: newNotif.message })
         setNotifications((prev) =>
           [

@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { devLog } from "@/lib/dev-log"
 import { Switch } from "@/components/ui/switch"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -88,7 +89,7 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
 
   async function onSubmit(values: PromoterProfileFormData) {
     setIsSubmitting(true)
-    console.log("Form values:", values)
+    devLog("Form values:", values)
 
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500))
