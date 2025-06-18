@@ -126,6 +126,31 @@ export default function ManagePromotersPage() {
     fetchPromotersWithContractCount()
   }, [])
 
+  useEffect(() => {
+    const promotersChannel = supabase
+      .channel("public:promoters:manage")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "promoters" },
+        () => fetchPromotersWithContractCount(),
+      )
+      .subscribe()
+
+    const contractsChannel = supabase
+      .channel("public:contracts:manage")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "contracts" },
+        () => fetchPromotersWithContractCount(),
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(promotersChannel)
+      supabase.removeChannel(contractsChannel)
+    }
+  }, [])
+
   const handleEdit = (promoter: Promoter) => {
     setSelectedPromoter(promoter)
     setShowForm(true)
