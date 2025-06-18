@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import type React from "react"
 
 import PromoterForm from "@/components/promoter-form"
@@ -67,7 +67,7 @@ const getDocumentStatus = (
   }
 }
 
-export default function ManagePromotersPage() {
+function ManagePromotersPageContent() {
   const [promoters, setPromoters] = useState<Promoter[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedPromoter, setSelectedPromoter] = useState<Promoter | null>(null)
@@ -335,5 +335,19 @@ export default function ManagePromotersPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function ManagePromotersPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center min-h-screen">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <ManagePromotersPageContent />
+    </Suspense>
   )
 }
