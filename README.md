@@ -43,6 +43,19 @@ Important keys include:
 
 - `MAKE_WEBHOOK_URL` – the Make.com webhook endpoint used to generate PDF documents.
 
+| Variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Base URL of your Supabase project |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key for Supabase admin operations |
+| `MAKE_WEBHOOK_URL` | Make.com endpoint for generating PDFs |
+| `MAKE_WEBHOOK_SECRET` | Optional secret for Make.com, not referenced yet |
+| `GOOGLE_CREDENTIALS_JSON` | Google service account credentials |
+| `GOOGLE_DOCS_TEMPLATE_ID` | ID of the Google Docs template contract |
+| `SMTP_HOST` | SMTP server host for sending PDF emails |
+| `SMTP_PORT` | SMTP server port |
+| `SMTP_USER` | Username or email for SMTP authentication |
+| `SMTP_PASS` | Password for SMTP authentication |
+
 
 Continue building your app on:
 
