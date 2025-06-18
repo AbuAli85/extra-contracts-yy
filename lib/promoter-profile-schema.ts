@@ -1,29 +1,15 @@
 import { z } from "zod"
-import { isBrowser } from "./utils"
+import { createOptionalFileSchema } from "./utils"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
 
-const fileSchema = z
-  .any()
-  .refine(
-    (file) =>
-      !file ||
-      (isBrowser
-        ? file instanceof File && file.size <= MAX_FILE_SIZE
-        : file.size <= MAX_FILE_SIZE),
-    `Max file size is 5MB.`,
-  )
-  .refine(
-    (file) =>
-      !file ||
-      (isBrowser
-        ? file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type)
-        : ACCEPTED_IMAGE_TYPES.includes(file.type)),
-    ".jpg, .jpeg, .png and .webp files are accepted.",
-  )
-  .optional()
-  .nullable()
+const fileSchema = createOptionalFileSchema(
+  MAX_FILE_SIZE,
+  ACCEPTED_IMAGE_TYPES,
+  "Max file size is 5MB.",
+  ".jpg, .jpeg, .png and .webp files are accepted.",
+)
 
 const dateOptionalNullableSchema = z
   .date({
