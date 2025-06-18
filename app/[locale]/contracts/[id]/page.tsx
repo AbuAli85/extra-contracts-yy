@@ -1,4 +1,5 @@
 import { getContract } from "@/lib/data"
+import { createServerComponentClient } from "@/lib/supabaseServer"
 
 interface Props {
   params: {
@@ -8,7 +9,8 @@ interface Props {
 }
 
 export default async function ContractPage({ params: { id, locale } }: Props) {
-  const contract = await getContract(id)
+  const supabase = createServerComponentClient()
+  const contract = await getContract(supabase, id)
 
   if (!contract) {
     return <div>Contract not found</div>
