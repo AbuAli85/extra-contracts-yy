@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { format } from "date-fns"
 
-import { contractGeneratorSchema, type ContractGeneratorFormData } from "@/types/custom"
+import { contractGeneratorSchema, type ContractGeneratorFormData } from "@/lib/schema-generator"
 import { useParties, type Party as PartyType } from "@/hooks/use-parties" // Import Party type if needed
 import { usePromoters } from "@/hooks/use-promoters"
 import type { Promoter } from "@/types/custom"
