@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { partyFormSchema, type PartyFormData } from "@/lib/party-schema"
 import type { Party } from "@/lib/types"
-import { supabase } from "@/lib/supabase"
+import { createParty, updateParty } from "@/app/actions/party"
 import { useToast } from "@/hooks/use-toast"
 
 import { Button } from "@/components/ui/button"
@@ -56,12 +56,10 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
       }
 
       if (partyToEdit?.id) {
-        const { error } = await supabase.from("parties").update(partyData).eq("id", partyToEdit.id).select()
-        if (error) throw error
+        await updateParty(partyToEdit.id, partyData)
         toast({ title: "Success!", description: "Party updated successfully." })
       } else {
-        const { error } = await supabase.from("parties").insert(partyData).select()
-        if (error) throw error
+        await createParty(partyData)
         toast({ title: "Success!", description: "Party added successfully." })
       }
       onFormSubmit()

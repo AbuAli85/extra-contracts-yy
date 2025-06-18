@@ -8,6 +8,7 @@ import {
   promoterStatusesList,
 } from "@/types/custom"
 import { supabase } from "@/lib/supabase"
+import { createPromoter, updatePromoter } from "@/app/actions/promoter"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -210,12 +211,10 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
       }
 
       if (promoterToEdit?.id) {
-        const { error } = await supabase.from("promoters").update(promoterData).eq("id", promoterToEdit.id).select()
-        if (error) throw error
+        await updatePromoter(promoterToEdit.id, promoterData)
         toast({ title: "Success!", description: "Promoter updated successfully." })
       } else {
-        const { error } = await supabase.from("promoters").insert(promoterData).select()
-        if (error) throw error
+        await createPromoter(promoterData)
         toast({ title: "Success!", description: "Promoter added successfully." })
       }
       onFormSubmit()
