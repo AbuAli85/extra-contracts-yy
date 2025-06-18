@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { isValid, parse } from "date-fns"
+import { isBrowser } from "../utils"
 
 // Helper for DD-MM-YYYY date string validation and transformation
 const dateSchemaDdMmYyyy = z
@@ -16,7 +17,6 @@ const dateSchemaDdMmYyyy = z
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "application/pdf"]
-const isBrowser = typeof window !== "undefined" && typeof File !== "undefined"
 
 const fileSchemaOptional = z
   .any()
