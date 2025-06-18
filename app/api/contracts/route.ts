@@ -8,9 +8,9 @@ import { contractGeneratorSchema } from "@/types/custom" // Your Zod schema for 
 // Placeholder for your PDF generation logic (e.g., calling Google Docs API via Make.com)
 async function generateBilingualPdf(contractData: any, contractId: string): Promise<string | null> {
   const supabaseAdmin = getSupabaseAdmin() // Get client instance
-  const makeWebhookUrl = process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL
+  const makeWebhookUrl = process.env.MAKE_WEBHOOK_URL
   if (!makeWebhookUrl) {
-    console.error("Make.com webhook URL (NEXT_PUBLIC_MAKE_WEBHOOK_URL) is not configured.")
+    console.error("Make.com webhook URL (MAKE_WEBHOOK_URL) is not configured.")
     return null
   }
 

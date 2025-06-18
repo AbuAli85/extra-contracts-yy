@@ -22,6 +22,8 @@ Your project is live at:
 
 Copy `env.example` to `.env.local` and fill in the variables.
 
+- `MAKE_WEBHOOK_URL` – the Make.com webhook endpoint used to generate PDF documents.
+
 
 Continue building your app on:
 
