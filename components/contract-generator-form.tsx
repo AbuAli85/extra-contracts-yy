@@ -44,7 +44,11 @@ export default function ContractGeneratorForm() {
     error: clientPartiesError,
   } = useParties("Client")
 
-  const { data: promoters, isLoading: isLoadingPromoters } = usePromoters()
+  const {
+    data: promoters,
+    isLoading: isLoadingPromoters,
+    error: promotersError,
+  } = usePromoters()
 
   const [selectedPromoter, setSelectedPromoter] = useState<Promoter | null>(null)
 
@@ -52,7 +56,8 @@ export default function ContractGeneratorForm() {
   useEffect(() => {
     devLog("Employer Parties Data:", employerParties)
     devLog("Client Parties Data:", clientParties)
-  }, [employerParties, clientParties])
+    devLog("Promoters Data:", promoters)
+  }, [employerParties, clientParties, promoters])
 
   useEffect(() => {
     if (employerPartiesError) {
@@ -62,6 +67,14 @@ export default function ContractGeneratorForm() {
       toast.error("Error loading Client parties", { description: clientPartiesError.message })
     }
   }, [employerPartiesError, clientPartiesError])
+
+  useEffect(() => {
+    if (promotersError) {
+      toast.error("Error loading promoters", {
+        description: promotersError.message,
+      })
+    }
+  }, [promotersError])
 
   const [promoterOptions, setPromoterOptions] = useState<{ value: string; label: string }[]>([])
 
@@ -293,6 +306,10 @@ export default function ContractGeneratorForm() {
                 <span className="font-medium">ID Card:</span> {selectedPromoter.id_card_number}
               </p>
             </div>
+          ) : promotersError ? (
+            <p className="text-sm text-destructive">Error loading promoters.</p>
+          ) : !isLoadingPromoters && promoters?.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No promoters available.</p>
           ) : (
             <p className="text-sm text-muted-foreground">Select a promoter to view details.</p>
           )}
