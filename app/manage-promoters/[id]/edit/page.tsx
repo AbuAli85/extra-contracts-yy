@@ -30,7 +30,7 @@ export default function EditPromoterPage() {
               Back to Promoter Details
             </Button>
           </Link>
-          <Link href="/manage-promoters" legacyBehavior passHref>
+          <Link href="/en/manage-promoters" legacyBehavior passHref>
             <Button variant="secondary">
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back to Promoter List

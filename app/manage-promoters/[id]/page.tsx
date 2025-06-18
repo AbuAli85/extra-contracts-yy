@@ -179,7 +179,7 @@ export default function PromoterDetailPage() {
           </CardHeader>
           <CardContent>
             <p className="text-card-foreground/80">{error || "Could not load promoter details."}</p>
-            <Button variant="outline" onClick={() => router.push("/manage-promoters")} className="mt-6">
+            <Button variant="outline" onClick={() => router.push("/en/manage-promoters")} className="mt-6">
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back to Promoter List
             </Button>
@@ -200,7 +200,7 @@ export default function PromoterDetailPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push("/manage-promoters")}
+              onClick={() => router.push("/en/manage-promoters")}
               className="text-muted-foreground hover:text-foreground"
             >
               <ArrowLeftIcon className="mr-2 h-4 w-4" />

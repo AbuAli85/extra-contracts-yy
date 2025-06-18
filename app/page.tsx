@@ -26,7 +26,7 @@ export default function HomePage() {
               View Contract History & Status
             </Button>
           </Link>
-          <Link href="/manage-promoters" passHref legacyBehavior>
+          <Link href="/en/manage-promoters" passHref legacyBehavior>
             <Button variant="outline" className="w-full justify-start">
               <UsersIcon className="mr-2 h-5 w-5" />
               Manage Promoters
