@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { useParams } from "next/navigation"
 import Link from "next/link"
 import { useContracts, useDeleteContractMutation } from "@/hooks/use-contracts"
 import type { Contract } from "@/types/custom"
@@ -46,6 +47,9 @@ const getContractStatus = (contract: Contract): ContractStatus => {
 }
 
 export default function ContractsDashboardPage() {
+  const params = useParams()
+  const locale = (params.locale as string) || "en"
+
   const { data: contracts, isLoading, error } = useContracts()
   const deleteContractMutation = useDeleteContractMutation()
   const { toast } = useToast()
@@ -69,14 +73,19 @@ export default function ContractsDashboardPage() {
         ""
       const secondParty =
         contract.parties_contracts_client_id_fkey?.name_en || contract.parties_contracts_client_id_fkey?.name_ar || ""
-      const promoter = contract.promoters?.name_en || contract.promoters?.name_ar || ""
+      const promoterName =
+        contract.promoter_name_en ||
+        (locale === "ar"
+          ? contract.promoters?.name_ar || contract.promoters?.name_en
+          : contract.promoters?.name_en || contract.promoters?.name_ar) ||
+        ""
 
       const matchesSearch =
         !searchTerm ||
         contract.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         firstParty.toLowerCase().includes(searchTerm.toLowerCase()) ||
         secondParty.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        promoter.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        promoterName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (contract.job_title && contract.job_title.toLowerCase().includes(searchTerm.toLowerCase()))
       return matchesStatus && matchesSearch
     })
@@ -263,6 +272,12 @@ export default function ContractsDashboardPage() {
                   <TableBody>
                     {filteredAndSortedContracts.map((contract) => {
                       const contractStatus = getContractStatus(contract)
+                      const promoterName =
+                        contract.promoter_name_en ||
+                        (locale === "ar"
+                          ? contract.promoters?.name_ar || contract.promoters?.name_en
+                          : contract.promoters?.name_en || contract.promoters?.name_ar) ||
+                        ""
                       return (
                         <TableRow key={contract.id}>
                           <TableCell className="font-mono text-xs">{contract.id.substring(0, 8)}...</TableCell>
@@ -276,7 +291,7 @@ export default function ContractsDashboardPage() {
                               contract.parties_contracts_client_id_fkey?.name_ar ||
                               "N/A"}
                           </TableCell>
-                          <TableCell>{contract.promoters?.name_en || contract.promoters?.name_ar || "N/A"}</TableCell>
+                          <TableCell>{promoterName || "N/A"}</TableCell>
                           <TableCell>
                             {contract.contract_valid_from
                               ? format(parseISO(contract.contract_valid_from), "dd-MM-yyyy")
