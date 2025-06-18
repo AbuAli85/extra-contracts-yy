@@ -1,15 +1,15 @@
-import type { SupabaseClient } from "@supabase/supabase-js"
-import type { Database } from "@/types/supabase" // Adjust path if necessary
-import type { ContractWithRelations } from "@/types/custom" // Adjust path if necessary
+import type { ContractWithRelations } from "@/types/custom"
+import { supabaseServer } from "@/lib/supabase/server"
 
 export const getContract = async (
-  supabase: SupabaseClient<Database>,
   contractId: string,
 ): Promise<ContractWithRelations | null> => {
   if (!contractId) {
     console.warn("getContract called with no contractId")
     return null
   }
+
+  const supabase = supabaseServer()
 
   const { data, error } = await supabase
     .from("contracts")
