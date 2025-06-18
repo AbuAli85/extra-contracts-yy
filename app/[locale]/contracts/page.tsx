@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import { useContracts, useDeleteContractMutation } from "@/hooks/use-contracts"
-import type { Contract } from "@/hooks/use-contracts"
+import type { Contract } from "@/types/custom"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
