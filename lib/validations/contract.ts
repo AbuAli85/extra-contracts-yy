@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { isValid, parse } from "date-fns"
-import { isBrowser } from "../utils"
+import { createOptionalFileSchema } from "../utils"
 
 // Helper for DD-MM-YYYY date string validation and transformation
 const dateSchemaDdMmYyyy = z
@@ -18,26 +18,12 @@ const dateSchemaDdMmYyyy = z
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "application/pdf"]
 
-const fileSchemaOptional = z
-  .any()
-  .refine(
-    (file) =>
-      !file ||
-      (isBrowser
-        ? file instanceof File && file.size <= MAX_FILE_SIZE
-        : file.size <= MAX_FILE_SIZE),
-    `Max file size is 5MB.`,
-  )
-  .refine(
-    (file) =>
-      !file ||
-      (isBrowser
-        ? file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type)
-        : ACCEPTED_IMAGE_TYPES.includes(file.type)),
-    ".jpg, .jpeg, .png, .webp, and .pdf files are accepted.",
-  )
-  .optional()
-  .nullable()
+const fileSchemaOptional = createOptionalFileSchema(
+  MAX_FILE_SIZE,
+  ACCEPTED_IMAGE_TYPES,
+  "Max file size is 5MB.",
+  ".jpg, .jpeg, .png, .webp, and .pdf files are accepted.",
+)
 
 export const ContractFormSchema = z
   .object({
