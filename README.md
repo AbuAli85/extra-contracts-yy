@@ -20,7 +20,19 @@ Your project is live at:
 
 ## Environment Variables
 
-Copy `env.example` to `.env.local` and fill in the variables.
+Copy `env.example` to `.env.local` and fill in each variable:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `MAKE_WEBHOOK_URL`
+- `MAKE_WEBHOOK_SECRET`
+- `GOOGLE_CREDENTIALS_JSON`
+- `GOOGLE_DOCS_TEMPLATE_ID`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASS`
 
 
 Continue building your app on:
