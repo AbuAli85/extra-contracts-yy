@@ -14,6 +14,13 @@ import { usePromoters } from "@/hooks/use-promoters"
 jest.mock("@/hooks/use-parties")
 jest.mock("@/hooks/use-promoters")
 
+jest.mock("@/lib/supabase", () => ({
+  supabase: {
+    channel: jest.fn(() => ({ on: jest.fn().mockReturnThis(), subscribe: jest.fn() })),
+    removeChannel: jest.fn(),
+  },
+}))
+
 const mockUseParties = useParties as jest.Mock
 const mockUsePromoters = usePromoters as jest.Mock
 

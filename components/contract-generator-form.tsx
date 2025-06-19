@@ -23,6 +23,7 @@ import { DatePickerWithManualInput } from "./date-picker-with-manual-input"
 import ComboboxField from "@/components/combobox-field"
 import { motion } from "framer-motion"
 import { devLog } from "@/lib/dev-log"
+import { supabase } from "@/lib/supabase"
 
 const sectionVariants = {
   hidden: { opacity: 0, x: -20 },
@@ -34,6 +35,18 @@ type ContractGeneratorFormData = z.infer<typeof formSchema>
 export default function ContractGeneratorForm() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('promoters-live')
+      .on(
+        'postgres_changes',
+        { event: '*', table: 'promoters', schema: 'public' },
+        () => queryClient.invalidateQueries(['promoters'])
+      )
+      .subscribe()
+    return () => supabase.removeChannel(channel)
+  }, [queryClient])
 
   // Fetch parties using the React Query hook
   const {
