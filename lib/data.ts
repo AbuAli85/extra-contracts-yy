@@ -1,5 +1,5 @@
 import type { ContractWithRelations } from "@/hooks/use-contracts"
-import { supabaseServer } from "@/lib/supabase/server"
+import { createServerComponentClient } from "@/lib/supabaseServer"
 
 export const getContract = async (
   contractId: string,
@@ -9,7 +9,7 @@ export const getContract = async (
     return null
   }
 
-  const supabase = supabaseServer()
+  const supabase = createServerComponentClient()
 
   const { data, error } = await supabase
     .from("contracts")
