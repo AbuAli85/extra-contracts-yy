@@ -20,11 +20,11 @@ Your project is live at:
 
 Install dependencies before running any scripts:
 
-```bash
+\`\`\`bash
 pnpm install
 # or
 npm install
-```
+\`\`\`
 
 After updating dependencies, run `pnpm install` again and commit the resulting
 `pnpm-lock.yaml`. The CI pipeline runs with a frozen lockfile and will fail if
@@ -32,9 +32,9 @@ After updating dependencies, run `pnpm install` again and commit the resulting
 
 After the dependencies are installed you can lint the project:
 
-```bash
+\`\`\`bash
 npm run lint
-```
+\`\`\`
 
 The form at `public/index.html` is generated from `index.html` using the
 `NEXT_PUBLIC_MAKE_WEBHOOK_URL` environment variable. When you run `npm run dev`
@@ -44,11 +44,11 @@ or `npm run build`, the script `scripts/build-form.js` replaces the placeholder
 
 If `next lint` reports "not found," install Next.js:
 
-```bash
+\`\`\`bash
 pnpm add next
 # or
 npm install next
-```
+\`\`\`
 
 
 ## Environment Variables
@@ -95,15 +95,15 @@ Continue building your app on:
 
 Install the [Supabase CLI](https://supabase.com/docs/guides/cli) globally:
 
-```bash
+\`\`\`bash
 npm install -g supabase
-```
+\`\`\`
 
 After installing, generate TypeScript definitions for your database:
 
-```bash
+\`\`\`bash
 npx supabase gen types typescript --project-id <YOUR_PROJECT_REF> --schema public > types/supabase.ts
-```
+\`\`\`
 
 Running this command whenever your database schema changes will keep
 `types/supabase.ts` in sync with your Supabase project.
@@ -113,15 +113,15 @@ Running this command whenever your database schema changes will keep
 Ensure you have **Node.js** and **pnpm** installed. Install project
 dependencies before running the tests:
 
-```bash
+\`\`\`bash
 pnpm install
-```
+\`\`\`
 
 After the dependencies are installed, execute the Jest test suite with:
 
-```bash
+\`\`\`bash
 pnpm test
-```
+\`\`\`
 
 Tests rely on the dependencies installed locally by `pnpm install` and will
 fail if they are missing. This command runs all unit tests defined in the
