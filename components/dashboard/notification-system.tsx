@@ -103,7 +103,7 @@ export default function NotificationSystem() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [toast])
+  }, [])
 
   return (
     <Card>
