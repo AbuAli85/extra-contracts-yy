@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
 
 import { contractGeneratorSchema, type ContractGeneratorFormData } from "@/lib/schema-generator"
@@ -30,6 +30,7 @@ const sectionVariants = {
 
 export default function ContractGeneratorForm() {
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   // Fetch parties using the React Query hook
   const {
@@ -61,17 +62,27 @@ export default function ContractGeneratorForm() {
 
   useEffect(() => {
     if (employerPartiesError) {
-      toast.error("Error loading Employer parties", { description: employerPartiesError.message })
+      toast({
+        title: "Error loading Employer parties",
+        description: employerPartiesError.message,
+        variant: "destructive",
+      })
     }
     if (clientPartiesError) {
-      toast.error("Error loading Client parties", { description: clientPartiesError.message })
+      toast({
+        title: "Error loading Client parties",
+        description: clientPartiesError.message,
+        variant: "destructive",
+      })
     }
   }, [employerPartiesError, clientPartiesError])
 
   useEffect(() => {
     if (promotersError) {
-      toast.error("Error loading promoters", {
+      toast({
+        title: "Error loading promoters",
         description: promotersError.message,
+        variant: "destructive",
       })
     }
   }, [promotersError])
@@ -137,15 +148,18 @@ export default function ContractGeneratorForm() {
       return response.json()
     },
     onSuccess: (data) => {
-      toast.success("Contract Created!", {
+      toast({
+        title: "Contract Created!",
         description: `PDF: ${data.contract.pdf_url || "Pending generation."}`,
       })
       form.reset()
       queryClient.invalidateQueries({ queryKey: ["contracts"] })
     },
     onError: (error: any) => {
-      toast.error("Creation Failed", {
+      toast({
+        title: "Creation Failed",
         description: error.message || "An unexpected error occurred.",
+        variant: "destructive",
       })
     },
   })
