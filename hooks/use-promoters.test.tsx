@@ -2,13 +2,9 @@ import { render, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { usePromoters } from "@/hooks/use-promoters"
 
-const pushMock = jest.fn()
 const toastMock = jest.fn()
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: pushMock,
-  }),
   usePathname: jest.fn(() => "/"),
   useSearchParams: jest.fn(() => new URLSearchParams()),
 }))
@@ -19,12 +15,10 @@ jest.mock("@/hooks/use-toast", () => ({
   }),
 }))
 
-const getSessionMock = jest.fn()
 const fromMock = jest.fn()
 
 jest.mock("@/lib/supabase", () => ({
   supabase: {
-    auth: { getSession: getSessionMock },
     from: fromMock,
     channel: jest.fn(() => ({ on: jest.fn().mockReturnThis(), subscribe: jest.fn(() => "chan") })),
     removeChannel: jest.fn(),
@@ -36,8 +30,7 @@ describe("usePromoters", () => {
     jest.clearAllMocks()
   })
 
-  it("redirects and shows toast when unauthenticated", async () => {
-    getSessionMock.mockResolvedValue({ data: { session: null }, error: null })
+  it("shows toast when unauthenticated", async () => {
 
     const queryClient = new QueryClient()
 
@@ -53,15 +46,13 @@ describe("usePromoters", () => {
     )
 
     await waitFor(() => {
-      expect(pushMock).toHaveBeenCalledWith("/login")
+      expect(toastMock).toHaveBeenCalledWith(
+        expect.objectContaining({ title: "Error loading promoters" }),
+      )
     })
-    expect(toastMock).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Authentication Required" }),
-    )
   })
 
   it("shows toast without redirect for other errors", async () => {
-    getSessionMock.mockResolvedValue({ data: { session: {} }, error: null })
 
     fromMock.mockReturnValue({
       select: jest.fn().mockReturnThis(),
@@ -88,6 +79,5 @@ describe("usePromoters", () => {
         expect.objectContaining({ title: "Error loading promoters" }),
       )
     })
-    expect(pushMock).not.toHaveBeenCalled()
   })
 })

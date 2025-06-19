@@ -3,24 +3,9 @@ import { useEffect, useMemo } from "react"
 import { supabase } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
 import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
 import type { Promoter } from "@/types/custom"
 
 const fetchPromoters = async (): Promise<Promoter[]> => {
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession()
-
-  if (sessionError) {
-    console.error("Error fetching session:", sessionError)
-    throw new Error(sessionError.message)
-  }
-
-  if (!session) {
-    throw new Error("Not authenticated")
-  }
-
   const { data, error } = await supabase
     .from("promoters")
     .select("*")
@@ -39,7 +24,6 @@ export const usePromoters = () => {
   const queryClient = useQueryClient()
   const queryKey = useMemo(() => ["promoters"], [])
   const { toast } = useToast()
-  const router = useRouter()
 
   const queryResult = useQuery<Promoter[], Error>({
     queryKey,
@@ -47,20 +31,11 @@ export const usePromoters = () => {
     staleTime: 1000 * 60 * 5,
     retry: false,
     onError: (error) => {
-      if (error.message === "Not authenticated") {
-        toast({
-          title: "Authentication Required",
-          description: error.message,
-          variant: "destructive",
-        })
-        router.push("/login")
-      } else {
-        toast({
-          title: "Error loading promoters",
-          description: error.message,
-          variant: "destructive",
-        })
-      }
+      toast({
+        title: "Error loading promoters",
+        description: error.message,
+        variant: "destructive",
+      })
     },
   })
 
