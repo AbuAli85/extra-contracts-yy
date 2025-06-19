@@ -19,18 +19,18 @@ export default function EditContractPage({ params }: { params: { id: string } })
           <p className="text-slate-600 dark:text-slate-300 mb-6">
             This page is under construction. Editing functionality will be implemented here.
           </p>
-          <Link href={`/contracts/${params.id}`} passHref className="inline-block mr-2">
-            <Button variant="outline">
+          <Button asChild variant="outline" className="inline-block mr-2">
+            <Link href={`/contracts/${params.id}`}> 
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back to Details
-            </Button>
-          </Link>
-          <Link href="/contracts" passHref className="inline-block">
-            <Button variant="secondary">
+            </Link>
+          </Button>
+          <Button asChild variant="secondary" className="inline-block">
+            <Link href="/contracts">
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back to Contracts List
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     </div>

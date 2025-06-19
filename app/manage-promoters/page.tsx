@@ -193,11 +193,11 @@ export default function ManagePromotersPage() {
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
           <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Manage Promoters</h1>
           <div className="flex gap-2">
-            <Link href="/" passHref>
-              <Button variant="outline">
+            <Button asChild variant="outline">
+              <Link href="/">
                 <ArrowLeftIcon className="mr-2 h-4 w-4" /> Back to Home
-              </Button>
-            </Link>
+              </Link>
+            </Button>
             <Button onClick={handleAddNew} className="bg-primary hover:bg-primary/90 text-primary-foreground">
               <PlusCircleIcon className="mr-2 h-5 w-5" />
               Add New Promoter
@@ -331,11 +331,11 @@ export default function ManagePromotersPage() {
                           </TableCell>
                           <TableCell className="px-4 py-3 text-right">
                             <div className="flex gap-2 justify-end">
-                              <Link href={`/manage-promoters/${promoter.id}`} passHref legacyBehavior>
-                                <Button variant="outline" size="sm" className="text-xs">
+                              <Button asChild variant="outline" size="sm" className="text-xs">
+                                <Link href={`/manage-promoters/${promoter.id}`}> 
                                   <EyeIcon className="mr-1 h-3.5 w-3.5" /> View
-                                </Button>
-                              </Link>
+                                </Link>
+                              </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
