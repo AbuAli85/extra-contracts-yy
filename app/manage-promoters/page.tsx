@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import type React from "react"
 
 import PromoterForm from "@/components/promoter-form"
@@ -73,21 +73,26 @@ export default function ManagePromotersPage() {
   const [selectedPromoter, setSelectedPromoter] = useState<Promoter | null>(null)
   const [showForm, setShowForm] = useState(false)
   const { toast } = useToast()
+  const isMountedRef = useRef(true)
 
   async function fetchPromotersWithContractCount() {
-    setIsLoading(true)
+    if (isMountedRef.current) setIsLoading(true)
     const { data: promotersData, error: promotersError } = await supabase.from("promoters").select("*").order("name_en")
 
     if (promotersError) {
       toast({ title: "Error fetching promoters", description: promotersError.message, variant: "destructive" })
-      setPromoters([])
-      setIsLoading(false)
+      if (isMountedRef.current) {
+        setPromoters([])
+        setIsLoading(false)
+      }
       return
     }
 
     if (!promotersData || promotersData.length === 0) {
-      setPromoters([])
-      setIsLoading(false)
+      if (isMountedRef.current) {
+        setPromoters([])
+        setIsLoading(false)
+      }
       return
     }
 
@@ -118,11 +123,15 @@ export default function ManagePromotersPage() {
       return { ...promoter, active_contracts_count: activeContracts }
     })
 
-    setPromoters(promotersWithCounts)
-    setIsLoading(false)
+    if (isMountedRef.current) {
+      setPromoters(promotersWithCounts)
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
+    let isMounted = true
+    isMountedRef.current = true
     fetchPromotersWithContractCount()
     const promotersChannel = supabase
       .channel("public:promoters:manage")
@@ -143,6 +152,8 @@ export default function ManagePromotersPage() {
       .subscribe()
 
     return () => {
+      isMounted = false
+      isMountedRef.current = false
       supabase.removeChannel(promotersChannel)
       supabase.removeChannel(contractsChannel)
     }
