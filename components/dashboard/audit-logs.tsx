@@ -52,17 +52,22 @@ export default function AuditLogs() {
 
   useEffect(() => {
     fetchAuditLogs()
+  }, [sortKey, sortDirection])
+
+  useEffect(() => {
     const channel = supabase
       .channel("public:audit_logs:feed") // Unique channel name
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "audit_logs" }, (payload) => {
-        const newLog = payload.new as any
-        devLog("New audit log received:", newLog)
-        toast({
-          title: "New Audit Log Entry",
-          description: `${newLog.user_email || "System"} performed action: ${newLog.action}`,
-        })
-        setLogs(
-          (prev) =>
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "audit_logs" },
+        (payload) => {
+          const newLog = payload.new as any
+          devLog("New audit log received:", newLog)
+          toast({
+            title: "New Audit Log Entry",
+            description: `${newLog.user_email || "System"} performed action: ${newLog.action}`,
+          })
+          setLogs((prev) =>
             [
               {
                 id: newLog.id,
@@ -74,15 +79,16 @@ export default function AuditLogs() {
               },
               ...prev,
             ]
-              .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()) // Ensure sort order is maintained
-              .slice(0, 100), // Keep list size manageable
-        )
-      })
+              .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+              .slice(0, 100),
+          )
+        },
+      )
       .subscribe()
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [sortKey, sortDirection, toast])
+  }, [])
 
   const filteredLogs = useMemo(() => {
     if (!logs) return []

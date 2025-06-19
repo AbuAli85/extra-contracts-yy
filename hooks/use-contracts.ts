@@ -48,12 +48,13 @@ const fetchContracts = async (): Promise<ContractWithRelations[]> => {
   return (data as ContractWithRelations[]) || []
 }
 
+const contractsQueryKey = ["contracts"] as const
+
 export const useContracts = () => {
   const queryClient = useQueryClient()
-  const queryKey = ["contracts"]
 
   const queryResult = useQuery<ContractWithRelations[], Error>({
-    queryKey: queryKey,
+    queryKey: contractsQueryKey,
     queryFn: fetchContracts,
   })
 
@@ -62,7 +63,7 @@ export const useContracts = () => {
       .channel("public-contracts-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, (payload) => {
         devLog("Realtime contract change received!", payload)
-        queryClient.invalidateQueries({ queryKey: queryKey })
+        queryClient.invalidateQueries({ queryKey: contractsQueryKey })
       })
       .subscribe((status, err) => {
         if (status === "SUBSCRIBED") {
@@ -79,7 +80,7 @@ export const useContracts = () => {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [queryClient, queryKey])
+  }, [queryClient])
 
   return queryResult
 }

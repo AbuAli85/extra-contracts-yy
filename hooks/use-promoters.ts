@@ -18,12 +18,13 @@ const fetchPromoters = async (): Promise<Promoter[]> => {
   return data || []
 }
 
+const promotersQueryKey = ["promoters"] as const
+
 export const usePromoters = () => {
   const queryClient = useQueryClient()
-  const queryKey = ["promoters"]
 
   const queryResult = useQuery<Promoter[], Error>({
-    queryKey,
+    queryKey: promotersQueryKey,
     queryFn: fetchPromoters,
     staleTime: 1000 * 60 * 5,
   })
@@ -36,7 +37,7 @@ export const usePromoters = () => {
         { event: "*", schema: "public", table: "promoters" },
         (payload) => {
           devLog("Realtime promoter change received!", payload)
-          queryClient.invalidateQueries({ queryKey })
+          queryClient.invalidateQueries({ queryKey: promotersQueryKey })
         },
       )
       .subscribe((status, err) => {
@@ -48,7 +49,7 @@ export const usePromoters = () => {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [queryClient, queryKey])
+  }, [queryClient])
 
   return queryResult
 }
