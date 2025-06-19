@@ -55,6 +55,19 @@ export interface NotificationItem {
   related_entity_type?: string
 }
 
+// Row shape from the `notifications` table used in realtime payloads
+export interface NotificationRow {
+  id: string
+  type: NotificationItem["type"]
+  message: string
+  created_at: string
+  user_email?: string | null
+  related_contract_id?: string | null
+  related_entity_id?: string | null
+  related_entity_type?: string | null
+  is_read: boolean
+}
+
 export interface AuditLogItem {
   id: string
   user: string // Mapped from user_email or "System"
@@ -62,6 +75,16 @@ export interface AuditLogItem {
   ipAddress: string // Mapped from ip_address
   timestamp: string // ISO Date string from timestamp
   details?: string | object // Mapped from details
+}
+
+// Row shape from the `audit_logs` table used in realtime payloads
+export interface AuditLogRow {
+  id: string
+  user_email?: string | null
+  action: string
+  ip_address?: string | null
+  timestamp: string
+  details?: string | object | null
 }
 
 export interface ContractsByStatusDataPoint {
