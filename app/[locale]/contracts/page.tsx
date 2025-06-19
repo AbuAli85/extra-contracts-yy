@@ -32,6 +32,7 @@ import { format, parseISO } from "date-fns"
 import { Loader2, Eye, Trash2, Download, MoreHorizontal, Filter, ArrowUpDown, Search } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import DashboardLayout from "@/components/dashboard/dashboard-layout" // Assuming this is your main layout
+import { FileTextIcon } from "@radix-ui/react-icons"
 
 type ContractStatus = "Active" | "Expired" | "Upcoming" | "Unknown"
 
@@ -74,11 +75,9 @@ export default function ContractsDashboardPage() {
       const secondParty =
         contract.parties_contracts_client_id_fkey?.name_en || contract.parties_contracts_client_id_fkey?.name_ar || ""
       const promoterName =
-        contract.promoter_name_en ||
         (locale === "ar"
           ? contract.promoters?.name_ar || contract.promoters?.name_en
-          : contract.promoters?.name_en || contract.promoters?.name_ar) ||
-        ""
+          : contract.promoters?.name_en || contract.promoters?.name_ar) || ""
 
       const matchesSearch =
         !searchTerm ||
@@ -114,7 +113,7 @@ export default function ContractsDashboardPage() {
       if (valA > valB) return sortDirection === "asc" ? 1 : -1
       return 0
     })
-  }, [contracts, searchTerm, statusFilter, sortColumn, sortDirection])
+  }, [contracts, searchTerm, statusFilter, sortColumn, sortDirection, locale])
 
   const handleSort = (column: keyof Contract | "status") => {
     if (sortColumn === column) {
@@ -277,11 +276,9 @@ export default function ContractsDashboardPage() {
                     {filteredAndSortedContracts.map((contract) => {
                       const contractStatus = getContractStatus(contract)
                       const promoterName =
-                        contract.promoter_name_en ||
                         (locale === "ar"
                           ? contract.promoters?.name_ar || contract.promoters?.name_en
-                          : contract.promoters?.name_en || contract.promoters?.name_ar) ||
-                        ""
+                          : contract.promoters?.name_en || contract.promoters?.name_ar) || ""
                       return (
                         <TableRow key={contract.id}>
                           <TableCell className="font-mono text-xs">{contract.id.substring(0, 8)}...</TableCell>
