@@ -1,41 +1,64 @@
 "use client"
 
-import { FormDescription } from "@/components/ui/form"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { useEffect, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { format, parseISO } from "date-fns"
+import { motion } from "framer-motion"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "@/components/ui/form"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select"
+import { Loader2 } from "lucide-react"
+import { DatePickerWithManualInput } from "./date-picker-with-manual-input"
+import ComboboxField from "@/components/combobox-field"
 import { useToast } from "@/hooks/use-toast"
-import { format } from "date-fns"
-import { z } from "zod"
-
-import { formSchema } from "@/lib/generate-contract-form-schema"
+import { devLog } from "@/lib/dev-log"
+import { supabase } from "@/lib/supabase"
+import type { Database } from "@/types/supabase"
+import {
+  contractGeneratorSchema,
+  type ContractGeneratorFormData,
+} from "@/lib/schema-generator"
 import { useParties, type Party as PartyType } from "@/hooks/use-parties"
 import { usePromoters } from "@/hooks/use-promoters"
 import type { Promoter } from "@/types/custom"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Loader2 } from "lucide-react"
-import { DatePickerWithManualInput } from "./date-picker-with-manual-input"
-import ComboboxField from "@/components/combobox-field"
-import { motion } from "framer-motion"
-import { devLog } from "@/lib/dev-log"
+interface ContractGeneratorFormProps {
+  /** Existing contract when editing; new contract if undefined. */
+  contract?: Database["public"]["Tables"]["contracts"]["Row"] | null
+  /** Callback when the form is successfully saved. */
+  onFormSubmit?: () => void
+}
 
 const sectionVariants = {
   hidden: { opacity: 0, x: -20 },
   visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
 }
 
-type ContractGeneratorFormData = z.infer<typeof formSchema>
-
-export default function ContractGeneratorForm() {
+export default function ContractGeneratorForm({
+  contract,
+  onFormSubmit,
+}: ContractGeneratorFormProps) {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
-  // Fetch parties using the React Query hook
+  // Party and promoter data with realtime updates from their hooks.
   const {
     data: employerParties,
     isLoading: isLoadingEmployerParties,
@@ -55,14 +78,73 @@ export default function ContractGeneratorForm() {
   } = usePromoters()
 
   const [selectedPromoter, setSelectedPromoter] = useState<Promoter | null>(null)
+  const [promoterOptions, setPromoterOptions] = useState<
+    { value: string; label: string }[]
+  >([])
 
-  // Debug output only in development
+  const form = useForm<ContractGeneratorFormData>({
+    resolver: zodResolver(contractGeneratorSchema),
+    mode: "onTouched",
+    defaultValues: {
+      first_party_id: undefined,
+      second_party_id: undefined,
+      promoter_id: undefined,
+      contract_start_date: undefined,
+      contract_end_date: undefined,
+      email: "",
+      job_title: "",
+      work_location: "",
+    },
+  })
+
+  // Populate options for the promoter combobox.
   useEffect(() => {
-    devLog("Employer Parties Data:", employerParties)
-    devLog("Client Parties Data:", clientParties)
-    devLog("Promoters Data:", promoters)
-  }, [employerParties, clientParties, promoters])
+    if (promoters) {
+      setPromoterOptions(
+        promoters.map((p) => ({
+          value: p.id,
+          label: `${p.name_en} / ${p.name_ar} (ID: ${p.id_card_number || "N/A"})`,
+        })),
+      )
+    }
+  }, [promoters])
 
+  // When editing, pre-fill form values.
+  useEffect(() => {
+    if (contract) {
+      form.reset({
+        first_party_id: contract.first_party_id ?? undefined,
+        second_party_id: contract.second_party_id ?? undefined,
+        promoter_id: contract.promoter_id ?? undefined,
+        contract_start_date: contract.contract_start_date
+          ? parseISO(contract.contract_start_date)
+          : undefined,
+        contract_end_date: contract.contract_end_date
+          ? parseISO(contract.contract_end_date)
+          : undefined,
+        email: contract.email ?? "",
+        job_title: contract.job_title ?? "",
+        work_location: contract.work_location ?? "",
+      })
+    }
+  }, [contract, form])
+
+  // Watch promoter selection to show a small preview.
+  const watchedPromoterId = useWatch({
+    control: form.control,
+    name: "promoter_id",
+  })
+
+  useEffect(() => {
+    if (watchedPromoterId && promoters) {
+      const promoter = promoters.find((p) => p.id === watchedPromoterId) || null
+      setSelectedPromoter(promoter)
+    } else {
+      setSelectedPromoter(null)
+    }
+  }, [watchedPromoterId, promoters])
+
+  // Surface loading errors.
   useEffect(() => {
     if (employerPartiesError) {
       toast({
@@ -78,7 +160,7 @@ export default function ContractGeneratorForm() {
         variant: "destructive",
       })
     }
-  }, [employerPartiesError, clientPartiesError])
+  }, [employerPartiesError, clientPartiesError, toast])
 
   useEffect(() => {
     if (promotersError) {
@@ -88,111 +170,92 @@ export default function ContractGeneratorForm() {
         variant: "destructive",
       })
     }
-  }, [promotersError])
+  }, [promotersError, toast])
 
-  const [promoterOptions, setPromoterOptions] = useState<{ value: string; label: string }[]>([])
-
-  const form = useForm<ContractGeneratorFormData>({
-    resolver: zodResolver(formSchema),
-    mode: "onTouched",
-    defaultValues: {
-      firstPartyId: undefined,
-      secondPartyId: undefined,
-      promoterId: undefined,
-      startDate: undefined,
-      endDate: undefined,
-      email: "",
-      jobTitle: "",
-      workLocation: "",
-    },
-  })
-
-  const watchStartDate = useWatch({
-    control: form.control,
-    name: "startDate",
-  })
-
-  const [minEndDate, setMinEndDate] = useState<Date | undefined>()
-
-  useEffect(() => {
-    // Ensure the end date picker always has the latest minimum date
-    // so users can't pick an end date prior to the selected start date.
-    setMinEndDate(watchStartDate)
-    const currentEnd = form.getValues("endDate")
-    if (currentEnd && watchStartDate && currentEnd < watchStartDate) {
-      form.setValue("endDate", watchStartDate, { shouldValidate: true })
-    }
-  }, [watchStartDate, form])
-
-  useEffect(() => {
-    if (promoters) {
-      setPromoterOptions(
-        promoters.map((p) => ({
-          value: p.id,
-          label: `${p.name_en} / ${p.name_ar} (ID: ${p.id_card_number || "N/A"})`,
-        })),
-      )
-    }
-  }, [promoters])
-
-  const watchedPromoterId = useWatch({
-    control: form.control,
-    name: "promoterId",
-  })
-
-  useEffect(() => {
-    if (watchedPromoterId && promoters) {
-      const promoter = promoters.find((p) => p.id === watchedPromoterId) || null
-      setSelectedPromoter(promoter)
-    } else {
-      setSelectedPromoter(null)
-    }
-  }, [watchedPromoterId, promoters])
-
-  const { mutate: createContract, isLoading: isSubmitting } = useMutation({
-    mutationFn: async (data: ContractGeneratorFormData) => {
-      const apiPayload = {
-        ...data,
-        contract_start_date: format(data.startDate, "yyyy-MM-dd"),
-        contract_end_date: format(data.endDate, "yyyy-MM-dd"),
+  const { mutate: saveContract, isLoading: isSubmitting } = useMutation({
+    mutationFn: async (values: ContractGeneratorFormData) => {
+      const payload = {
+        first_party_id: values.first_party_id,
+        second_party_id: values.second_party_id,
+        promoter_id: values.promoter_id,
+        contract_start_date: format(values.contract_start_date, "yyyy-MM-dd"),
+        contract_end_date: format(values.contract_end_date, "yyyy-MM-dd"),
+        email: values.email,
+        job_title: values.job_title,
+        work_location: values.work_location,
       }
-      const response = await fetch("/api/contracts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(apiPayload),
-      })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to create contract.")
+
+      if (contract?.id) {
+        const { data, error } = await supabase
+          .from("contracts")
+          .update(payload)
+          .eq("id", contract.id)
+          .select()
+          .single()
+
+        if (error) throw new Error(error.message)
+        return data
       }
-      return response.json()
+
+      const { data, error } = await supabase
+        .from("contracts")
+        .insert(payload)
+        .select()
+        .single()
+
+      if (error) throw new Error(error.message)
+      return data
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast({
-        title: "Contract Created!",
-        description: `PDF: ${data.contract.pdf_url || "Pending generation."}`,
+        title: contract?.id ? "Contract Updated!" : "Contract Created!",
+        description: data.pdf_url
+          ? `PDF: ${data.pdf_url}`
+          : "PDF generation pending.",
       })
+
       form.reset()
       queryClient.invalidateQueries({ queryKey: ["contracts"] })
+      onFormSubmit?.()
+
+      const hookUrl =
+        process.env.PUBLIC_MAKE_HOOK_URL ||
+        process.env.NEXT_PUBLIC_MAKE_HOOK_URL
+      if (hookUrl) {
+        try {
+          await fetch(hookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contract_id: data.id }),
+          })
+        } catch (err) {
+          console.error("Make webhook error:", err)
+        }
+      }
     },
     onError: (error: any) => {
       toast({
-        title: "Creation Failed",
+        title: "Error",
         description: error.message || "An unexpected error occurred.",
         variant: "destructive",
       })
     },
   })
 
-  const onSubmit = (data: ContractGeneratorFormData) => {
-    createContract(data)
+  const onSubmit = (values: ContractGeneratorFormData) => {
+    saveContract(values)
   }
 
-  const isLoadingInitialData = isLoadingEmployerParties || isLoadingClientParties || isLoadingPromoters
+  const isLoadingInitialData =
+    isLoadingEmployerParties || isLoadingClientParties || isLoadingPromoters
 
-  // Show main loader only if no data has been fetched yet for parties/promoters
-  // and the form hasn't been interacted with.
-  if (isLoadingInitialData && !form.formState.isDirty && !employerParties && !clientParties && !promoters) {
+  if (
+    isLoadingInitialData &&
+    !form.formState.isDirty &&
+    !employerParties &&
+    !clientParties &&
+    !promoters
+  ) {
     return (
       <div className="flex justify-center items-center min-h-[300px]">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -204,33 +267,46 @@ export default function ContractGeneratorForm() {
   const getInputStateClasses = (fieldName: keyof ContractGeneratorFormData) => {
     const fieldState = form.getFieldState(fieldName)
     if (fieldState.error) return "ring-destructive ring-2"
-    if (fieldState.isDirty && !fieldState.error && fieldState.isTouched) return "ring-success ring-2"
+    if (fieldState.isDirty && !fieldState.error && fieldState.isTouched)
+      return "ring-success ring-2"
     return ""
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-        <motion.div variants={sectionVariants} initial="hidden" animate="visible" className="space-y-6">
+        {/* Contracting Parties */}
+        <motion.div
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-6"
+        >
           <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
             Contracting Parties
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
-              name="firstPartyId"
+              name="first_party_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Party A (Employer)</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    value={field.value || ""} // Ensure value is controlled
+                    value={field.value || ""}
                     disabled={isSubmitting || isLoadingEmployerParties}
                   >
                     <FormControl>
-                      <SelectTrigger className={getInputStateClasses("firstPartyId")}>
+                      <SelectTrigger
+                        className={getInputStateClasses("first_party_id")}
+                      >
                         <SelectValue
-                          placeholder={isLoadingEmployerParties ? "Loading Employers..." : "Select Employer"}
+                          placeholder={
+                            isLoadingEmployerParties
+                              ? "Loading Employers..."
+                              : "Select Employer"
+                          }
                         />
                       </SelectTrigger>
                     </FormControl>
@@ -240,15 +316,17 @@ export default function ContractGeneratorForm() {
                           Loading...
                         </SelectItem>
                       )}
-                      {!isLoadingEmployerParties && employerParties?.length === 0 && (
-                        <SelectItem value="no-data" disabled>
-                          No employers found
-                        </SelectItem>
-                      )}
+                      {!isLoadingEmployerParties &&
+                        employerParties?.length === 0 && (
+                          <SelectItem value="no-data" disabled>
+                            No employers found
+                          </SelectItem>
+                        )}
                       {!isLoadingEmployerParties &&
                         employerParties?.map((party: PartyType) => (
                           <SelectItem key={party.id} value={party.id}>
-                            {party.name_en} / {party.name_ar} {party.crn && `(CRN: ${party.crn})`}
+                            {party.name_en} / {party.name_ar}{" "}
+                            {party.crn && `(CRN: ${party.crn})`}
                           </SelectItem>
                         ))}
                     </SelectContent>
@@ -257,20 +335,29 @@ export default function ContractGeneratorForm() {
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
-              name="secondPartyId"
+              name="second_party_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Party B (Client)</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    value={field.value || ""} // Ensure value is controlled
+                    value={field.value || ""}
                     disabled={isSubmitting || isLoadingClientParties}
                   >
                     <FormControl>
-                      <SelectTrigger className={getInputStateClasses("secondPartyId")}>
-                        <SelectValue placeholder={isLoadingClientParties ? "Loading Clients..." : "Select Client"} />
+                      <SelectTrigger
+                        className={getInputStateClasses("second_party_id")}
+                      >
+                        <SelectValue
+                          placeholder={
+                            isLoadingClientParties
+                              ? "Loading Clients..."
+                              : "Select Client"
+                          }
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -279,15 +366,17 @@ export default function ContractGeneratorForm() {
                           Loading...
                         </SelectItem>
                       )}
-                      {!isLoadingClientParties && clientParties?.length === 0 && (
-                        <SelectItem value="no-data" disabled>
-                          No clients found
-                        </SelectItem>
-                      )}
+                      {!isLoadingClientParties &&
+                        clientParties?.length === 0 && (
+                          <SelectItem value="no-data" disabled>
+                            No clients found
+                          </SelectItem>
+                        )}
                       {!isLoadingClientParties &&
                         clientParties?.map((party: PartyType) => (
                           <SelectItem key={party.id} value={party.id}>
-                            {party.name_en} / {party.name_ar} {party.crn && `(CRN: ${party.crn})`}
+                            {party.name_en} / {party.name_ar}{" "}
+                            {party.crn && `(CRN: ${party.crn})`}
                           </SelectItem>
                         ))}
                     </SelectContent>
@@ -299,25 +388,34 @@ export default function ContractGeneratorForm() {
           </div>
         </motion.div>
 
-        {/* Promoter Section */}
-        <motion.div variants={sectionVariants} initial="hidden" animate="visible" className="space-y-6">
+        {/* Promoter Information */}
+        <motion.div
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-6"
+        >
           <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
             Promoter Information
           </h3>
           <FormField
             control={form.control}
-            name="promoterId"
+            name="promoter_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Promoter</FormLabel>
                 <ComboboxField
                   field={field}
                   options={promoterOptions}
-                  placeholder={isLoadingPromoters ? "Loading Promoters..." : "Select a promoter"}
+                  placeholder={
+                    isLoadingPromoters
+                      ? "Loading Promoters..."
+                      : "Select a promoter"
+                  }
                   searchPlaceholder="Search promoters..."
                   emptyStateMessage="No promoter found."
                   disabled={isSubmitting || isLoadingPromoters}
-                  inputClassName={getInputStateClasses("promoterId")}
+                  inputClassName={getInputStateClasses("promoter_id")}
                 />
                 <FormMessage />
               </FormItem>
@@ -326,33 +424,47 @@ export default function ContractGeneratorForm() {
           {selectedPromoter ? (
             <div className="p-3 border rounded-md bg-muted/50 space-y-1 text-sm">
               <p>
-                <span className="font-medium">Name (EN):</span> {selectedPromoter.name_en}
+                <span className="font-medium">Name (EN):</span>{" "}
+                {selectedPromoter.name_en}
               </p>
               <p dir="rtl">
-                <span className="font-medium">Name (AR):</span> {selectedPromoter.name_ar}
+                <span className="font-medium">Name (AR):</span>{" "}
+                {selectedPromoter.name_ar}
               </p>
               <p>
-                <span className="font-medium">ID Card:</span> {selectedPromoter.id_card_number}
+                <span className="font-medium">ID Card:</span>{" "}
+                {selectedPromoter.id_card_number}
               </p>
             </div>
           ) : promotersError ? (
-            <p className="text-sm text-destructive">Error loading promoters.</p>
+            <p className="text-sm text-destructive">
+              Error loading promoters.
+            </p>
           ) : !isLoadingPromoters && promoters?.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No promoters available.</p>
+            <p className="text-sm text-muted-foreground">
+              No promoters available.
+            </p>
           ) : (
-            <p className="text-sm text-muted-foreground">Select a promoter to view details.</p>
+            <p className="text-sm text-muted-foreground">
+              Select a promoter to view details.
+            </p>
           )}
         </motion.div>
 
-        {/* Contract Period Section */}
-        <motion.div variants={sectionVariants} initial="hidden" animate="visible" className="space-y-6">
+        {/* Contract Period */}
+        <motion.div
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-6"
+        >
           <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
             Contract Period
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
-              name="startDate"
+              name="contract_start_date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Contract Start Date</FormLabel>
@@ -362,15 +474,18 @@ export default function ContractGeneratorForm() {
                     dateFormat="dd-MM-yyyy"
                     placeholder="dd-MM-yyyy"
                     disabled={isSubmitting}
-                    inputClassName={getInputStateClasses("startDate")}
+                    inputClassName={getInputStateClasses(
+                      "contract_start_date",
+                    )}
                   />
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
-              name="endDate"
+              name="contract_end_date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Contract End Date</FormLabel>
@@ -379,8 +494,12 @@ export default function ContractGeneratorForm() {
                     setDate={field.onChange}
                     dateFormat="dd-MM-yyyy"
                     placeholder="dd-MM-yyyy"
-                    disabled={(date) => (minEndDate ? date <= minEndDate : false) || isSubmitting}
-                    inputClassName={getInputStateClasses("endDate")}
+                    disabled={(date) =>
+                      (form.getValues("contract_start_date")
+                        ? date <= form.getValues("contract_start_date")!
+                        : false) || isSubmitting
+                    }
+                    inputClassName={getInputStateClasses("contract_end_date")}
                   />
                   <FormMessage />
                 </FormItem>
@@ -389,8 +508,13 @@ export default function ContractGeneratorForm() {
           </div>
         </motion.div>
 
-        {/* Additional Details Section */}
-        <motion.div variants={sectionVariants} initial="hidden" animate="visible" className="space-y-6">
+        {/* Additional Details */}
+        <motion.div
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-6"
+        >
           <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
             Additional Details
           </h3>
@@ -408,14 +532,17 @@ export default function ContractGeneratorForm() {
                     className={getInputStateClasses("email")}
                   />
                 </FormControl>
-                <FormDescription>Email address for contract-related notifications.</FormDescription>
+                <FormDescription>
+                  Email address for contract-related notifications.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
-            name="jobTitle"
+            name="job_title"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Job Title (Optional)</FormLabel>
@@ -424,16 +551,17 @@ export default function ContractGeneratorForm() {
                     placeholder="e.g., Marketing Specialist"
                     {...field}
                     disabled={isSubmitting}
-                    className={getInputStateClasses("jobTitle")}
+                    className={getInputStateClasses("job_title")}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
-            name="workLocation"
+            name="work_location"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Work Location (Optional)</FormLabel>
@@ -442,7 +570,7 @@ export default function ContractGeneratorForm() {
                     placeholder="e.g., Main Office, Remote"
                     {...field}
                     disabled={isSubmitting}
-                    className={getInputStateClasses("workLocation")}
+                    className={getInputStateClasses("work_location")}
                   />
                 </FormControl>
                 <FormMessage />
@@ -461,6 +589,8 @@ export default function ContractGeneratorForm() {
               <>
                 <Loader2 className="animate-spin me-2 h-5 w-5" /> Submitting...
               </>
+            ) : contract?.id ? (
+              "Update Contract"
             ) : (
               "Generate & Save Contract"
             )}
