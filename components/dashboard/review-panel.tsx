@@ -67,7 +67,7 @@ export default function ReviewPanel() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [toast])
+  }, [])
 
   const handleAction = async (itemId: string, action: "approve" | "reject" | "comment") => {
     toast({ title: `Action: ${action}`, description: `Processing item ${itemId}...` })

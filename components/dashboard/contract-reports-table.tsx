@@ -59,7 +59,9 @@ export default function ContractReportsTable() {
 
   useEffect(() => {
     fetchContracts()
+  }, [sortKey, sortDirection])
 
+  useEffect(() => {
     // For views, Supabase Realtime listens to changes on the underlying tables.
     // So, we subscribe to `contracts`, `promoters`, and `parties`.
     const handleTableChange = (payload: any, tableName: string) => {
@@ -92,7 +94,7 @@ export default function ContractReportsTable() {
       supabase.removeChannel(promotersChannel)
       supabase.removeChannel(partiesChannel)
     }
-  }, [sortKey, sortDirection, toast]) // fetchContracts is stable, so not needed in deps if not changing itself
+  }, []) // subscribe once
 
   const filteredData = useMemo(() => {
     if (!contracts) return []

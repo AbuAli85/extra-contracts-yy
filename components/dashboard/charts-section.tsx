@@ -102,7 +102,7 @@ export default function ChartsSection() {
     return () => {
       supabase.removeChannel(contractsChartChannel)
     }
-  }, [toast])
+  }, [])
 
   if (loading) {
     return (
