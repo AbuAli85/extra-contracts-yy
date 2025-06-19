@@ -191,11 +191,12 @@ export default function ContractGeneratorForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-        <motion.div variants={sectionVariants} initial="hidden" animate="visible" className="space-y-6">
-          <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
-            Contracting Parties
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div variants={sectionVariants} initial="hidden" animate="visible">
+          <fieldset className="space-y-6">
+            <legend className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
+              Contracting Parties
+            </legend>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
               name="first_party_id"
@@ -206,6 +207,7 @@ export default function ContractGeneratorForm() {
                     onValueChange={field.onChange}
                     value={field.value || ""} // Ensure value is controlled
                     disabled={isSubmitting || isLoadingEmployerParties}
+                    aria-label="Party A (Employer)"
                   >
                     <FormControl>
                       <SelectTrigger className={getInputStateClasses("first_party_id")}>
@@ -251,6 +253,7 @@ export default function ContractGeneratorForm() {
                     onValueChange={field.onChange}
                     value={field.value || ""} // Ensure value is controlled
                     disabled={isSubmitting || isLoadingClientParties}
+                    aria-label="Party B (Client)"
                   >
                     <FormControl>
                       <SelectTrigger className={getInputStateClasses("second_party_id")}>
@@ -285,19 +288,21 @@ export default function ContractGeneratorForm() {
               )}
             />
           </div>
+          </fieldset>
         </motion.div>
 
         {/* Promoter Section */}
-        <motion.div variants={sectionVariants} initial="hidden" animate="visible" className="space-y-6">
-          <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
-            Promoter Information
-          </h3>
-          <FormField
-            control={form.control}
-            name="promoter_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Promoter</FormLabel>
+        <motion.div variants={sectionVariants} initial="hidden" animate="visible">
+          <fieldset className="space-y-6">
+            <legend className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
+              Promoter Information
+            </legend>
+            <FormField
+              control={form.control}
+              name="promoter_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Promoter</FormLabel>
                 <ComboboxField
                   field={field}
                   options={promoterOptions}
@@ -306,6 +311,7 @@ export default function ContractGeneratorForm() {
                   emptyStateMessage="No promoter found."
                   disabled={isSubmitting || isLoadingPromoters}
                   inputClassName={getInputStateClasses("promoter_id")}
+                  ariaLabel="Promoter"
                 />
                 <FormMessage />
               </FormItem>
@@ -330,12 +336,14 @@ export default function ContractGeneratorForm() {
           ) : (
             <p className="text-sm text-muted-foreground">Select a promoter to view details.</p>
           )}
+          </fieldset>
         </motion.div>
 
         {/* Contract Period Section */}
-        <motion.div variants={sectionVariants} initial="hidden" animate="visible" className="space-y-6">
-          <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">Contract Period</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div variants={sectionVariants} initial="hidden" animate="visible">
+          <fieldset className="space-y-6">
+            <legend className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">Contract Period</legend>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
               name="contract_start_date"
@@ -377,12 +385,14 @@ export default function ContractGeneratorForm() {
               )}
             />
           </div>
+          </fieldset>
         </motion.div>
 
         {/* Additional Details Section */}
-        <motion.div variants={sectionVariants} initial="hidden" animate="visible" className="space-y-6">
-          <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">Additional Details</h3>
-          <FormField
+        <motion.div variants={sectionVariants} initial="hidden" animate="visible">
+          <fieldset className="space-y-6">
+            <legend className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">Additional Details</legend>
+            <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
@@ -437,6 +447,7 @@ export default function ContractGeneratorForm() {
               </FormItem>
             )}
           />
+          </fieldset>
         </motion.div>
 
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>

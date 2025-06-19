@@ -196,7 +196,7 @@ export default function ContractReportsTable() {
               className="pl-8 w-full"
             />
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={setStatusFilter} aria-label="Status Filter">
             <SelectTrigger className="w-full md:w-[180px]">
               <SelectValue placeholder="Filter by Status" />
             </SelectTrigger>

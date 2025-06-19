@@ -328,6 +328,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                         searchPlaceholder="Search employers..."
                         emptyStateMessage="No employer found."
                         disabled={formActuallyDisabled}
+                        ariaLabel="Employer Agency"
                       />
                     </FormControl>
                     <FormMessage />
@@ -348,6 +349,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                         searchPlaceholder="Search clients..."
                         emptyStateMessage="No client found."
                         disabled={formActuallyDisabled}
+                        ariaLabel="Currently Outsourced To (Client)"
                       />
                     </FormControl>
                     <FormMessage />
@@ -386,7 +388,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                 render={({ field }) => (
                   <FormItem>
                     <ShadcnFormLabel>Status / الحالة</ShadcnFormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={formActuallyDisabled}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={formActuallyDisabled} aria-label="Status">
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select status" />

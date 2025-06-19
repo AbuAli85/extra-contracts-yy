@@ -20,6 +20,7 @@ interface ComboboxFieldProps {
   searchPlaceholder?: string
   emptyStateMessage?: string
   disabled?: boolean
+  ariaLabel?: string
 }
 
 export default function ComboboxField({
@@ -29,6 +30,7 @@ export default function ComboboxField({
   searchPlaceholder = "Search...",
   emptyStateMessage = "No option found.",
   disabled,
+  ariaLabel,
 }: ComboboxFieldProps) {
   const [open, setOpen] = React.useState(false)
 
@@ -39,6 +41,7 @@ export default function ComboboxField({
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          aria-label={ariaLabel}
           className={cn(
             "w-full justify-between",
             !field.value && "text-muted-foreground",

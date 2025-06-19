@@ -32,7 +32,7 @@ export default function ContractStatusFilter() {
       <Label htmlFor="status-filter" className="text-sm font-medium">
         Filter by Status:
       </Label>
-      <Select value={currentStatus} onValueChange={handleStatusChange}>
+      <Select value={currentStatus} onValueChange={handleStatusChange} aria-label="Status Filter">
         <SelectTrigger id="status-filter" className="w-[200px]">
           <SelectValue placeholder="Select status" />
         </SelectTrigger>

@@ -244,7 +244,7 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Employer Agency</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""} disabled={formDisabled}>
+                      <Select onValueChange={field.onChange} value={field.value || ""} disabled={formDisabled} aria-label="Employer Agency">
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select employer agency" />
@@ -268,7 +268,7 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Currently Outsourced To (Client)</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""} disabled={formDisabled}>
+                      <Select onValueChange={field.onChange} value={field.value || ""} disabled={formDisabled} aria-label="Currently Outsourced To (Client)">
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select client company" />
@@ -353,7 +353,7 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value} disabled={formDisabled}>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={formDisabled} aria-label="Status">
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select status" />
