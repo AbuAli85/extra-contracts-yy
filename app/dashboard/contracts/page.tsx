@@ -11,12 +11,12 @@ export default function ContractsPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Manage Contracts / إدارة العقود</h1>
-          <Link href="/generate-contract" passHref>
-            <Button>
+          <Button asChild>
+            <Link href="/generate-contract">
               <FilePlus2Icon className="mr-2 h-5 w-5" />
               Generate New Contract
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
         <ContractReportsTable />
         {/* Additional contract management features can be added here */}
