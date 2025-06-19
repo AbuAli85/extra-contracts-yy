@@ -24,18 +24,18 @@ export default function EditPromoterPage() {
           <p className="text-slate-600 dark:text-slate-300 mb-6">
             Editing functionality for promoters will be implemented here.
           </p>
-          <Link href={`/manage-promoters/${promoterId}`} legacyBehavior passHref>
-            <Button variant="outline" className="mr-2">
+          <Button asChild variant="outline" className="mr-2">
+            <Link href={`/manage-promoters/${promoterId}`}> 
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back to Promoter Details
-            </Button>
-          </Link>
-          <Link href="/manage-promoters" legacyBehavior passHref>
-            <Button variant="secondary">
+            </Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/manage-promoters">
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back to Promoter List
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     </div>

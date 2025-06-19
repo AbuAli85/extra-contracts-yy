@@ -14,36 +14,36 @@ export default function HomePage() {
         </CardHeader>
         <AuthStatus />
         <CardContent className="space-y-4 pt-6">
-          <Link href="/generate-contract" passHref legacyBehavior>
-            <Button variant="default" className="w-full justify-start">
+          <Button asChild variant="default" className="w-full justify-start">
+            <Link href="/generate-contract">
               <FilePlus2Icon className="mr-2 h-5 w-5" />
               Generate New Contract
-            </Button>
-          </Link>
-          <Link href="/contracts" passHref legacyBehavior>
-            <Button variant="secondary" className="w-full justify-start">
+            </Link>
+          </Button>
+          <Button asChild variant="secondary" className="w-full justify-start">
+            <Link href="/contracts">
               <History className="mr-2 h-5 w-5" />
               View Contract History & Status
-            </Button>
-          </Link>
-          <Link href="/manage-promoters" passHref legacyBehavior>
-            <Button variant="outline" className="w-full justify-start">
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full justify-start">
+            <Link href="/manage-promoters">
               <UsersIcon className="mr-2 h-5 w-5" />
               Manage Promoters
-            </Button>
-          </Link>
-          <Link href="/manage-parties" passHref legacyBehavior>
-            <Button variant="outline" className="w-full justify-start">
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full justify-start">
+            <Link href="/manage-parties">
               <BuildingIcon className="mr-2 h-5 w-5" />
               Manage Parties
-            </Button>
-          </Link>
-          <Link href="/request-contract" passHref legacyBehavior>
-            <Button variant="outline" className="w-full justify-start">
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full justify-start">
+            <Link href="/request-contract">
               <FileTextIcon className="mr-2 h-5 w-5" />
               Request New Contract (Manual Form)
-            </Button>
-          </Link>
+            </Link>
+          </Button>
           <a href="/index.html" target="_blank" rel="noopener noreferrer" className="block">
             <Button variant="outline" className="w-full justify-start">
               <ExternalLinkIcon className="mr-2 h-5 w-5" />

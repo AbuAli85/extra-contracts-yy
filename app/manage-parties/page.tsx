@@ -130,11 +130,11 @@ export default function ManagePartiesPage() {
           </Card>
         )}
         <div className="mt-8 text-center">
-          <Link href="/" passHref>
-            <Button variant="outline">
+          <Button asChild variant="outline">
+            <Link href="/">
               <ArrowLeftIcon className="mr-2 h-4 w-4" /> Back to Home
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     </div>

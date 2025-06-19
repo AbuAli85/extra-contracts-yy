@@ -170,11 +170,11 @@ export default async function ContractsListPage({
           </CardHeader>
           <CardContent>
             <p>Could not fetch contracts: {error.message}</p>
-            <Link href="/" passHref>
-              <Button variant="outline" className="mt-4">
+            <Button asChild variant="outline" className="mt-4">
+              <Link href="/">
                 <ArrowLeftIcon className="mr-2 h-4 w-4" /> Back to Home
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -188,11 +188,11 @@ export default async function ContractsListPage({
         {/* Wider max-width */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
           <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Contract Management</h1>
-          <Link href="/" passHref>
-            <Button variant="outline" className="w-full sm:w-auto">
+          <Button asChild variant="outline" className="w-full sm:w-auto">
+            <Link href="/">
               <ArrowLeftIcon className="mr-2 h-4 w-4" /> Back to Home
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
         {/* Summary Cards - Refined Style */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -355,24 +355,30 @@ export default async function ContractsListPage({
                   {Math.min(ITEMS_PER_PAGE * currentPage, count)} of {count} contracts
                 </span>
                 <div className="flex items-center space-x-2">
-                  <Link
-                    href={`/contracts?page=${currentPage - 1}${generationStatusFilter ? `&status=${generationStatusFilter}` : ""}${searchQuery ? `&q=${searchQuery}` : ""}`}
-                    passHref
-                    legacyBehavior
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage <= 1}
                   >
-                    <Button variant="outline" size="sm" disabled={currentPage <= 1}>
+                    <Link
+                      href={`/contracts?page=${currentPage - 1}${generationStatusFilter ? `&status=${generationStatusFilter}` : ""}${searchQuery ? `&q=${searchQuery}` : ""}`}
+                    >
                       Previous
-                    </Button>
-                  </Link>
-                  <Link
-                    href={`/contracts?page=${currentPage + 1}${generationStatusFilter ? `&status=${generationStatusFilter}` : ""}${searchQuery ? `&q=${searchQuery}` : ""}`}
-                    passHref
-                    legacyBehavior
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage >= totalPages}
                   >
-                    <Button variant="outline" size="sm" disabled={currentPage >= totalPages}>
+                    <Link
+                      href={`/contracts?page=${currentPage + 1}${generationStatusFilter ? `&status=${generationStatusFilter}` : ""}${searchQuery ? `&q=${searchQuery}` : ""}`}
+                    >
                       Next
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               </div>
             )}
