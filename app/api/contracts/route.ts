@@ -4,7 +4,8 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin"
 import { createServerComponentClient } from "@/lib/supabaseServer"
 import { contractGeneratorSchema } from "@/lib/schema-generator" // Your Zod schema for validation
 import type { BilingualPdfData } from "@/lib/types"
-// Removed direct import of Database type from here, as it's handled in admin.ts
+import type { Database } from "@/types/supabase"
+import { format } from "date-fns"
 
 // Placeholder for your PDF generation logic (e.g., calling Google Docs API via Make.com)
 async function generateBilingualPdf(contractData: BilingualPdfData, contractId: string): Promise<string | null> {
@@ -80,13 +81,12 @@ export async function POST(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-    const contractToInsert = {
-      // Explicitly type this if Database["public"]["Tables"]["contracts"]["Insert"] is needed
+    const contractToInsert: Database["public"]["Tables"]["contracts"]["Insert"] = {
       first_party_id: validatedData.first_party_id,
       second_party_id: validatedData.second_party_id,
       promoter_id: validatedData.promoter_id,
-      contract_start_date: validatedData.contract_start_date,
-      contract_end_date: validatedData.contract_end_date,
+      contract_start_date: format(validatedData.contract_start_date, "yyyy-MM-dd"),
+      contract_end_date: format(validatedData.contract_end_date, "yyyy-MM-dd"),
       email: validatedData.email,
       job_title: validatedData.job_title,
       work_location: validatedData.work_location,
