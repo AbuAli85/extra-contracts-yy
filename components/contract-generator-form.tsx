@@ -96,6 +96,7 @@ export default function ContractGeneratorForm() {
       first_party_id: undefined,
       second_party_id: undefined,
       promoter_id: undefined,
+      refNumber: "",
       contract_start_date: undefined,
       contract_end_date: undefined,
       email: "",
@@ -103,6 +104,12 @@ export default function ContractGeneratorForm() {
       work_location: "",
     },
   })
+
+  useEffect(() => {
+    const today = format(new Date(), "ddMMyyyy")
+    const random = Math.floor(1000 + Math.random() * 9000)
+    form.setValue("refNumber", `PAC-${today}-${random}`)
+  }, [form])
 
   useEffect(() => {
     if (promoters) {
@@ -195,6 +202,19 @@ export default function ContractGeneratorForm() {
           <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
             Contracting Parties
           </h3>
+          <FormField
+            control={form.control}
+            name="refNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Reference Number</FormLabel>
+                <FormControl>
+                  <Input {...field} readOnly />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
