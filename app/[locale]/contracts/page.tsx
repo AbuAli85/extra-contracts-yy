@@ -75,9 +75,9 @@ export default function ContractsDashboardPage() {
       const secondParty =
         contract.parties_contracts_client_id_fkey?.name_en || contract.parties_contracts_client_id_fkey?.name_ar || ""
       const promoterName =
-        (locale === "ar"
-          ? contract.promoters?.name_ar || contract.promoters?.name_en
-          : contract.promoters?.name_en || contract.promoters?.name_ar) || ""
+          (locale === "ar"
+            ? contract.promoter_name_ar || contract.promoter_name_en
+            : contract.promoter_name_en || contract.promoter_name_ar) || ""
 
       const matchesSearch =
         !searchTerm ||
@@ -275,10 +275,10 @@ export default function ContractsDashboardPage() {
                   <TableBody>
                     {filteredAndSortedContracts.map((contract) => {
                       const contractStatus = getContractStatus(contract)
-                      const promoterName =
-                        (locale === "ar"
-                          ? contract.promoters?.name_ar || contract.promoters?.name_en
-                          : contract.promoters?.name_en || contract.promoters?.name_ar) || ""
+                        const promoterName =
+                          (locale === "ar"
+                            ? contract.promoter_name_ar || contract.promoter_name_en
+                            : contract.promoter_name_en || contract.promoter_name_ar) || ""
                       return (
                         <TableRow key={contract.id}>
                           <TableCell className="font-mono text-xs">{contract.id.substring(0, 8)}...</TableCell>
