@@ -39,7 +39,8 @@ export default function ReviewPanel() {
         contractLink: `/contracts/${item.id}`, // Link to view the contract details
         // You might need to fetch submitter details (user_id) separately if not directly available
         submitter: item.user_id ? `User ${item.user_id.substring(0, 8)}...` : "System",
-        avatar: "/placeholder.svg?width=40&height=40",
+        // Use a static placeholder path without query params to avoid file system errors
+        avatar: "/placeholder.svg",
       }))
       setReviewItems(formattedItems)
     } catch (error: any) {
