@@ -2,16 +2,16 @@
 
 import { FormDescription } from "@/components/ui/form"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
 
 import { contractGeneratorSchema, type ContractGeneratorFormData } from "@/lib/schema-generator"
 import { useParties, type Party as PartyType } from "@/hooks/use-parties" // Import Party type if needed
-import { usePromoters } from "@/hooks/use-promoters"
+import { supabase } from "@/lib/supabase"
 import type { Promoter } from "@/types/custom"
 
 import { Button } from "@/components/ui/button"
@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Loader2 } from "lucide-react"
 import { DatePickerWithManualInput } from "./date-picker-with-manual-input"
-import ComboboxField from "@/components/combobox-field"
+import SelectCreatable from "@/components/select-creatable"
 import { motion } from "framer-motion"
 import { devLog } from "@/lib/dev-log"
 
@@ -45,20 +45,24 @@ export default function ContractGeneratorForm() {
     error: clientPartiesError,
   } = useParties("Client")
 
-  const {
-    data: promoters,
-    isLoading: isLoadingPromoters,
-    error: promotersError,
-  } = usePromoters()
-
-  const [selectedPromoter, setSelectedPromoter] = useState<Promoter | null>(null)
+  const promotersQuery = useQuery<Promoter[], Error>({
+    queryKey: ["promoters"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("promoters")
+        .select("id, name_en, name_ar, photo_url")
+        .order("name_en")
+      if (error) throw error
+      return data ?? []
+    },
+  })
 
   // Debug output only in development
   useEffect(() => {
     devLog("Employer Parties Data:", employerParties)
     devLog("Client Parties Data:", clientParties)
-    devLog("Promoters Data:", promoters)
-  }, [employerParties, clientParties, promoters])
+    devLog("Promoters Data:", promotersQuery.data)
+  }, [employerParties, clientParties, promotersQuery.data])
 
   useEffect(() => {
     if (employerPartiesError) {
@@ -78,16 +82,23 @@ export default function ContractGeneratorForm() {
   }, [employerPartiesError, clientPartiesError])
 
   useEffect(() => {
-    if (promotersError) {
+    if (promotersQuery.error) {
       toast({
         title: "Error loading promoters",
-        description: promotersError.message,
+        description: promotersQuery.error.message,
         variant: "destructive",
       })
     }
-  }, [promotersError])
+  }, [promotersQuery.error])
 
-  const [promoterOptions, setPromoterOptions] = useState<{ value: string; label: string }[]>([])
+  const promoterOptions = useMemo(
+    () =>
+      promotersQuery.data?.map((p) => ({
+        value: p.id,
+        label: `${p.name_en} / ${p.name_ar}`,
+      })) ?? [],
+    [promotersQuery.data],
+  )
 
   const form = useForm<ContractGeneratorFormData>({
     resolver: zodResolver(contractGeneratorSchema),
@@ -104,30 +115,17 @@ export default function ContractGeneratorForm() {
     },
   })
 
-  useEffect(() => {
-    if (promoters) {
-      setPromoterOptions(
-        promoters.map((p) => ({
-          value: p.id,
-          label: `${p.name_en} / ${p.name_ar} (ID: ${p.id_card_number || "N/A"})`,
-        })),
-      )
-    }
-  }, [promoters])
 
   const watchedPromoterId = useWatch({
     control: form.control,
     name: "promoter_id",
   })
 
-  useEffect(() => {
-    if (watchedPromoterId && promoters) {
-      const promoter = promoters.find((p) => p.id === watchedPromoterId) || null
-      setSelectedPromoter(promoter)
-    } else {
-      setSelectedPromoter(null)
-    }
-  }, [watchedPromoterId, promoters])
+  const selectedPromoter = useMemo(
+    () =>
+      promotersQuery.data?.find((p) => p.id === watchedPromoterId) || null,
+    [watchedPromoterId, promotersQuery.data],
+  )
 
   const { mutate: createContract, isLoading: isSubmitting } = useMutation({
     mutationFn: async (data: ContractGeneratorFormData) => {
@@ -168,11 +166,18 @@ export default function ContractGeneratorForm() {
     createContract(data)
   }
 
-  const isLoadingInitialData = isLoadingEmployerParties || isLoadingClientParties || isLoadingPromoters
+  const isLoadingInitialData =
+    isLoadingEmployerParties || isLoadingClientParties || promotersQuery.isFetching
 
   // Show main loader only if no data has been fetched yet for parties/promoters
   // and the form hasn't been interacted with.
-  if (isLoadingInitialData && !form.formState.isDirty && !employerParties && !clientParties && !promoters) {
+  if (
+    isLoadingInitialData &&
+    !form.formState.isDirty &&
+    !employerParties &&
+    !clientParties &&
+    !promotersQuery.data,
+  ) {
     return (
       <div className="flex justify-center items-center min-h-[300px]">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -298,34 +303,42 @@ export default function ContractGeneratorForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Promoter</FormLabel>
-                <ComboboxField
-                  field={field}
+                <SelectCreatable
+                  value={field.value}
+                  onChange={field.onChange}
                   options={promoterOptions}
-                  placeholder={isLoadingPromoters ? "Loading Promoters..." : "Select a promoter"}
+                  placeholder={promotersQuery.isFetching ? "Loading Promoters..." : "Select a promoter"}
                   searchPlaceholder="Search promoters..."
                   emptyStateMessage="No promoter found."
-                  disabled={isSubmitting || isLoadingPromoters}
+                  disabled={isSubmitting || promotersQuery.isFetching}
                   inputClassName={getInputStateClasses("promoter_id")}
                 />
                 <FormMessage />
+                {promotersQuery.error && (
+                  <FormMessage>{promotersQuery.error.message}</FormMessage>
+                )}
               </FormItem>
             )}
           />
           {selectedPromoter ? (
             <div className="p-3 border rounded-md bg-muted/50 space-y-1 text-sm">
+              {selectedPromoter.photo_url && (
+                <img
+                  src={selectedPromoter.photo_url}
+                  alt="Promoter photo"
+                  className="h-16 w-16 rounded-md object-cover mb-2"
+                />
+              )}
               <p>
                 <span className="font-medium">Name (EN):</span> {selectedPromoter.name_en}
               </p>
               <p dir="rtl">
                 <span className="font-medium">Name (AR):</span> {selectedPromoter.name_ar}
               </p>
-              <p>
-                <span className="font-medium">ID Card:</span> {selectedPromoter.id_card_number}
-              </p>
             </div>
-          ) : promotersError ? (
+          ) : promotersQuery.error ? (
             <p className="text-sm text-destructive">Error loading promoters.</p>
-          ) : !isLoadingPromoters && promoters?.length === 0 ? (
+          ) : !promotersQuery.isFetching && promotersQuery.data?.length === 0 ? (
             <p className="text-sm text-muted-foreground">No promoters available.</p>
           ) : (
             <p className="text-sm text-muted-foreground">Select a promoter to view details.</p>
