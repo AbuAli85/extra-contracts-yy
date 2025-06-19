@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase" // Supabase client for reads
 import { createContract, deleteContract } from "@/app/actions/contracts"
+import { useToast } from "@/hooks/use-toast"
 import { devLog } from "@/lib/dev-log"
 import type { Database } from "@/types/supabase"
 import { useEffect } from "react"
@@ -109,6 +110,7 @@ const deleteContractInSupabase = async (contractId: string): Promise<void> => {
 
 export const useDeleteContractMutation = () => {
   const queryClient = useQueryClient()
+  const { toast } = useToast()
   return useMutation<void, Error, string>({
     // contractId is a string
     mutationFn: deleteContractInSupabase,
@@ -121,7 +123,11 @@ export const useDeleteContractMutation = () => {
     },
     onError: (error) => {
       console.error("Error deleting contract:", error)
-      // Potentially show a toast notification to the user
+      toast({
+        title: "Error",
+        description: `Failed to delete contract: ${error.message}`,
+        variant: "destructive",
+      })
     },
   })
 }
