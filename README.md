@@ -26,6 +26,10 @@ pnpm install
 npm install
 ```
 
+After updating dependencies, run `pnpm install` again and commit the resulting
+`pnpm-lock.yaml`. The CI pipeline runs with a frozen lockfile and will fail if
+`package.json` and the lockfile are out of sync.
+
 After the dependencies are installed you can lint the project:
 
 ```bash
