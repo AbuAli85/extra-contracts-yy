@@ -3,9 +3,9 @@ import userEvent from "@testing-library/user-event"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import ContractGeneratorForm from "./contract-generator-form"
 
-const mockToast = jest.fn()
+const toastMock = jest.fn()
 jest.mock("@/hooks/use-toast", () => ({
-  useToast: () => ({ toast: mockToast }),
+  useToast: () => ({ toast: toastMock }),
 }))
 
 import { useParties } from "@/hooks/use-parties"
@@ -86,9 +86,9 @@ describe("ContractGeneratorForm", () => {
     renderForm()
     const user = userEvent.setup()
     await user.click(screen.getByRole("button", { name: /generate/i }))
-    expect(await screen.findByText("Please select Party A.")).toBeInTheDocument()
-    expect(await screen.findByText("Please select Party B.")).toBeInTheDocument()
-    expect(await screen.findByText("Please select a Promoter.")).toBeInTheDocument()
+    expect(await screen.findByText("Please select the first party.")).toBeInTheDocument()
+    expect(await screen.findByText("Please select the second party.")).toBeInTheDocument()
+    expect(await screen.findByText("Please select the promoter.")).toBeInTheDocument()
     expect(await screen.findByText("Contract start date is required.")).toBeInTheDocument()
     expect(await screen.findByText("Contract end date is required.")).toBeInTheDocument()
     expect(await screen.findByText("Please enter a valid email address for notifications.")).toBeInTheDocument()
@@ -122,6 +122,6 @@ describe("ContractGeneratorForm", () => {
       "/api/contracts",
       expect.objectContaining({ method: "POST" }),
     )
-    expect(mockToast).toHaveBeenCalled()
+    await waitFor(() => expect(toastMock).toHaveBeenCalled())
   })
 })
