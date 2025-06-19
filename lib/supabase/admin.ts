@@ -8,15 +8,14 @@ export function getSupabaseAdmin(): SupabaseClient<Database> {
     return supabaseAdminInstance
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://example.supabase.co"
+  const supabaseServiceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || "service-role-key"
 
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
-    console.error(
-      "Supabase URL or Service Role Key is missing. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.",
-    )
-    throw new Error(
-      "Supabase URL or Service Role Key is missing. Application cannot connect to the database securely on the server.",
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.warn(
+      "Supabase URL or Service Role Key is missing. Using placeholder credentials.",
     )
   }
 

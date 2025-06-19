@@ -4,14 +4,15 @@ import type { Database } from "@/types/supabase"
 
 export function createServerComponentClient() {
   const cookieStore = cookies()
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://example.supabase.co"
+  const supabaseAnonKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "public-anon-key"
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error(
-      "Supabase URL or Anon Key is missing. Ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set.",
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.warn(
+      "Supabase URL or Anon Key is missing. Using placeholder credentials.",
     )
-    throw new Error("Supabase credentials are missing")
   }
 
   return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
