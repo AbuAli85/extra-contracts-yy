@@ -1,0 +1,472 @@
+"use client"
+
+import { FormDescription } from "@/components/ui/form"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { useEffect, useState } from "react"
+import { useForm, useWatch } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useToast } from "@/hooks/use-toast"
+import { format } from "date-fns"
+import { z } from "zod"
+
+import { formSchema } from "@/lib/generate-contract-form-schema"
+import { useParties, type Party as PartyType } from "@/hooks/use-parties"
+import { usePromoters } from "@/hooks/use-promoters"
+import type { Promoter } from "@/types/custom"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Loader2 } from "lucide-react"
+import { DatePickerWithManualInput } from "./date-picker-with-manual-input"
+import ComboboxField from "@/components/combobox-field"
+import { motion } from "framer-motion"
+import { devLog } from "@/lib/dev-log"
+
+const sectionVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
+}
+
+type ContractGeneratorFormData = z.infer<typeof formSchema>
+
+export default function ContractGeneratorForm() {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  // Fetch parties using the React Query hook
+  const {
+    data: employerParties,
+    isLoading: isLoadingEmployerParties,
+    error: employerPartiesError,
+  } = useParties("Employer")
+
+  const {
+    data: clientParties,
+    isLoading: isLoadingClientParties,
+    error: clientPartiesError,
+  } = useParties("Client")
+
+  const {
+    data: promoters,
+    isLoading: isLoadingPromoters,
+    error: promotersError,
+  } = usePromoters()
+
+  const [selectedPromoter, setSelectedPromoter] = useState<Promoter | null>(null)
+
+  // Debug output only in development
+  useEffect(() => {
+    devLog("Employer Parties Data:", employerParties)
+    devLog("Client Parties Data:", clientParties)
+    devLog("Promoters Data:", promoters)
+  }, [employerParties, clientParties, promoters])
+
+  useEffect(() => {
+    if (employerPartiesError) {
+      toast({
+        title: "Error loading Employer parties",
+        description: employerPartiesError.message,
+        variant: "destructive",
+      })
+    }
+    if (clientPartiesError) {
+      toast({
+        title: "Error loading Client parties",
+        description: clientPartiesError.message,
+        variant: "destructive",
+      })
+    }
+  }, [employerPartiesError, clientPartiesError])
+
+  useEffect(() => {
+    if (promotersError) {
+      toast({
+        title: "Error loading promoters",
+        description: promotersError.message,
+        variant: "destructive",
+      })
+    }
+  }, [promotersError])
+
+  const [promoterOptions, setPromoterOptions] = useState<{ value: string; label: string }[]>([])
+
+  const form = useForm<ContractGeneratorFormData>({
+    resolver: zodResolver(formSchema),
+    mode: "onTouched",
+    defaultValues: {
+      firstPartyId: undefined,
+      secondPartyId: undefined,
+      promoterId: undefined,
+      startDate: undefined,
+      endDate: undefined,
+      email: "",
+      jobTitle: "",
+      workLocation: "",
+    },
+  })
+
+  const watchStartDate = useWatch({
+    control: form.control,
+    name: "startDate",
+  })
+
+  const [minEndDate, setMinEndDate] = useState<Date | undefined>()
+
+  useEffect(() => {
+    // Ensure the end date picker always has the latest minimum date
+    // so users can't pick an end date prior to the selected start date.
+    setMinEndDate(watchStartDate)
+    const currentEnd = form.getValues("endDate")
+    if (currentEnd && watchStartDate && currentEnd < watchStartDate) {
+      form.setValue("endDate", watchStartDate, { shouldValidate: true })
+    }
+  }, [watchStartDate, form])
+
+  useEffect(() => {
+    if (promoters) {
+      setPromoterOptions(
+        promoters.map((p) => ({
+          value: p.id,
+          label: `${p.name_en} / ${p.name_ar} (ID: ${p.id_card_number || "N/A"})`,
+        })),
+      )
+    }
+  }, [promoters])
+
+  const watchedPromoterId = useWatch({
+    control: form.control,
+    name: "promoterId",
+  })
+
+  useEffect(() => {
+    if (watchedPromoterId && promoters) {
+      const promoter = promoters.find((p) => p.id === watchedPromoterId) || null
+      setSelectedPromoter(promoter)
+    } else {
+      setSelectedPromoter(null)
+    }
+  }, [watchedPromoterId, promoters])
+
+  const { mutate: createContract, isLoading: isSubmitting } = useMutation({
+    mutationFn: async (data: ContractGeneratorFormData) => {
+      const apiPayload = {
+        ...data,
+        contract_start_date: format(data.startDate, "yyyy-MM-dd"),
+        contract_end_date: format(data.endDate, "yyyy-MM-dd"),
+      }
+      const response = await fetch("/api/contracts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(apiPayload),
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to create contract.")
+      }
+      return response.json()
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Contract Created!",
+        description: `PDF: ${data.contract.pdf_url || "Pending generation."}`,
+      })
+      form.reset()
+      queryClient.invalidateQueries({ queryKey: ["contracts"] })
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Creation Failed",
+        description: error.message || "An unexpected error occurred.",
+        variant: "destructive",
+      })
+    },
+  })
+
+  const onSubmit = (data: ContractGeneratorFormData) => {
+    createContract(data)
+  }
+
+  const isLoadingInitialData = isLoadingEmployerParties || isLoadingClientParties || isLoadingPromoters
+
+  // Show main loader only if no data has been fetched yet for parties/promoters
+  // and the form hasn't been interacted with.
+  if (isLoadingInitialData && !form.formState.isDirty && !employerParties && !clientParties && !promoters) {
+    return (
+      <div className="flex justify-center items-center min-h-[300px]">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="ms-4 text-lg text-muted-foreground">Loading form data...</p>
+      </div>
+    )
+  }
+
+  const getInputStateClasses = (fieldName: keyof ContractGeneratorFormData) => {
+    const fieldState = form.getFieldState(fieldName)
+    if (fieldState.error) return "ring-destructive ring-2"
+    if (fieldState.isDirty && !fieldState.error && fieldState.isTouched) return "ring-success ring-2"
+    return ""
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+        <motion.div variants={sectionVariants} initial="hidden" animate="visible" className="space-y-6">
+          <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
+            Contracting Parties
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="firstPartyId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Party A (Employer)</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || ""} // Ensure value is controlled
+                    disabled={isSubmitting || isLoadingEmployerParties}
+                  >
+                    <FormControl>
+                      <SelectTrigger className={getInputStateClasses("firstPartyId")}>
+                        <SelectValue
+                          placeholder={isLoadingEmployerParties ? "Loading Employers..." : "Select Employer"}
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {isLoadingEmployerParties && (
+                        <SelectItem value="loading" disabled>
+                          Loading...
+                        </SelectItem>
+                      )}
+                      {!isLoadingEmployerParties && employerParties?.length === 0 && (
+                        <SelectItem value="no-data" disabled>
+                          No employers found
+                        </SelectItem>
+                      )}
+                      {!isLoadingEmployerParties &&
+                        employerParties?.map((party: PartyType) => (
+                          <SelectItem key={party.id} value={party.id}>
+                            {party.name_en} / {party.name_ar} {party.crn && `(CRN: ${party.crn})`}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="secondPartyId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Party B (Client)</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || ""} // Ensure value is controlled
+                    disabled={isSubmitting || isLoadingClientParties}
+                  >
+                    <FormControl>
+                      <SelectTrigger className={getInputStateClasses("secondPartyId")}>
+                        <SelectValue placeholder={isLoadingClientParties ? "Loading Clients..." : "Select Client"} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {isLoadingClientParties && (
+                        <SelectItem value="loading" disabled>
+                          Loading...
+                        </SelectItem>
+                      )}
+                      {!isLoadingClientParties && clientParties?.length === 0 && (
+                        <SelectItem value="no-data" disabled>
+                          No clients found
+                        </SelectItem>
+                      )}
+                      {!isLoadingClientParties &&
+                        clientParties?.map((party: PartyType) => (
+                          <SelectItem key={party.id} value={party.id}>
+                            {party.name_en} / {party.name_ar} {party.crn && `(CRN: ${party.crn})`}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </motion.div>
+
+        {/* Promoter Section */}
+        <motion.div variants={sectionVariants} initial="hidden" animate="visible" className="space-y-6">
+          <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
+            Promoter Information
+          </h3>
+          <FormField
+            control={form.control}
+            name="promoterId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Promoter</FormLabel>
+                <ComboboxField
+                  field={field}
+                  options={promoterOptions}
+                  placeholder={isLoadingPromoters ? "Loading Promoters..." : "Select a promoter"}
+                  searchPlaceholder="Search promoters..."
+                  emptyStateMessage="No promoter found."
+                  disabled={isSubmitting || isLoadingPromoters}
+                  inputClassName={getInputStateClasses("promoterId")}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {selectedPromoter ? (
+            <div className="p-3 border rounded-md bg-muted/50 space-y-1 text-sm">
+              <p>
+                <span className="font-medium">Name (EN):</span> {selectedPromoter.name_en}
+              </p>
+              <p dir="rtl">
+                <span className="font-medium">Name (AR):</span> {selectedPromoter.name_ar}
+              </p>
+              <p>
+                <span className="font-medium">ID Card:</span> {selectedPromoter.id_card_number}
+              </p>
+            </div>
+          ) : promotersError ? (
+            <p className="text-sm text-destructive">Error loading promoters.</p>
+          ) : !isLoadingPromoters && promoters?.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No promoters available.</p>
+          ) : (
+            <p className="text-sm text-muted-foreground">Select a promoter to view details.</p>
+          )}
+        </motion.div>
+
+        {/* Contract Period Section */}
+        <motion.div variants={sectionVariants} initial="hidden" animate="visible" className="space-y-6">
+          <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
+            Contract Period
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="startDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Contract Start Date</FormLabel>
+                  <DatePickerWithManualInput
+                    date={field.value}
+                    setDate={field.onChange}
+                    dateFormat="dd-MM-yyyy"
+                    placeholder="dd-MM-yyyy"
+                    disabled={isSubmitting}
+                    inputClassName={getInputStateClasses("startDate")}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="endDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Contract End Date</FormLabel>
+                  <DatePickerWithManualInput
+                    date={field.value}
+                    setDate={field.onChange}
+                    dateFormat="dd-MM-yyyy"
+                    placeholder="dd-MM-yyyy"
+                    disabled={(date) => (minEndDate ? date <= minEndDate : false) || isSubmitting}
+                    inputClassName={getInputStateClasses("endDate")}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </motion.div>
+
+        {/* Additional Details Section */}
+        <motion.div variants={sectionVariants} initial="hidden" animate="visible" className="space-y-6">
+          <h3 className="text-xl font-semibold font-heading border-b-2 border-primary pb-2 mb-6">
+            Additional Details
+          </h3>
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Notification Email</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="contact@example.com"
+                    {...field}
+                    disabled={isSubmitting}
+                    className={getInputStateClasses("email")}
+                  />
+                </FormControl>
+                <FormDescription>Email address for contract-related notifications.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="jobTitle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Job Title (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., Marketing Specialist"
+                    {...field}
+                    disabled={isSubmitting}
+                    className={getInputStateClasses("jobTitle")}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="workLocation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Work Location (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., Main Office, Remote"
+                    {...field}
+                    disabled={isSubmitting}
+                    className={getInputStateClasses("workLocation")}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            type="submit"
+            className="w-full h-12 text-base font-semibold"
+            disabled={isSubmitting || isLoadingInitialData}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin me-2 h-5 w-5" /> Submitting...
+              </>
+            ) : (
+              "Generate & Save Contract"
+            )}
+          </Button>
+        </motion.div>
+      </form>
+    </Form>
+  )
+}
