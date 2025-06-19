@@ -90,7 +90,8 @@ export default function ImageUploadField({
         {displayPreviewUrl ? (
           <>
             <Image
-              src={displayPreviewUrl || "/placeholder.svg?width=190&height=190&query=preview"} // Adjusted placeholder size slightly for padding
+              // Use a simple placeholder path without query parameters
+              src={displayPreviewUrl || "/placeholder.svg"}
               alt={`Preview`}
               fill
               sizes="(max-width: 768px) 100vw, 480px" // Example sizes, adjust based on actual usage and container size
@@ -100,7 +101,8 @@ export default function ImageUploadField({
               onError={() => {
                 // This handles browser-side loading errors for the src
                 // The 400 error is likely from the Next.js optimization step before this
-                setPreview("/placeholder.svg?width=100&height=100")
+                // Fall back to a static placeholder without query params
+                setPreview("/placeholder.svg")
               }}
             />
             {!disabled && (
