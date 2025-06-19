@@ -3,9 +3,9 @@ import userEvent from "@testing-library/user-event"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import ContractGeneratorForm from "./contract-generator-form"
 
-const mockToast = jest.fn()
+const toastMock = jest.fn()
 jest.mock("@/hooks/use-toast", () => ({
-  useToast: () => ({ toast: mockToast }),
+  useToast: () => ({ toast: toastMock }),
 }))
 
 import { useParties } from "@/hooks/use-parties"
@@ -122,6 +122,6 @@ describe("ContractGeneratorForm", () => {
       "/api/contracts",
       expect.objectContaining({ method: "POST" }),
     )
-    expect(mockToast).toHaveBeenCalled()
+    expect(toastMock).toHaveBeenCalled()
   })
 })
