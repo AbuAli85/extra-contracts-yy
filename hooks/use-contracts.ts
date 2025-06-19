@@ -70,10 +70,11 @@ export const useContracts = () => {
           devLog("Subscribed to contracts channel!")
         }
         if (status === "CHANNEL_ERROR") {
-          console.error("Channel error:", err)
+          const message = err?.message ?? "Unknown channel error"
+          console.error(`Contracts channel error (${status}):`, message)
         }
         if (status === "TIMED_OUT") {
-          console.warn("Subscription timed out")
+          console.warn(`Subscription timed out (${status})`)
         }
       })
 
