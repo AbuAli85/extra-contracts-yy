@@ -16,56 +16,15 @@ import {
   UserIcon,
   FileTextIcon,
   Loader2,
-  AlertTriangleIcon,
-  ShieldCheckIcon,
-  ShieldAlertIcon,
   BriefcaseIcon,
   EyeIcon,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { format, parseISO, differenceInDays, isPast } from "date-fns"
+import { format } from "date-fns"
+import { getDocumentStatus } from "@/lib/document-status"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-// Helper function to determine document status
-const getDocumentStatus = (
-  expiryDate: string | null | undefined,
-): {
-  text: string
-  Icon: React.ElementType
-  colorClass: string
-  tooltip?: string
-} => {
-  if (!expiryDate) {
-    return { text: "No Date", Icon: AlertTriangleIcon, colorClass: "text-slate-500", tooltip: "Expiry date not set" }
-  }
-  const date = parseISO(expiryDate)
-  const today = new Date()
-  const daysUntilExpiry = differenceInDays(date, today)
-
-  if (isPast(date)) {
-    return {
-      text: "Expired",
-      Icon: ShieldAlertIcon,
-      colorClass: "text-red-500",
-      tooltip: `Expired on ${format(date, "MMM d, yyyy")}`,
-    }
-  }
-  if (daysUntilExpiry <= 30) {
-    return {
-      text: "Expires Soon",
-      Icon: ShieldAlertIcon,
-      colorClass: "text-orange-500",
-      tooltip: `Expires in ${daysUntilExpiry} day(s) on ${format(date, "MMM d, yyyy")}`,
-    }
-  }
-  return {
-    text: "Valid",
-    Icon: ShieldCheckIcon,
-    colorClass: "text-green-500",
-    tooltip: `Valid until ${format(date, "MMM d, yyyy")}`,
-  }
-}
 
 export default function ManagePromotersPage() {
   const [promoters, setPromoters] = useState<Promoter[]>([])
