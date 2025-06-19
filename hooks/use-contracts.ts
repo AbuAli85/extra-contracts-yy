@@ -1,15 +1,17 @@
 "use client"
 
+// --- Supabase setup and core utilities ---
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase" // Supabase client for reads
+import { supabase } from "@/lib/supabase" // Initialized Supabase client
 import { createContract, deleteContract } from "@/app/actions/contracts"
 import { useToast } from "@/hooks/use-toast"
 import { devLog } from "@/lib/dev-log"
 import type { Database } from "@/types/supabase"
 import { useEffect } from "react"
 
-// Define a more detailed Contract type that includes potential related data
-// This should align with what your `fetchContracts` select query returns
+// --- Schema definition ---
+// Detailed contract type including joined relational data
+// This mirrors what the `fetchContracts` query selects
 export type ContractWithRelations = Database["public"]["Tables"]["contracts"]["Row"] & {
   parties_contracts_employer_id_fkey?: Database["public"]["Tables"]["parties"]["Row"] | null
   parties_contracts_client_id_fkey?: Database["public"]["Tables"]["parties"]["Row"] | null
@@ -19,9 +21,11 @@ export type ContractWithRelations = Database["public"]["Tables"]["contracts"]["R
   // employer?: Database["public"]["Tables"]["parties"]["Row"] | null
   // client?: Database["public"]["Tables"]["parties"]["Row"] | null
 }
+// Minimal fields required when creating a new contract
 export type ContractInsert = Database["public"]["Tables"]["contracts"]["Insert"]
 
-// Fetch all contracts with related data
+// --- Queries ---
+// Fetch all contracts with their related party and promoter info
 const fetchContracts = async (): Promise<ContractWithRelations[]> => {
   const { data, error } = await supabase
     .from("contracts")
@@ -53,11 +57,13 @@ export const useContracts = () => {
   const queryClient = useQueryClient()
   const queryKey = ["contracts"]
 
+  // --- Data fetching with React Query ---
   const queryResult = useQuery<ContractWithRelations[], Error>({
     queryKey: queryKey,
     queryFn: fetchContracts,
   })
 
+  // --- Realtime subscription ---
   useEffect(() => {
     const channel = supabase
       .channel("public-contracts-realtime")
@@ -94,6 +100,7 @@ const createContractInSupabase = async (
   return data as ContractWithRelations
 }
 
+// --- Form submission: create contract ---
 export const useCreateContractMutation = () => {
   const queryClient = useQueryClient()
   return useMutation<ContractWithRelations, Error, ContractInsert>({
@@ -104,7 +111,7 @@ export const useCreateContractMutation = () => {
   })
 }
 
-// Delete a contract
+// --- Form submission: delete contract ---
 const deleteContractInSupabase = async (contractId: string): Promise<void> => {
   await deleteContract(contractId)
 }
@@ -132,3 +139,11 @@ export const useDeleteContractMutation = () => {
     },
   })
 }
+
+/*
+Enhancement Summary:
+- Documented Supabase initialization and utilities.
+- Added comments for schema types and data fetching queries.
+- Explained realtime subscriptions and mutation logic.
+- Provided context for create/delete contract operations.
+*/
