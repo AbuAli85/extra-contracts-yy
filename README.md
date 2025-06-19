@@ -106,11 +106,19 @@ Running this command whenever your database schema changes will keep
 
 ## Running Tests
 
-Ensure you have **Node.js** and **pnpm** installed. After installing project
-dependencies with `pnpm install`, execute the Jest test suite with:
+Ensure you have **Node.js** and **pnpm** installed. Install project
+dependencies before running the tests:
+
+```bash
+pnpm install
+```
+
+After the dependencies are installed, execute the Jest test suite with:
 
 ```bash
 pnpm test
 ```
 
-This command runs all unit tests defined in the repository.
+Tests rely on the dependencies installed locally by `pnpm install` and will
+fail if they are missing. This command runs all unit tests defined in the
+repository.
