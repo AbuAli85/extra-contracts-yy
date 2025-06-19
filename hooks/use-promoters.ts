@@ -2,10 +2,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useMemo } from "react"
 import { supabase } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
-import { toast } from "sonner"
+import { useToast } from "@/hooks/use-toast"
 import type { Promoter } from "@/types/custom"
 
-const fetchPromoters = async (): Promise<Promoter[]> => {
+const fetchPromoters = async (
+  toastHook: ReturnType<typeof useToast>["toast"],
+): Promise<Promoter[]> => {
   const { data, error } = await supabase
     .from("promoters")
     .select("*")
@@ -14,19 +16,24 @@ const fetchPromoters = async (): Promise<Promoter[]> => {
     console.error("Error fetching promoters:", error)
     // Log the complete error object for easier debugging
     console.error(error)
-    toast.error("Error loading promoters", { description: error.message })
+    toastHook({
+      title: "Error loading promoters",
+      description: error.message,
+      variant: "destructive",
+    })
     throw new Error(error.message)
   }
   return data || []
 }
 
 export const usePromoters = () => {
+  const { toast: toastHook } = useToast()
   const queryClient = useQueryClient()
   const queryKey = useMemo(() => ["promoters"], [])
 
   const queryResult = useQuery<Promoter[], Error>({
     queryKey,
-    queryFn: fetchPromoters,
+    queryFn: () => fetchPromoters(toastHook),
     staleTime: 1000 * 60 * 5,
   })
 
