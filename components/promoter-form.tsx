@@ -68,7 +68,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
   const isEditScreen = !!promoterToEdit
   const [isEditable, setIsEditable] = useState(!isEditScreen)
 
-  const form = useForm<PromoterProfileFormData>({
+  const { reset, ...form } = useForm<PromoterProfileFormData>({
     resolver: zodResolver(promoterProfileSchema),
     defaultValues: {
       name_en: "",
@@ -107,7 +107,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
 
   useEffect(() => {
     if (promoterToEdit) {
-      form.reset({
+      reset({
         name_en: promoterToEdit.name_en || "",
         name_ar: promoterToEdit.name_ar || "",
         id_card_number: promoterToEdit.id_card_number || "",
@@ -133,7 +133,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         notes: promoterToEdit.notes || "",
       })
     } else {
-      form.reset({
+      reset({
         ...form.formState.defaultValues,
         status: "active",
         notify_days_before_id_expiry: 30,
