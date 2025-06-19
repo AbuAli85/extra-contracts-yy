@@ -1,8 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 import type { Promoter } from "@/types/custom"
 
 const fetchPromoters = async (): Promise<Promoter[]> => {
@@ -21,6 +22,9 @@ const fetchPromoters = async (): Promise<Promoter[]> => {
 }
 
 export const usePromoters = () => {
+  const router = useRouter()
+  const [sessionChecked, setSessionChecked] = useState(false)
+  const [hasSession, setHasSession] = useState(false)
   const queryClient = useQueryClient()
   const queryKey = useMemo(() => ["promoters"], [])
 
@@ -28,9 +32,25 @@ export const usePromoters = () => {
     queryKey,
     queryFn: fetchPromoters,
     staleTime: 1000 * 60 * 5,
+    enabled: sessionChecked && hasSession,
   })
 
   useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      setSessionChecked(true)
+      if (!session) {
+        toast.error("Please login to continue")
+        router.push("/login")
+        setHasSession(false)
+      } else {
+        setHasSession(true)
+      }
+    }
+    checkSession()
+
     const channel = supabase
       .channel("public-promoters-realtime")
       .on(
@@ -50,7 +70,7 @@ export const usePromoters = () => {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [queryClient])
+  }, [queryClient, router])
 
   return { ...queryResult, errorMessage: queryResult.error?.message }
 }
