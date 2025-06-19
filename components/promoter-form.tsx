@@ -86,20 +86,20 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
       work_location: "",
       status: "active",
       contract_valid_until: null,
-      notify_before_id_expiry_days: 30,
-      notify_before_passport_expiry_days: 90,
-      notify_before_contract_expiry_days: 30,
+      notify_days_before_id_expiry: 30,
+      notify_days_before_passport_expiry: 90,
+      notify_days_before_contract_expiry: 30,
       notes: "",
     },
   })
 
   // Watch relevant fields for expiry alerts
   const idCardExpiryDate = useWatch({ control: form.control, name: "id_card_expiry_date" })
-  const notifyIdDays = useWatch({ control: form.control, name: "notify_before_id_expiry_days" })
+  const notifyIdDays = useWatch({ control: form.control, name: "notify_days_before_id_expiry" })
   const passportExpiryDate = useWatch({ control: form.control, name: "passport_expiry_date" })
-  const notifyPassportDays = useWatch({ control: form.control, name: "notify_before_passport_expiry_days" })
+  const notifyPassportDays = useWatch({ control: form.control, name: "notify_days_before_passport_expiry" })
   const contractValidUntil = useWatch({ control: form.control, name: "contract_valid_until" })
-  const notifyContractDays = useWatch({ control: form.control, name: "notify_before_contract_expiry_days" })
+  const notifyContractDays = useWatch({ control: form.control, name: "notify_days_before_contract_expiry" })
 
   const idCardAlert = getExpiryAlert(idCardExpiryDate, notifyIdDays, "ID Card")
   const passportAlert = getExpiryAlert(passportExpiryDate, notifyPassportDays, "Passport")
@@ -127,18 +127,18 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         contract_valid_until: promoterToEdit.contract_valid_until
           ? parseISO(promoterToEdit.contract_valid_until)
           : null,
-        notify_before_id_expiry_days: promoterToEdit.notify_before_id_expiry_days ?? 30,
-        notify_before_passport_expiry_days: promoterToEdit.notify_before_passport_expiry_days ?? 90,
-        notify_before_contract_expiry_days: promoterToEdit.notify_before_contract_expiry_days ?? 30,
+        notify_days_before_id_expiry: promoterToEdit.notify_days_before_id_expiry ?? 30,
+        notify_days_before_passport_expiry: promoterToEdit.notify_days_before_passport_expiry ?? 90,
+        notify_days_before_contract_expiry: promoterToEdit.notify_days_before_contract_expiry ?? 30,
         notes: promoterToEdit.notes || "",
       })
     } else {
       form.reset({
         ...form.formState.defaultValues,
         status: "active",
-        notify_before_id_expiry_days: 30,
-        notify_before_passport_expiry_days: 90,
-        notify_before_contract_expiry_days: 30,
+        notify_days_before_id_expiry: 30,
+        notify_days_before_passport_expiry: 90,
+        notify_days_before_contract_expiry: 30,
       })
     }
   }, [promoterToEdit, form])
@@ -203,9 +203,9 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         work_location: values.work_location,
         status: values.status,
         contract_valid_until: values.contract_valid_until ? format(values.contract_valid_until, "yyyy-MM-dd") : null,
-        notify_before_id_expiry_days: values.notify_before_id_expiry_days,
-        notify_before_passport_expiry_days: values.notify_before_passport_expiry_days,
-        notify_before_contract_expiry_days: values.notify_before_contract_expiry_days,
+        notify_days_before_id_expiry: values.notify_days_before_id_expiry,
+        notify_days_before_passport_expiry: values.notify_days_before_passport_expiry,
+        notify_days_before_contract_expiry: values.notify_days_before_contract_expiry,
         notes: values.notes,
       }
 
@@ -528,7 +528,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-8">
               <FormField
                 control={form.control}
-                name="notify_before_id_expiry_days"
+                name="notify_days_before_id_expiry"
                 render={({ field }) => (
                   <FormItem>
                     <ShadcnFormLabel>ID Expiry Alert (Days) / تنبيه انتهاء البطاقة (أيام)</ShadcnFormLabel>
@@ -550,7 +550,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
               />
               <FormField
                 control={form.control}
-                name="notify_before_passport_expiry_days"
+                name="notify_days_before_passport_expiry"
                 render={({ field }) => (
                   <FormItem>
                     <ShadcnFormLabel>Passport Expiry Alert (Days) / تنبيه انتهاء الجواز (أيام)</ShadcnFormLabel>
@@ -572,7 +572,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
               />
               <FormField
                 control={form.control}
-                name="notify_before_contract_expiry_days"
+                name="notify_days_before_contract_expiry"
                 render={({ field }) => (
                   <FormItem>
                     <ShadcnFormLabel>Contract Expiry Alert (Days) / تنبيه انتهاء العقد (أيام)</ShadcnFormLabel>
