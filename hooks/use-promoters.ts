@@ -45,6 +45,7 @@ export const usePromoters = () => {
     queryKey,
     queryFn: fetchPromoters,
     staleTime: 1000 * 60 * 5,
+    retry: false,
     onError: (error) => {
       toast({
         title: "Authentication Required",
