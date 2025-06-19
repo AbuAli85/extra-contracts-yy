@@ -218,9 +218,7 @@ export default function ContractGeneratorForm({
       queryClient.invalidateQueries({ queryKey: ["contracts"] })
       onFormSubmit?.()
 
-      const hookUrl =
-        process.env.PUBLIC_MAKE_HOOK_URL ||
-        process.env.NEXT_PUBLIC_MAKE_HOOK_URL
+      const hookUrl = process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL
       if (hookUrl) {
         try {
           await fetch(hookUrl, {
