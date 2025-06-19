@@ -12,6 +12,8 @@ const fetchPromoters = async (): Promise<Promoter[]> => {
     .order("name_en", { ascending: true })
   if (error) {
     console.error("Error fetching promoters:", error)
+    // Log the complete error object for easier debugging
+    console.error(error)
     toast.error("Error loading promoters", { description: error.message })
     throw new Error(error.message)
   }
@@ -50,5 +52,5 @@ export const usePromoters = () => {
     }
   }, [queryClient, queryKey])
 
-  return queryResult
+  return { ...queryResult, errorMessage: queryResult.error?.message }
 }
