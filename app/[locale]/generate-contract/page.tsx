@@ -1,7 +1,7 @@
 // app/[locale]/generate-contract/page.tsx
 "use client"
 
-import GenerateContractForm from "@/components/GenerateContractForm"
+import GenerateContractForm from "@/components/generate-contract-form"
 import { motion } from "framer-motion"
 
 export default function GenerateContractPage() {
