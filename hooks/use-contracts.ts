@@ -65,12 +65,13 @@ export const useContracts = () => {
         devLog("Realtime contract change received!", payload)
         queryClient.invalidateQueries({ queryKey: queryKey })
       })
-      .subscribe((status, err) => {
+      // Supabase v2 subscribe callback only provides the status
+      .subscribe((status) => {
         if (status === "SUBSCRIBED") {
           devLog("Subscribed to contracts channel!")
         }
         if (status === "CHANNEL_ERROR") {
-          console.error("Channel error:", err)
+          console.error("Channel error:", channel.getError())
         }
         if (status === "TIMED_OUT") {
           console.warn("Subscription timed out")

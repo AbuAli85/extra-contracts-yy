@@ -75,9 +75,10 @@ export const usePromoters = () => {
           queryClient.invalidateQueries({ queryKey })
         },
       )
-      .subscribe((status, err) => {
+      // Supabase v2 subscribe callback only receives the status
+      .subscribe((status) => {
         if (status === "CHANNEL_ERROR") {
-          console.error("Promoters channel error:", err)
+          console.error("Promoters channel error:", channel.getError())
         }
       })
 
