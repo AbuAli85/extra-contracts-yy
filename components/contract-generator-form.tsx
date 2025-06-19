@@ -135,6 +135,11 @@ export default function ContractGeneratorForm({
     name: "promoter_id",
   })
 
+  const startDate = useWatch({
+    control: form.control,
+    name: "contract_start_date",
+  })
+
   useEffect(() => {
     if (watchedPromoterId && promoters) {
       const promoter = promoters.find((p) => p.id === watchedPromoterId) || null
@@ -494,10 +499,10 @@ export default function ContractGeneratorForm({
                     setDate={field.onChange}
                     dateFormat="dd-MM-yyyy"
                     placeholder="dd-MM-yyyy"
-                    disabled={(date) =>
-                      (form.getValues("contract_start_date")
-                        ? date <= form.getValues("contract_start_date")!
-                        : false) || isSubmitting
+                    disabled={
+                      isSubmitting
+                        ? true
+                        : (date) => !startDate ? false : date <= startDate
                     }
                     inputClassName={getInputStateClasses("contract_end_date")}
                   />
