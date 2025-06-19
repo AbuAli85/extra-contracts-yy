@@ -1,11 +1,14 @@
 import { createClient } from "@supabase/supabase-js"
 import type { Database } from "@/types/supabase"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Supabase URL or Anon Key is missing. Check your environment variables.")
+  console.error(
+    "Supabase URL or Anon Key is missing. Ensure PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY are set.",
+  )
+  throw new Error("Supabase credentials are missing")
 }
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)

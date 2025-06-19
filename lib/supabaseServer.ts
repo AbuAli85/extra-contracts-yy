@@ -4,7 +4,17 @@ import type { Database } from "@/types/supabase"
 
 export function createServerComponentClient() {
   const cookieStore = cookies()
-  return createServerClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error(
+      "Supabase URL or Anon Key is missing. Ensure PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY are set.",
+    )
+    throw new Error("Supabase credentials are missing")
+  }
+
+  return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
       get(name: string) {
         return cookieStore.get(name)?.value
