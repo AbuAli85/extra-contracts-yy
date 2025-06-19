@@ -47,12 +47,20 @@ export const usePromoters = () => {
     staleTime: 1000 * 60 * 5,
     retry: false,
     onError: (error) => {
-      toast({
-        title: "Authentication Required",
-        description: error.message,
-        variant: "destructive",
-      })
-      router.push("/login")
+      if (error.message === "Not authenticated") {
+        toast({
+          title: "Authentication Required",
+          description: error.message,
+          variant: "destructive",
+        })
+        router.push("/login")
+      } else {
+        toast({
+          title: "Error loading promoters",
+          description: error.message,
+          variant: "destructive",
+        })
+      }
     },
   })
 
