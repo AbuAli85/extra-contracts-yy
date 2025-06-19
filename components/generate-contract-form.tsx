@@ -7,7 +7,7 @@ import { z } from "zod"
 import { formSchema } from "@/lib/generate-contract-form-schema"
 
 export default function GenerateContractForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const { reset, ...form } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   })
 

@@ -89,7 +89,7 @@ export default function GenerateContractForm() {
 
   const [promoterOptions, setPromoterOptions] = useState<{ value: string; label: string }[]>([])
 
-  const form = useForm<ContractGeneratorFormData>({
+  const { reset, ...form } = useForm<ContractGeneratorFormData>({
     resolver: zodResolver(contractGeneratorSchema),
     mode: "onTouched",
     defaultValues: {
@@ -152,7 +152,7 @@ export default function GenerateContractForm() {
         title: "Contract Created!",
         description: `PDF: ${data.contract.pdf_url || "Pending generation."}`,
       })
-      form.reset()
+      reset()
       queryClient.invalidateQueries({ queryKey: ["contracts"] })
     },
     onError: (error: any) => {

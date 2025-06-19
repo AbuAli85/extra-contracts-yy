@@ -21,7 +21,7 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const form = useForm<PartyFormData>({
+  const { reset, ...form } = useForm<PartyFormData>({
     resolver: zodResolver(partyFormSchema),
     defaultValues: {
       name_en: "",
@@ -32,13 +32,13 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
 
   useEffect(() => {
     if (partyToEdit) {
-      form.reset({
+      reset({
         name_en: partyToEdit.name_en || "",
         name_ar: partyToEdit.name_ar || "",
         crn: partyToEdit.crn || "",
       })
     } else {
-      form.reset({
+      reset({
         name_en: "",
         name_ar: "",
         crn: "",
