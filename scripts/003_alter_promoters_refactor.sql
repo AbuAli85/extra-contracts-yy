@@ -4,6 +4,35 @@
 
 DO $$
 BEGIN
+    -- Rename legacy notification columns if present
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name='promoters' AND column_name='notify_before_id_expiry_days'
+    ) THEN
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name='promoters' AND column_name='notify_days_before_id_expiry'
+        ) THEN
+            ALTER TABLE promoters RENAME COLUMN notify_before_id_expiry_days TO notify_days_before_id_expiry;
+        ELSE
+            ALTER TABLE promoters DROP COLUMN notify_before_id_expiry_days;
+        END IF;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name='promoters' AND column_name='notify_before_passport_expiry_days'
+    ) THEN
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name='promoters' AND column_name='notify_days_before_passport_expiry'
+        ) THEN
+            ALTER TABLE promoters RENAME COLUMN notify_before_passport_expiry_days TO notify_days_before_passport_expiry;
+        ELSE
+            ALTER TABLE promoters DROP COLUMN notify_before_passport_expiry_days;
+        END IF;
+    END IF;
+
     -- Add notify_days_before_id_expiry
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='notify_days_before_id_expiry') THEN
         ALTER TABLE promoters ADD COLUMN notify_days_before_id_expiry INTEGER DEFAULT 30;
