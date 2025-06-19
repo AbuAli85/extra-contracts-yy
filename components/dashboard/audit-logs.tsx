@@ -52,6 +52,9 @@ export default function AuditLogs() {
 
   useEffect(() => {
     fetchAuditLogs()
+  }, [sortKey, sortDirection])
+
+  useEffect(() => {
     const channel = supabase
       .channel("public:audit_logs:feed") // Unique channel name
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "audit_logs" }, (payload) => {
@@ -82,7 +85,7 @@ export default function AuditLogs() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [sortKey, sortDirection, toast])
+  }, [])
 
   const filteredLogs = useMemo(() => {
     if (!logs) return []

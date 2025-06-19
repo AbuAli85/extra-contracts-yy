@@ -105,7 +105,7 @@ export default function DashboardPage() {
       supabase.removeChannel(promotersChannel)
       supabase.removeChannel(partiesChannel)
     }
-  }, [toast])
+  }, [])
 
   const summaryWidgetsData: SummaryWidgetData[] = [
     {
