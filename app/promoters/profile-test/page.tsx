@@ -6,6 +6,7 @@
 import PromoterProfileForm from "@/components/promoter-profile-form"
 import type { PromoterProfile } from "@/lib/types"
 import { devLog } from "@/lib/dev-log"
+import placeholderSvg from "@/public/placeholder.svg"
 
 // Sample data for editing (optional)
 const samplePromoterToEdit: PromoterProfile = {
@@ -20,8 +21,8 @@ const samplePromoterToEdit: PromoterProfile = {
   status: "active",
   contract_valid_until: "2025-12-31",
   // Use simple placeholder images without query parameters
-  id_card_url: "/placeholder.svg",
-  passport_url: "/placeholder.svg",
+  id_card_url: placeholderSvg,
+  passport_url: placeholderSvg,
   id_card_expiry_date: "2026-06-15",
   passport_expiry_date: "2028-03-20",
   notes: "Excellent performance. Key contact for Tech Innovators project.",
