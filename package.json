@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "node scripts/build-form.js && next build",
+    "build": "next build",
     "dev": "node scripts/build-form.js && next dev",
     "lint": "next lint",
     "start": "next start",
