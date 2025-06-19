@@ -51,7 +51,7 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
   const isEditMode = !!promoterToEdit
   const [isEditable, setIsEditable] = useState(!isEditMode) // Editable by default in add mode
 
-  const form = useForm<PromoterProfileFormData>({
+  const { reset, ...form } = useForm<PromoterProfileFormData>({
     resolver: zodResolver(promoterProfileSchema),
     defaultValues: {
       name_en: "",
@@ -75,7 +75,7 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
 
   useEffect(() => {
     if (isEditMode && promoterToEdit) {
-      form.reset({
+      reset({
         name_en: promoterToEdit.name_en || "",
         name_ar: promoterToEdit.name_ar || "",
         id_card_number: promoterToEdit.id_card_number || "",
@@ -144,7 +144,7 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
       } else {
         // await api.createPromoter(submissionData);
         toast({ title: "Success!", description: "New promoter added successfully." })
-        form.reset() // Reset form after successful addition
+        reset() // Reset form after successful addition
       }
       onFormSubmitSuccess?.(values)
     } catch (error: any) {

@@ -82,7 +82,7 @@ export default function ContractGeneratorForm({
     { value: string; label: string }[]
   >([])
 
-  const form = useForm<ContractGeneratorFormData>({
+  const { reset, ...form } = useForm<ContractGeneratorFormData>({
     resolver: zodResolver(contractGeneratorSchema),
     mode: "onTouched",
     defaultValues: {
@@ -112,7 +112,7 @@ export default function ContractGeneratorForm({
   // When editing, pre-fill form values.
   useEffect(() => {
     if (contract) {
-      form.reset({
+      reset({
         first_party_id: contract.first_party_id ?? undefined,
         second_party_id: contract.second_party_id ?? undefined,
         promoter_id: contract.promoter_id ?? undefined,
@@ -214,7 +214,7 @@ export default function ContractGeneratorForm({
           : "PDF generation pending.",
       })
 
-      form.reset()
+      reset()
       queryClient.invalidateQueries({ queryKey: ["contracts"] })
       onFormSubmit?.()
 
