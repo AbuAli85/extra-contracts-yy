@@ -8,6 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
+import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabase"
 
 import { contractGeneratorSchema, type ContractGeneratorFormData } from "@/lib/schema-generator"
 import { useParties, type Party as PartyType } from "@/hooks/use-parties" // Import Party type if needed
@@ -129,31 +131,36 @@ export default function ContractGeneratorForm() {
     }
   }, [watchedPromoterId, promoters])
 
+  const router = useRouter()
+
   const { mutate: createContract, isLoading: isSubmitting } = useMutation({
-    mutationFn: async (data: ContractGeneratorFormData) => {
-      const apiPayload = {
-        ...data,
-        contract_start_date: format(data.contract_start_date, "yyyy-MM-dd"),
-        contract_end_date: format(data.contract_end_date, "yyyy-MM-dd"),
-      }
-      const response = await fetch("/api/contracts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(apiPayload),
+    mutationFn: async (values: ContractGeneratorFormData) => {
+      await supabase.from("contracts").insert({
+        first_party_id: values.first_party_id,
+        second_party_id: values.second_party_id,
+        promoter_id: values.promoter_id,
+        contract_start_date: format(values.contract_start_date, "yyyy-MM-dd"),
+        contract_end_date: format(values.contract_end_date, "yyyy-MM-dd"),
+        job_title: values.job_title,
+        work_location: values.work_location,
+        email: values.email,
       })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to create contract.")
+
+      const hookUrl = process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL
+      if (hookUrl) {
+        await fetch(hookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        })
       }
-      return response.json()
     },
-    onSuccess: (data) => {
-      toast({
-        title: "Contract Created!",
-        description: `PDF: ${data.contract.pdf_url || "Pending generation."}`,
-      })
+    onSuccess: () => {
+      toast({ title: "Contract Created!" })
       form.reset()
       queryClient.invalidateQueries({ queryKey: ["contracts"] })
+      router.push("/contracts")
+      router.refresh()
     },
     onError: (error: any) => {
       toast({

@@ -18,6 +18,12 @@ const mockUseParties = useParties as jest.Mock
 const mockUsePromoters = usePromoters as jest.Mock
 
 const originalFetch = global.fetch
+const insertMock = jest.fn(() => Promise.resolve({ error: null }))
+const fromMock = jest.fn(() => ({ insert: insertMock }))
+
+jest.mock("@/lib/supabase", () => ({
+  supabase: { from: fromMock },
+}))
 
 const employerParty = {
   id: "party-employer-1",
@@ -66,20 +72,13 @@ describe("ContractGeneratorForm", () => {
       isLoading: false,
       error: undefined,
     })
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            message: "Contract generated",
-            contract: { id: "new-contract-id", pdf_url: "http://mockurl.com/contract.pdf" },
-          }),
-      }),
-    ) as jest.Mock
+    process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL = "https://example.com/hook"
+    global.fetch = jest.fn(() => Promise.resolve({ ok: true })) as jest.Mock
   })
 
   afterEach(() => {
     global.fetch = originalFetch
+    delete process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL
   })
 
   test("shows validation errors when required fields are missing", async () => {
@@ -117,9 +116,10 @@ describe("ContractGeneratorForm", () => {
 
     await user.click(screen.getByRole("button", { name: /generate/i }))
 
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(insertMock).toHaveBeenCalled())
+    expect(fromMock).toHaveBeenCalledWith("contracts")
     expect(global.fetch).toHaveBeenCalledWith(
-      "/api/contracts",
+      "https://example.com/hook",
       expect.objectContaining({ method: "POST" }),
     )
     expect(toastMock).toHaveBeenCalled()
