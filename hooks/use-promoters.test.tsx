@@ -20,11 +20,12 @@ jest.mock("@/hooks/use-toast", () => ({
 }))
 
 const getSessionMock = jest.fn()
+const fromMock = jest.fn()
 
 jest.mock("@/lib/supabase", () => ({
   supabase: {
     auth: { getSession: getSessionMock },
-    from: jest.fn(),
+    from: fromMock,
     channel: jest.fn(() => ({ on: jest.fn().mockReturnThis(), subscribe: jest.fn(() => "chan") })),
     removeChannel: jest.fn(),
   },
@@ -55,7 +56,38 @@ describe("usePromoters", () => {
       expect(pushMock).toHaveBeenCalledWith("/login")
     })
     expect(toastMock).toHaveBeenCalledWith(
-      expect.objectContaining({ variant: "destructive" }),
+      expect.objectContaining({ title: "Authentication Required" }),
     )
+  })
+
+  it("shows toast without redirect for other errors", async () => {
+    getSessionMock.mockResolvedValue({ data: { session: {} }, error: null })
+
+    fromMock.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      order: jest.fn(() =>
+        Promise.resolve({ data: null, error: { message: "DB Error" } }),
+      ),
+    })
+
+    const queryClient = new QueryClient()
+
+    const TestComponent = () => {
+      usePromoters()
+      return null
+    }
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TestComponent />
+      </QueryClientProvider>,
+    )
+
+    await waitFor(() => {
+      expect(toastMock).toHaveBeenCalledWith(
+        expect.objectContaining({ title: "Error loading promoters" }),
+      )
+    })
+    expect(pushMock).not.toHaveBeenCalled()
   })
 })
