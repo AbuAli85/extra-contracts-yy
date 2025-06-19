@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
-import type { NotificationItem } from "@/lib/dashboard-types"
+import type { NotificationItem, NotificationRow } from "@/lib/dashboard-types"
 import { useToast } from "@/hooks/use-toast"
 import { formatDistanceToNow } from "date-fns"
 
@@ -43,7 +43,7 @@ export default function NotificationSystem() {
 
       if (error) throw error
       setNotifications(
-        data.map((n: any) => ({
+        data.map((n: NotificationRow) => ({
           id: n.id,
           type: n.type as NotificationItem["type"],
           message: n.message,
@@ -73,8 +73,11 @@ export default function NotificationSystem() {
     fetchNotifications()
     const channel = supabase
       .channel("public:notifications:feed") // Unique channel name
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, (payload) => {
-        const newNotif = payload.new as any
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications" },
+        (payload) => {
+          const newNotif = payload.new as NotificationRow
         devLog("New notification received:", newNotif)
         toast({ title: "New Notification", description: newNotif.message })
         setNotifications((prev) =>

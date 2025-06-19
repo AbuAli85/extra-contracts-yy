@@ -34,6 +34,17 @@ interface PromoterProfileFormProps {
   onFormSubmitSuccess?: (data: PromoterProfileFormData) => void // Callback for successful submission
 }
 
+type SubmissionData = Omit<
+  PromoterProfileFormData,
+  "id_card_image" | "passport_image"
+> & {
+  id_card_url: string | null
+  passport_url: string | null
+  contract_valid_until: string | null
+  id_card_expiry_date: string | null
+  passport_expiry_date: string | null
+}
+
 export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSuccess }: PromoterProfileFormProps) {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -101,18 +112,19 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
       // For example, upload `values.id_card_image` and `values.passport_image` if they are File objects.
       // Then, replace them with the returned URLs before saving to the database.
 
-      const submissionData = {
-        ...values,
+      const { id_card_image, passport_image, ...rest } = values
+      const submissionData: SubmissionData = {
+        ...rest,
         // This part is more about preparing data for a simulated API call.
         // The actual URL determination (upload new, use existing, or null)
         // would happen with your `uploadFile` function and Supabase logic.
         // For now, we assume `values.existing_id_card_url` is correctly nulled if removed.
         id_card_url:
-          values.id_card_image instanceof File
+          id_card_image instanceof File
             ? "new_file_placeholder_url_id_card.jpg" // Placeholder for new upload
             : values.existing_id_card_url,
         passport_url:
-          values.passport_image instanceof File
+          passport_image instanceof File
             ? "new_file_placeholder_url_passport.jpg" // Placeholder for new upload
             : values.existing_passport_url,
         contract_valid_until: values.contract_valid_until
@@ -125,9 +137,6 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
           ? format(new Date(values.passport_expiry_date), "yyyy-MM-dd")
           : null,
       }
-      // Remove file objects if you're not sending them directly
-      delete (submissionData as any).id_card_image
-      delete (submissionData as any).passport_image
 
       if (isEditMode) {
         // await api.updatePromoter(promoterToEdit.id, submissionData);
