@@ -15,4 +15,3 @@ let content = fs.readFileSync(templatePath, 'utf8');
 content = content.replace(/__MAKE_WEBHOOK_URL__/g, NEXT_PUBLIC_MAKE_WEBHOOK_URL);
 fs.writeFileSync(outputPath, content);
 console.log(`Wrote ${outputPath}`);
-
