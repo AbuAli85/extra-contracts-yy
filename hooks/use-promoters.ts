@@ -1,11 +1,20 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
 import { toast } from "sonner"
+import { useToast } from "@/hooks/use-toast"
 import type { Promoter } from "@/types/custom"
 
 const fetchPromoters = async (): Promise<Promoter[]> => {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session) {
+    throw new Error("Authentication Required")
+  }
+
   const { data, error } = await supabase
     .from("promoters")
     .select("*")
@@ -22,12 +31,20 @@ const fetchPromoters = async (): Promise<Promoter[]> => {
 
 export const usePromoters = () => {
   const queryClient = useQueryClient()
+  const router = useRouter()
+  const { toast: toastify } = useToast()
   const queryKey = useMemo(() => ["promoters"], [])
 
   const queryResult = useQuery<Promoter[], Error>({
     queryKey,
     queryFn: fetchPromoters,
     staleTime: 1000 * 60 * 5,
+    onError: (error) => {
+      if (error.message === "Authentication Required") {
+        toastify({ title: "Authentication Required" })
+        router.push("/login")
+      }
+    },
   })
 
   useEffect(() => {
