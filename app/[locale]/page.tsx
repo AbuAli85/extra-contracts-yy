@@ -114,11 +114,9 @@ export default function HomePage({ params }: { params: { locale: string } }) {
                     </Button>
                   </a>
                 ) : (
-                  <Link href={`/${params.locale}${action.href}`} passHref legacyBehavior>
-                    <Button variant={action.variant} className="w-full h-12 text-base font-semibold">
-                      {action.title}
-                    </Button>
-                  </Link>
+                  <Button asChild variant={action.variant} className="w-full h-12 text-base font-semibold">
+                    <Link href={`/${params.locale}${action.href}`}>{action.title}</Link>
+                  </Button>
                 )}
               </CardContent>
             </Card>

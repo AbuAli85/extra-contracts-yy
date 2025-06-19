@@ -225,9 +225,11 @@ export default function ContractsDashboardPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Link href="/[locale]/generate-contract" passHref locale={false}>
-                <Button>Create New Contract</Button>
-              </Link>
+              <Button asChild>
+                <Link href="/[locale]/generate-contract" locale={false}>
+                  Create New Contract
+                </Link>
+              </Button>
             </div>
 
             {filteredAndSortedContracts.length === 0 ? (
@@ -240,9 +242,11 @@ export default function ContractsDashboardPage() {
                     : "Get started by creating a new contract."}
                 </p>
                 {!(searchTerm || statusFilter !== "all") && (
-                  <Link href="/[locale]/generate-contract" passHref locale={false}>
-                    <Button className="mt-6">Create New Contract</Button>
-                  </Link>
+                  <Button asChild className="mt-6">
+                    <Link href="/[locale]/generate-contract" locale={false}>
+                      Create New Contract
+                    </Link>
+                  </Button>
                 )}
               </div>
             ) : (

@@ -124,12 +124,12 @@ export default async function ContractDetailPage({ params }: { params: { id: str
             <p className="text-card-foreground/80">
               The contract with ID <span className="font-mono text-primary">{params.id}</span> could not be found.
             </p>
-            <Link href="/contracts" passHref className="mt-6 inline-block">
-              <Button variant="outline">
+            <Button asChild variant="outline" className="mt-6 inline-block">
+              <Link href="/contracts">
                 <ArrowLeftIcon className="mr-2 h-4 w-4" />
                 Back to Contracts List
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -145,12 +145,12 @@ export default async function ContractDetailPage({ params }: { params: { id: str
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <Link href="/contracts" passHref>
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                <ArrowLeftIcon className="mr-2 h-4 w-4" />
-                Back to Contracts
-              </Button>
+          <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+            <Link href="/contracts">
+              <ArrowLeftIcon className="mr-2 h-4 w-4" />
+              Back to Contracts
             </Link>
+          </Button>
             <h1 className="text-3xl font-bold mt-2">Contract Overview</h1>
             <p className="text-muted-foreground">
               Reference ID:{" "}
@@ -159,12 +159,12 @@ export default async function ContractDetailPage({ params }: { params: { id: str
               </span>
             </p>
           </div>
-          <Link href={`/contracts/${contract.id}/edit`} passHref>
-            <Button>
+          <Button asChild>
+            <Link href={`/contracts/${contract.id}/edit`}>
               <EditIcon className="mr-2 h-4 w-4" />
               Edit Contract
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">

@@ -169,12 +169,12 @@ export default function PromoterDetailPage() {
               {promoterDetails.name_ar}
             </p>
           </div>
-          <Link href={`/manage-promoters/${promoterId}/edit`} passHref legacyBehavior>
-            <Button>
+          <Button asChild>
+            <Link href={`/manage-promoters/${promoterId}/edit`}>
               <EditIcon className="mr-2 h-4 w-4" />
               Edit Promoter
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
