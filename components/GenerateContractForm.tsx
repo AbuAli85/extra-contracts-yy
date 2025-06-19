@@ -28,7 +28,7 @@ const sectionVariants = {
   visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
 }
 
-export default function ContractGeneratorForm() {
+export default function GenerateContractForm() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
