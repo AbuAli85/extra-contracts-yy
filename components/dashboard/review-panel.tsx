@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { ThumbsUp, ThumbsDown, MessageSquare, Loader2 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import placeholderAvatar from "@/public/placeholder.svg"
 import { devLog } from "@/lib/dev-log"
 import type { ReviewItem } from "@/lib/dashboard-types" // Ensure this type is defined
 import { useToast } from "@/hooks/use-toast"
@@ -40,7 +41,7 @@ export default function ReviewPanel() {
         // You might need to fetch submitter details (user_id) separately if not directly available
         submitter: item.user_id ? `User ${item.user_id.substring(0, 8)}...` : "System",
         // Use a static placeholder path without query params to avoid file system errors
-        avatar: "/placeholder.svg",
+        avatar: placeholderAvatar,
       }))
       setReviewItems(formattedItems)
     } catch (error: any) {
@@ -114,7 +115,7 @@ export default function ReviewPanel() {
                       <p className="text-xs text-muted-foreground">{item.period}</p>
                     </div>
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={item.avatar || "/placeholder.svg"} alt={item.submitter} />
+                      <AvatarImage src={item.avatar || placeholderAvatar} alt={item.submitter} />
                       <AvatarFallback>{item.submitter?.substring(0, 1).toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </div>
