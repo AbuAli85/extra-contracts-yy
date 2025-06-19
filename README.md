@@ -54,11 +54,11 @@ npm install next
 ## Environment Variables
 
 Copy `env.example` to `.env.local` and fill in the variables. Environment
-variables prefixed with `PUBLIC_` are required on the client, while the
+variables prefixed with `NEXT_PUBLIC_` are required on the client, while the
 others should remain server-side. Important keys include:
 
-- `PUBLIC_SUPABASE_URL`
-- `PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `NEXT_PUBLIC_MAKE_WEBHOOK_URL`
 - `MAKE_WEBHOOK_URL`
@@ -66,8 +66,8 @@ others should remain server-side. Important keys include:
 
 | Variable | Purpose | Scope |
 | --- | --- | --- |
-| `PUBLIC_SUPABASE_URL` | Base URL of your Supabase project | client |
-| `PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key used by the browser | client |
+| `NEXT_PUBLIC_SUPABASE_URL` | Base URL of your Supabase project | client |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key used by the browser | client |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key for Supabase admin operations | server |
 | `NEXT_PUBLIC_MAKE_WEBHOOK_URL` | Public URL for Make.com form submissions; used to generate `public/index.html` | client |
 | `MAKE_WEBHOOK_URL` | Make.com endpoint for generating PDFs | server |
