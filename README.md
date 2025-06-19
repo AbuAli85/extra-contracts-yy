@@ -41,7 +41,6 @@ The form at `public/index.html` is generated from `index.html` using the
 or `npm run build`, the script `scripts/build-form.js` replaces the placeholder
 `__MAKE_WEBHOOK_URL__` in `index.html` and writes the result to
 `public/index.html`.
-`public/index.html` is gitignored and generated automatically each time you run `npm run dev` or `npm run build`.
 
 If `next lint` reports "not found," install Next.js:
 
