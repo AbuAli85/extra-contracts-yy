@@ -22,9 +22,9 @@ export interface Promoter {
   contract_valid_until?: string | null
   id_card_expiry_date?: string | null
   passport_expiry_date?: string | null
-  notify_before_id_expiry_days?: number | null
-  notify_before_passport_expiry_days?: number | null
-  notify_before_contract_expiry_days?: number | null
+  notify_days_before_id_expiry?: number | null
+  notify_days_before_passport_expiry?: number | null
+  notify_days_before_contract_expiry?: number | null
   notes?: string | null
   created_at?: string | null
   active_contracts_count?: number
