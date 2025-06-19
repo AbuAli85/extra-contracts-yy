@@ -1,12 +1,12 @@
 'use server'
 
-import { supabaseServer } from '@/lib/supabase/server'
+import { createServerComponentClient } from '@/lib/supabaseServer'
 import type { Database } from '@/types/supabase'
 
 export type ContractInsert = Database['public']['Tables']['contracts']['Insert']
 
 export async function createContract(newContract: ContractInsert) {
-  const supabase = supabaseServer()
+  const supabase = createServerComponentClient()
   const { data, error } = await supabase
     .from('contracts')
     .insert(newContract)
@@ -33,7 +33,7 @@ export async function createContract(newContract: ContractInsert) {
 }
 
 export async function deleteContract(contractId: string) {
-  const supabase = supabaseServer()
+  const supabase = createServerComponentClient()
   const { error } = await supabase.from('contracts').delete().eq('id', contractId)
   if (error) throw new Error(error.message)
 }
