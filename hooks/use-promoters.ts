@@ -75,7 +75,7 @@ export const usePromoters = () => {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [queryClient])
+  }, [queryClient, queryKey])
 
   return { ...queryResult, errorMessage: queryResult.error?.message }
 }
