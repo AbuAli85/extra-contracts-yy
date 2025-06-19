@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { supabase } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
 import { toast } from "sonner"
@@ -22,7 +22,7 @@ const fetchPromoters = async (): Promise<Promoter[]> => {
 
 export const usePromoters = () => {
   const queryClient = useQueryClient()
-  const queryKey = ["promoters"]
+  const queryKey = useMemo(() => ["promoters"], [])
 
   const queryResult = useQuery<Promoter[], Error>({
     queryKey,
@@ -50,7 +50,7 @@ export const usePromoters = () => {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [queryClient, queryKey])
+  }, [queryClient])
 
   return { ...queryResult, errorMessage: queryResult.error?.message }
 }
