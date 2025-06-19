@@ -2,7 +2,11 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import ContractGeneratorForm from "./contract-generator-form"
-import { toast } from "sonner"
+
+const mockToast = jest.fn()
+jest.mock("@/hooks/use-toast", () => ({
+  useToast: () => ({ toast: mockToast }),
+}))
 
 import { useParties } from "@/hooks/use-parties"
 import { usePromoters } from "@/hooks/use-promoters"
@@ -118,6 +122,6 @@ describe("ContractGeneratorForm", () => {
       "/api/contracts",
       expect.objectContaining({ method: "POST" }),
     )
-    expect((toast as any).success).toHaveBeenCalled()
+    expect(mockToast).toHaveBeenCalled()
   })
 })
