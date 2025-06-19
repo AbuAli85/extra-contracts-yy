@@ -77,7 +77,8 @@ export const usePromoters = () => {
       )
       .subscribe((status, err) => {
         if (status === "CHANNEL_ERROR") {
-          console.error("Promoters channel error:", err)
+          const message = err?.message ?? "Unknown channel error"
+          console.error(`Promoters channel error (${status}):`, message)
         }
       })
 
