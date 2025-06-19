@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import ContractGeneratorForm from "./contract-generator-form"
+import GenerateContractForm from "./GenerateContractForm"
 
 const toastMock = jest.fn()
 jest.mock("@/hooks/use-toast", () => ({
@@ -44,12 +44,12 @@ function renderForm() {
   const queryClient = new QueryClient()
   return render(
     <QueryClientProvider client={queryClient}>
-      <ContractGeneratorForm />
+      <GenerateContractForm />
     </QueryClientProvider>,
   )
 }
 
-describe("ContractGeneratorForm", () => {
+describe("GenerateContractForm", () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseParties.mockImplementation((type: string) => {
