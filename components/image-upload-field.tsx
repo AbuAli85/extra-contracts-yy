@@ -4,6 +4,7 @@
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
+import placeholderSrc from "@/public/placeholder.svg"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 // Removed Label import from here, will be used from parent
@@ -91,7 +92,7 @@ export default function ImageUploadField({
           <>
             <Image
               // Use a simple placeholder path without query parameters
-              src={displayPreviewUrl || "/placeholder.svg"}
+              src={displayPreviewUrl || placeholderSrc}
               alt={`Preview`}
               fill
               sizes="(max-width: 768px) 100vw, 480px" // Example sizes, adjust based on actual usage and container size
@@ -102,7 +103,7 @@ export default function ImageUploadField({
                 // This handles browser-side loading errors for the src
                 // The 400 error is likely from the Next.js optimization step before this
                 // Fall back to a static placeholder without query params
-                setPreview("/placeholder.svg")
+                setPreview(placeholderSrc)
               }}
             />
             {!disabled && (
