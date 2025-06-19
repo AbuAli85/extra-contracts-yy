@@ -124,20 +124,6 @@ export default function ManagePromotersPage() {
 
   useEffect(() => {
     fetchPromotersWithContractCount()
-    const channel = supabase
-      .channel("public:promoters:manage")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "promoters" },
-        () => fetchPromotersWithContractCount(),
-      )
-      .subscribe()
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [])
-
-  useEffect(() => {
     const promotersChannel = supabase
       .channel("public:promoters:manage")
       .on(
