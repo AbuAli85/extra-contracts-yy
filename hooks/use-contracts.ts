@@ -16,6 +16,8 @@ export type ContractWithRelations = Database["public"]["Tables"]["contracts"]["R
   parties_contracts_employer_id_fkey?: Database["public"]["Tables"]["parties"]["Row"] | null
   parties_contracts_client_id_fkey?: Database["public"]["Tables"]["parties"]["Row"] | null
   promoters?: Database["public"]["Tables"]["promoters"]["Row"] | null
+  promoter_name_en: string
+  promoter_name_ar: string
   // Adjust based on your actual join aliases if different
   // For example, if you aliased them:
   // employer?: Database["public"]["Tables"]["parties"]["Row"] | null
