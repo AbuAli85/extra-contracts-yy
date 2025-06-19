@@ -14,19 +14,12 @@ export const getContract = async (
   const { data, error } = await supabase
     .from("contracts")
     .select(`
-      id,
-      created_at,
-      job_title,
-      contract_valid_from,
-      contract_valid_until,
-      status,
-      pdf_url,
-      first_party_id,
-      second_party_id,
-      promoter_id,
-      parties!contracts_employer_id_fkey (id, name_en, name_ar),
-      parties!contracts_client_id_fkey (id, name_en, name_ar),
-      promoters (id, name_en, name_ar)
+      *,
+      promoter_name_en:promoter_id(name_en),
+      promoter_name_ar:promoter_id(name_ar),
+      parties!contracts_employer_id_fkey(id,name_en,name_ar),
+      parties!contracts_client_id_fkey(id,name_en,name_ar),
+      promoters(id,name_en,name_ar)
     `)
     .eq("id", contractId)
     .single()
