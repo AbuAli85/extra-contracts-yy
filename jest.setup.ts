@@ -15,17 +15,6 @@ jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(() => new URLSearchParams()),
 }))
 
-// Mock sonner's useToast or the specific toast function
-jest.mock("sonner", () => ({
-  toast: {
-    success: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warning: jest.fn(),
-    loading: jest.fn(),
-    dismiss: jest.fn(),
-  },
-}))
 
 // Mock useToast if not already globally mocked in your tests
 jest.mock("@/hooks/use-toast", () => ({

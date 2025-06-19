@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase" // Your Supabase client instance
 import type { Database } from "@/types/supabase" // Assuming generated Supabase types
-import { toast } from "sonner" // For error notifications
+import { toast } from "@/hooks/use-toast" // For error notifications
 
 // Define the structure of a Party based on your select query
 export type Party = Pick<Database["public"]["Tables"]["parties"]["Row"], "id" | "name_en" | "name_ar" | "crn" | "type">
@@ -17,7 +17,11 @@ const fetchParties = async (partyType?: "Employer" | "Client"): Promise<Party[]>
 
   if (error) {
     console.error("Error fetching parties:", error)
-    toast.error("Error loading parties", { description: error.message })
+    toast({
+      title: "Error loading parties",
+      description: error.message,
+      variant: "destructive",
+    })
     throw new Error(error.message) // React Query will handle this error
   }
   return data || []
