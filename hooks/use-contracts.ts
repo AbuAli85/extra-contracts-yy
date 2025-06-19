@@ -16,6 +16,8 @@ export type ContractWithRelations = Database["public"]["Tables"]["contracts"]["R
   parties_contracts_employer_id_fkey?: Database["public"]["Tables"]["parties"]["Row"] | null
   parties_contracts_client_id_fkey?: Database["public"]["Tables"]["parties"]["Row"] | null
   promoters?: Database["public"]["Tables"]["promoters"]["Row"] | null
+  promoter_name_en?: string | null
+  promoter_name_ar?: string | null
   // Adjust based on your actual join aliases if different
   // For example, if you aliased them:
   // employer?: Database["public"]["Tables"]["parties"]["Row"] | null
@@ -30,19 +32,12 @@ const fetchContracts = async (): Promise<ContractWithRelations[]> => {
   const { data, error } = await supabase
     .from("contracts")
     .select(`
-      id,
-      created_at,
-      job_title,
-      contract_valid_from,
-      contract_valid_until,
-      status,
-      pdf_url,
-      first_party_id,
-      second_party_id,
-      promoter_id,
-      parties!contracts_employer_id_fkey (id, name_en, name_ar),
-      parties!contracts_client_id_fkey (id, name_en, name_ar),
-      promoters (id, name_en, name_ar)
+      *,
+      promoter_name_en:promoter_id(name_en),
+      promoter_name_ar:promoter_id(name_ar),
+      parties!contracts_employer_id_fkey(id,name_en,name_ar),
+      parties!contracts_client_id_fkey(id,name_en,name_ar),
+      promoters(id,name_en,name_ar)
     `)
     .order("created_at", { ascending: false })
 
