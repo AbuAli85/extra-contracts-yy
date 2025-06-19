@@ -1,4 +1,4 @@
-import GenerateContractForm from "@/components/GenerateContractForm"
+import GenerateContractForm from "@/components/generate-contract-form"
 
 export default function GenerateContractPage() {
   return (
