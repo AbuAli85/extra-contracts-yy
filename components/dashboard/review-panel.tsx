@@ -7,7 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { ThumbsUp, ThumbsDown, MessageSquare, Loader2 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
-import placeholderAvatar from "@/public/placeholder.svg"
+// Use a static path rather than importing the file. Importing triggered
+// filesystem lookups on `/public/placeholder.svg` which fail in some
+// environments.
+const placeholderAvatar = "/placeholder.svg"
 import { devLog } from "@/lib/dev-log"
 import type { ReviewItem } from "@/lib/dashboard-types" // Ensure this type is defined
 import { useToast } from "@/hooks/use-toast"
