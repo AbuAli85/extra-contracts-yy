@@ -2,12 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* Light mode background - Neutral White */
+    --foreground: 240 10% 3.9%; /* Light mode text - Dark Gray */
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 220 90% 50%; /* Primary accent - Deep Blue */
+    --primary-foreground: 0 0% 100%; /* Text on primary - White */
+    --primary-light: 220 90% 60%; /* Lighter shade for hover/active */
+
+    --secondary: 240 4.8% 95.9%; /* Secondary background - Light Gray */
+    --secondary-foreground: 240 5.9% 10%; /* Text on secondary - Dark Gray */
+
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%; /* Muted text - Medium Gray */
+
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 72.2% 50.6%; /* Destructive actions - Red */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142.1 70.6% 45.3%; /* Success actions - Green */
+    --success-foreground: 0 0% 100%;
+
+    --border: 240 5.9% 90%; /* Borders - Light Gray */
+    --input: 240 5.9% 90%; /* Input borders */
+    --ring: 220 90% 50%; /* Focus ring - Primary Blue */
+
+    --radius: 0.5rem; /* Consistent border radius */
+
+    /* Chart colors */
+    --chart-1: 220 70% 50%; /* Blue */
+    --chart-2: 0 70% 50%; /* Red */
+    --chart-3: 40 70% 50%; /* Orange/Yellow */
+    --chart-4: 160 70% 50%; /* Teal/Green */
+    --chart-5: 280 70% 50%; /* Purple */
+
+    /* Custom status colors */
+    --status-active-bg: 145 63% 90%; /* Light Green */
+    --status-active-fg: 145 75% 30%; /* Dark Green */
+    --status-expired-bg: 0 72% 93%; /* Light Red */
+    --status-expired-fg: 0 70% 45%; /* Dark Red */
+    --status-soon-exp-bg: 38 92% 90%; /* Light Orange */
+    --status-soon-exp-fg: 28 80% 50%; /* Dark Orange */
+  }
+
+  .dark {
+    --background: 240 10% 3.9%; /* Dark mode background - Very Dark Gray/Blue */
+    --foreground: 0 0% 98%; /* Dark mode text - Near White */
+
+    --card: 240 6% 10%; /* Dark mode card background */
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 220 90% 60%; /* Primary accent in dark mode - Brighter Blue */
+    --primary-foreground: 240 10% 3.9%; /* Text on primary in dark mode */
+    --primary-light: 220 90% 70%;
+
+    --secondary: 240 3.7% 15.9%; /* Secondary background in dark mode */
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 142.1 70.6% 35.3%;
+    --success-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 220 90% 60%;
+
+    /* Chart colors for dark mode */
+    --chart-1: 220 70% 60%;
+    --chart-2: 0 70% 60%;
+    --chart-3: 40 70% 60%;
+    --chart-4: 160 70% 60%;
+    --chart-5: 280 70% 60%;
+
+    /* Custom status colors for dark mode */
+    --status-active-bg: 145 63% 15%;
+    --status-active-fg: 145 75% 70%;
+    --status-expired-bg: 0 72% 18%;
+    --status-expired-fg: 0 70% 75%;
+    --status-soon-exp-bg: 38 92% 20%;
+    --status-soon-exp-fg: 28 80% 70%;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold tracking-tight;
+  }
+  h1 { @apply text-3xl md:text-4xl; }
+  h2 { @apply text-2xl md:text-3xl; }
+  h3 { @apply text-xl md:text-2xl; }
+
+  .form-input {
+    @apply block w-full rounded-md border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+  .form-input[aria-invalid="true"] { @apply ring-destructive ring-2; }
+  .form-input.success { @apply ring-success ring-2; }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
 }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: hsl(var(--secondary)); border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.5); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.7); }
