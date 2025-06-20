@@ -4,7 +4,11 @@
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
-import placeholderSrc from "@/public/placeholder.svg"
+
+// Use a direct path string so Next.js doesn't try to read from the filesystem
+// during the build phase. Importing the file caused errors like
+// `EISDIR: illegal operation on a directory` in some environments.
+const placeholderSrc = "/placeholder.svg"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 // Removed Label import from here, will be used from parent

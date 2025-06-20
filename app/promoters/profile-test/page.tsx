@@ -6,7 +6,8 @@
 import PromoterProfileForm from "@/components/promoter-profile-form"
 import type { PromoterProfile } from "@/lib/types"
 import { devLog } from "@/lib/dev-log"
-import placeholderSvg from "@/public/placeholder.svg"
+// Direct path string avoids build-time file reads that can fail
+const placeholderSvg = "/placeholder.svg"
 
 // Sample data for editing (optional)
 const samplePromoterToEdit: PromoterProfile = {
