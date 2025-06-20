@@ -320,7 +320,7 @@ export default async function ContractsListPage({
                                   </a>
                                 </DropdownMenuItem>
                               </Link>
-                              <Link href={`/contracts/${contract.id}/edit`} passHref legacyBehavior>
+                              <Link href={`/edit-contract/${contract.id}`} passHref legacyBehavior>
                                 <DropdownMenuItem asChild>
                                   <a>
                                     <Edit3Icon className="mr-2 h-4 w-4" /> Edit Contract
