@@ -10,18 +10,18 @@ export default function EditContractError({
   reset: () => void
 }) {
   useEffect(() => {
-    // This logs the specific error to your browser's console for debugging.
-    // Generated for AbuAli85 at: 2025-06-20 09:59:40 UTC
+    // For AbuAli85 - Clearing the .next cache and recreating this file.
+    // Generated at: 2025-06-20 10:12:09 UTC
     console.error(error)
   }, [error])
 
   return (
     <div className="p-4 space-y-2">
-      <h2 className="font-semibold">Error Loading Editor</h2>
-      <p>We ran into a problem while preparing the editor. Please try again.</p>
+      <h2 className="font-semibold">Error in Editor</h2>
+      <p>A problem occurred while loading the contract editor.</p>
       <button
         onClick={
-          // This function will attempt to re-render the page.
+          // Attempt to recover by re-rendering this page segment.
           () => reset()
         }
         className="underline text-sm"
