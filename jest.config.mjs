@@ -10,6 +10,7 @@ const config = {
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
+    '^pp/(.*)$': '<rootDir>/app/$1'
   },
   preset: 'ts-jest', // if using TypeScript
 }
