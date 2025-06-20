@@ -1,3 +1,5 @@
+import path from 'path'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -16,7 +18,12 @@ const nextConfig = {
         port: '',
         pathname: '/storage/v1/object/public/**',
       },
-    ],
+      ],
+  },
+  webpack: (config) => {
+    // Allow absolute imports starting with /app to resolve from the repository root
+    config.resolve.alias['/app'] = path.resolve(__dirname, 'app')
+    return config
   },
 }
 
