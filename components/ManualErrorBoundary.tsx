@@ -12,8 +12,8 @@ export class ManualErrorBoundary extends React.Component<
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props)
-    // For AbuAli85 - This is a manual error boundary to work around the broken environment.
-    // Generated at: 2025-06-20 10:19:31 UTC
+    // For AbuAli85 - Applying manual boundary to the correct page.
+    // Generated at: 2025-06-20 10:25:48 UTC
     this.state = { hasError: false }
   }
 
@@ -30,14 +30,14 @@ export class ManualErrorBoundary extends React.Component<
     if (this.state.hasError) {
       // You can render any custom fallback UI
       return (
-        <div className="p-4">
-            <h2 className="font-semibold">An Error Occurred</h2>
-            <p>We ran into a problem loading this component.</p>
+        <div className="p-4 border border-red-500">
+            <h2 className="font-semibold text-red-700">Error Loading Editor</h2>
+            <p>This component has crashed. Please try again.</p>
             <button
                 onClick={() => this.setState({ hasError: false })}
                 className="underline text-sm"
             >
-                Try again
+                Try to reload this component
             </button>
         </div>
       )
