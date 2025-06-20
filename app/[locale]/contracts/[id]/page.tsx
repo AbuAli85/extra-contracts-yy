@@ -1,4 +1,5 @@
 import { getContract } from "@/lib/data"
+import { ManualErrorBoundary } from "@/components/ManualErrorBoundary"
 
 interface Props {
   params: {
@@ -22,11 +23,13 @@ export default async function ContractPage({ params: { id, locale } }: Props) {
     "N/A"
 
   return (
-    <div>
-      <h1>Contract Details</h1>
-      <p>ID: {contract.id}</p>
-      <p>Promoter: {promoterName}</p>
-      {/* Add more contract details here */}
-    </div>
+    <ManualErrorBoundary>
+      <div>
+        <h1>Contract Details</h1>
+        <p>ID: {contract.id}</p>
+        <p>Promoter: {promoterName}</p>
+        {/* Add more contract details here */}
+      </div>
+    </ManualErrorBoundary>
   )
 }
