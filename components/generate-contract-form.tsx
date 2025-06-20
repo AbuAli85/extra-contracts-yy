@@ -11,9 +11,7 @@ export default function GenerateContractForm() {
     resolver: zodResolver(formSchema),
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-  }
+  function onSubmit(values: z.infer<typeof formSchema>) {}
 
   return <form onSubmit={form.handleSubmit(onSubmit)}></form>
 }

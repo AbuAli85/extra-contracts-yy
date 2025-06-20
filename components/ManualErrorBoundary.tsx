@@ -12,9 +12,6 @@ export class ManualErrorBoundary extends React.Component<
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props)
-    // For AbuAli85 - Final Strategy: Manual Error Boundary
-    // This avoids the broken file system detection in your environment.
-    // Generated at: 2025-06-20 10:23:48 UTC
     this.state = { hasError: false }
   }
 
