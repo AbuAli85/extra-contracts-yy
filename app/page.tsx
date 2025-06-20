@@ -1,57 +1,73 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileTextIcon, FilePlus2Icon, ExternalLinkIcon, UsersIcon, BuildingIcon, History } from "lucide-react"
-import AuthStatus from "@/components/auth-status"
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-export default function HomePage() {
-  return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Bilingual Contract Management</CardTitle>
-          <CardDescription className="text-center">Choose an action below to proceed.</CardDescription>
-        </CardHeader>
-        <AuthStatus />
-        <CardContent className="space-y-4 pt-6">
-          <Button asChild variant="default" className="w-full justify-start">
-            <Link href="/generate-contract">
-              <FilePlus2Icon className="mr-2 h-5 w-5" />
-              Generate New Contract
-            </Link>
-          </Button>
-          <Button asChild variant="secondary" className="w-full justify-start">
-            <Link href="/contracts">
-              <History className="mr-2 h-5 w-5" />
-              View Contract History & Status
-            </Link>
-          </Button>
-          <Button asChild variant="outline" className="w-full justify-start">
-            <Link href="/manage-promoters">
-              <UsersIcon className="mr-2 h-5 w-5" />
-              Manage Promoters
-            </Link>
-          </Button>
-          <Button asChild variant="outline" className="w-full justify-start">
-            <Link href="/manage-parties">
-              <BuildingIcon className="mr-2 h-5 w-5" />
-              Manage Parties
-            </Link>
-          </Button>
-          <Button asChild variant="outline" className="w-full justify-start">
-            <Link href="/request-contract">
-              <FileTextIcon className="mr-2 h-5 w-5" />
-              Request New Contract (Manual Form)
-            </Link>
-          </Button>
-          <a href="/index.html" target="_blank" rel="noopener noreferrer" className="block">
-            <Button variant="outline" className="w-full justify-start">
-              <ExternalLinkIcon className="mr-2 h-5 w-5" />
-              View Static HTML Form (Make.com)
-            </Button>
-          </a>
-        </CardContent>
-      </Card>
-    </div>
-  )
+/* Variables layer: light mode CSS variables */
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* Light mode background */
+    --foreground: 240 10% 3.9%; /* Light mode text */
+    /* add other light mode CSS variables here */
+  }
+}
+
+/* Variables layer: dark mode CSS variables via media query */
+@layer base {
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: 240 10% 3.9%; /* Dark mode background */
+      --foreground: 0 0% 98%;    /* Dark mode text */
+      /* add other dark mode CSS variables here */
+    }
+  }
+}
+
+/* Global element styles */
+@layer base {
+  html {
+    @apply antialiased;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  /* Form input states */
+  .form-input {
+    @apply block w-full rounded-md border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+  .form-input[aria-invalid="true"] {
+    @apply ring-destructive ring-2;
+  }
+  .form-input.success {
+    @apply ring-success ring-2;
+  }
+}
+
+/* Typography layer: heading styles */
+@layer typography {
+  h1 { @apply font-heading font-semibold tracking-tight text-3xl md:text-4xl; }
+  h2 { @apply font-heading font-semibold tracking-tight text-2xl md:text-3xl; }
+  h3 { @apply font-heading font-semibold tracking-tight text-xl md:text-2xl; }
+  h4 { @apply font-heading font-semibold tracking-tight text-lg; }
+  h5 { @apply font-heading font-semibold tracking-tight text-base; }
+  h6 { @apply font-heading font-semibold tracking-tight text-base; }
+}
+
+/* Utilities layer: custom scrollbar styling */
+@layer utilities {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--secondary));
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.5);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.7);
+  }
 }
