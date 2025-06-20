@@ -1,7 +1,9 @@
 import type React from "react"
 import type { Metadata } from "next"
 import ClientLayout from "./client-layout"
-import "../globals.css"
+// For AbuAli85 - Importing the global CSS file to fix the missing module error.
+// Generated at: 2025-06-20 13:14:49 UTC
+import "./globals.css"
 
 export const metadata: Metadata = {
   // Metadata should be in a server component or page.tsx
