@@ -1,4 +1,4 @@
-'use client' // Error components must be Client Components
+'use client' 
 
 import { useEffect } from 'react'
 
@@ -10,18 +10,20 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
+    // You can log the error to an error reporting service here
     console.error(error)
   }, [error])
 
   return (
-    <div>
-      <h2>Something went wrong!</h2>
+    <div className="p-4 space-y-2">
+      <h2 className="font-semibold">Something went wrong loading the contract!</h2>
+      <p>We couldn't retrieve the requested document. Please try again.</p>
       <button
         onClick={
           // Attempt to recover by trying to re-render the segment
           () => reset()
         }
+        className="underline text-sm"
       >
         Try again
       </button>
