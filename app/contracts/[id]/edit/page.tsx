@@ -1,13 +1,15 @@
 // Placeholder for Edit Contract Page
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ManualErrorBoundary } from "@/components/ManualErrorBoundary"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeftIcon, Construction } from "lucide-react"
 
 export default function EditContractPage({ params }: { params: { id: string } }) {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-4">
-      <Card className="w-full max-w-lg">
+    <ManualErrorBoundary>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-4">
+        <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">Edit Contract</CardTitle>
           <CardDescription className="text-slate-500 dark:text-slate-400">
@@ -34,5 +36,7 @@ export default function EditContractPage({ params }: { params: { id: string } })
         </CardContent>
       </Card>
     </div>
+    </ManualErrorBoundary>
   )
 }
+
