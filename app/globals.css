@@ -1,36 +1,28 @@
-/*
-  Make sure your tailwind.config.js includes the following in its content array:
-    content: [
-      './app/**/*.{js,ts,jsx,tsx}',
-      './components/**/*.{js,ts,jsx,tsx}',
-      // ...other paths
-    ]
-*/
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Variables layer: light and dark mode CSS variables */
+/* Variables layer: light mode CSS variables */
 @layer base {
   :root {
     --background: 0 0% 100%; /* Light mode background */
     --foreground: 240 10% 3.9%; /* Light mode text */
-    /* ... additional light mode variables ... */
+    /* add other light mode CSS variables here */
   }
 }
 
+/* Variables layer: dark mode CSS variables via media query */
 @layer base {
   @media (prefers-color-scheme: dark) {
     :root {
       --background: 240 10% 3.9%; /* Dark mode background */
       --foreground: 0 0% 98%;    /* Dark mode text */
-      /* ... additional dark mode overrides ... */
+      /* add other dark mode CSS variables here */
     }
   }
 }
 
-/* Global element styles layer */
+/* Global element styles */
 @layer base {
   html {
     @apply antialiased;
@@ -39,12 +31,9 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-
   /* Form input states */
   .form-input {
-    @apply block w-full rounded-md border-input bg-transparent px-3 py-2 text-sm shadow-sm \
-      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring \
-      focus-visible:ring-offset-2;
+    @apply block w-full rounded-md border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
   }
   .form-input[aria-invalid="true"] {
     @apply ring-destructive ring-2;
