@@ -117,7 +117,8 @@ dependencies before running the tests:
 pnpm install
 \`\`\`
 
-After the dependencies are installed, execute the Jest test suite with:
+You must run `pnpm install` before `pnpm test` so all dependencies are available.
+After the install completes, execute the Jest test suite with:
 
 \`\`\`bash
 pnpm test
