@@ -37,10 +37,11 @@ npm run lint
 \`\`\`
 
 The form at `public/index.html` is generated from `index.html` using the
-`NEXT_PUBLIC_MAKE_WEBHOOK_URL` environment variable. When you run `npm run dev`
-or `npm run build`, the script `scripts/build-form.js` replaces the placeholder
+`NEXT_PUBLIC_MAKE_WEBHOOK_URL` environment variable. When you run `pnpm run dev`
+or `next build`, the script `scripts/build-form.js` replaces the placeholder
 `__MAKE_WEBHOOK_URL__` in `index.html` and writes the result to
-`public/index.html`.
+`public/index.html`. This file is created automatically and should not be
+committed to version control.
 
 If `next lint` reports "not found," install Next.js:
 
@@ -50,12 +51,21 @@ pnpm add next
 npm install next
 \`\`\`
 
+## Global Styles
+
+Base CSS lives in `app/globals.css`. The file is imported in `app/layout.tsx` so
+its styles apply to all pages.
+
 
 ## Environment Variables
 
 Copy `env.example` to `.env.local` and fill in the variables. Environment
 variables prefixed with `NEXT_PUBLIC_` are required on the client, while the
 others should remain server-side. Important keys include:
+
+The Supabase variables (`NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`) are mandatory
+for the application to run.
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
