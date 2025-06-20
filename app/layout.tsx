@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import ClientLayout from "./client-layout"
-import "./globals.css"
+import "@/app/globals.css"
 
 export const metadata: Metadata = {
   // Metadata should be in a server component or page.tsx
