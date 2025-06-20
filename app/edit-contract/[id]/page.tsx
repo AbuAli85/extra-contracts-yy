@@ -39,4 +39,3 @@ export default function EditContractPage({ params }: { params: { id: string } })
     </ManualErrorBoundary>
   )
 }
-
