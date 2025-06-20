@@ -18,6 +18,8 @@ Your project is live at:
 
 ## Build your app
 
+This project requires **Node.js 20**. If you use [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to select this version.
+
 Install dependencies before running any scripts:
 
 \`\`\`bash
