@@ -160,7 +160,7 @@ export default async function ContractDetailPage({ params }: { params: { id: str
             </p>
           </div>
           <Button asChild>
-            <Link href={`/contracts/${contract.id}/edit`}>
+            <Link href={`/edit-contract/${contract.id}`}>
               <EditIcon className="mr-2 h-4 w-4" />
               Edit Contract
             </Link>
