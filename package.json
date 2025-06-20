@@ -7,6 +7,7 @@
     "dev": "node scripts/build-form.js && next dev",
     "lint": "eslint .",
     "start": "next start",
+    "pretest": "pnpm install --frozen-lockfile || true",
     "test": "jest"
   },
   "dependencies": {
