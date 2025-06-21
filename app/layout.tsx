@@ -10,10 +10,12 @@ export const metadata: Metadata = {
   generator: 'v0.dev'
 }
 
-export default function RootLayout({ children }: { children: ReactNode }) {
-  return (
-    <ClientLayout>
-      {children}
-    </ClientLayout>
-  )
+export default function RootLayout({
+  children,
+  params,
+}: {
+  children: ReactNode
+  params: { locale: string }
+}) {
+  return <ClientLayout params={params}>{children}</ClientLayout>
 }
