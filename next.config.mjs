@@ -1,4 +1,4 @@
-import path from 'path'
+// Next.js configuration file
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
