@@ -21,8 +21,6 @@ const nextConfig = {
       ],
   },
   webpack: (config) => {
-    // Allow absolute imports starting with /app to resolve from the repository root
-    config.resolve.alias['/app'] = path.resolve(__dirname, 'app')
     return config
   },
 }
