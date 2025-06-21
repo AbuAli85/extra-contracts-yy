@@ -55,9 +55,10 @@ npm install next
 
 ## Environment Variables
 
-Copy `env.example` to `.env.local` and fill in the variables. Environment
-variables prefixed with `NEXT_PUBLIC_` are required on the client, while the
-others should remain server-side. Important keys include:
+Use the provided `env.example` file as a template for your local environment.
+Copy it to `.env.local` and replace the placeholders with your project specific
+values. Environment variables prefixed with `NEXT_PUBLIC_` are required on the
+client, while the others should remain server-side. Important keys include:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `SUPABASE_URL`
