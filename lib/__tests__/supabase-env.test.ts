@@ -29,10 +29,10 @@ describe('Supabase environment variables', () => {
   })
 
   it('throws when admin env vars are missing', async () => {
-    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://example.supabase.co'
+    process.env.SUPABASE_URL = 'https://example.supabase.co'
     delete process.env.SUPABASE_SERVICE_ROLE_KEY
     await expect(import('../supabase/admin')).rejects.toThrow(
-      /NEXT_PUBLIC_SUPABASE_URL.*SUPABASE_SERVICE_ROLE_KEY/,
+      /SUPABASE_URL.*SUPABASE_SERVICE_ROLE_KEY/,
     )
   })
 
@@ -40,6 +40,7 @@ describe('Supabase environment variables', () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://example.supabase.co'
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'anon'
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'service'
+    process.env.SUPABASE_URL = 'https://example.supabase.co'
 
     const client = await import('../supabase')
     expect(client.supabase).toBeDefined()
