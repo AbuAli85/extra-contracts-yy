@@ -19,6 +19,9 @@ const nextConfig = {
       ],
   },
   webpack: (config) => {
+    // Allow absolute imports from the /app directory
+    config.resolve.alias['/app'] = path.resolve(__dirname, 'app')
+    config.resolve.alias['app'] = path.resolve(__dirname, 'app')
     return config
   },
 }
