@@ -1,7 +1,7 @@
-import type React from "react"
+import "./globals.css"
+import type { ReactNode } from "react"
 import type { Metadata } from "next"
 import ClientLayout from "./client-layout"
-import "./globals.css"
 
 export const metadata: Metadata = {
   // Metadata should be in a server component or page.tsx
@@ -11,11 +11,10 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode
-  params: { locale: string }
-}) {
-  return <ClientLayout params={params}>{children}</ClientLayout>
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
 }
