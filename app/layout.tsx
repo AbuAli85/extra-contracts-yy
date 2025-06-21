@@ -1,13 +1,18 @@
-"use client"
-
+import "./globals.css"
 import type { ReactNode } from "react"
+import type { Metadata } from "next"
 
-interface ClientLayoutProps {
+export const metadata: Metadata = {
+  title: "Bilingual Contract Generator",
+  description: "Generate and manage bilingual contracts efficiently.",
+}
+
+interface RootLayoutProps {
   children: ReactNode
   params: { locale: string }
 }
 
-export default function ClientLayout({ children, params }: ClientLayoutProps) {
+export default function RootLayout({ children, params }: RootLayoutProps) {
   return (
     <html lang={params.locale || "en"}>
       <body>
