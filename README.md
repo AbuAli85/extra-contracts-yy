@@ -60,6 +60,7 @@ variables prefixed with `NEXT_PUBLIC_` are required on the client, while the
 others should remain server-side. Important keys include:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
+- `SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `NEXT_PUBLIC_MAKE_WEBHOOK_URL`
@@ -69,6 +70,7 @@ others should remain server-side. Important keys include:
 | Variable | Purpose | Scope |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Base URL of your Supabase project | client |
+| `SUPABASE_URL` | Private Supabase project URL used on the server | server |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key used by the browser | client |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key for Supabase admin operations | server |
 | `NEXT_PUBLIC_MAKE_WEBHOOK_URL` | Public URL for Make.com form submissions; used to generate `public/index.html` | client |
