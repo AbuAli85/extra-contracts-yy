@@ -1,11 +1,12 @@
 "use client"
 // CORE INPUT COMPONENT: For use within FormField
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { useDebouncedCallback } from "use-debounce"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 interface ComboboxFieldProps {
@@ -20,6 +21,7 @@ interface ComboboxFieldProps {
   searchPlaceholder?: string
   emptyStateMessage?: string
   disabled?: boolean
+  isLoading?: boolean
 }
 
 export default function ComboboxField({
@@ -29,8 +31,21 @@ export default function ComboboxField({
   searchPlaceholder = "Search...",
   emptyStateMessage = "No option found.",
   disabled,
+  isLoading = false,
 }: ComboboxFieldProps) {
   const [open, setOpen] = React.useState(false)
+  const [inputValue, setInputValue] = React.useState("")
+  const [searchQuery, setSearchQuery] = React.useState("")
+  const debouncedSetSearch = useDebouncedCallback((value: string) => {
+    setSearchQuery(value)
+  }, 300)
+
+  const filteredOptions = React.useMemo(() => {
+    if (!searchQuery) return options
+    return options.filter((option) =>
+      option.label.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+  }, [options, searchQuery])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -54,24 +69,44 @@ export default function ComboboxField({
       {!disabled && (
         <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
           <Command>
-            <CommandInput placeholder={searchPlaceholder} />
+            <CommandInput
+              placeholder={searchPlaceholder}
+              value={inputValue}
+              onValueChange={(val) => {
+                setInputValue(val)
+                debouncedSetSearch(val)
+              }}
+            />
             <CommandList>
-              <CommandEmpty>{emptyStateMessage}</CommandEmpty>
-              <CommandGroup>
-                {options.map((option) => (
-                  <CommandItem
-                    key={option.value}
-                    value={option.label} // Search by label
-                    onSelect={() => {
-                      field.onChange(option.value === field.value ? null : option.value)
-                      setOpen(false)
-                    }}
-                  >
-                    <Check className={cn("mr-2 h-4 w-4", field.value === option.value ? "opacity-100" : "opacity-0")} />
-                    {option.label}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              ) : (
+                <>
+                  <CommandEmpty>{emptyStateMessage}</CommandEmpty>
+                  <CommandGroup>
+                    {filteredOptions.map((option) => (
+                      <CommandItem
+                        key={option.value}
+                        value={option.label}
+                        onSelect={() => {
+                          field.onChange(option.value === field.value ? null : option.value)
+                          setOpen(false)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            field.value === option.value ? "opacity-100" : "opacity-0",
+                          )}
+                        />
+                        {option.label}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>
