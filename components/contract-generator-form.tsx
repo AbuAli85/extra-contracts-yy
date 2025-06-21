@@ -5,7 +5,7 @@ import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { format, parseISO } from "date-fns"
-import { motion } from "framer-motion"
+import { motion, type Variants, type Easing } from "framer-motion"
 import {
   Form,
   FormControl,
@@ -46,7 +46,7 @@ interface ContractGeneratorFormProps {
   onFormSubmit?: () => void
 }
 
-const sectionVariants = {
+const sectionVariants: Variants = {
   hidden: { opacity: 0, x: -20 },
   visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
 }
