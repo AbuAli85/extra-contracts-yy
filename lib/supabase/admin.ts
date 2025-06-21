@@ -8,12 +8,12 @@ export function getSupabaseAdmin(): SupabaseClient<Database> {
     return supabaseAdminInstance
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseUrl = process.env.SUPABASE_URL
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     throw new Error(
-      'Supabase credentials are missing. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.',
+      'getSupabaseAdmin(): missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in environment',
     )
   }
 
@@ -21,6 +21,9 @@ export function getSupabaseAdmin(): SupabaseClient<Database> {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
+    },
+    global: {
+      headers: { 'cache-control': 'no-cache' },
     },
   })
 
