@@ -146,9 +146,6 @@ importers:
       framer-motion:
         specifier: latest
         version: 12.18.1(@emotion/is-prop-valid@1.3.1)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
-      fs:
-        specifier: latest
-        version: 0.0.1-security
       input-otp:
         specifier: latest
         version: 1.4.2(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
@@ -161,9 +158,6 @@ importers:
       next-themes:
         specifier: latest
         version: 0.4.6(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
-      path:
-        specifier: latest
-        version: 0.12.7
       react:
         specifier: ^18
         version: 18.0.0
