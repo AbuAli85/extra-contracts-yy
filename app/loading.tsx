@@ -1,7 +1,8 @@
 // For AbuAli85 - A global loading indicator to fix the missing module error.
 // Generated at: 2025-06-20 13:14:49 UTC
+import React from "react"
 
-export default function Loading() {
+export function Loading() {
   // This is a simple spinner. You can customize it with any loading UI you want.
   return (
     <div className="flex justify-center items-center h-screen">
@@ -9,3 +10,5 @@ export default function Loading() {
     </div>
   );
 }
+
+export default Loading
