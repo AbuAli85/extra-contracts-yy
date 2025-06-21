@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileTextIcon, FilePlus2Icon, History, UsersIcon, BuildingIcon, ExternalLinkIcon } from "lucide-react"
 import AuthStatus from "@/components/auth-status" // Assuming this component exists
-import { motion } from "framer-motion"
+import { motion, type Variants, type Easing } from "framer-motion"
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
     opacity: 1,
@@ -16,7 +16,7 @@ const cardVariants = {
     transition: {
       delay: i * 0.1,
       duration: 0.5,
-      ease: "easeOut",
+      ease: [0.42, 0, 0.58, 1] as Easing,
     },
   }),
 }
