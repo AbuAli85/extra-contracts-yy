@@ -53,7 +53,7 @@ const actions = [
   {
     title: "Request New Contract (Manual)",
     description: "Submit a request using a detailed form.",
-    href: "/request-contract",
+    href: "/generate-contract",
     icon: FileTextIcon,
     variant: "outline" as const,
   },
