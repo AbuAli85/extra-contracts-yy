@@ -1,14 +1,12 @@
-// For AbuAli85 - A global loading indicator to fix the missing module error.
-// Generated at: 2025-06-20 13:14:49 UTC
 import React from "react"
+import { Loader2 } from "lucide-react"
 
 export function Loading() {
-  // This is a simple spinner. You can customize it with any loading UI you want.
   return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+    <div className="flex h-full w-full items-center justify-center">
+      <Loader2 className="h-10 w-10 animate-spin text-primary" />
     </div>
-  );
+  )
 }
 
 export default Loading
