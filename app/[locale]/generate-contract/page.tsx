@@ -1,7 +1,7 @@
 // app/[locale]/generate-contract/page.tsx
 "use client"
 
-import GenerateContractForm from "@/components/generate-contract-form"
+import ContractGeneratorForm from "@/components/contract-generator-form"
 import { motion } from "framer-motion"
 
 export default function GenerateContractPage() {
@@ -18,7 +18,7 @@ export default function GenerateContractPage() {
       </div>
       {/* Form container with padding, rounded corners, and shadow */}
       <div className="bg-card p-6 md:p-8 rounded-lg shadow-xl">
-        <GenerateContractForm />
+        <ContractGeneratorForm />
       </div>
     </motion.div>
   )
