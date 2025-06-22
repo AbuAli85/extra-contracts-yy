@@ -1,6 +1,7 @@
 {
   "name": "my-v0-project",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "engines": {
     "node": "20.x"
@@ -85,6 +86,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-next": "^14.2.4",
     "eslint-plugin-prettier": "^5.1.0",
+    "@eslint/eslintrc": "^2.1.4",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.7",
     "jest": "^29",
