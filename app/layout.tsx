@@ -1,6 +1,6 @@
 "use client"
 
-import "./globals.css"
+import "@/styles/globals.css"
 import type { ReactNode } from "react"
 
 interface ClientLayoutProps {
