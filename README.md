@@ -40,7 +40,7 @@ npm run lint
 
 The form at `public/index.html` is generated from `index.html` using the
 `NEXT_PUBLIC_MAKE_WEBHOOK_URL` environment variable. When you run `npm run dev`
-or `npm run build`, the script `scripts/build-form.js` replaces the placeholder
+or `npm run build`, the script `scripts/build-form.cjs` replaces the placeholder
 `__MAKE_WEBHOOK_URL__` in `index.html` and writes the result to
 `public/index.html`.
 
