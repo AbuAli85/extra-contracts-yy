@@ -5,6 +5,7 @@
 
 import PromoterProfileForm from "@/components/promoter-profile-form"
 import type { PromoterProfile } from "@/lib/types"
+import type { PromoterProfileFormData } from "@/lib/promoter-profile-schema"
 import { devLog } from "@/lib/dev-log"
 // Direct path string avoids build-time file reads that can fail
 const placeholderSvg = "/placeholder.svg"
@@ -31,7 +32,7 @@ const samplePromoterToEdit: PromoterProfile = {
 }
 
 export default function PromoterProfileTestPage() {
-  const handleFormSubmit = (data: any) => {
+  const handleFormSubmit = (data: PromoterProfileFormData) => {
     devLog("Form submitted on test page:", data)
     // You can add navigation or other actions here
   }
