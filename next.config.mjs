@@ -1,5 +1,3 @@
-import path from 'path'
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -19,9 +17,6 @@ const nextConfig = {
         pathname: '/storage/v1/object/public/**',
       },
       ],
-  },
-  webpack: (config) => {
-    return config
   },
 }
 
