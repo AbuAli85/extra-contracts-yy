@@ -134,11 +134,3 @@ export const useDeleteContractMutation = () => {
     },
   })
 }
-
-/*
-Enhancement Summary:
-- Documented Supabase initialization and utilities.
-- Added comments for schema types and data fetching queries.
-- Explained realtime subscriptions and mutation logic.
-- Provided context for create/delete contract operations.
-*/
