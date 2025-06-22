@@ -11,7 +11,7 @@
     "dev": "POSTCSS_CONFIG=postcss.config.mjs node scripts/build-form.js && next dev",
     "lint": "eslint .",
     "start": "next start",
-    "pretest": "pnpm install --frozen-lockfile || true",
+    "pretest": "pnpm install --frozen-lockfile",
     "test": "jest"
   },
   "dependencies": {
