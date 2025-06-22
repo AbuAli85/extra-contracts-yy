@@ -18,6 +18,14 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/app/:css*',
+        destination: '/_next/static/css/:css*',
+      },
+    ]
+  },
 }
 
 export default nextConfig
