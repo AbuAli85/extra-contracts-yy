@@ -1,66 +1,94 @@
 "use client"
 
+import { useEffect } from "react"
+import { Card, CardContent } from "@/components/ui/card"
 import { useContractsStore } from "@/lib/stores/contracts-store"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { FileText, Clock, Loader2, CheckCircle, AlertCircle } from "lucide-react"
 
 export function ContractsDashboardWidget() {
-  const { stats, loading } = useContractsStore()
+  const { statistics, fetchContracts, loading } = useContractsStore()
 
-  const statCards = [
+  useEffect(() => {
+    fetchContracts()
+  }, [fetchContracts])
+
+  const stats = [
     {
       title: "Total Contracts",
-      value: stats.total,
-      icon: FileText,
+      value: statistics.total,
+      icon: <FileText className="h-4 w-4" />,
       color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      bgColor: "bg-blue-100",
     },
     {
-      title: "In Progress",
-      value: stats.queued + stats.processing,
-      icon: Loader2,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
+      title: "Pending",
+      value: statistics.pending,
+      icon: <Clock className="h-4 w-4" />,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-100",
+    },
+    {
+      title: "Processing",
+      value: statistics.processing + statistics.queued,
+      icon: <Loader2 className="h-4 w-4" />,
+      color: "text-blue-600",
+      bgColor: "bg-blue-100",
     },
     {
       title: "Completed",
-      value: stats.completed,
-      icon: CheckCircle,
+      value: statistics.completed,
+      icon: <CheckCircle className="h-4 w-4" />,
       color: "text-green-600",
-      bgColor: "bg-green-50",
+      bgColor: "bg-green-100",
     },
     {
       title: "Failed",
-      value: stats.failed,
-      icon: AlertCircle,
+      value: statistics.failed,
+      icon: <AlertCircle className="h-4 w-4" />,
       color: "text-red-600",
-      bgColor: "bg-red-50",
+      bgColor: "bg-red-100",
     },
   ]
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {statCards.map((stat) => {
-        const Icon = stat.icon
-        return (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-              <div className={`p-2 rounded-full ${stat.bgColor}`}>
-                <Icon className={`h-4 w-4 ${stat.color}`} />
+  if (loading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        {stats.map((stat, index) => (
+          <Card key={index}>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-2">
+                <div className={`p-2 rounded-full ${stat.bgColor}`}>
+                  <div className={stat.color}>{stat.icon}</div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+                  <div className="h-6 w-8 bg-muted animate-pulse rounded" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{loading ? "..." : stat.value}</div>
-              {stat.title === "In Progress" && (
-                <p className="text-xs text-muted-foreground">
-                  {stats.queued} queued, {stats.processing} processing
-                </p>
-              )}
             </CardContent>
           </Card>
-        )
-      })}
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      {stats.map((stat, index) => (
+        <Card key={index}>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-2">
+              <div className={`p-2 rounded-full ${stat.bgColor}`}>
+                <div className={stat.color}>{stat.icon}</div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+                <p className="text-2xl font-bold">{stat.value}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 }
