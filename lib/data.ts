@@ -4,16 +4,12 @@ import type { Contract, Party, Promoter } from "./types"
 
 // Helper function to get the appropriate client based on execution context
 function getSupabaseClient() {
-  // Check if we're in a browser environment
-  if (typeof window !== 'undefined') {
-    return createBrowserClient()
-  }
-  // Server environment
+  // In a try-catch block to handle cases where headers aren't available
   try {
+    // First attempt to use the server client
     return createServerClient()
   } catch (error) {
-    // Fallback to browser client if headers are not available (e.g., in pages/ directory)
-    console.warn('Falling back to browser client in server environment')
+    // Fall back to browser client if headers are not available
     return createBrowserClient()
   }
 }
