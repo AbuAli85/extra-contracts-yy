@@ -1,69 +1,53 @@
 {
-  "common": {
-    "title": "Bilingual Contract Generator",
-    "loading": "Loading...",
-    "error": "An error occurred",
-    "success": "Success",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "view": "View",
-    "back": "Back",
-    "next": "Next",
-    "previous": "Previous",
-    "search": "Search",
-    "filter": "Filter",
-    "sort": "Sort",
-    "export": "Export",
-    "import": "Import",
-    "refresh": "Refresh"
+  "navigation": {
+    "home": "Home",
+    "contracts": "Contracts",
+    "generateContract": "Generate Contract",
+    "manageParties": "Manage Parties",
+    "managePromoters": "Manage Promoters",
+    "dashboard": "Dashboard",
+    "login": "Login"
   },
   "contracts": {
     "title": "Contracts",
     "generateNew": "Generate New Contract",
-    "number": "Contract Number",
     "partyA": "Party A",
     "partyB": "Party B",
     "contractType": "Contract Type",
     "description": "Description",
     "status": "Status",
     "createdAt": "Created At",
-    "updatedAt": "Updated At",
     "action": "Action",
+    "number": "Number",
+    "generate": "Generate",
     "download": "Download",
     "retry": "Retry",
-    "generate": "Generate",
     "pending": "Pending",
     "queued": "Queued",
     "processing": "Processing",
     "completed": "Completed",
-    "failed": "Failed",
-    "noContracts": "No contracts found",
-    "generateFirst": "Generate your first contract to get started",
-    "generationStarted": "Contract generation started successfully!",
-    "generationFailed": "Failed to generate contract",
-    "downloadSuccess": "Contract downloaded successfully!",
-    "downloadFailed": "Failed to download contract",
-    "retrySuccess": "Contract retry initiated successfully!",
-    "retryFailed": "Failed to retry contract"
+    "failed": "Failed"
   },
   "dashboard": {
     "title": "Dashboard",
     "overview": "Overview",
+    "recentContracts": "Recent Contracts",
     "statistics": "Statistics",
     "totalContracts": "Total Contracts",
     "pendingContracts": "Pending Contracts",
     "completedContracts": "Completed Contracts",
-    "failedContracts": "Failed Contracts",
-    "recentActivity": "Recent Activity",
-    "quickActions": "Quick Actions"
+    "failedContracts": "Failed Contracts"
   },
-  "forms": {
-    "required": "This field is required",
-    "invalidEmail": "Please enter a valid email address",
-    "invalidPhone": "Please enter a valid phone number",
-    "minLength": "Must be at least {min} characters",
-    "maxLength": "Must be no more than {max} characters"
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "close": "Close",
+    "submit": "Submit"
   }
 }
