@@ -5,10 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartsSection } from "@/components/dashboard/charts-section"
 import { SummaryWidget } from "@/components/dashboard/summary-widget"
 import { useQuery } from "@tanstack/react-query"
-import { getDashboardAnalytics } from "@/lib/dashboard-data"
+// Import from the client-safe version instead
+import { getDashboardAnalytics } from "@/lib/dashboard-data.client"
 import { Loader2 } from "lucide-react"
 
 export default function DashboardAnalyticsPage() {
+  // Rest of your component remains the same
   const t = useTranslations("DashboardAnalyticsPage")
 
   const {
