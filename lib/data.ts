@@ -1,9 +1,26 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient as createServerClient } from "@/lib/supabase/server"
+import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import type { Contract, Party, Promoter } from "./types"
 
-const supabase = createClient()
+// Helper function to get the appropriate client based on execution context
+function getSupabaseClient() {
+  // Check if we're in a browser environment
+  if (typeof window !== 'undefined') {
+    return createBrowserClient()
+  }
+  // Server environment
+  try {
+    return createServerClient()
+  } catch (error) {
+    // Fallback to browser client if headers are not available (e.g., in pages/ directory)
+    console.warn('Falling back to browser client in server environment')
+    return createBrowserClient()
+  }
+}
 
 export async function getContractsData(query?: string, status?: string): Promise<Contract[]> {
+  const supabase = getSupabaseClient()
+  
   let dbQuery = supabase
     .from("contracts")
     .select(`
@@ -49,6 +66,8 @@ export async function getContractsData(query?: string, status?: string): Promise
 }
 
 export async function getContractById(id: string): Promise<Contract | null> {
+  const supabase = getSupabaseClient()
+  
   const { data, error } = await supabase
     .from("contracts")
     .select(`
@@ -89,6 +108,8 @@ export async function getContractById(id: string): Promise<Contract | null> {
 }
 
 export async function getParties(): Promise<Party[]> {
+  const supabase = getSupabaseClient()
+  
   const { data, error } = await supabase.from("parties").select("*").order("name", { ascending: true })
 
   if (error) {
@@ -99,6 +120,8 @@ export async function getParties(): Promise<Party[]> {
 }
 
 export async function getPartyById(id: string): Promise<Party | null> {
+  const supabase = getSupabaseClient()
+  
   const { data, error } = await supabase.from("parties").select("*").eq("id", id).single()
 
   if (error) {
@@ -109,6 +132,8 @@ export async function getPartyById(id: string): Promise<Party | null> {
 }
 
 export async function getPromoters(): Promise<Promoter[]> {
+  const supabase = getSupabaseClient()
+  
   const { data, error } = await supabase.from("promoters").select("*").order("name", { ascending: true })
 
   if (error) {
@@ -119,6 +144,8 @@ export async function getPromoters(): Promise<Promoter[]> {
 }
 
 export async function getPromoterById(id: string): Promise<Promoter | null> {
+  const supabase = getSupabaseClient()
+  
   const { data, error } = await supabase.from("promoters").select("*").eq("id", id).single()
 
   if (error) {
