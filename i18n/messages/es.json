@@ -1,6 +1,6 @@
 {
   "common": {
-    "title": "Generador de Contratos Bilingüe",
+    "title": "Generador de Contratos Bilingües",
     "loading": "Cargando...",
     "error": "Ocurrió un error",
     "success": "Éxito",
@@ -8,10 +8,18 @@
     "save": "Guardar",
     "delete": "Eliminar",
     "edit": "Editar",
-    "view": "Ver"
+    "view": "Ver",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar"
   },
   "contracts": {
     "title": "Contratos",
+    "generateNew": "Generar Nuevo Contrato",
     "number": "Número de Contrato",
     "partyA": "Parte A",
     "partyB": "Parte B",
@@ -20,15 +28,16 @@
     "status": "Estado",
     "createdAt": "Creado el",
     "action": "Acción",
-    "generate": "Generar",
-    "generateNew": "Generar Nuevo Contrato",
     "download": "Descargar",
+    "generate": "Generar",
     "retry": "Reintentar",
     "pending": "Pendiente",
     "queued": "En Cola",
     "processing": "Procesando",
     "completed": "Completado",
-    "failed": "Fallido"
+    "failed": "Fallido",
+    "noContracts": "No se encontraron contratos",
+    "generateFirst": "Genera tu primer contrato para comenzar"
   },
   "dashboard": {
     "title": "Panel de Control",
@@ -36,6 +45,8 @@
     "totalContracts": "Contratos Totales",
     "pendingContracts": "Contratos Pendientes",
     "completedContracts": "Contratos Completados",
-    "failedContracts": "Contratos Fallidos"
+    "failedContracts": "Contratos Fallidos",
+    "recentActivity": "Actividad Reciente",
+    "statistics": "Estadísticas"
   }
 }
