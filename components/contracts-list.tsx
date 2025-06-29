@@ -4,7 +4,8 @@ import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Download, Play, RotateCcw, Loader2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Download, RefreshCw, Play, AlertCircle } from "lucide-react"
 import { useContractsStore } from "@/lib/stores/contracts-store"
 import { useRealtimeContracts } from "@/hooks/use-realtime-contracts"
 import { ContractStatusIndicator } from "./contract-status-indicator"
@@ -13,7 +14,7 @@ import { toast } from "sonner"
 export function ContractsList() {
   const { contracts, loading, error, fetchContracts, generateContract } = useContractsStore()
 
-  // Set up real-time subscriptions
+  // Enable real-time subscriptions
   useRealtimeContracts()
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export function ContractsList() {
       await generateContract(contractNumber)
       toast.success("Contract generation started!")
     } catch (error) {
-      toast.error("Failed to generate contract")
+      toast.error("Failed to start contract generation")
     }
   }
 
@@ -42,9 +43,9 @@ export function ContractsList() {
   if (loading && contracts.length === 0) {
     return (
       <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="ml-2">Loading contracts...</span>
+        <CardContent className="flex items-center justify-center p-8">
+          <RefreshCw className="h-6 w-6 animate-spin mr-2" />
+          Loading contracts...
         </CardContent>
       </Card>
     )
@@ -53,13 +54,9 @@ export function ContractsList() {
   if (error) {
     return (
       <Card>
-        <CardContent className="py-8">
-          <div className="text-center text-red-600">
-            <p>Error: {error}</p>
-            <Button onClick={fetchContracts} variant="outline" className="mt-4 bg-transparent">
-              Try Again
-            </Button>
-          </div>
+        <CardContent className="flex items-center justify-center p-8 text-red-600">
+          <AlertCircle className="h-6 w-6 mr-2" />
+          Error: {error}
         </CardContent>
       </Card>
     )
@@ -68,7 +65,10 @@ export function ContractsList() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Contracts</CardTitle>
+        <CardTitle className="flex items-center justify-between">
+          Contracts
+          <Badge variant="secondary">{contracts.length} total</Badge>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {contracts.length === 0 ? (
@@ -97,7 +97,7 @@ export function ContractsList() {
                     </TableCell>
                     <TableCell>{new Date(contract.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex items-center gap-2">
                         {contract.status === "pending" && (
                           <Button size="sm" onClick={() => handleGenerate(contract.contract_number)} disabled={loading}>
                             <Play className="h-4 w-4 mr-1" />
@@ -112,7 +112,7 @@ export function ContractsList() {
                             onClick={() => handleGenerate(contract.contract_number)}
                             disabled={loading}
                           >
-                            <RotateCcw className="h-4 w-4 mr-1" />
+                            <RefreshCw className="h-4 w-4 mr-1" />
                             Retry
                           </Button>
                         )}
