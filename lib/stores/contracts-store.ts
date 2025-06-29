@@ -1,5 +1,7 @@
 import { create } from "zustand"
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@supabase/supabase-js"
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
 export interface Contract {
   id: string
@@ -35,9 +37,7 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
 
   updateContract: (updatedContract) =>
     set((state) => ({
-      contracts: state.contracts.map((contract) =>
-        contract.contract_number === updatedContract.contract_number ? { ...contract, ...updatedContract } : contract,
-      ),
+      contracts: state.contracts.map((contract) => (contract.id === updatedContract.id ? updatedContract : contract)),
     })),
 
   addContract: (contract) =>
@@ -55,28 +55,23 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
   setError: (error) => set({ error }),
 
   fetchContracts: async () => {
-    const { setLoading, setError, setContracts } = get()
-    setLoading(true)
-    setError(null)
-
+    set({ loading: true, error: null })
     try {
-      const supabase = createClient()
       const { data, error } = await supabase.from("contracts").select("*").order("created_at", { ascending: false })
 
       if (error) throw error
-      setContracts(data || [])
+
+      set({ contracts: data || [], loading: false })
     } catch (error) {
       console.error("Error fetching contracts:", error)
-      setError(error instanceof Error ? error.message : "Failed to fetch contracts")
-    } finally {
-      setLoading(false)
+      set({
+        error: error instanceof Error ? error.message : "Failed to fetch contracts",
+        loading: false,
+      })
     }
   },
 
   generateContract: async (contractNumber: string) => {
-    const { setError } = get()
-    setError(null)
-
     try {
       const response = await fetch("/api/generate-contract", {
         method: "POST",
@@ -89,10 +84,12 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
         throw new Error(errorData.error || "Failed to generate contract")
       }
 
-      // The contract status will be updated via real-time subscription
+      const result = await response.json()
+      console.log("Contract generation initiated:", result)
     } catch (error) {
       console.error("Error generating contract:", error)
-      setError(error instanceof Error ? error.message : "Failed to generate contract")
+      set({ error: error instanceof Error ? error.message : "Failed to generate contract" })
+      throw error
     }
   },
 }))
