@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/client"
 
 export interface DashboardAnalytics {
   totalContracts: number
+  activeContracts: number
   pendingContracts: number
   completedContracts: number
   failedContracts: number
@@ -9,6 +10,19 @@ export interface DashboardAnalytics {
   contractsLastMonth: number
   averageProcessingTime: number
   successRate: number
+  contractTrends: ContractTrend[]
+  statusDistribution: ContractStatusDistribution[]
+}
+
+export interface ContractTrend {
+  month: string
+  newContracts: number
+  completedContracts: number
+}
+
+export interface ContractStatusDistribution {
+  name: string
+  count: number
 }
 
 export interface PendingReview {
@@ -79,9 +93,16 @@ export async function getDashboardAnalytics(): Promise<ServerActionResponse<Dash
     const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
 
     const totalContracts = contracts?.length || 0
-    const pendingContracts = contracts?.filter((c) => c.status === "pending" || c.status === "processing").length || 0
+    const pendingContracts =
+      contracts?.filter(
+        (c) => c.status === "pending" || c.status === "processing" || c.status === "pending_review"
+      ).length || 0
     const completedContracts = contracts?.filter((c) => c.status === "completed").length || 0
     const failedContracts = contracts?.filter((c) => c.status === "failed").length || 0
+    const activeContracts =
+      contracts?.filter(
+        (c) => !["completed", "failed", "cancelled", "terminated", "expired"].includes(c.status)
+      ).length || 0
 
     const contractsThisMonth = contracts?.filter((c) => new Date(c.created_at) >= thisMonth).length || 0
 
@@ -107,8 +128,45 @@ export async function getDashboardAnalytics(): Promise<ServerActionResponse<Dash
 
     const successRate = totalContracts > 0 ? (completedContracts / totalContracts) * 100 : 0
 
+    // Generate contract trends for the last 6 months
+    const monthsBack = 6
+    const contractTrends: ContractTrend[] = []
+    for (let i = monthsBack - 1; i >= 0; i--) {
+      const start = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1)
+      const monthLabel = start.toLocaleString("default", { month: "short" })
+
+      const newContracts =
+        contracts?.filter((c) => {
+          const created = new Date(c.created_at)
+          return created >= start && created < end
+        }).length || 0
+
+      const completedInMonth =
+        contracts?.filter((c) => {
+          if (c.status !== "completed" || !c.updated_at) return false
+          const updated = new Date(c.updated_at)
+          return updated >= start && updated < end
+        }).length || 0
+
+      contractTrends.push({
+        month: monthLabel,
+        newContracts,
+        completedContracts: completedInMonth,
+      })
+    }
+
+    const statusMap: Record<string, number> = {}
+    contracts?.forEach((c) => {
+      statusMap[c.status] = (statusMap[c.status] || 0) + 1
+    })
+    const statusDistribution: ContractStatusDistribution[] = Object.entries(statusMap).map(
+      ([name, count]) => ({ name, count })
+    )
+
     const analytics: DashboardAnalytics = {
       totalContracts,
+      activeContracts,
       pendingContracts,
       completedContracts,
       failedContracts,
@@ -116,6 +174,8 @@ export async function getDashboardAnalytics(): Promise<ServerActionResponse<Dash
       contractsLastMonth,
       averageProcessingTime: Math.round(averageProcessingTime),
       successRate: Math.round(successRate * 100) / 100,
+      contractTrends,
+      statusDistribution,
     }
 
     return {

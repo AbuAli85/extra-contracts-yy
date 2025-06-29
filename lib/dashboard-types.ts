@@ -1,5 +1,6 @@
 export interface DashboardAnalytics {
   totalContracts: number
+  activeContracts: number
   pendingContracts: number
   completedContracts: number
   failedContracts: number
@@ -7,6 +8,8 @@ export interface DashboardAnalytics {
   contractsLastMonth: number
   averageProcessingTime: number
   successRate: number
+  contractTrends: ContractTrend[]
+  statusDistribution: ContractStatusDistribution[]
 }
 
 export interface PendingReview {
@@ -58,6 +61,17 @@ export interface ChartData {
   name: string
   value: number
   color?: string
+}
+
+export interface ContractTrend {
+  month: string
+  newContracts: number
+  completedContracts: number
+}
+
+export interface ContractStatusDistribution {
+  name: string
+  count: number
 }
 
 export interface AuditLog extends AdminAction {
