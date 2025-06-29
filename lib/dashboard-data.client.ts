@@ -1,18 +1,19 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-
-// Simple response interface
-interface ServerActionResponse<T = any> {
-  success: boolean;
-  message: string;
-  data?: T | null;
-}
+import type {
+  DashboardAnalytics,
+  PendingReview,
+  AdminAction,
+  ServerActionResponse,
+} from "./dashboard-types";
 
 /**
  * Fetches dashboard analytics data
  */
-export async function getDashboardAnalytics() {
+export async function getDashboardAnalytics(): Promise<
+  ServerActionResponse<DashboardAnalytics>
+> {
   const supabase = createClient();
   
   try {
@@ -41,7 +42,9 @@ export async function getDashboardAnalytics() {
 /**
  * Fetches pending reviews data
  */
-export async function getPendingReviews() {
+export async function getPendingReviews(): Promise<
+  ServerActionResponse<PendingReview[]>
+> {
   const supabase = createClient();
   
   try {
@@ -74,7 +77,9 @@ export async function getPendingReviews() {
 /**
  * Fetches admin actions data
  */
-export async function getAdminActions() {
+export async function getAdminActions(): Promise<
+  ServerActionResponse<AdminAction[]>
+> {
   const supabase = createClient();
   
   try {
