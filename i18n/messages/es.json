@@ -1,53 +1,31 @@
 {
-  "navigation": {
-    "home": "Inicio",
-    "contracts": "Contratos",
-    "generateContract": "Generar Contrato",
-    "manageParties": "Gestionar Partes",
-    "managePromoters": "Gestionar Promotores",
-    "dashboard": "Panel",
-    "login": "Iniciar Sesión"
+  "dashboard": {
+    "title": "Panel de Contratos",
+    "overview": "Resumen",
+    "recentContracts": "Contratos Recientes",
+    "totalContracts": "Total de Contratos",
+    "pendingContracts": "Pendientes",
+    "completedContracts": "Completados",
+    "failedContracts": "Fallidos",
+    "statistics": "Estadísticas",
+    "recentActivity": "Actividad Reciente"
   },
   "contracts": {
     "title": "Contratos",
     "generateNew": "Generar Nuevo Contrato",
+    "generate": "Generar",
     "partyA": "Parte A",
     "partyB": "Parte B",
     "contractType": "Tipo de Contrato",
     "description": "Descripción",
     "status": "Estado",
     "createdAt": "Creado el",
-    "action": "Acción",
-    "number": "Número",
-    "generate": "Generar",
-    "download": "Descargar",
-    "retry": "Reintentar",
+    "action": "Acciones",
+    "number": "Número de Contrato",
     "pending": "Pendiente",
     "queued": "En Cola",
     "processing": "Procesando",
     "completed": "Completado",
     "failed": "Fallido"
-  },
-  "dashboard": {
-    "title": "Panel",
-    "overview": "Resumen",
-    "recentContracts": "Contratos Recientes",
-    "statistics": "Estadísticas",
-    "totalContracts": "Total de Contratos",
-    "pendingContracts": "Contratos Pendientes",
-    "completedContracts": "Contratos Completados",
-    "failedContracts": "Contratos Fallidos"
-  },
-  "common": {
-    "loading": "Cargando...",
-    "error": "Error",
-    "success": "Éxito",
-    "cancel": "Cancelar",
-    "save": "Guardar",
-    "delete": "Eliminar",
-    "edit": "Editar",
-    "view": "Ver",
-    "close": "Cerrar",
-    "submit": "Enviar"
   }
 }
