@@ -1,7 +1,5 @@
-"use client"
-
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, Clock, AlertCircle, Loader2, FileText } from "lucide-react"
+import { Loader2, CheckCircle, XCircle, Clock } from "lucide-react"
 
 interface ContractStatusIndicatorProps {
   status: "pending" | "queued" | "processing" | "completed" | "failed"
@@ -10,34 +8,36 @@ interface ContractStatusIndicatorProps {
 
 const statusConfig = {
   pending: {
-    icon: FileText,
+    icon: Clock,
     label: "Pending",
     variant: "secondary" as const,
-    className: "bg-gray-100 text-gray-800 hover:bg-gray-200",
+    className: "bg-gray-100 text-gray-800",
   },
   queued: {
-    icon: Clock,
+    icon: Loader2,
     label: "Queued",
     variant: "secondary" as const,
-    className: "bg-blue-100 text-blue-800 hover:bg-blue-200",
+    className: "bg-blue-100 text-blue-800",
+    animate: true,
   },
   processing: {
     icon: Loader2,
     label: "Processing",
     variant: "secondary" as const,
-    className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+    className: "bg-yellow-100 text-yellow-800",
+    animate: true,
   },
   completed: {
     icon: CheckCircle,
     label: "Completed",
     variant: "secondary" as const,
-    className: "bg-green-100 text-green-800 hover:bg-green-200",
+    className: "bg-green-100 text-green-800",
   },
   failed: {
-    icon: AlertCircle,
+    icon: XCircle,
     label: "Failed",
     variant: "destructive" as const,
-    className: "bg-red-100 text-red-800 hover:bg-red-200",
+    className: "bg-red-100 text-red-800",
   },
 }
 
@@ -47,7 +47,7 @@ export function ContractStatusIndicator({ status, className }: ContractStatusInd
 
   return (
     <Badge variant={config.variant} className={`${config.className} ${className}`}>
-      <Icon className={`h-3 w-3 mr-1 ${status === "processing" ? "animate-spin" : ""}`} />
+      <Icon className={`h-3 w-3 mr-1 ${config.animate ? "animate-spin" : ""}`} />
       {config.label}
     </Badge>
   )
