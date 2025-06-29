@@ -1,6 +1,8 @@
-import { createClient } from "@/lib/supabase/server"
-import { cookies } from "next/headers"
+// Re-export from our unified data API
+export * from './data'
 import type { AdminAction, DashboardAnalytics, Notification, PendingReview, User } from "./dashboard-types"
+// Import only browser client statically
+import { createClient as createBrowserClient } from "@/lib/supabase/client"
 
 interface ServerActionResponse<T = any> {
   success: boolean
@@ -9,9 +11,29 @@ interface ServerActionResponse<T = any> {
   errors?: Record<string, string[]> | null
 }
 
+// Helper function to get the appropriate client
+async function getSupabaseClient() {
+  // In a browser environment
+  if (typeof window !== 'undefined') {
+    return createBrowserClient()
+  }
+  
+  // In server environment
+  try {
+    // Dynamically import server-only modules
+    const { cookies } = await import('next/headers')
+    const { createClient: createServerClient } = await import("@/lib/supabase/server") 
+    const cookieStore = cookies()
+    return createServerClient(cookieStore)
+  } catch (error) {
+    // Fallback to browser client
+    console.warn('Falling back to browser client in server environment')
+    return createBrowserClient()
+  }
+}
+
 export async function getDashboardAnalytics(): Promise<ServerActionResponse<DashboardAnalytics>> {
-  const cookieStore = cookies()
-  const supabase = createClient(cookieStore)
+  const supabase = await getSupabaseClient()
 
   const { data, error } = await supabase.rpc("get_dashboard_analytics")
 
@@ -31,8 +53,7 @@ export async function getDashboardAnalytics(): Promise<ServerActionResponse<Dash
 }
 
 export async function getPendingReviews(): Promise<ServerActionResponse<PendingReview[]>> {
-  const cookieStore = cookies()
-  const supabase = createClient(cookieStore)
+  const supabase = await getSupabaseClient()
 
   // Example: Fetch contracts that are 'pending_review'
   const { data, error } = await supabase
@@ -57,8 +78,7 @@ export async function getPendingReviews(): Promise<ServerActionResponse<PendingR
 }
 
 export async function getAdminActions(): Promise<ServerActionResponse<AdminAction[]>> {
-  const cookieStore = cookies()
-  const supabase = createClient(cookieStore)
+  const supabase = await getSupabaseClient()
 
   // Example: Fetch recent audit logs or admin-specific actions
   const { data, error } = await supabase
@@ -83,8 +103,7 @@ export async function getAdminActions(): Promise<ServerActionResponse<AdminActio
 }
 
 export async function getNotifications(): Promise<ServerActionResponse<Notification[]>> {
-  const cookieStore = cookies()
-  const supabase = createClient(cookieStore)
+  const supabase = await getSupabaseClient()
 
   // Example: Fetch notifications for the current user
   const {
@@ -121,8 +140,7 @@ export async function getNotifications(): Promise<ServerActionResponse<Notificat
 }
 
 export async function getUsers(): Promise<ServerActionResponse<User[]>> {
-  const cookieStore = cookies()
-  const supabase = createClient(cookieStore)
+  const supabase = await getSupabaseClient()
 
   // Example: Fetch a list of users (admin view)
   // In a real app, you'd likely have RLS or a separate admin client for this
@@ -144,8 +162,7 @@ export async function getUsers(): Promise<ServerActionResponse<User[]>> {
 }
 
 export async function getAuditLogs(limit = 50): Promise<ServerActionResponse<AdminAction[]>> {
-  const cookieStore = cookies()
-  const supabase = createClient(cookieStore)
+  const supabase = await getSupabaseClient()
 
   const { data, error } = await supabase
     .from("audit_logs")
