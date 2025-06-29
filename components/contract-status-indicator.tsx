@@ -1,33 +1,34 @@
 import { Badge } from "@/components/ui/badge"
-import { Clock, CheckCircle, XCircle, Loader2, PlayCircle } from "lucide-react"
+import { CheckCircle, Clock, Loader2, FileText, XCircle } from "lucide-react"
 
 interface ContractStatusIndicatorProps {
   status: "pending" | "queued" | "processing" | "completed" | "failed"
+  showIcon?: boolean
 }
 
-export function ContractStatusIndicator({ status }: ContractStatusIndicatorProps) {
+export function ContractStatusIndicator({ status, showIcon = true }: ContractStatusIndicatorProps) {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "pending":
         return {
           variant: "secondary" as const,
-          icon: Clock,
+          icon: FileText,
           label: "Pending",
-          className: "text-gray-600",
+          className: "bg-gray-100 text-gray-700 border-gray-200",
         }
       case "queued":
         return {
           variant: "outline" as const,
-          icon: PlayCircle,
+          icon: Clock,
           label: "Queued",
-          className: "text-blue-600",
+          className: "bg-blue-50 text-blue-700 border-blue-200",
         }
       case "processing":
         return {
           variant: "outline" as const,
           icon: Loader2,
           label: "Processing",
-          className: "text-yellow-600",
+          className: "bg-yellow-50 text-yellow-700 border-yellow-200",
           animate: true,
         }
       case "completed":
@@ -35,21 +36,21 @@ export function ContractStatusIndicator({ status }: ContractStatusIndicatorProps
           variant: "default" as const,
           icon: CheckCircle,
           label: "Completed",
-          className: "text-green-600 bg-green-50",
+          className: "bg-green-50 text-green-700 border-green-200",
         }
       case "failed":
         return {
           variant: "destructive" as const,
           icon: XCircle,
           label: "Failed",
-          className: "text-red-600",
+          className: "bg-red-50 text-red-700 border-red-200",
         }
       default:
         return {
           variant: "secondary" as const,
-          icon: Clock,
+          icon: FileText,
           label: "Unknown",
-          className: "text-gray-600",
+          className: "bg-gray-100 text-gray-700 border-gray-200",
         }
     }
   }
@@ -58,8 +59,8 @@ export function ContractStatusIndicator({ status }: ContractStatusIndicatorProps
   const Icon = config.icon
 
   return (
-    <Badge variant={config.variant} className={config.className}>
-      <Icon className={`h-3 w-3 mr-1 ${config.animate ? "animate-spin" : ""}`} />
+    <Badge variant={config.variant} className={`flex items-center gap-1 ${config.className}`}>
+      {showIcon && <Icon className={`h-3 w-3 ${config.animate ? "animate-spin" : ""}`} />}
       {config.label}
     </Badge>
   )
