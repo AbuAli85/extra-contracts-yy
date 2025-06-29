@@ -8,7 +8,7 @@ interface ServerActionResponse<T = any> {
   errors?: Record<string, string[]> | null
 }
 
-// Client-safe implementations
+// Client-safe implementation for React Query
 export async function getDashboardAnalytics(): Promise<ServerActionResponse<DashboardAnalytics>> {
   const supabase = createClient()
 
@@ -37,17 +37,4 @@ export async function getDashboardAnalytics(): Promise<ServerActionResponse<Dash
   }
 }
 
-// Add other client-safe implementations
-export async function getPendingReviews(): Promise<ServerActionResponse<PendingReview[]>> {
-  const supabase = createClient()
-  // Implementation...
-  return { success: true, message: "Success", data: [] }
-}
-
-export async function getAdminActions(): Promise<ServerActionResponse<AdminAction[]>> {
-  const supabase = createClient()
-  // Implementation...
-  return { success: true, message: "Success", data: [] }
-}
-
-// Add other client-safe implementations here...
+// Add other client-safe data functions as needed
