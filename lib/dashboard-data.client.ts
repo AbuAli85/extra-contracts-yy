@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client"
-import type { AdminAction, DashboardAnalytics, Notification, PendingReview, User } from "./dashboard-types"
+import type { DashboardAnalytics } from "./dashboard-types"
 
 interface ServerActionResponse<T = any> {
   success: boolean
@@ -8,7 +8,9 @@ interface ServerActionResponse<T = any> {
   errors?: Record<string, string[]> | null
 }
 
-// Client-safe implementation for React Query
+/**
+ * Client-safe implementation for fetching dashboard analytics
+ */
 export async function getDashboardAnalytics(): Promise<ServerActionResponse<DashboardAnalytics>> {
   const supabase = createClient()
 
@@ -36,5 +38,3 @@ export async function getDashboardAnalytics(): Promise<ServerActionResponse<Dash
     }
   }
 }
-
-// Add other client-safe data functions as needed
