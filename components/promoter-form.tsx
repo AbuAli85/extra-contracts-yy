@@ -18,6 +18,7 @@ interface PromoterFormProps {
   initialData?: Promoter
 }
 
+// Changed to default export
 export default function PromoterForm({ initialData }: PromoterFormProps) {
   const { toast } = useToast()
   const router = useRouter()
