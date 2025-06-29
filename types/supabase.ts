@@ -10,6 +10,8 @@ export type Database = {
           created_at: string
           user_id: string
           details: Json | null
+          table_name: string | null
+          record_id: string | null
         }
         Insert: {
           id?: string
@@ -17,6 +19,8 @@ export type Database = {
           created_at?: string
           user_id: string
           details?: Json | null
+          table_name?: string | null
+          record_id?: string | null
         }
         Update: {
           id?: string
@@ -24,6 +28,8 @@ export type Database = {
           created_at?: string
           user_id?: string
           details?: Json | null
+          table_name?: string | null
+          record_id?: string | null
         }
         Relationships: []
       }
@@ -31,77 +37,102 @@ export type Database = {
         Row: {
           id: string
           contract_name: string
-          status: string
+          contract_number: string
+          status: "pending" | "processing" | "completed" | "failed" | "cancelled"
           created_at: string
           updated_at: string
           user_id: string | null
-          contract_data: Json | null
-          contract_url: string | null
-          contract_number: string | null
-          party_1_name: string | null
-          party_1_email: string | null
-          party_2_name: string | null
-          party_2_email: string | null
+          party_1_id: string | null
+          party_2_id: string | null
+          promoter_id: string | null
           contract_type: string | null
-          language: string | null
+          contract_data: Json | null
+          file_url: string | null
+          notes: string | null
         }
         Insert: {
           id?: string
           contract_name: string
-          status?: string
+          contract_number: string
+          status?: "pending" | "processing" | "completed" | "failed" | "cancelled"
           created_at?: string
           updated_at?: string
           user_id?: string | null
-          contract_data?: Json | null
-          contract_url?: string | null
-          contract_number?: string | null
-          party_1_name?: string | null
-          party_1_email?: string | null
-          party_2_name?: string | null
-          party_2_email?: string | null
+          party_1_id?: string | null
+          party_2_id?: string | null
+          promoter_id?: string | null
           contract_type?: string | null
-          language?: string | null
+          contract_data?: Json | null
+          file_url?: string | null
+          notes?: string | null
         }
         Update: {
           id?: string
           contract_name?: string
-          status?: string
+          contract_number?: string
+          status?: "pending" | "processing" | "completed" | "failed" | "cancelled"
           created_at?: string
           updated_at?: string
           user_id?: string | null
-          contract_data?: Json | null
-          contract_url?: string | null
-          contract_number?: string | null
-          party_1_name?: string | null
-          party_1_email?: string | null
-          party_2_name?: string | null
-          party_2_email?: string | null
+          party_1_id?: string | null
+          party_2_id?: string | null
+          promoter_id?: string | null
           contract_type?: string | null
-          language?: string | null
+          contract_data?: Json | null
+          file_url?: string | null
+          notes?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contracts_party_1_id_fkey"
+            columns: ["party_1_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_party_2_id_fkey"
+            columns: ["party_2_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_promoter_id_fkey"
+            columns: ["promoter_id"]
+            isOneToOne: false
+            referencedRelation: "promoters"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
           id: string
-          message: string
-          created_at: string
-          read: boolean
           user_id: string
+          message: string
+          read: boolean
+          created_at: string
+          type: string | null
+          data: Json | null
         }
         Insert: {
           id?: string
-          message: string
-          created_at?: string
-          read?: boolean
           user_id: string
+          message: string
+          read?: boolean
+          created_at?: string
+          type?: string | null
+          data?: Json | null
         }
         Update: {
           id?: string
-          message?: string
-          created_at?: string
-          read?: boolean
           user_id?: string
+          message?: string
+          read?: boolean
+          created_at?: string
+          type?: string | null
+          data?: Json | null
         }
         Relationships: []
       }
@@ -109,35 +140,38 @@ export type Database = {
         Row: {
           id: string
           name: string
-          email: string
+          email: string | null
           phone: string | null
           address: string | null
+          type: "individual" | "company" | "organization"
           created_at: string
           updated_at: string
           user_id: string | null
-          type: string | null
+          additional_info: Json | null
         }
         Insert: {
           id?: string
           name: string
-          email: string
+          email?: string | null
           phone?: string | null
           address?: string | null
+          type: "individual" | "company" | "organization"
           created_at?: string
           updated_at?: string
           user_id?: string | null
-          type?: string | null
+          additional_info?: Json | null
         }
         Update: {
           id?: string
           name?: string
-          email?: string
+          email?: string | null
           phone?: string | null
           address?: string | null
+          type?: "individual" | "company" | "organization"
           created_at?: string
           updated_at?: string
           user_id?: string | null
-          type?: string | null
+          additional_info?: Json | null
         }
         Relationships: []
       }
@@ -148,13 +182,14 @@ export type Database = {
           email: string
           phone: string | null
           company: string | null
+          specialization: string | null
+          experience_years: number | null
+          rating: number | null
+          status: "active" | "inactive" | "suspended"
           created_at: string
           updated_at: string
           user_id: string | null
-          bio: string | null
-          website: string | null
-          social_media: Json | null
-          profile_image: string | null
+          profile_data: Json | null
         }
         Insert: {
           id?: string
@@ -162,13 +197,14 @@ export type Database = {
           email: string
           phone?: string | null
           company?: string | null
+          specialization?: string | null
+          experience_years?: number | null
+          rating?: number | null
+          status?: "active" | "inactive" | "suspended"
           created_at?: string
           updated_at?: string
           user_id?: string | null
-          bio?: string | null
-          website?: string | null
-          social_media?: Json | null
-          profile_image?: string | null
+          profile_data?: Json | null
         }
         Update: {
           id?: string
@@ -176,13 +212,14 @@ export type Database = {
           email?: string
           phone?: string | null
           company?: string | null
+          specialization?: string | null
+          experience_years?: number | null
+          rating?: number | null
+          status?: "active" | "inactive" | "suspended"
           created_at?: string
           updated_at?: string
           user_id?: string | null
-          bio?: string | null
-          website?: string | null
-          social_media?: Json | null
-          profile_image?: string | null
+          profile_data?: Json | null
         }
         Relationships: []
       }
@@ -190,26 +227,26 @@ export type Database = {
         Row: {
           id: string
           email: string
-          role: string
+          role: "admin" | "user" | "manager"
           created_at: string
           updated_at: string
-          full_name: string | null
+          profile_data: Json | null
         }
         Insert: {
-          id?: string
+          id: string
           email: string
-          role?: string
+          role?: "admin" | "user" | "manager"
           created_at?: string
           updated_at?: string
-          full_name?: string | null
+          profile_data?: Json | null
         }
         Update: {
           id?: string
           email?: string
-          role?: string
+          role?: "admin" | "user" | "manager"
           created_at?: string
           updated_at?: string
-          full_name?: string | null
+          profile_data?: Json | null
         }
         Relationships: []
       }
@@ -233,7 +270,10 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      contract_status: "pending" | "processing" | "completed" | "failed" | "cancelled"
+      party_type: "individual" | "company" | "organization"
+      promoter_status: "active" | "inactive" | "suspended"
+      user_role: "admin" | "user" | "manager"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -241,10 +281,10 @@ export type Database = {
   }
 }
 
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (Database["public"]["Tables"] & Database["public"]["Views"])
-    | { schema: keyof Database },
+  PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] & PublicSchema["Views"]) | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
@@ -256,8 +296,8 @@ export type Tables<
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] & Database["public"]["Views"])
-    ? (Database["public"]["Tables"] & Database["public"]["Views"])[PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    ? (PublicSchema["Tables"] & PublicSchema["Views"])[PublicTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -265,7 +305,7 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends keyof Database["public"]["Tables"] | { schema: keyof Database },
+  PublicTableNameOrOptions extends keyof PublicSchema["Tables"] | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
     : never = never,
@@ -275,8 +315,8 @@ export type TablesInsert<
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-    ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -284,7 +324,7 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends keyof Database["public"]["Tables"] | { schema: keyof Database },
+  PublicTableNameOrOptions extends keyof PublicSchema["Tables"] | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
     : never = never,
@@ -294,8 +334,8 @@ export type TablesUpdate<
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-    ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -303,12 +343,12 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends keyof Database["public"]["Enums"] | { schema: keyof Database },
+  PublicEnumNameOrOptions extends keyof PublicSchema["Enums"] | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
-    ? Database["public"]["Enums"][PublicEnumNameOrOptions]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
