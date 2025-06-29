@@ -1,6 +1,6 @@
 {
   "common": {
-    "title": "Generador de Contratos Bilingües",
+    "title": "Generador de Contratos Bilingüe",
     "loading": "Cargando...",
     "error": "Ocurrió un error",
     "success": "Éxito",
@@ -14,8 +14,10 @@
     "previous": "Anterior",
     "search": "Buscar",
     "filter": "Filtrar",
+    "sort": "Ordenar",
     "export": "Exportar",
-    "import": "Importar"
+    "import": "Importar",
+    "refresh": "Actualizar"
   },
   "contracts": {
     "title": "Contratos",
@@ -27,26 +29,41 @@
     "description": "Descripción",
     "status": "Estado",
     "createdAt": "Creado el",
+    "updatedAt": "Actualizado el",
     "action": "Acción",
     "download": "Descargar",
-    "generate": "Generar",
     "retry": "Reintentar",
+    "generate": "Generar",
     "pending": "Pendiente",
     "queued": "En Cola",
     "processing": "Procesando",
     "completed": "Completado",
     "failed": "Fallido",
     "noContracts": "No se encontraron contratos",
-    "generateFirst": "Genera tu primer contrato para comenzar"
+    "generateFirst": "Genera tu primer contrato para comenzar",
+    "generationStarted": "¡Generación de contrato iniciada exitosamente!",
+    "generationFailed": "Error al generar contrato",
+    "downloadSuccess": "¡Contrato descargado exitosamente!",
+    "downloadFailed": "Error al descargar contrato",
+    "retrySuccess": "¡Reintento de contrato iniciado exitosamente!",
+    "retryFailed": "Error al reintentar contrato"
   },
   "dashboard": {
     "title": "Panel de Control",
     "overview": "Resumen",
-    "totalContracts": "Contratos Totales",
+    "statistics": "Estadísticas",
+    "totalContracts": "Total de Contratos",
     "pendingContracts": "Contratos Pendientes",
     "completedContracts": "Contratos Completados",
     "failedContracts": "Contratos Fallidos",
     "recentActivity": "Actividad Reciente",
-    "statistics": "Estadísticas"
+    "quickActions": "Acciones Rápidas"
+  },
+  "forms": {
+    "required": "Este campo es obligatorio",
+    "invalidEmail": "Por favor ingrese un email válido",
+    "invalidPhone": "Por favor ingrese un teléfono válido",
+    "minLength": "Debe tener al menos {min} caracteres",
+    "maxLength": "No debe tener más de {max} caracteres"
   }
 }
