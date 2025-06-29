@@ -1,14 +1,15 @@
-"use client"
-import DashboardLayout from "@/components/dashboard/dashboard-layout"
-import AuditLogs from "@/components/dashboard/audit-logs" // Re-use the panel
+import { getTranslations } from "next-intl/server"
+import { AuditLogs } from "@/components/dashboard/audit-logs"
+import { getAuditLogs } from "@/lib/dashboard-data"
 
-export default function AuditPage() {
+export default async function AuditPage() {
+  const t = await getTranslations("DashboardAuditLogs")
+  const initialLogs = await getAuditLogs()
+
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <h1 className="text-2xl font-semibold">System Audit Logs / سجلات تدقيق النظام</h1>
-        <AuditLogs /> {/* Can be enhanced for a full page view with more filters/pagination */}
-      </div>
-    </DashboardLayout>
+    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+      <h1 className="text-2xl font-semibold">{t("auditLogsTitle")}</h1>
+      <AuditLogs />
+    </main>
   )
 }

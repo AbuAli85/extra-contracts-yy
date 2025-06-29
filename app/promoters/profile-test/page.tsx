@@ -1,48 +1,51 @@
-// This is a test page to render the form.
-// You can navigate to /promoters/profile-test to see the form.
-// In a real app, this form would be part of /promoters/new or /promoters/[id]/edit pages.
-"use client"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PromoterProfileForm } from "@/components/promoter-profile-form"
+import { getPromoterById } from "@/lib/data"
+import { notFound } from "next/navigation"
 
-import PromoterProfileForm from "@/components/promoter-profile-form"
-import type { PromoterProfile } from "@/lib/types"
-import type { PromoterProfileFormData } from "@/lib/promoter-profile-schema"
-import { devLog } from "@/lib/dev-log"
-// Direct path string avoids build-time file reads that can fail
-const placeholderSvg = "/placeholder.svg"
-
-// Sample data for editing (optional)
-const samplePromoterToEdit: PromoterProfile = {
-  id: "promo-123",
-  name_en: "Jane Smith",
-  name_ar: "جين سميث",
-  id_card_number: "9876543210",
-  employer_id: "beta_workforce",
-  outsourced_to_id: "client_tech_innovators",
-  job_title: "Senior Promoter",
-  work_location: "Tech Park, Building A",
-  status: "active",
-  contract_valid_until: "2025-12-31",
-  // Use simple placeholder images without query parameters
-  id_card_url: placeholderSvg,
-  passport_url: placeholderSvg,
-  id_card_expiry_date: "2026-06-15",
-  passport_expiry_date: "2028-03-20",
-  notes: "Excellent performance. Key contact for Tech Innovators project.",
-  created_at: "2023-01-10T10:00:00Z",
+interface PromoterProfileTestPageProps {
+  searchParams: {
+    id?: string
+  }
 }
 
-export default function PromoterProfileTestPage() {
-  const handleFormSubmit = (data: PromoterProfileFormData) => {
-    devLog("Form submitted on test page:", data)
-    // You can add navigation or other actions here
+export default async function PromoterProfileTestPage({ searchParams }: PromoterProfileTestPageProps) {
+  const promoterId = searchParams.id
+  let initialData = undefined
+
+  if (promoterId) {
+    const promoter = await getPromoterById(promoterId)
+    if (!promoter) {
+      notFound()
+    }
+    initialData = {
+      nameEn: promoter.name_en,
+      nameAr: promoter.name_ar,
+      email: promoter.email,
+      phone: promoter.phone || "",
+      address: promoter.address || "",
+      city: promoter.city || "",
+      country: promoter.country || "",
+      zipCode: promoter.zip_code || "",
+      contactPerson: promoter.contact_person || "",
+      contactPersonEmail: promoter.contact_person_email || "",
+      contactPersonPhone: promoter.contact_person_phone || "",
+      website: promoter.website || "",
+      logoUrl: promoter.logo_url || "",
+    }
   }
 
   return (
-    <div className="min-h-screen bg-background py-8 sm:py-12 px-4">
-      <PromoterProfileForm
-        // promoterToEdit={samplePromoterToEdit} // Uncomment to test edit mode
-        onFormSubmitSuccess={handleFormSubmit}
-      />
-    </div>
+    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+      <h1 className="text-2xl font-semibold">Promoter Profile Test Form</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle>Promoter Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PromoterProfileForm initialData={initialData} promoterId={promoterId} />
+        </CardContent>
+      </Card>
+    </main>
   )
 }

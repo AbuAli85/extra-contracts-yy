@@ -1,11 +1,22 @@
 "use client"
 
-export default function ErrorPage({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error)
+import { Button } from "@/components/ui/button"
+import { FrownIcon } from "lucide-react"
+import { useEffect } from "react"
+
+export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  useEffect(() => {
+    // Log the error to an error reporting service
+    console.error(error)
+  }, [error])
+
   return (
-    <div className="p-4 space-y-2">
-      <h2 className="font-semibold">Something went wrong!</h2>
-      <button onClick={() => reset()} className="underline text-sm">Try again</button>
+    <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-col items-center justify-center gap-4 py-10">
+      <FrownIcon className="h-16 w-16 text-destructive" />
+      <h2 className="text-2xl font-bold text-destructive">Something went wrong!</h2>
+      <p className="text-muted-foreground">An unexpected error occurred.</p>
+      <p className="text-sm text-muted-foreground">Error: {error.message}</p>
+      <Button onClick={() => reset()}>Try again</Button>
     </div>
   )
 }

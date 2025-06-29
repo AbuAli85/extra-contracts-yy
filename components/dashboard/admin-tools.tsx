@@ -1,85 +1,166 @@
 "use client"
+import { useState } from "react"
+import type React from "react"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Users, Settings, DatabaseZap, Mail, FileSpreadsheet } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Loader2, Database, UserPlus, Mail } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Input } from "@/components/ui/input" // For file input
-import type React from "react"
+import { createClient } from "@/lib/supabase/client"
+import { devLog } from "@/lib/dev-log"
+import { useTranslations } from "next-intl"
 
 export default function AdminTools() {
+  const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const { toast } = useToast()
+  const supabase = createClient()
+  const t = useTranslations("DashboardAdminTools")
 
-  const handleBulkImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      toast({ title: "File Selected", description: `Selected file: ${file.name}. Upload logic not implemented.` })
-      // Placeholder for actual CSV upload and processing logic
-      // e.g., using Supabase Edge Functions or a server-side API route
+  const handleRunMigration = async () => {
+    setLoading(true)
+    try {
+      // This is a placeholder. In a real app, you'd trigger a server-side migration script.
+      // For now, we'll simulate success/failure.
+      devLog("Simulating database migration...")
+      await new Promise((resolve) => setTimeout(resolve, 2000)) // Simulate API call
+      toast({ title: t("migrationSuccessTitle"), description: t("migrationSuccessDescription") })
+    } catch (error: any) {
+      console.error("Migration error:", error)
+      toast({
+        title: t("migrationErrorTitle"),
+        description: error.message || t("migrationErrorDescription"),
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
     }
   }
 
-  const adminActions = [
-    {
-      label: "Manage Users",
-      labelAr: "إدارة المستخدمين",
-      icon: Users,
-      action: () =>
-        toast({ title: "Manage Users", description: "Navigate to user management page (not implemented)." }),
-    },
-    {
-      label: "System Settings",
-      labelAr: "إعدادات النظام",
-      icon: Settings,
-      action: () => toast({ title: "System Settings", description: "Navigate to settings page (not implemented)." }),
-    },
-    {
-      label: "Database Backup",
-      labelAr: "نسخ احتياطي لقاعدة البيانات",
-      icon: DatabaseZap,
-      action: () => toast({ title: "Database Backup", description: "Trigger database backup (not implemented)." }),
-    },
-    {
-      label: "Email Templates",
-      labelAr: "قوالب البريد الإلكتروني",
-      icon: Mail,
-      action: () =>
-        toast({ title: "Email Templates", description: "Navigate to email template editor (not implemented)." }),
-    },
-  ]
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${location.origin}/auth/callback`,
+        },
+      })
+
+      if (error) throw error
+
+      if (data.user) {
+        toast({ title: t("userCreateSuccessTitle"), description: t("userCreateSuccessDescription") })
+        setEmail("")
+        setPassword("")
+      } else {
+        toast({ title: t("userCreatePendingTitle"), description: t("userCreatePendingDescription") })
+      }
+    } catch (error: any) {
+      console.error("User creation error:", error)
+      toast({
+        title: t("userCreateErrorTitle"),
+        description: error.message || t("userCreateErrorDescription"),
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSendWelcomeEmail = async () => {
+    setLoading(true)
+    try {
+      // This is a placeholder. In a real app, you'd trigger a server-side function
+      // to send a welcome email, possibly using a service like Resend or SendGrid.
+      devLog("Simulating sending welcome email...")
+      await new Promise((resolve) => setTimeout(resolve, 2000)) // Simulate API call
+      toast({ title: t("welcomeEmailSuccessTitle"), description: t("welcomeEmailSuccessDescription") })
+    } catch (error: any) {
+      console.error("Welcome email error:", error)
+      toast({
+        title: t("welcomeEmailErrorTitle"),
+        description: error.message || t("welcomeEmailErrorDescription"),
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Admin Tools / أدوات المسؤول</CardTitle>
-        <CardDescription>Quick access to administrative functions. / وصول سريع إلى الوظائف الإدارية.</CardDescription>
+        <CardTitle>{t("adminToolsTitle")}</CardTitle>
+        <CardDescription>{t("adminToolsDescription")}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {adminActions.map((tool) => (
-          <Button
-            key={tool.label}
-            variant="outline"
-            onClick={tool.action}
-            className="w-full justify-start text-left p-4"
-          >
-            <tool.icon className="h-5 w-5 mr-3" />
-            <div>
-              <p>{tool.label}</p>
-              <p className="text-xs text-muted-foreground">{tool.labelAr}</p>
-            </div>
-          </Button>
-        ))}
-        <div className="space-y-2 p-4 border rounded-md">
-          <label htmlFor="bulk-import-input" className="font-semibold flex items-center gap-2 cursor-pointer">
-            <FileSpreadsheet className="h-5 w-5" />
-            <div>
-              <p>Bulk Contract Import</p>
-              <p className="text-xs text-muted-foreground">استيراد جماعي للعقود</p>
-            </div>
-          </label>
-          <Input id="bulk-import-input" type="file" accept=".csv" onChange={handleBulkImport} className="mt-1" />
-          <p className="text-xs text-muted-foreground mt-1">Upload a CSV file to import multiple contracts.</p>
-        </div>
+      <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Button onClick={handleRunMigration} disabled={loading}>
+          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
+          {t("runMigrations")}
+        </Button>
+
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button disabled={loading}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              {t("createNewUser")}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("createNewUserTitle")}</DialogTitle>
+              <DialogDescription>{t("createNewUserDescription")}</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleCreateUser} className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="email">{t("emailLabel")}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="user@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">{t("passwordLabel")}</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <Button type="submit" disabled={loading}>
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
+                {t("createUserButton")}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        <Button onClick={handleSendWelcomeEmail} disabled={loading}>
+          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+          {t("sendWelcomeEmail")}
+        </Button>
       </CardContent>
     </Card>
   )

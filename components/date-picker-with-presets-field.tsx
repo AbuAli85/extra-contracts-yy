@@ -1,89 +1,78 @@
 "use client"
-// CORE INPUT COMPONENT: Does NOT render FormItem, FormLabel, FormControl, FormMessage by itself.
-import type React from "react"
+import { format, startOfToday, addYears } from "date-fns"
+import { CalendarIcon } from "lucide-react"
 
-// These will be provided by the parent FormField.
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
-import { CalendarIcon } from "lucide-react"
-import { format, addYears, startOfToday } from "date-fns"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface DatePickerWithPresetsFieldProps {
-  field: {
-    // React Hook Form field object
-    name: string
-    value: Date | null | undefined
-    onChange: (date: Date | null) => void
-    onBlur: () => void
-    ref: React.Ref<any>
-  }
+  date: Date | undefined
+  setDate: (date: Date | undefined) => void
   placeholder?: string
   disabled?: boolean
-  disabledCalendar?: (date: Date) => boolean
-  presets?: { label: string; date: Date }[]
 }
 
-const defaultPresets = [
-  { label: "Today", date: startOfToday() },
-  { label: "+1Y", date: addYears(startOfToday(), 1) },
-  { label: "+2Y", date: addYears(startOfToday(), 2) },
-  { label: "+3Y", date: addYears(startOfToday(), 3) },
-  { label: "+4Y", date: addYears(startOfToday(), 4) },
-  { label: "+5Y", date: addYears(startOfToday(), 5) },
-]
+export const DatePickerWithPresetsField = ({
+  date,
+  setDate,
+  placeholder = "Pick a date",
+  disabled = false,
+}: DatePickerWithPresetsFieldProps) => {
+  const defaultPresets = [
+    { label: "Today", date: startOfToday() },
+    { label: "+1Y", date: addYears(startOfToday(), 1) },
+    { label: "+2Y", date: addYears(startOfToday(), 2) },
+    { label: "+3Y", date: addYears(startOfToday(), 3) },
+    { label: "+4Y", date: addYears(startOfToday(), 4) },
+    { label: "+5Y", date: addYears(startOfToday(), 5) },
+  ]
 
-export default function DatePickerWithPresetsField({
-  field,
-  placeholder,
-  disabled,
-  disabledCalendar,
-  presets = defaultPresets,
-}: DatePickerWithPresetsFieldProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        {/* FormControl will wrap this Button in the parent component */}
         <Button
           variant={"outline"}
           className={cn(
-            "w-full justify-start text-left font-normal", // Ensure justify-start for icon alignment
-            !field.value && "text-muted-foreground",
-            disabled && "bg-muted/50 cursor-not-allowed opacity-50",
+            "w-full justify-start text-left font-normal",
+            !date && "text-muted-foreground",
+            disabled && "opacity-50 cursor-not-allowed",
           )}
           disabled={disabled}
-          ref={field.ref} // Pass ref to the trigger
         >
-          {field.value ? format(new Date(field.value), "PPP") : <span>{placeholder || "Pick a date"}</span>}
-          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {date ? format(date, "PPP") : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
-      {!disabled && (
-        <PopoverContent className="w-auto p-0" align="start">
-          <div className="grid grid-cols-3 gap-2 p-2 border-b">
-            {presets.map(({ label: presetLabel, date }) => (
-              <Button
-                key={presetLabel}
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => field.onChange(date)}
-                className="text-xs h-7"
-              >
-                {presetLabel}
-              </Button>
+      <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
+        <Select
+          onValueChange={(value) => {
+            const selectedPreset = defaultPresets.find((p) => p.label === value)
+            if (selectedPreset) {
+              setDate(selectedPreset.date)
+            } else if (value === "none") {
+              setDate(undefined)
+            }
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select preset" />
+          </SelectTrigger>
+          <SelectContent position="popper">
+            {defaultPresets.map((preset) => (
+              <SelectItem key={preset.label} value={preset.label}>
+                {preset.label}
+              </SelectItem>
             ))}
-          </div>
-          <Calendar
-            mode="single"
-            selected={field.value ? new Date(field.value) : undefined}
-            onSelect={(date) => field.onChange(date || null)} // Ensure null is passed if date is undefined
-            disabled={disabledCalendar}
-            initialFocus
-          />
-        </PopoverContent>
-      )}
+            <SelectItem value="none">No date</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="rounded-md border">
+          <Calendar mode="single" selected={date} onSelect={setDate} initialFocus disabled={disabled} />
+        </div>
+      </PopoverContent>
     </Popover>
   )
 }

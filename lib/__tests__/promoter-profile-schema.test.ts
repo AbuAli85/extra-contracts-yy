@@ -1,57 +1,98 @@
-import { promoterProfileSchema } from '../promoter-profile-schema'
+import { promoterProfileSchema } from "../promoter-profile-schema"
 
-describe('promoterProfileSchema', () => {
-  const baseData = {
-    name_en: 'John',
-    name_ar: 'جون',
-    id_card_number: '123',
-    status: 'active' as const,
-    contract_valid_until: '2025-12-31',
-    id_card_image: new File(['a'], 'id.jpg', { type: 'image/jpeg' }),
-    passport_image: new File(['a'], 'pass.jpg', { type: 'image/jpeg' }),
-  }
-
-  it('accepts valid ISO date strings', () => {
-    const result = promoterProfileSchema.safeParse(baseData)
+describe("promoterProfileSchema", () => {
+  it("should validate a correct promoter profile", () => {
+    const validData = {
+      name: "John Doe",
+      email: "john.doe@example.com",
+      phone: "123-456-7890",
+      company_name: "Acme Corp",
+      company_address: "123 Main St",
+      contact_person: "Jane Smith",
+      contact_email: "jane.smith@example.com",
+      contact_phone: "098-765-4321",
+      website: "https://www.acmecorp.com",
+      notes: "Some notes here.",
+      logo_url: "https://example.com/logo.png",
+    }
+    const result = promoterProfileSchema.safeParse(validData)
     expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.contract_valid_until).toBeInstanceOf(Date)
+    expect(result.data).toEqual(validData)
+  })
+
+  it("should allow optional fields to be null or undefined", () => {
+    const validData = {
+      name: "John Doe",
+      email: "john.doe@example.com",
+      phone: "123-456-7890",
+      company_name: "Acme Corp",
+      company_address: "123 Main St",
+      contact_person: null,
+      contact_email: undefined,
+      contact_phone: "",
+      website: null,
+      notes: undefined,
+      logo_url: "",
+    }
+    const result = promoterProfileSchema.safeParse(validData)
+    expect(result.success).toBe(true)
+    expect(result.data).toEqual({
+      name: "John Doe",
+      email: "john.doe@example.com",
+      phone: "123-456-7890",
+      company_name: "Acme Corp",
+      company_address: "123 Main St",
+      contact_person: null,
+      contact_email: null, // Zod transforms undefined/empty string to null for nullable fields
+      contact_phone: null,
+      website: null,
+      notes: null,
+      logo_url: null,
+    })
+  })
+
+  it("should fail validation for missing required fields", () => {
+    const invalidData = {
+      email: "john.doe@example.com",
+      phone: "123-456-7890",
+      company_name: "Acme Corp",
+      company_address: "123 Main St",
+    }
+    const result = promoterProfileSchema.safeParse(invalidData)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path[0] === "name")).toBe(true)
     }
   })
 
-  it('rejects invalid date strings', () => {
-    const result = promoterProfileSchema.safeParse({
-      ...baseData,
-      contract_valid_until: 'not-a-date',
-    })
-    expect(result.success).toBe(false)
-  })
-
-  it('accepts allowed file types', () => {
-    const result = promoterProfileSchema.safeParse(baseData)
-    expect(result.success).toBe(true)
-  })
-
-  it('rejects disallowed file types', () => {
-    const result = promoterProfileSchema.safeParse({
-      ...baseData,
-      id_card_image: new File(['a'], 'id.pdf', { type: 'application/pdf' }),
-    })
+  it("should fail validation for invalid email format", () => {
+    const invalidData = {
+      name: "John Doe",
+      email: "invalid-email",
+      phone: "123-456-7890",
+      company_name: "Acme Corp",
+      company_address: "123 Main St",
+    }
+    const result = promoterProfileSchema.safeParse(invalidData)
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.error.flatten().fieldErrors.id_card_image?.[0]).toMatch(/files are accepted/)
+      expect(result.error.issues.some((issue) => issue.path[0] === "email")).toBe(true)
     }
   })
 
-  it('rejects files exceeding size limit', () => {
-    const bigFile = new File([new Uint8Array(6 * 1024 * 1024)], 'big.jpg', { type: 'image/jpeg' })
-    const result = promoterProfileSchema.safeParse({
-      ...baseData,
-      id_card_image: bigFile,
-    })
+  it("should fail validation for invalid website URL", () => {
+    const invalidData = {
+      name: "John Doe",
+      email: "john.doe@example.com",
+      phone: "123-456-7890",
+      company_name: "Acme Corp",
+      company_address: "123 Main St",
+      website: "not-a-url",
+    }
+    const result = promoterProfileSchema.safeParse(invalidData)
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.error.flatten().fieldErrors.id_card_image?.[0]).toMatch(/Max file size/)
+      expect(result.error.issues.some((issue) => issue.path[0] === "website")).toBe(true)
     }
   })
 })

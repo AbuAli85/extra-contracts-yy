@@ -1,40 +1,46 @@
-'use client'
+"use client"
 
-import React from 'react'
+import React from "react"
+import { Button } from "@/components/ui/button"
+import { FrownIcon } from "lucide-react"
 
-interface State {
-  hasError: boolean;
+interface ManualErrorBoundaryProps {
+  children: React.ReactNode
 }
 
-export class ManualErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  State
-> {
-  constructor(props: { children: React.ReactNode }) {
+interface ManualErrorBoundaryState {
+  hasError: boolean
+  error: Error | null
+}
+
+export class ManualErrorBoundary extends React.Component<ManualErrorBoundaryProps, ManualErrorBoundaryState> {
+  constructor(props: ManualErrorBoundaryProps) {
     super(props)
-    this.state = { hasError: false }
+    this.state = { hasError: false, error: null }
   }
 
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true }
+  static getDerivedStateFromError(error: Error): ManualErrorBoundaryState {
+    // Update state so the next render will show the fallback UI.
+    return { hasError: true, error }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("ManualErrorBoundary caught an error:", error, errorInfo);
+    // You can also log the error to an error reporting service
+    console.error("Uncaught error:", error, errorInfo)
   }
 
   render() {
     if (this.state.hasError) {
+      // You can render any custom fallback UI
       return (
-        <div className="p-4 border border-red-500">
-            <h2 className="font-semibold text-red-700">An Error Occurred</h2>
-            <p>This part of the application has crashed.</p>
-            <button
-                onClick={() => this.setState({ hasError: false })}
-                className="underline text-sm"
-            >
-                Try to reload this component
-            </button>
+        <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-col items-center justify-center gap-4 py-10">
+          <FrownIcon className="h-16 w-16 text-destructive" />
+          <h2 className="text-2xl font-bold text-destructive">Oops! Something went wrong.</h2>
+          <p className="text-muted-foreground">We're sorry, but an unexpected error occurred.</p>
+          {this.state.error && (
+            <p className="text-sm text-muted-foreground">Error details: {this.state.error.message}</p>
+          )}
+          <Button onClick={() => this.setState({ hasError: false, error: null })}>Try again</Button>
         </div>
       )
     }

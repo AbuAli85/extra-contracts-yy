@@ -8,18 +8,24 @@ import { Badge } from "@/components/ui/badge"
 import { ThumbsUp, ThumbsDown, MessageSquare, Loader2 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 // Use a static path rather than importing the file. Importing triggered
-// filesystem lookups on `/public/placeholder.svg` which fail in some
+// filesystem lookups on `/public/placeholder.png` which fail in some
 // environments.
-const placeholderAvatar = "/placeholder.svg"
+const placeholderAvatar = "/placeholder.png"
 import { devLog } from "@/lib/dev-log"
-import type { ReviewItem } from "@/lib/dashboard-types" // Ensure this type is defined
+import type { ReviewItem, Review } from "@/lib/dashboard-types" // Ensure this type is defined
 import { useToast } from "@/hooks/use-toast"
 import { formatDistanceToNow } from "date-fns"
+import { useTranslations } from "next-intl"
 
-export default function ReviewPanel() {
+interface ReviewPanelProps {
+  reviews: Review[]
+}
+
+export function ReviewPanel({ reviews }: ReviewPanelProps) {
   const [reviewItems, setReviewItems] = useState<ReviewItem[]>([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
+  const t = useTranslations("DashboardReviewPanel")
 
   const fetchReviewItems = async () => {
     setLoading(true)
@@ -28,7 +34,7 @@ export default function ReviewPanel() {
       const { data, error } = await supabase
         .from("contracts") // Or a dedicated 'review_items' table
         .select("id, contract_id, promoter_name_en, first_party_name_en, second_party_name_en, created_at, user_id") // Adjust fields
-        .eq("status", "Pending Approval") // This status needs to exist in your contracts table
+        .eq("status", "Pending Review") // This status needs to exist in your contracts table
         .order("created_at", { ascending: false })
         .limit(10)
 
@@ -61,7 +67,7 @@ export default function ReviewPanel() {
       .channel("public:contracts:review")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "contracts", filter: "status=eq.Pending Approval" },
+        { event: "*", schema: "public", table: "contracts", filter: "status=eq.Pending Review" },
         (payload) => {
           devLog("Review items change:", payload)
           toast({ title: "New Item for Review", description: "An item has been submitted for review." })
@@ -85,11 +91,8 @@ export default function ReviewPanel() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Items for Review / عناصر للمراجعة</CardTitle>
-        <CardDescription>
-          Contracts and documents awaiting your approval or feedback. / العقود والمستندات التي تنتظر موافقتك أو
-          ملاحظاتك.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[350px]">
@@ -98,39 +101,35 @@ export default function ReviewPanel() {
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           )}
-          {!loading && reviewItems.length === 0 && (
-            <p className="text-center text-muted-foreground py-8">
-              No items currently need review. / لا توجد عناصر تحتاج إلى مراجعة حاليًا.
-            </p>
+          {!loading && reviews.length === 0 && (
+            <p className="text-center text-muted-foreground py-8">{t("noPendingReviews")}</p>
           )}
-          {!loading && reviewItems.length > 0 && (
+          {!loading && reviews.length > 0 && (
             <div className="space-y-4">
-              {reviewItems.map((item) => (
-                <div key={item.id} className="p-3 border rounded-md hover:bg-muted/50 transition-colors">
+              {reviews.map((review) => (
+                <div key={review.id} className="p-3 border rounded-md hover:bg-muted/50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="secondary">Pending Approval</Badge>
-                        <h4 className="font-semibold">{item.title}</h4>
+                        <Badge variant="secondary">{t("pendingApproval")}</Badge>
+                        <h4 className="font-semibold">{review.title}</h4>
                       </div>
-                      <p className="text-sm text-muted-foreground">Parties: {item.parties}</p>
-                      <p className="text-sm text-muted-foreground">Promoter: {item.promoter}</p>
-                      <p className="text-xs text-muted-foreground">{item.period}</p>
+                      <p className="text-sm text-muted-foreground">{review.description}</p>
                     </div>
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={item.avatar || placeholderAvatar} alt={item.submitter} />
-                      <AvatarFallback>{item.submitter?.substring(0, 1).toUpperCase()}</AvatarFallback>
+                      <AvatarImage src={review.avatar || placeholderAvatar} alt={review.submitter} />
+                      <AvatarFallback>{review.submitter?.substring(0, 1).toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </div>
                   <div className="mt-3 flex justify-end gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleAction(item.id, "approve")}>
-                      <ThumbsUp className="h-4 w-4 mr-1" /> Approve
+                    <Button variant="outline" size="sm" onClick={() => handleAction(review.id, "approve")}>
+                      <ThumbsUp className="h-4 w-4 mr-1" /> {t("approveButton")}
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleAction(item.id, "reject")}>
-                      <ThumbsDown className="h-4 w-4 mr-1" /> Reject
+                    <Button variant="outline" size="sm" onClick={() => handleAction(review.id, "reject")}>
+                      <ThumbsDown className="h-4 w-4 mr-1" /> {t("rejectButton")}
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleAction(item.id, "comment")}>
-                      <MessageSquare className="h-4 w-4 mr-1" /> Comment
+                    <Button variant="ghost" size="sm" onClick={() => handleAction(review.id, "comment")}>
+                      <MessageSquare className="h-4 w-4 mr-1" /> {t("commentButton")}
                     </Button>
                   </div>
                 </div>

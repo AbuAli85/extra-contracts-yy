@@ -1,43 +1,42 @@
-import { Badge } from "@/components/ui/badge"
-import { CheckCircle, CalendarClock, AlertCircle, CalendarX2 } from "lucide-react"
-import { isFuture, isPast, isWithinInterval } from "date-fns"
+import { cn } from "@/lib/utils"
 
 interface LifecycleStatusIndicatorProps {
-  startDate: string | Date
-  endDate: string | Date
+  status: string
 }
 
-export default function LifecycleStatusIndicator({ startDate, endDate }: LifecycleStatusIndicatorProps) {
-  const now = new Date()
-  const start = new Date(startDate)
-  const end = new Date(endDate)
-
-  let status: "Active" | "Upcoming" | "Expired" | "Invalid Dates" = "Invalid Dates"
-  let Icon = AlertCircle
-  let badgeClass = "bg-gray-500 text-white"
-
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-    status = "Invalid Dates"
-    Icon = AlertCircle
-    badgeClass = "bg-red-100 text-red-700 border-red-300"
-  } else if (isWithinInterval(now, { start, end })) {
-    status = "Active"
-    Icon = CheckCircle
-    badgeClass = "bg-green-100 text-green-700 border-green-300"
-  } else if (isFuture(start)) {
-    status = "Upcoming"
-    Icon = CalendarClock
-    badgeClass = "bg-blue-100 text-blue-700 border-blue-300"
-  } else if (isPast(end)) {
-    status = "Expired"
-    Icon = CalendarX2
-    badgeClass = "bg-orange-100 text-orange-700 border-orange-300"
+export const LifecycleStatusIndicator = ({ status }: LifecycleStatusIndicatorProps) => {
+  let colorClass = ""
+  switch (status.toLowerCase()) {
+    case "draft":
+      colorClass = "bg-gray-500"
+      break
+    case "pending review":
+      colorClass = "bg-yellow-500"
+      break
+    case "approved":
+      colorClass = "bg-blue-500"
+      break
+    case "signed":
+      colorClass = "bg-purple-500"
+      break
+    case "active":
+      colorClass = "bg-green-500"
+      break
+    case "completed":
+      colorClass = "bg-teal-500"
+      break
+    case "archived":
+      colorClass = "bg-red-500"
+      break
+    default:
+      colorClass = "bg-gray-400"
   }
 
   return (
-    <Badge variant="outline" className={`flex items-center gap-1.5 px-2 py-1 text-xs font-medium ${badgeClass}`}>
-      <Icon className="h-3.5 w-3.5" />
+    <span
+      className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white", colorClass)}
+    >
       {status}
-    </Badge>
+    </span>
   )
 }

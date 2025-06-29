@@ -1,25 +1,39 @@
-// app/[locale]/generate-contract/page.tsx
-"use client"
+import { getTranslations } from "next-intl/server"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ContractGeneratorForm } from "@/components/contract-generator-form"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { ArrowLeftIcon } from "lucide-react"
 
-import ContractGeneratorForm from "@/components/contract-generator-form"
-import { motion } from "framer-motion"
+interface GenerateContractPageProps {
+  params: {
+    locale: string
+  }
+}
 
-export default function GenerateContractPage() {
+export default async function GenerateContractPage({ params }: GenerateContractPageProps) {
+  const t = await getTranslations("GenerateContractPage")
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="max-w-4xl mx-auto" // Consistent container max-width
-    >
-      <div className="text-center mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold font-heading mb-3">Create New Contract</h1>
-        <p className="text-md text-muted-foreground">Fill in the details below to generate your bilingual contract.</p>
+    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+      <div className="flex items-center">
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/${params.locale}/contracts`}>
+            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+            {t("backToContracts")}
+          </Link>
+        </Button>
+        <h1 className="ml-auto text-2xl font-semibold">{t("generateContractTitle")}</h1>
       </div>
-      {/* Form container with padding, rounded corners, and shadow */}
-      <div className="bg-card p-6 md:p-8 rounded-lg shadow-xl">
-        <ContractGeneratorForm />
-      </div>
-    </motion.div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("contractDetails")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ContractGeneratorForm />
+        </CardContent>
+      </Card>
+    </main>
   )
 }

@@ -1,8 +1,7 @@
 "use client"
 
-import type React from "react"
-import { useState, useEffect, useRef } from "react"
-import { format, parse, isValid } from "date-fns"
+import * as React from "react"
+import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -14,107 +13,67 @@ import { Input } from "@/components/ui/input"
 interface DatePickerWithManualInputProps {
   date: Date | undefined
   setDate: (date: Date | undefined) => void
-  dateFormat?: string
   placeholder?: string
-  disabled?: boolean | ((date: Date) => boolean)
+  disabled?: boolean
 }
 
 export function DatePickerWithManualInput({
   date,
   setDate,
-  dateFormat = "dd-MM-yyyy",
-  placeholder,
-  disabled,
+  placeholder = "YYYY-MM-DD",
+  disabled = false,
 }: DatePickerWithManualInputProps) {
-  const [inputValue, setInputValue] = useState<string>("")
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [inputValue, setInputValue] = React.useState(date ? format(date, "yyyy-MM-dd") : "")
 
-  useEffect(() => {
-    if (date && isValid(date)) {
-      setInputValue(format(date, dateFormat))
-    } else {
-      setInputValue("") // Clear input if date is null/undefined or invalid
-    }
-  }, [date, dateFormat])
+  React.useEffect(() => {
+    setInputValue(date ? format(date, "yyyy-MM-dd") : "")
+  }, [date])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setInputValue(value)
-    // Try to parse, but only update the parent state if it's a fully valid date string
-    // according to the format, or if it's empty.
-    if (value === "") {
-      setDate(undefined)
-      return
-    }
-    const parsedDate = parse(value, dateFormat, new Date())
-    if (isValid(parsedDate) && format(parsedDate, dateFormat) === value) {
-      setDate(parsedDate)
-    }
-    // If partially typed, don't setDate yet, wait for blur or calendar select
-  }
-
-  const handleInputBlur = () => {
-    const parsedDate = parse(inputValue, dateFormat, new Date())
-    if (isValid(parsedDate)) {
-      // If input was partial/invalid but parsable, format it correctly
-      // and update the parent state.
-      const correctlyFormatted = format(parsedDate, dateFormat)
-      setInputValue(correctlyFormatted)
-      setDate(parse(correctlyFormatted, dateFormat, new Date())) // Re-parse to ensure Date object
-    } else if (inputValue !== "") {
-      // If input is invalid and not empty, revert to last valid date or clear
-      if (date && isValid(date)) {
-        setInputValue(format(date, dateFormat))
+    try {
+      const parsedDate = new Date(value)
+      if (!isNaN(parsedDate.getTime())) {
+        setDate(parsedDate)
       } else {
-        setInputValue("")
         setDate(undefined)
       }
-    } else {
-      // Input is empty
+    } catch {
       setDate(undefined)
     }
   }
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
-    setDate(selectedDate) // Update parent state
-    if (selectedDate && isValid(selectedDate)) {
-      setInputValue(format(selectedDate, dateFormat)) // Update input field
-    } else {
-      setInputValue("")
-    }
-    setIsCalendarOpen(false) // Close calendar
-    inputRef.current?.focus() // Optionally refocus input
+    setDate(selectedDate)
+    setInputValue(selectedDate ? format(selectedDate, "yyyy-MM-dd") : "")
   }
 
-  const isDateDisabled = typeof disabled === "function" ? disabled : () => !!disabled
-
   return (
-    <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-      <div className="flex items-center gap-x-2">
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant={"outline"}
+          className={cn(
+            "w-full justify-start text-left font-normal",
+            !date && "text-muted-foreground",
+            disabled && "opacity-50 cursor-not-allowed",
+          )}
+          disabled={disabled}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {date ? format(date, "PPP") : <span>{placeholder}</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0">
         <Input
-          ref={inputRef}
-          type="text"
-          placeholder={placeholder || dateFormat.toUpperCase()}
           value={inputValue}
           onChange={handleInputChange}
-          onBlur={handleInputBlur}
-          className="w-full" // Ensure it takes available width
-          disabled={typeof disabled === "boolean" ? disabled : false}
+          placeholder={placeholder}
+          className="mb-2"
+          disabled={disabled}
         />
-        <PopoverTrigger asChild>
-          <Button
-            variant={"outline"}
-            className={cn("w-auto shrink-0 p-2", !date && "text-muted-foreground")}
-            disabled={typeof disabled === "boolean" ? disabled : false}
-            aria-label="Open calendar"
-          >
-            <CalendarIcon className="h-4 w-4" />
-          </Button>
-        </PopoverTrigger>
-      </div>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar mode="single" selected={date} onSelect={handleDateSelect} initialFocus disabled={isDateDisabled} />
+        <Calendar mode="single" selected={date} onSelect={handleDateSelect} initialFocus disabled={disabled} />
       </PopoverContent>
     </Popover>
   )

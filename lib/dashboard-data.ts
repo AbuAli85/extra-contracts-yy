@@ -1,180 +1,249 @@
-import { FileText, FileCheck, FileX, CalendarClock, Users, Building } from "lucide-react"
+import { createClient } from "@/lib/supabase/server"
 import type {
-  SummaryWidgetData,
-  ContractReportItem,
-  ReviewItem,
-  NotificationItem,
-  ContractsPerMonthData,
-  ContractsByStatusData,
-  ContractVolumeData,
+  DashboardSummary,
+  ContractTrend,
+  ContractStatusDistribution,
+  AuditLog,
+  Review,
+  AdminAction,
+  User,
+  Contract,
 } from "./dashboard-types"
+import { format, subMonths } from "date-fns"
 
-export const summaryWidgetsData: SummaryWidgetData[] = [
-  {
-    title: "Total Contracts",
-    titleAr: "إجمالي العقود",
-    value: 1250,
-    icon: FileText,
-    trend: "+12%",
-    color: "text-blue-500",
-  },
-  {
-    title: "Active Contracts",
-    titleAr: "العقود النشطة",
-    value: 850,
-    icon: FileCheck,
-    trend: "+5%",
-    color: "text-green-500",
-  },
-  {
-    title: "Expired Contracts",
-    titleAr: "العقود منتهية الصلاحية",
-    value: 300,
-    icon: FileX,
-    trend: "-2%",
-    color: "text-red-500",
-  },
-  {
-    title: "Expiring in 30 Days",
-    titleAr: "تنتهي خلال 30 يومًا",
-    value: 75,
-    icon: CalendarClock,
-    trend: "+10",
-    color: "text-orange-500",
-  },
-  { title: "Total Promoters", titleAr: "إجمالي المروجين", value: 250, icon: Users, color: "text-purple-500" },
-  { title: "Total Companies", titleAr: "إجمالي الشركات", value: 150, icon: Building, color: "text-teal-500" },
-]
+const supabase = createClient()
 
-export const contractReportsData: ContractReportItem[] = [
-  {
-    id: "1",
-    contract_id: "CON-001",
-    promoter_name: "Aisha Al Ahmed",
-    employer_name: "Tech Solutions LLC",
-    client_name: "Global Corp",
-    start_date: "2023-01-15",
-    end_date: "2024-01-14",
-    status: "Expired",
-  },
-  {
-    id: "2",
-    contract_id: "CON-002",
-    promoter_name: "John Doe",
-    employer_name: "Innovate Ltd",
-    client_name: "Alpha Inc",
-    start_date: "2023-06-01",
-    end_date: "2024-05-31",
-    status: "Active",
-  },
-  {
-    id: "3",
-    contract_id: "CON-003",
-    promoter_name: "Fatima Khan",
-    employer_name: "Creative Minds",
-    client_name: "Beta Group",
-    start_date: "2024-07-01",
-    end_date: "2024-07-25",
-    status: "Soon-to-Expire",
-  },
-  {
-    id: "4",
-    contract_id: "CON-004",
-    promoter_name: "Omar Hassan",
-    employer_name: "Tech Solutions LLC",
-    client_name: "Gamma Co.",
-    start_date: "2024-03-10",
-    end_date: "2025-03-09",
-    status: "Active",
-  },
-]
+export async function getDashboardSummary(): Promise<DashboardSummary> {
+  const { data: totalContractsData, error: totalContractsError } = await supabase
+    .from("contracts")
+    .select("count", { count: "exact" })
 
-export const recentlyCreatedContracts: ReviewItem[] = [
-  {
-    id: "rc1",
-    title: "CON-004",
-    promoter: "Omar Hassan",
-    parties: "Tech Solutions LLC / Gamma Co.",
-    period: "Mar 10, 2024 - Mar 09, 2025",
-    contractLink: "/contracts/CON-004",
-  },
-  {
-    id: "rc2",
-    title: "CON-005",
-    promoter: "Li Wei",
-    parties: "Innovate Ltd / Delta LLC",
-    period: "Apr 01, 2024 - Mar 31, 2025",
-    contractLink: "/contracts/CON-005",
-  },
-]
+  const { data: activeContractsData, error: activeContractsError } = await supabase
+    .from("contracts")
+    .select("count", { count: "exact" })
+    .eq("status", "Active") // Assuming 'Active' is a status
 
-export const recentlyExpiredContracts: ReviewItem[] = [
-  {
-    id: "re1",
-    title: "CON-001",
-    promoter: "Aisha Al Ahmed",
-    parties: "Tech Solutions LLC / Global Corp",
-    period: "Jan 15, 2023 - Jan 14, 2024",
-    contractLink: "/contracts/CON-001",
-  },
-]
+  const { data: pendingContractsData, error: pendingContractsError } = await supabase
+    .from("contracts")
+    .select("count", { count: "exact" })
+    .eq("status", "Pending Review") // Assuming 'Pending Review' is a status
 
-export const contractsMissingDocuments: ReviewItem[] = [
-  {
-    id: "md1",
-    title: "CON-002",
-    promoter: "John Doe",
-    parties: "Innovate Ltd / Alpha Inc",
-    period: "Jun 01, 2023 - May 31, 2024",
-    contractLink: "/contracts/CON-002",
-  },
-]
-
-export const notificationItemsData: NotificationItem[] = [
-  {
-    id: "n1",
-    related_contract_id: "CON-003",
-    promoterName: "Fatima Khan",
-    clientName: "Beta Group",
-    daysUntilExpiry: 20,
-    expiryDate: "2024-07-25",
-  },
-  {
-    id: "n2",
-    related_contract_id: "CON-006",
-    promoterName: "Maria Garcia",
-    clientName: "Epsilon Solutions",
-    daysUntilExpiry: 28,
-    expiryDate: "2024-08-02",
-  },
-]
-
-export const contractsPerMonthChartData: ContractsPerMonthData[] = [
-  { month: "Jan", contracts: 65 },
-  { month: "Feb", contracts: 59 },
-  { month: "Mar", contracts: 80 },
-  { month: "Apr", contracts: 81 },
-  { month: "May", contracts: 56 },
-  { month: "Jun", contracts: 55 },
-  { month: "Jul", contracts: 40 },
-  { month: "Aug", contracts: 70 },
-  { month: "Sep", contracts: 60 },
-  { month: "Oct", contracts: 90 },
-  { month: "Nov", contracts: 75 },
-  { month: "Dec", contracts: 85 },
-]
-
-export const contractsByStatusChartData: ContractsByStatusData[] = [
-  { name: "Active", value: 850, fill: "hsl(var(--chart-1))" },
-  { name: "Expired", value: 300, fill: "hsl(var(--chart-2))" },
-  { name: "Soon-to-Expire", value: 75, fill: "hsl(var(--chart-3))" },
-]
-
-export const contractVolumeTrendData: ContractVolumeData[] = Array.from({ length: 12 }, (_, i) => {
-  const date = new Date()
-  date.setMonth(date.getMonth() - (11 - i))
-  return {
-    month: date.toLocaleString("default", { month: "short" }),
-    volume: Math.floor(Math.random() * 50) + 50, // Random volume between 50-100
+  if (totalContractsError || activeContractsError || pendingContractsError) {
+    console.error(
+      "Error fetching dashboard summary:",
+      totalContractsError || activeContractsError || pendingContractsError,
+    )
+    // Return default values or throw an error based on your error handling strategy
+    return {
+      totalContracts: 0,
+      activeContracts: 0,
+      pendingContracts: 0,
+    }
   }
-})
+
+  return {
+    totalContracts: totalContractsData?.[0]?.count || 0,
+    activeContracts: activeContractsData?.[0]?.count || 0,
+    pendingContracts: pendingContractsData?.[0]?.count || 0,
+  }
+}
+
+export async function getContractTrends(): Promise<ContractTrend[]> {
+  // This is a simplified mock. In a real app, you'd query your database
+  // for contract creation/completion dates and aggregate them by month.
+  const trends: ContractTrend[] = []
+  const now = new Date()
+
+  for (let i = 5; i >= 0; i--) {
+    const month = subMonths(now, i)
+    const monthName = format(month, "MMM yyyy")
+    // Mock data: random numbers for demonstration
+    trends.push({
+      month: monthName,
+      newContracts: Math.floor(Math.random() * 20) + 5,
+      completedContracts: Math.floor(Math.random() * 15) + 3,
+    })
+  }
+  return trends
+}
+
+export async function getContractStatusDistribution(): Promise<ContractStatusDistribution[]> {
+  // This is a simplified mock. In a real app, you'd query your database
+  // to count contracts by their status.
+  const { data, error } = await supabase.from("contracts").select("status, count", { count: "exact" }).order("status")
+
+  if (error) {
+    console.error("Error fetching contract status distribution:", error)
+    return []
+  }
+
+  // Transform Supabase count data into the desired format
+  const distribution: ContractStatusDistribution[] = data.map((row: any) => ({
+    name: row.status,
+    count: row.count,
+  }))
+
+  return distribution
+}
+
+export async function getAuditLogs(): Promise<AuditLog[]> {
+  // This is a simplified mock. In a real app, you'd query your audit log table.
+  const { data, error } = await supabase
+    .from("audit_logs")
+    .select("*")
+    .order("timestamp", { ascending: false })
+    .limit(10)
+
+  if (error) {
+    console.error("Error fetching audit logs:", error)
+    return []
+  }
+
+  return data.map((log) => ({
+    id: log.id,
+    timestamp: log.timestamp,
+    user: log.user_email || "System",
+    action: log.action,
+    target: log.target || "N/A",
+    details: log.details || "No additional details",
+  })) as AuditLog[]
+}
+
+export async function getPendingReviews(): Promise<Review[]> {
+  // This is a simplified mock. In a real app, you'd query for items needing review.
+  const { data, error } = await supabase
+    .from("contracts")
+    .select("id, contract_name, created_at, user_id")
+    .eq("status", "Pending Review")
+    .order("created_at", { ascending: false })
+    .limit(5)
+
+  if (error) {
+    console.error("Error fetching pending reviews:", error)
+    return []
+  }
+
+  return data.map((contract) => ({
+    id: contract.id,
+    title: `Contract: ${contract.contract_name}`,
+    description: `Submitted by user ${contract.user_id?.substring(0, 8)}... for review.`,
+    avatar: "/placeholder-user.png", // Placeholder avatar
+    submitter: `User ${contract.user_id?.substring(0, 8)}...`,
+    period: format(new Date(contract.created_at), "PPP"),
+  })) as Review[]
+}
+
+export async function getAdminActions(): Promise<AdminAction[]> {
+  // Mock data for admin actions
+  return [
+    { id: "1", name: "Run Database Migration", description: "Apply latest schema changes." },
+    { id: "2", name: "Clear Cache", description: "Clear application cache for all users." },
+    { id: "3", name: "Generate Report", description: "Generate a comprehensive system report." },
+  ]
+}
+
+export async function getNotifications(): Promise<Notification[]> {
+  // This is a simplified mock. In a real app, you'd query your notifications table.
+  const { data, error } = await supabase
+    .from("notifications")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(10)
+
+  if (error) {
+    console.error("Error fetching notifications:", error)
+    return []
+  }
+
+  return data.map((n) => ({
+    id: n.id,
+    type: n.type,
+    message: n.message,
+    timestamp: n.created_at,
+    isRead: n.is_read,
+  })) as Notification[]
+}
+
+// Placeholder for getContractsByPromoter
+export async function getContractsByPromoter(promoterId: string): Promise<Contract[]> {
+  console.log(`Fetching contracts for promoter: ${promoterId}`)
+  // In a real application, you would query your database for contracts
+  // associated with the given promoterId.
+  const { data, error } = await supabase
+    .from("contracts")
+    .select(`
+      id,
+      contract_name,
+      contract_type,
+      start_date,
+      end_date,
+      contract_value,
+      content_english,
+      content_spanish,
+      status,
+      created_at,
+      updated_at,
+      parties_contracts_party_a_id_fkey(name),
+      parties_contracts_party_b_id_fkey(name),
+      promoters(name)
+    `)
+    .eq("promoter_id", promoterId)
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    console.error("Error fetching contracts by promoter:", error)
+    return []
+  }
+
+  return data.map((contract: any) => ({
+    ...contract,
+    party_a_name: contract.parties_contracts_party_a_id_fkey?.name || "N/A",
+    party_b_name: contract.parties_contracts_party_b_id_fkey?.name || "N/A",
+    promoter_name: contract.promoters?.name || "N/A",
+  })) as Contract[]
+}
+
+// Placeholder for getReviewItems
+export async function getReviewItems(): Promise<Review[]> {
+  console.log("Fetching review items...")
+  // This would typically fetch items from a 'reviews' table or
+  // filter existing data based on a 'needs_review' flag.
+  return [
+    {
+      id: "review-1",
+      title: "Contract #001 - Pending Approval",
+      description: "Review required for new sales contract with Client X.",
+      avatar: "/placeholder-user.png",
+      submitter: "Admin User",
+      period: "2023-10-26",
+    },
+    {
+      id: "review-2",
+      title: "Promoter Profile Update",
+      description: "Promoter 'John Doe' updated their profile. Needs verification.",
+      avatar: "/placeholder-user.png",
+      submitter: "Promoter John",
+      period: "2023-10-25",
+    },
+  ]
+}
+
+// Placeholder for getUsers
+export async function getUsers(): Promise<User[]> {
+  console.log("Fetching users...")
+  // In a real application, you would query your Supabase auth.users table
+  // or a custom 'profiles' table linked to auth.users.
+  const { data, error } = await supabase.from("profiles").select("id, email, role, created_at").limit(10)
+
+  if (error) {
+    console.error("Error fetching users:", error)
+    return []
+  }
+
+  return data.map((user: any) => ({
+    id: user.id,
+    email: user.email,
+    role: user.role || "user", // Default role if not specified
+    createdAt: user.created_at,
+  })) as User[]
+}

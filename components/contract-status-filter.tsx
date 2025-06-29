@@ -1,49 +1,40 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 
-const STATUS_OPTIONS = [
-  { label: "All Statuses", value: "all" },
-  { label: "Pending Generation", value: "PENDING_GENERATION" },
-  { label: "Generated Successfully", value: "GENERATED_SUCCESSFULLY" },
-  { label: "Email Sent", value: "EMAIL_SENT" },
-  { label: "Generation Error", value: "GENERATION_ERROR" },
-]
-
-export default function ContractStatusFilter() {
-  const router = useRouter()
+export const ContractStatusFilter = () => {
+  const t = useTranslations("ContractStatusFilter")
   const searchParams = useSearchParams()
-  const currentStatus = searchParams.get("status") || "all"
+  const pathname = usePathname()
+  const { replace } = useRouter()
 
-  const handleStatusChange = (newStatus: string) => {
+  const handleStatusChange = (status: string) => {
     const params = new URLSearchParams(searchParams)
-    if (newStatus === "all") {
+    if (status === "all") {
       params.delete("status")
     } else {
-      params.set("status", newStatus)
+      params.set("status", status)
     }
-    router.push(`/contracts?${params.toString()}`)
+    replace(`${pathname}?${params.toString()}`)
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <Label htmlFor="status-filter" className="text-sm font-medium">
-        Filter by Status:
-      </Label>
-      <Select value={currentStatus} onValueChange={handleStatusChange}>
-        <SelectTrigger id="status-filter" className="w-[200px]">
-          <SelectValue placeholder="Select status" />
-        </SelectTrigger>
-        <SelectContent>
-          {STATUS_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <Select onValueChange={handleStatusChange} defaultValue={searchParams.get("status")?.toString() || "all"}>
+      <SelectTrigger className="w-[180px]">
+        <SelectValue placeholder={t("filterByStatus")} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">{t("allStatuses")}</SelectItem>
+        <SelectItem value="Draft">{t("statusDraft")}</SelectItem>
+        <SelectItem value="Pending Review">{t("statusPendingReview")}</SelectItem>
+        <SelectItem value="Approved">{t("statusApproved")}</SelectItem>
+        <SelectItem value="Signed">{t("statusSigned")}</SelectItem>
+        <SelectItem value="Active">{t("statusActive")}</SelectItem>
+        <SelectItem value="Completed">{t("statusCompleted")}</SelectItem>
+        <SelectItem value="Archived">{t("statusArchived")}</SelectItem>
+      </SelectContent>
+    </Select>
   )
 }

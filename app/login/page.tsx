@@ -1,9 +1,18 @@
-import AuthForm from "@/components/auth-form"
+import { AuthForm } from "@/components/auth-form"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <AuthForm />
+    <div className="flex min-h-screen items-center justify-center bg-muted">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardDescription>Enter your email and password to access your account.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AuthForm />
+        </CardContent>
+      </Card>
     </div>
   )
 }

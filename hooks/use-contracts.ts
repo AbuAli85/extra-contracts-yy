@@ -1,136 +1,78 @@
-"use client"
-
-// --- Supabase setup and core utilities ---
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase" // Initialized Supabase client
-import { createContract, deleteContract } from "@/app/actions/contracts"
-import { useToast } from "@/hooks/use-toast"
-import { devLog } from "@/lib/dev-log"
-import type { Database } from "@/types/supabase"
-import { useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
+import type { Contract } from "@/lib/types"
+import {
+  createContract as createContractAction,
+  updateContract as updateContractAction,
+  deleteContract as deleteContractAction,
+} from "@/app/actions/contracts"
 
-// --- Schema definition ---
-// Detailed contract type including joined relational data
-// This mirrors what the `fetchContracts` query selects
-export type ContractWithRelations = Database["public"]["Tables"]["contracts"]["Row"] & {
-  parties_contracts_employer_id_fkey?: Database["public"]["Tables"]["parties"]["Row"] | null
-  parties_contracts_client_id_fkey?: Database["public"]["Tables"]["parties"]["Row"] | null
-  promoters?: Database["public"]["Tables"]["promoters"]["Row"] | null
-  promoter_name_en?: string | null
-  promoter_name_ar?: string | null
-  // Adjust based on your actual join aliases if different
-  // For example, if you aliased them:
-  // employer?: Database["public"]["Tables"]["parties"]["Row"] | null
-  // client?: Database["public"]["Tables"]["parties"]["Row"] | null
-}
-// Minimal fields required when creating a new contract
-export type ContractInsert = Database["public"]["Tables"]["contracts"]["Insert"]
+const supabase = createClient()
 
-// --- Queries ---
-// Fetch all contracts with their related party and promoter info
-const fetchContracts = async (): Promise<ContractWithRelations[]> => {
-  const { data, error } = await supabase
-    .from("contracts")
-    .select(`
-      *,
-      promoter_name_en:promoter_id(name_en),
-      promoter_name_ar:promoter_id(name_ar),
-      parties!contracts_employer_id_fkey(id,name_en,name_ar),
-      parties!contracts_client_id_fkey(id,name_en,name_ar),
-      promoters(id,name_en,name_ar)
-    `)
-    .order("created_at", { ascending: false })
+// Fetch all contracts
+export function useContracts(query?: string, status?: string) {
+  return useQuery<Contract[], Error>({
+    queryKey: ["contracts", query, status],
+    queryFn: async () => {
+      let dbQuery = supabase.from("contracts").select("*")
 
-  if (error) {
-    console.error("Error fetching contracts:", error)
-    throw new Error(error.message)
-  }
-  return (data as ContractWithRelations[]) || []
-}
+      if (query) {
+        dbQuery = dbQuery.or(`contract_name.ilike.%${query}%,contract_type.ilike.%${query}%`)
+      }
 
-export const useContracts = () => {
-  const queryClient = useQueryClient()
-  const queryKey = ["contracts"]
+      if (status && status !== "all") {
+        dbQuery = dbQuery.eq("status", status)
+      }
 
-  // --- Data fetching with React Query ---
-  const queryResult = useQuery<ContractWithRelations[], Error>({
-    queryKey: queryKey,
-    queryFn: fetchContracts,
+      const { data, error } = await dbQuery
+      if (error) throw error
+      return data as Contract[]
+    },
   })
+}
 
-  // --- Realtime subscription ---
-  useEffect(() => {
-    const channel = supabase
-      .channel("public-contracts-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, (payload) => {
-        devLog("Realtime contract change received!", payload)
-        queryClient.invalidateQueries({ queryKey: queryKey })
-      })
-      .subscribe((status, err) => {
-        if (status === "SUBSCRIBED") {
-          devLog("Subscribed to contracts channel!")
-        }
-        if (status === "CHANNEL_ERROR") {
-          const message = err?.message ?? "Unknown channel error"
-          console.error(`Contracts channel error (${status}):`, message)
-        }
-        if (status === "TIMED_OUT") {
-          console.warn(`Subscription timed out (${status})`)
-        }
-      })
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [queryClient, queryKey])
-
-  return queryResult
+// Fetch a single contract by ID
+export function useContract(id: string) {
+  return useQuery<Contract, Error>({
+    queryKey: ["contract", id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("contracts").select("*").eq("id", id).single()
+      if (error) throw error
+      return data as Contract
+    },
+  })
 }
 
 // Create a new contract
-const createContractInSupabase = async (
-  newContract: ContractInsert,
-): Promise<ContractWithRelations> => {
-  const data = await createContract(newContract)
-  return data as ContractWithRelations
-}
-
-// --- Form submission: create contract ---
-export const useCreateContractMutation = () => {
+export function useCreateContractMutation() {
   const queryClient = useQueryClient()
-  return useMutation<ContractWithRelations, Error, ContractInsert>({
-    mutationFn: createContractInSupabase,
+  return useMutation({
+    mutationFn: createContractAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contracts"] })
     },
   })
 }
 
-// --- Form submission: delete contract ---
-const deleteContractInSupabase = async (contractId: string): Promise<void> => {
-  await deleteContract(contractId)
+// Update an existing contract
+export function useUpdateContractMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, formData }: { id: string; formData: FormData }) => updateContractAction(id, formData),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["contract", variables.id] })
+      queryClient.invalidateQueries({ queryKey: ["contracts"] })
+    },
+  })
 }
 
-export const useDeleteContractMutation = () => {
+// Delete a contract
+export function useDeleteContractMutation() {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
-  return useMutation<void, Error, string>({
-    // contractId is a string
-    mutationFn: deleteContractInSupabase,
-    onSuccess: (_data, contractId) => {
+  return useMutation({
+    mutationFn: deleteContractAction,
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contracts"] })
-      // Optionally, for optimistic updates:
-      // queryClient.setQueryData(['contracts'], (oldData: ContractWithRelations[] | undefined) =>
-      //   oldData ? oldData.filter(contract => contract.id !== contractId) : []
-      // );
-    },
-    onError: (error) => {
-      console.error("Error deleting contract:", error)
-      toast({
-        title: "Error",
-        description: `Failed to delete contract: ${error.message}`,
-        variant: "destructive",
-      })
     },
   })
 }

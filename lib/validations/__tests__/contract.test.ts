@@ -1,67 +1,103 @@
-import { ContractFormSchema } from '../contract'
+import { contractSchema } from "../contract"
 
-describe('ContractFormSchema', () => {
-  const baseData = {
-    firstPartyId: '1',
-    secondPartyId: '2',
-    promoterId: '3',
-    contractStartDate: '01-01-2025',
-    contractEndDate: '02-01-2025',
-    jobTitleEn: 'Dev',
-    jobTitleAr: 'مطور',
-    salaryAmount: 100,
-    salaryCurrency: 'SAR',
-    workingHours: '8',
-    workingDays: 'Mon-Fri',
-    annualLeaveDays: 1,
-    promoterIdCardCopy: new File(['a'], 'id.jpg', { type: 'image/jpeg' }),
-    promoterPassportCopy: new File(['a'], 'pass.pdf', { type: 'application/pdf' }),
-  }
-
-  it('accepts valid dates in DD-MM-YYYY format', () => {
-    const result = ContractFormSchema.safeParse(baseData)
+describe("contractSchema", () => {
+  it("should validate a correct contract", () => {
+    const validData = {
+      contract_name: "Service Agreement",
+      contract_type: "Service",
+      party_a_id: "uuid-party-a",
+      party_b_id: "uuid-party-b",
+      promoter_id: "uuid-promoter",
+      start_date: new Date("2023-01-01"),
+      end_date: new Date("2023-12-31"),
+      contract_value: "10000.00",
+      content_english: "This is the English content.",
+      content_spanish: "Este es el contenido en español.",
+      status: "Draft",
+    }
+    const result = contractSchema.safeParse(validData)
     expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.contractStartDate).toBeInstanceOf(Date)
-    }
+    expect(result.data).toEqual(validData)
   })
 
-  it('rejects invalid date formats', () => {
-    const result = ContractFormSchema.safeParse({
-      ...baseData,
-      contractStartDate: '2025/01/01',
-    })
-    expect(result.success).toBe(false)
-    if (!result.success) {
-      expect(result.error.flatten().fieldErrors.contractStartDate?.[0]).toMatch(/Invalid date format/)
+  it("should allow optional fields to be undefined", () => {
+    const validData = {
+      contract_name: "Service Agreement",
+      contract_type: "Service",
+      party_a_id: "uuid-party-a",
+      party_b_id: "uuid-party-b",
+      promoter_id: "uuid-promoter",
+      start_date: undefined,
+      end_date: undefined,
+      contract_value: "10000.00",
+      content_english: "This is the English content.",
+      content_spanish: "Este es el contenido en español.",
+      status: "Draft",
     }
-  })
-
-  it('accepts allowed file types', () => {
-    const result = ContractFormSchema.safeParse(baseData)
+    const result = contractSchema.safeParse(validData)
     expect(result.success).toBe(true)
+    expect(result.data).toEqual(validData)
   })
 
-  it('rejects disallowed file types', () => {
-    const result = ContractFormSchema.safeParse({
-      ...baseData,
-      promoterIdCardCopy: new File(['a'], 'test.txt', { type: 'text/plain' }),
-    })
+  it("should fail validation for missing required fields", () => {
+    const invalidData = {
+      contract_type: "Service",
+      party_a_id: "uuid-party-a",
+      party_b_id: "uuid-party-b",
+      promoter_id: "uuid-promoter",
+      start_date: new Date("2023-01-01"),
+      end_date: new Date("2023-12-31"),
+      contract_value: "10000.00",
+      content_english: "This is the English content.",
+      content_spanish: "Este es el contenido en español.",
+      status: "Draft",
+    }
+    const result = contractSchema.safeParse(invalidData)
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.error.flatten().fieldErrors.promoterIdCardCopy?.[0]).toMatch(/files are accepted/)
+      expect(result.error.issues.some((issue) => issue.path[0] === "contract_name")).toBe(true)
     }
   })
 
-  it('rejects files exceeding size limit', () => {
-    const bigFile = new File([new Uint8Array(6 * 1024 * 1024)], 'big.pdf', { type: 'application/pdf' })
-    const result = ContractFormSchema.safeParse({
-      ...baseData,
-      promoterIdCardCopy: bigFile,
-    })
+  it("should fail validation for invalid contract_value (not a number)", () => {
+    const invalidData = {
+      contract_name: "Service Agreement",
+      contract_type: "Service",
+      party_a_id: "uuid-party-a",
+      party_b_id: "uuid-party-b",
+      promoter_id: "uuid-promoter",
+      start_date: new Date("2023-01-01"),
+      end_date: new Date("2023-12-31"),
+      contract_value: "not-a-number",
+      content_english: "This is the English content.",
+      content_spanish: "Este es el contenido en español.",
+      status: "Draft",
+    }
+    const result = contractSchema.safeParse(invalidData)
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.error.flatten().fieldErrors.promoterIdCardCopy?.[0]).toMatch(/Max file size/)
+      expect(result.error.issues.some((issue) => issue.path[0] === "contract_value")).toBe(true)
+    }
+  })
+
+  it("should fail validation if end_date is before start_date", () => {
+    const invalidData = {
+      contract_name: "Service Agreement",
+      contract_type: "Service",
+      party_a_id: "uuid-party-a",
+      party_b_id: "uuid-party-b",
+      promoter_id: "uuid-promoter",
+      start_date: new Date("2023-12-31"),
+      end_date: new Date("2023-01-01"),
+      contract_value: "10000.00",
+      content_english: "This is the English content.",
+      content_spanish: "Este es el contenido en español.",
+      status: "Draft",
+    }
+    const result = contractSchema.safeParse(invalidData)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.message === "End date cannot be before start date.")).toBe(true)
     }
   })
 })

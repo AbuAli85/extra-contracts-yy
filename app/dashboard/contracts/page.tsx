@@ -1,26 +1,15 @@
-"use client"
-import DashboardLayout from "@/components/dashboard/dashboard-layout"
+import { getTranslations } from "next-intl/server"
 import ContractReportsTable from "@/components/dashboard/contract-reports-table"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { FilePlus2Icon } from "lucide-react"
+import { getContracts } from "@/lib/data"
 
-export default function ContractsPage() {
+export default async function DashboardContractsPage() {
+  const t = await getTranslations("DashboardContracts")
+  const contracts = await getContracts() // Fetch all contracts for the table
+
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold">Manage Contracts / إدارة العقود</h1>
-          <Button asChild>
-            <Link href="/generate-contract">
-              <FilePlus2Icon className="mr-2 h-5 w-5" />
-              Generate New Contract
-            </Link>
-          </Button>
-        </div>
-        <ContractReportsTable />
-        {/* Additional contract management features can be added here */}
-      </div>
-    </DashboardLayout>
+    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+      <h1 className="text-2xl font-semibold">{t("contractsTitle")}</h1>
+      <ContractReportsTable initialContracts={contracts} />
+    </main>
   )
 }
