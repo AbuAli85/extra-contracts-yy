@@ -4,133 +4,121 @@ import { toast } from "sonner"
 
 export interface Contract {
   id: string
-  contract_number: string
-  title?: string
+  title: string
   status: "pending" | "queued" | "processing" | "completed" | "failed"
-  pdf_url?: string
-  error_message?: string
   created_at: string
   updated_at: string
-  party1_id?: string
-  party2_id?: string
-  contract_type?: string
-  terms?: Record<string, any>
-  created_by?: string
+  pdf_url?: string
+  error_message?: string
+  contract_data?: any
 }
 
 interface ContractsState {
   contracts: Contract[]
-  loading: boolean
+  isLoading: boolean
   error: string | null
-  statistics: {
+  stats: {
     total: number
     pending: number
-    queued: number
-    processing: number
     completed: number
     failed: number
   }
-}
 
-interface ContractsActions {
+  // Actions
   fetchContracts: () => Promise<void>
-  generateContract: (contractNumber: string) => Promise<void>
-  retryContract: (contractNumber: string) => Promise<void>
-  downloadContract: (pdfUrl: string, contractNumber: string) => void
-  updateContract: (contract: Contract) => void
-  setContracts: (contracts: Contract[]) => void
-  calculateStatistics: () => void
+  generateContract: (data: any) => Promise<void>
+  retryContract: (id: string) => Promise<void>
+  downloadContract: (id: string) => Promise<void>
+  updateContract: (id: string, updates: Partial<Contract>) => void
+  calculateStats: () => void
 }
 
-type ContractsStore = ContractsState & ContractsActions
-
-export const useContractsStore = create<ContractsStore>((set, get) => ({
+export const useContractsStore = create<ContractsState>((set, get) => ({
   contracts: [],
-  loading: false,
+  isLoading: false,
   error: null,
-  statistics: {
+  stats: {
     total: 0,
     pending: 0,
-    queued: 0,
-    processing: 0,
     completed: 0,
     failed: 0,
   },
 
   fetchContracts: async () => {
-    set({ loading: true, error: null })
+    set({ isLoading: true, error: null })
+
     try {
       const supabase = createClient()
       const { data, error } = await supabase.from("contracts").select("*").order("created_at", { ascending: false })
 
       if (error) throw error
 
-      set({ contracts: data || [], loading: false })
-      get().calculateStatistics()
+      set({ contracts: data || [], isLoading: false })
+      get().calculateStats()
     } catch (error) {
       console.error("Error fetching contracts:", error)
-      set({ error: "Failed to fetch contracts", loading: false })
-      toast.error("Failed to fetch contracts")
+      set({
+        error: error instanceof Error ? error.message : "Failed to fetch contracts",
+        isLoading: false,
+      })
     }
   },
 
-  generateContract: async (contractNumber: string) => {
+  generateContract: async (contractData: any) => {
     try {
       const response = await fetch("/api/generate-contract", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ contract_number: contractNumber }),
+        body: JSON.stringify(contractData),
       })
 
-      const data = await response.json()
-
       if (!response.ok) {
-        throw new Error(data.error || "Failed to generate contract")
+        throw new Error("Failed to generate contract")
       }
 
+      const result = await response.json()
       toast.success("Contract generation started!")
-      get().fetchContracts()
+
+      // Refresh contracts to show the new one
+      await get().fetchContracts()
     } catch (error) {
       console.error("Error generating contract:", error)
-      toast.error(error instanceof Error ? error.message : "Failed to generate contract")
+      toast.error("Failed to generate contract")
+      throw error
     }
   },
 
-  retryContract: async (contractNumber: string) => {
+  retryContract: async (id: string) => {
     try {
-      const response = await fetch("/api/generate-contract", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ contract_number: contractNumber }),
-      })
+      const contract = get().contracts.find((c) => c.id === id)
+      if (!contract) return
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to retry contract")
-      }
-
-      toast.success("Contract retry started!")
-      get().fetchContracts()
+      await get().generateContract(contract.contract_data)
+      toast.success("Contract retry initiated!")
     } catch (error) {
       console.error("Error retrying contract:", error)
-      toast.error(error instanceof Error ? error.message : "Failed to retry contract")
+      toast.error("Failed to retry contract")
     }
   },
 
-  downloadContract: (pdfUrl: string, contractNumber: string) => {
+  downloadContract: async (id: string) => {
     try {
+      const contract = get().contracts.find((c) => c.id === id)
+      if (!contract?.pdf_url) {
+        toast.error("PDF not available")
+        return
+      }
+
+      // Create a temporary link to download the file
       const link = document.createElement("a")
-      link.href = pdfUrl
-      link.download = `contract-${contractNumber}.pdf`
-      link.target = "_blank"
+      link.href = contract.pdf_url
+      link.download = `contract-${id}.pdf`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+
       toast.success("Download started!")
     } catch (error) {
       console.error("Error downloading contract:", error)
@@ -138,30 +126,22 @@ export const useContractsStore = create<ContractsStore>((set, get) => ({
     }
   },
 
-  updateContract: (updatedContract: Contract) => {
+  updateContract: (id: string, updates: Partial<Contract>) => {
     set((state) => ({
-      contracts: state.contracts.map((contract) =>
-        contract.contract_number === updatedContract.contract_number ? updatedContract : contract,
-      ),
+      contracts: state.contracts.map((contract) => (contract.id === id ? { ...contract, ...updates } : contract)),
     }))
-    get().calculateStatistics()
+    get().calculateStats()
   },
 
-  setContracts: (contracts: Contract[]) => {
-    set({ contracts })
-    get().calculateStatistics()
-  },
-
-  calculateStatistics: () => {
-    const { contracts } = get()
-    const statistics = {
+  calculateStats: () => {
+    const contracts = get().contracts
+    const stats = {
       total: contracts.length,
-      pending: contracts.filter((c) => c.status === "pending").length,
-      queued: contracts.filter((c) => c.status === "queued").length,
-      processing: contracts.filter((c) => c.status === "processing").length,
+      pending: contracts.filter((c) => c.status === "pending" || c.status === "queued" || c.status === "processing")
+        .length,
       completed: contracts.filter((c) => c.status === "completed").length,
       failed: contracts.filter((c) => c.status === "failed").length,
     }
-    set({ statistics })
+    set({ stats })
   },
 }))
