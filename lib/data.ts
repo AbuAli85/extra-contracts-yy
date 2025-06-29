@@ -1,22 +1,30 @@
-import { createClient as createServerClient } from "@/lib/supabase/server"
-import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import type { Contract, Party, Promoter } from "./types"
+// Only import the browser client statically
+import { createClient as createBrowserClient } from "@/lib/supabase/client"
 
 // Helper function to get the appropriate client based on execution context
-function getSupabaseClient() {
-  // In a try-catch block to handle cases where headers aren't available
+async function getSupabaseClient() {
+  // In a browser environment or when headers aren't available, use the browser client
+  if (typeof window !== 'undefined') {
+    return createBrowserClient()
+  }
+  
+  // In a server environment, try to use the server client
   try {
-    // First attempt to use the server client
+    // Dynamically import the server client to prevent webpack from including it in client bundles
+    const { createClient: createServerClient } = await import("@/lib/supabase/server")
     return createServerClient()
   } catch (error) {
     // Fall back to browser client if headers are not available
+    console.warn('Falling back to browser client in server environment')
     return createBrowserClient()
   }
 }
 
 export async function getContractsData(query?: string, status?: string): Promise<Contract[]> {
-  const supabase = getSupabaseClient()
+  const supabase = await getSupabaseClient()
   
+  // Rest of the function remains the same
   let dbQuery = supabase
     .from("contracts")
     .select(`
@@ -61,9 +69,11 @@ export async function getContractsData(query?: string, status?: string): Promise
   })) as Contract[]
 }
 
+// Update all other functions to use await getSupabaseClient()
 export async function getContractById(id: string): Promise<Contract | null> {
-  const supabase = getSupabaseClient()
+  const supabase = await getSupabaseClient()
   
+  // Rest of the function remains the same
   const { data, error } = await supabase
     .from("contracts")
     .select(`
@@ -104,8 +114,9 @@ export async function getContractById(id: string): Promise<Contract | null> {
 }
 
 export async function getParties(): Promise<Party[]> {
-  const supabase = getSupabaseClient()
+  const supabase = await getSupabaseClient()
   
+  // Rest of the function remains the same
   const { data, error } = await supabase.from("parties").select("*").order("name", { ascending: true })
 
   if (error) {
@@ -116,8 +127,9 @@ export async function getParties(): Promise<Party[]> {
 }
 
 export async function getPartyById(id: string): Promise<Party | null> {
-  const supabase = getSupabaseClient()
+  const supabase = await getSupabaseClient()
   
+  // Rest of the function remains the same
   const { data, error } = await supabase.from("parties").select("*").eq("id", id).single()
 
   if (error) {
@@ -128,8 +140,9 @@ export async function getPartyById(id: string): Promise<Party | null> {
 }
 
 export async function getPromoters(): Promise<Promoter[]> {
-  const supabase = getSupabaseClient()
+  const supabase = await getSupabaseClient()
   
+  // Rest of the function remains the same
   const { data, error } = await supabase.from("promoters").select("*").order("name", { ascending: true })
 
   if (error) {
@@ -140,8 +153,9 @@ export async function getPromoters(): Promise<Promoter[]> {
 }
 
 export async function getPromoterById(id: string): Promise<Promoter | null> {
-  const supabase = getSupabaseClient()
+  const supabase = await getSupabaseClient()
   
+  // Rest of the function remains the same
   const { data, error } = await supabase.from("promoters").select("*").eq("id", id).single()
 
   if (error) {
