@@ -1,13 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-
-// Simple response interface
-interface ServerActionResponse<T = any> {
-  success: boolean;
-  message: string;
-  data?: T | null;
-}
+import type { ServerActionResponse } from "./dashboard-types";
 
 /**
  * Fetches dashboard analytics data
