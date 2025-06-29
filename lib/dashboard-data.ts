@@ -1,15 +1,16 @@
 // Re-export from our unified data API
 export * from './data'
-import type { AdminAction, DashboardAnalytics, Notification, PendingReview, User } from "./dashboard-types"
+import type {
+  AdminAction,
+  DashboardAnalytics,
+  Notification,
+  PendingReview,
+  ServerActionResponse,
+  User,
+} from "./dashboard-types"
 // Import only browser client statically
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 
-interface ServerActionResponse<T = any> {
-  success: boolean
-  message: string
-  data?: T | null
-  errors?: Record<string, string[]> | null
-}
 
 // Helper function to get the appropriate client
 async function getSupabaseClient() {
