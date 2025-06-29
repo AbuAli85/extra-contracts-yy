@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server.server"
-import { cookies } from "next/headers"
+import { createClient } from "@/lib/supabase/server"
+import 'server-only' // Mark this module as server-only
 import type { AdminAction, DashboardAnalytics, Notification, PendingReview, User } from "./dashboard-types"
 
 interface ServerActionResponse<T = any> {
@@ -9,9 +9,8 @@ interface ServerActionResponse<T = any> {
   errors?: Record<string, string[]> | null
 }
 
-// This file will ONLY be imported by Server Components in the app/ directory
-export async function getDashboardAnalyticsServer(): Promise<ServerActionResponse<DashboardAnalytics>> {
-  const cookieStore = cookies()
+// Server-only implementations
+export async function getDashboardAnalytics(): Promise<ServerActionResponse<DashboardAnalytics>> {
   const supabase = createClient()
 
   const { data, error } = await supabase.rpc("get_dashboard_analytics")
@@ -31,17 +30,17 @@ export async function getDashboardAnalyticsServer(): Promise<ServerActionRespons
   }
 }
 
-// Continue with all the other server-side functions, but add "Server" suffix to their names
-export async function getPendingReviewsServer(): Promise<ServerActionResponse<PendingReview[]>> {
+// Add other server-only implementations
+export async function getPendingReviews(): Promise<ServerActionResponse<PendingReview[]>> {
   const supabase = createClient()
-  // ...function implementation...
+  // Implementation...
   return { success: true, message: "Success", data: [] }
 }
 
-export async function getAdminActionsServer(): Promise<ServerActionResponse<AdminAction[]>> {
+export async function getAdminActions(): Promise<ServerActionResponse<AdminAction[]>> {
   const supabase = createClient()
-  // ...function implementation...
+  // Implementation...
   return { success: true, message: "Success", data: [] }
 }
 
-// ... other server-only functions ...
+// Add other server-only implementations here...
