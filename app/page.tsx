@@ -2,46 +2,29 @@
 
 import { useEffect } from "react"
 import { useTranslations } from "next-intl"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ContractsList } from "@/components/contracts-list"
 import { ContractsDashboardWidget } from "@/components/contracts-dashboard-widget"
 import { useContractsStore } from "@/lib/stores/contracts-store"
 import { useRealtimeContracts } from "@/hooks/use-realtime-contracts"
-import { createClient } from "@/lib/supabase/client"
 
 export default function HomePage() {
   const t = useTranslations("dashboard")
-  const { setContracts, setLoading, setError } = useContractsStore()
+  const { fetchContracts } = useContractsStore()
 
   // Set up real-time subscriptions
   useRealtimeContracts()
 
   useEffect(() => {
-    const fetchContracts = async () => {
-      setLoading(true)
-      try {
-        const supabase = createClient()
-        const { data, error } = await supabase.from("contracts").select("*").order("created_at", { ascending: false })
-
-        if (error) throw error
-
-        setContracts(data || [])
-      } catch (error) {
-        console.error("Error fetching contracts:", error)
-        setError(error instanceof Error ? error.message : "Failed to fetch contracts")
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchContracts()
-  }, [setContracts, setLoading, setError])
+  }, [fetchContracts])
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground">Manage your bilingual contracts efficiently</p>
+        <p className="text-muted-foreground">Generate and manage bilingual contracts with real-time processing</p>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
@@ -51,7 +34,22 @@ export default function HomePage() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          <ContractsDashboardWidget />
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight mb-4">{t("statistics")}</h2>
+            <ContractsDashboardWidget />
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("recentActivity")}</CardTitle>
+              <CardDescription>Latest contract generation activity</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Recent activity will appear here</p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="contracts">

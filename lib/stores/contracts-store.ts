@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import { toast } from "sonner"
+import { createClient } from "@/lib/supabase/client"
 
 export interface Contract {
   id: string
@@ -36,6 +37,7 @@ interface ContractsState {
   setError: (error: string | null) => void
 
   // API actions
+  fetchContracts: () => Promise<void>
   generateContract: (data: ContractFormData) => Promise<void>
   retryContract: (id: string) => Promise<void>
   downloadContract: (contract: Contract) => Promise<void>
@@ -74,6 +76,37 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
   setLoading: (isLoading) => set({ isLoading }),
 
   setError: (error) => set({ error }),
+
+  fetchContracts: async () => {
+    set({ isLoading: true, error: null })
+
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.from("contracts").select("*").order("created_at", { ascending: false })
+
+      if (error) throw error
+
+      const contracts: Contract[] = (data || []).map((item) => ({
+        id: item.id,
+        contract_number: item.contract_number,
+        party_a: item.party_a,
+        party_b: item.party_b,
+        contract_type: item.contract_type,
+        description: item.description || undefined,
+        status: item.status as "pending" | "queued" | "processing" | "completed" | "failed",
+        pdf_url: item.pdf_url || undefined,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        user_id: item.user_id,
+      }))
+
+      set({ contracts, isLoading: false })
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to fetch contracts"
+      set({ error: errorMessage, isLoading: false })
+      toast.error(errorMessage)
+    }
+  },
 
   generateContract: async (data) => {
     set({ isLoading: true, error: null })
