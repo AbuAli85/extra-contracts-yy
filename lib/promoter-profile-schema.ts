@@ -20,10 +20,10 @@ const dateOptionalNullableSchema = z
   .nullable()
 
 export const promoterProfileSchema = z.object({
-  name: z.string().min(1, "Promoter name is required."),
-  name_en: z.string().min(1, "Name (English) is required."),
-  name_ar: z.string().min(1, "Name (Arabic) is required."),
-  id_card_number: z.string().min(1, "ID card number is required."),
+  name: z.string().min(1, "Promoter name is required.").trim(),
+  name_en: z.string().min(1, "Name (English) is required.").trim(),
+  name_ar: z.string().min(1, "Name (Arabic) is required.").trim(),
+  id_card_number: z.string().min(1, "ID card number is required.").trim(),
   employer_id: z.string().optional().nullable(),
   outsourced_to_id: z.string().optional().nullable(),
   job_title: z.string().optional().nullable(),
@@ -36,38 +36,48 @@ export const promoterProfileSchema = z.object({
   existing_passport_url: z.string().optional().nullable(),
   id_card_expiry_date: dateOptionalNullableSchema,
   passport_expiry_date: dateOptionalNullableSchema,
-  email: z.string().email("Invalid email address.").min(1, "Email is required."),
-  phone: z.string().min(1, "Phone number is required."),
-  company_name: z.string().min(1, "Company name is required."),
-  company_address: z.string().min(1, "Company address is required."),
-  contact_person: z
+  email: z.string().email("Invalid email address.").min(1, "Email is required.").trim(),
+  phone: z
     .string()
-    .nullable()
     .optional()
-    .transform((e) => (e === "" ? null : e)),
-  contact_email: z
+    .transform((e) => (e === "" ? undefined : e)),
+  company_name: z.string().min(1, "Company name is required.").trim(),
+  company_address: z
     .string()
-    .email("Invalid email address.")
-    .nullable()
     .optional()
-    .transform((e) => (e === "" ? null : e)),
-  contact_phone: z
+    .transform((e) => (e === "" ? undefined : e)),
+  city: z
     .string()
-    .nullable()
     .optional()
-    .transform((e) => (e === "" ? null : e)),
+    .transform((e) => (e === "" ? undefined : e)),
+  state: z
+    .string()
+    .optional()
+    .transform((e) => (e === "" ? undefined : e)),
+  zip_code: z
+    .string()
+    .optional()
+    .transform((e) => (e === "" ? undefined : e)),
+  country: z
+    .string()
+    .optional()
+    .transform((e) => (e === "" ? undefined : e)),
+  bio: z
+    .string()
+    .optional()
+    .transform((e) => (e === "" ? undefined : e)),
   website: z
+    .string()
+    .url("Invalid URL format.")
+    .optional()
+    .transform((e) => (e === "" ? undefined : e)),
+  logo_url: z
     .string()
     .url("Invalid URL format.")
     .nullable()
     .optional()
     .transform((e) => (e === "" ? null : e)),
-  notes: z
-    .string()
-    .nullable()
-    .optional()
-    .transform((e) => (e === "" ? null : e)),
-  logo_url: z
+  profile_picture_url: z
     .string()
     .url("Invalid URL format.")
     .nullable()

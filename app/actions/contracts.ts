@@ -1,156 +1,237 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
-import type { z } from "zod"
+import { cookies } from "next/headers"
+
 import { createClient } from "@/lib/supabase/server"
-import type { contractFormSchema } from "@/lib/generate-contract-form-schema"
-import { devLog } from "@/lib/dev-log"
+import { contractSchema } from "@/lib/validations/contract"
 import type { Contract } from "@/lib/types"
 
-export async function createContract(values: z.infer<typeof contractFormSchema>) {
-  const supabase = createClient()
+interface ServerActionResponse<T = any> {
+  success: boolean
+  message: string
+  data?: T | null
+  errors?: Record<string, string[]> | null
+}
 
-  const {
-    firstPartyNameEn,
-    firstPartyNameAr,
-    secondPartyNameEn,
-    secondPartyNameAr,
-    promoterNameEn,
-    promoterNameAr,
-    contractType,
-    startDate,
-    endDate,
-    contentEn,
-    contentAr,
-  } = values
+export async function createContract(
+  prevState: ServerActionResponse | null,
+  formData: FormData,
+): Promise<ServerActionResponse<Contract>> {
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const rawData = Object.fromEntries(formData.entries())
 
-  if (!user) {
-    throw new Error("User not authenticated")
+  // Convert checkbox to boolean
+  const is_template = rawData.is_template === "on" ? true : false
+  const is_archived = rawData.is_archived === "on" ? true : false
+
+  const parsed = contractSchema.safeParse({
+    ...rawData,
+    contract_value: rawData.contract_value ? Number.parseFloat(rawData.contract_value as string) : undefined,
+    effective_date: rawData.effective_date || undefined,
+    termination_date: rawData.termination_date || undefined,
+    is_template,
+    is_archived,
+  })
+
+  if (!parsed.success) {
+    const errors = parsed.error.flatten().fieldErrors
+    console.error("Validation errors:", errors)
+    return {
+      success: false,
+      message: "Validation failed. Please check your inputs.",
+      errors,
+    }
   }
 
-  const { data, error } = await supabase
-    .from("contracts")
-    .insert({
-      user_id: user.id,
-      first_party_name_en: firstPartyNameEn,
-      first_party_name_ar: firstPartyNameAr,
-      second_party_name_en: secondPartyNameEn,
-      second_party_name_ar: secondPartyNameAr,
-      promoter_name_en: promoterNameEn,
-      promoter_name_ar: promoterNameAr,
-      contract_type: contractType,
-      start_date: startDate.toISOString(),
-      end_date: endDate.toISOString(),
-      content_en: contentEn,
-      content_ar: contentAr,
-      status: "Draft", // Initial status
-    })
-    .select()
-    .single()
+  const { data, error } = await supabase.from("contracts").insert([parsed.data]).select().single()
 
   if (error) {
-    devLog("Error creating contract:", error)
-    throw new Error(`Failed to create contract: ${error.message}`)
+    console.error("Error creating contract:", error)
+    return {
+      success: false,
+      message: `Failed to create contract: ${error.message}`,
+    }
   }
 
   revalidatePath("/contracts")
   revalidatePath("/dashboard/contracts")
-  redirect(`/contracts/${data.id}`)
+  revalidatePath("/generate-contract")
+  return {
+    success: true,
+    message: "Contract created successfully!",
+    data,
+  }
 }
 
-export async function updateContract(id: string, values: z.infer<typeof contractFormSchema>) {
-  const supabase = createClient()
-
-  const {
-    firstPartyNameEn,
-    firstPartyNameAr,
-    secondPartyNameEn,
-    secondPartyNameAr,
-    promoterNameEn,
-    promoterNameAr,
-    contractType,
-    startDate,
-    endDate,
-    contentEn,
-    contentAr,
-  } = values
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new Error("User not authenticated")
-  }
+export async function getContracts(): Promise<ServerActionResponse<Contract[]>> {
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
 
   const { data, error } = await supabase
     .from("contracts")
-    .update({
-      first_party_name_en: firstPartyNameEn,
-      first_party_name_ar: firstPartyNameAr,
-      second_party_name_en: secondPartyNameEn,
-      second_party_name_ar: secondPartyNameAr,
-      promoter_name_en: promoterNameEn,
-      promoter_name_ar: promoterNameAr,
-      contract_type: contractType,
-      start_date: startDate.toISOString(),
-      end_date: endDate.toISOString(),
-      content_en: contentEn,
-      content_ar: contentAr,
-      updated_at: new Date().toISOString(),
-    })
+    .select(
+      `
+      id,
+      contract_id,
+      contract_name,
+      contract_type,
+      status,
+      effective_date,
+      termination_date,
+      created_at,
+      updated_at,
+      parties_a:party_a_id(name),
+      parties_b:party_b_id(name),
+      promoters(name)
+    `,
+    )
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    console.error("Error fetching contracts:", error)
+    return {
+      success: false,
+      message: `Failed to fetch contracts: ${error.message}`,
+    }
+  }
+
+  // Flatten the nested party and promoter objects for easier consumption
+  const flattenedData = data.map((contract) => ({
+    ...contract,
+    parties_a: contract.parties_a || null,
+    parties_b: contract.parties_b || null,
+    promoters: contract.promoters || null,
+  })) as Contract[]
+
+  return {
+    success: true,
+    message: "Contracts fetched successfully.",
+    data: flattenedData,
+  }
+}
+
+export async function getContractById(id: string): Promise<ServerActionResponse<Contract>> {
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
+
+  const { data, error } = await supabase
+    .from("contracts")
+    .select(
+      `
+      *,
+      parties_a:party_a_id(id, name, email, phone, address, type),
+      parties_b:party_b_id(id, name, email, phone, address, type),
+      promoters(id, name, email, phone, company, address, city, state, zip_code, country, bio, profile_picture_url)
+    `,
+    )
     .eq("id", id)
-    .select()
     .single()
 
   if (error) {
-    devLog("Error updating contract:", error)
-    throw new Error(`Failed to update contract: ${error.message}`)
+    console.error(`Error fetching contract with ID ${id}:`, error)
+    return {
+      success: false,
+      message: `Failed to fetch contract: ${error.message}`,
+    }
   }
 
-  revalidatePath("/contracts")
-  revalidatePath(`/contracts/${id}`)
-  revalidatePath("/dashboard/contracts")
-  redirect(`/contracts/${id}`)
+  if (!data) {
+    return {
+      success: false,
+      message: "Contract not found.",
+      data: null,
+    }
+  }
+
+  // Flatten the nested party and promoter objects
+  const flattenedData: Contract = {
+    ...data,
+    parties_a: data.parties_a || null,
+    parties_b: data.parties_b || null,
+    promoters: data.promoters || null,
+  } as Contract
+
+  return {
+    success: true,
+    message: "Contract fetched successfully.",
+    data: flattenedData,
+  }
 }
 
-export async function deleteContract(id: string) {
-  const supabase = createClient()
+export async function updateContract(
+  id: string,
+  prevState: ServerActionResponse | null,
+  formData: FormData,
+): Promise<ServerActionResponse<Contract>> {
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
+
+  const rawData = Object.fromEntries(formData.entries())
+
+  // Convert checkbox to boolean
+  const is_template = rawData.is_template === "on" ? true : false
+  const is_archived = rawData.is_archived === "on" ? true : false
+
+  const parsed = contractSchema.safeParse({
+    ...rawData,
+    contract_value: rawData.contract_value ? Number.parseFloat(rawData.contract_value as string) : undefined,
+    effective_date: rawData.effective_date || undefined,
+    termination_date: rawData.termination_date || undefined,
+    is_template,
+    is_archived,
+  })
+
+  if (!parsed.success) {
+    const errors = parsed.error.flatten().fieldErrors
+    console.error("Validation errors:", errors)
+    return {
+      success: false,
+      message: "Validation failed. Please check your inputs.",
+      errors,
+    }
+  }
+
+  const { data, error } = await supabase.from("contracts").update(parsed.data).eq("id", id).select().single()
+
+  if (error) {
+    console.error(`Error updating contract with ID ${id}:`, error)
+    return {
+      success: false,
+      message: `Failed to update contract: ${error.message}`,
+    }
+  }
+
+  revalidatePath(`/contracts/${id}`)
+  revalidatePath("/contracts")
+  revalidatePath("/dashboard/contracts")
+  return {
+    success: true,
+    message: "Contract updated successfully!",
+    data,
+  }
+}
+
+export async function deleteContract(id: string): Promise<ServerActionResponse> {
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
 
   const { error } = await supabase.from("contracts").delete().eq("id", id)
 
   if (error) {
-    devLog("Error deleting contract:", error)
-    throw new Error(`Failed to delete contract: ${error.message}`)
+    console.error(`Error deleting contract with ID ${id}:`, error)
+    return {
+      success: false,
+      message: `Failed to delete contract: ${error.message}`,
+    }
   }
 
   revalidatePath("/contracts")
   revalidatePath("/dashboard/contracts")
-  redirect("/contracts")
-}
-
-export async function updateContractStatus(contractId: string, newStatus: Contract["status"]) {
-  const supabase = createClient()
-
-  const { data, error } = await supabase
-    .from("contracts")
-    .update({ status: newStatus, updated_at: new Date().toISOString() })
-    .eq("id", contractId)
-    .select()
-    .single()
-
-  if (error) {
-    devLog("Error updating contract status:", error)
-    throw new Error(`Failed to update contract status: ${error.message}`)
+  return {
+    success: true,
+    message: "Contract deleted successfully!",
   }
-
-  revalidatePath("/contracts")
-  revalidatePath(`/contracts/${contractId}`)
-  revalidatePath("/dashboard/contracts")
-  return data
 }

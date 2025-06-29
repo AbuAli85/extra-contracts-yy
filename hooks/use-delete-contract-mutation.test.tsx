@@ -1,54 +1,82 @@
+"use client"
+
 import type React from "react"
+
 import { renderHook, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useDeleteContractMutation } from "./use-contracts"
-import { deleteContract as deleteContractAction } from "@/app/actions/contracts"
-import jest from "jest" // Declare the jest variable
+import { toast } from "@/components/ui/use-toast" // Assuming this is the correct path
+import { useRouter } from "next/navigation"
+import { NextIntlClientProvider } from "next-intl/client"
+import messages from "@/messages/en.json" // Adjust path as necessary
+import jest from "jest" // Import jest to fix the undeclared variable error
 
 // Mock the server action
 jest.mock("@/app/actions/contracts", () => ({
-  deleteContract: jest.fn(),
+  deleteContract: jest.fn((id: string) => {
+    if (id === "success-id") {
+      return Promise.resolve({ success: true, message: "Contract deleted successfully!" })
+    }
+    return Promise.resolve({ success: false, message: "Failed to delete contract." })
+  }),
 }))
 
-describe("useDeleteContractMutation", () => {
-  let queryClient: QueryClient
+// Mock useToast
+jest.mock("@/components/ui/use-toast", () => ({
+  toast: jest.fn(),
+}))
 
+// Mock useRouter
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    refresh: jest.fn(),
+  }),
+}))
+
+// Mock next-intl useTranslations
+jest.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key, // Simple mock that returns the key
+}))
+
+const queryClient = new QueryClient()
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <NextIntlClientProvider locale="en" messages={messages}>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </NextIntlClientProvider>
+)
+
+describe("useDeleteContractMutation", () => {
   beforeEach(() => {
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: false,
-        },
-      },
-    })
-    ;(deleteContractAction as jest.Mock).mockClear()
+    jest.clearAllMocks()
   })
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  )
-
   it("successfully deletes a contract", async () => {
-    ;(deleteContractAction as jest.Mock).mockResolvedValue({ success: true, message: "Deleted" })
-
     const { result } = renderHook(() => useDeleteContractMutation(), { wrapper })
 
-    result.current.mutate("contract-id-1")
+    result.current.mutate("success-id")
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(deleteContractAction).toHaveBeenCalledWith("contract-id-1")
+
+    expect(toast).toHaveBeenCalledWith({
+      title: "success",
+      description: "Contract deleted successfully!",
+    })
+    expect(useRouter().refresh).toHaveBeenCalled()
   })
 
   it("handles deletion error", async () => {
-    const errorMessage = "Failed to delete"
-    ;(deleteContractAction as jest.Mock).mockResolvedValue({ success: false, message: errorMessage })
-
     const { result } = renderHook(() => useDeleteContractMutation(), { wrapper })
 
-    result.current.mutate("contract-id-1")
+    result.current.mutate("error-id")
 
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(result.current.error?.message).toBe(errorMessage)
-    expect(deleteContractAction).toHaveBeenCalledWith("contract-id-1")
+
+    expect(toast).toHaveBeenCalledWith({
+      title: "error",
+      description: "Failed to delete contract.",
+      variant: "destructive",
+    })
+    expect(useRouter().refresh).not.toHaveBeenCalled()
   })
 })

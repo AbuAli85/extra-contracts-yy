@@ -2,20 +2,19 @@
 
 import type React from "react"
 
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { ThemeProvider } from "next-themes"
 import { NextIntlClientProvider } from "next-intl"
-import type { AbstractIntlMessages } from "next-intl"
-import { SupabaseListener } from "@/app/supabase-listener"
+import { Toaster } from "@/components/ui/sonner"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { SupabaseListener } from "@/app/supabase-listener" // Ensure this is a named import
 
 interface ClientLayoutProps {
   children: React.ReactNode
-  messages: AbstractIntlMessages
+  messages: Record<string, string>
   locale: string
 }
 
-export const ClientLayout = ({ children, messages, locale }: ClientLayoutProps) => {
+const ClientLayout = ({ children, messages, locale }: ClientLayoutProps) => {
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
@@ -29,5 +28,4 @@ export const ClientLayout = ({ children, messages, locale }: ClientLayoutProps) 
   )
 }
 
-// Default export
 export default ClientLayout

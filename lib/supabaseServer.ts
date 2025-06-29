@@ -1,39 +1,21 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { createClient } from "@supabase/supabase-js"
 import type { Database } from "@/types/supabase"
 
-export function createServerComponentClient() {
-  const cookieStore = cookies()
+// This client is intended for server-side use where the service role key is safe.
+// DO NOT expose SUPABASE_SERVICE_ROLE_KEY to the client-side.
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL")
-  if (!supabaseAnonKey) throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY")
-
-  return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value
-      },
-      set(name: string, value: string, options: CookieOptions) {
-        try {
-          cookieStore.set({ name, value, ...options })
-        } catch (error) {
-          // The `cookies().set()` method can't be called from a Server Component if a `NextRequest` is in the same scope.
-          // It's only supported when called from a Server Action or Route Handler.
-          console.warn("Could not set cookie from Server Component:", error)
-        }
-      },
-      remove(name: string, options: CookieOptions) {
-        try {
-          cookieStore.set({ name, value: "", ...options })
-        } catch (error) {
-          // The `cookies().set()` method can't be called from a Server Component if a `NextRequest` is in the same scope.
-          // It's only supported when called from a Server Action or Route Handler.
-          console.warn("Could not remove cookie from Server Component:", error)
-        }
-      },
-    },
-  })
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  console.error(
+    "Supabase URL and Service Role Key must be defined in environment variables for server-side operations.",
+  )
+  // In a real application, you might throw an error or handle this more gracefully
 }
+
+export const supabaseAdmin = createClient<Database>(supabaseUrl || "", supabaseServiceRoleKey || "", {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+})

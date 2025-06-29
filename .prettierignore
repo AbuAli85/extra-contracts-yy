@@ -1,8 +1,6 @@
 .next
-node_modules
+.pnpm-store
+coverage
 dist
 build
-coverage
-.env
-.env.local
-.vercel
+node_modules

@@ -2,8 +2,9 @@
 
 import * as React from "react"
 import { OTPInput, Slot, type OTPInputProps } from "input-otp"
+import { Dot } from "lucide-react"
+
 import { cn } from "@/lib/utils"
-import { Dot } from "@/components/ui/dot" // Import Dot component
 
 const InputOTP = React.forwardRef<React.ElementRef<typeof OTPInput>, OTPInputProps>(
   ({ className, containerClassName, ...props }, ref) => (
@@ -17,7 +18,7 @@ const InputOTP = React.forwardRef<React.ElementRef<typeof OTPInput>, OTPInputPro
 )
 InputOTP.displayName = "InputOTP"
 
-const InputOTPGroup = React.forwardRef<React.ElementRef<typeof Slot>, React.ComponentPropsWithoutRef<typeof Slot>>(
+const InputOTPGroup = React.forwardRef<React.ElementRef<"div">, React.ComponentPropsWithoutRef<"div">>(
   ({ className, ...props }, ref) => <div ref={ref} className={cn("flex items-center", className)} {...props} />,
 )
 InputOTPGroup.displayName = "InputOTPGroup"
@@ -31,18 +32,24 @@ const InputOTPSlot = React.forwardRef<
     index={index}
     className={cn(
       "relative flex h-9 w-9 items-center justify-center border-y border-r border-input text-sm shadow-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
-      "focus-within:z-10 focus-within:ring-1 focus-within:ring-ring",
+      "focus-within:z-10",
+      {
+        "border-l border-r-0": index === 0,
+        "border-r": index === 0,
+      },
       className,
     )}
     {...props}
-  />
+  >
+    {props.children}
+  </Slot>
 ))
 InputOTPSlot.displayName = "InputOTPSlot"
 
-const InputOTPSeparator = React.forwardRef<React.ElementRef<typeof Slot>, React.ComponentPropsWithoutRef<typeof Slot>>(
+const InputOTPSeparator = React.forwardRef<React.ElementRef<"div">, React.ComponentPropsWithoutRef<"div">>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("-mx-2 flex items-center justify-center", className)} {...props}>
-      <Dot className="h-3 w-3" />
+    <div ref={ref} className={cn("-mx-2 flex items-center", className)} {...props}>
+      <Dot />
     </div>
   ),
 )

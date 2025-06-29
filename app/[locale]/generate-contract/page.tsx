@@ -1,39 +1,31 @@
 import { getTranslations } from "next-intl/server"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ContractGeneratorForm } from "@/components/contract-generator-form"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { ArrowLeftIcon } from "lucide-react"
+import { getParties } from "@/app/actions/parties"
+import { getPromoters } from "@/app/actions/promoters"
 
-interface GenerateContractPageProps {
-  params: {
-    locale: string
-  }
-}
-
-export default async function GenerateContractPage({ params }: GenerateContractPageProps) {
+export default async function GenerateContractPage() {
   const t = await getTranslations("GenerateContractPage")
+  const { data: parties, error: partiesError } = await getParties()
+  const { data: promoters, error: promotersError } = await getPromoters()
+
+  if (partiesError || promotersError) {
+    console.error("Error fetching data for contract generator:", partiesError || promotersError)
+    return <div className="text-red-500">{t("errorLoadingData")}</div>
+  }
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-      <div className="flex items-center">
-        <Button variant="outline" size="sm" asChild>
-          <Link href={`/${params.locale}/contracts`}>
-            <ArrowLeftIcon className="mr-2 h-4 w-4" />
-            {t("backToContracts")}
-          </Link>
-        </Button>
-        <h1 className="ml-auto text-2xl font-semibold">{t("generateContractTitle")}</h1>
-      </div>
-
+    <div className="container mx-auto py-8 px-4 md:px-6">
+      <h1 className="text-3xl font-bold mb-6">{t("generateNewContract")}</h1>
       <Card>
         <CardHeader>
           <CardTitle>{t("contractDetails")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <ContractGeneratorForm />
+          <ContractGeneratorForm parties={parties || []} promoters={promoters || []} />
         </CardContent>
       </Card>
-    </main>
+    </div>
   )
 }

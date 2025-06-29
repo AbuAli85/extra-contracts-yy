@@ -1,48 +1,17 @@
 import { Skeleton } from "@/components/ui/skeleton"
-import { Card } from "@/components/ui/card"
 
-export default function ContractDetailsLoading() {
+export default function Loading() {
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-      <div className="flex items-center">
-        <Skeleton className="h-8 w-32" />
-        <Skeleton className="ml-auto h-8 w-48" />
+    <div className="container mx-auto py-8 px-4 md:px-6">
+      <div className="flex items-center justify-between mb-6">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-10 w-32" />
       </div>
-
-      <Card className="p-6 space-y-6">
-        <div className="flex flex-row items-center justify-between pb-2">
-          <Skeleton className="h-7 w-64" />
-          <Skeleton className="h-6 w-24" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-        </div>
-
-        <Skeleton className="h-0.5 w-full" />
-
-        <div>
-          <Skeleton className="h-7 w-48 mb-2" />
-          <Skeleton className="h-48 w-full" />
-          <Skeleton className="h-0.5 w-full my-4" />
-          <Skeleton className="h-48 w-full" />
-        </div>
-
-        <Skeleton className="h-0.5 w-full" />
-
-        <div className="flex flex-wrap gap-2 justify-end">
-          <Skeleton className="h-9 w-32" />
-          <Skeleton className="h-9 w-24" />
-          <Skeleton className="h-9 w-28" />
-          <Skeleton className="h-9 w-32" />
-        </div>
-      </Card>
-    </main>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-[200px] w-full rounded-lg" />
+        ))}
+      </div>
+    </div>
   )
 }

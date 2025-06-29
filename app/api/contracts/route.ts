@@ -1,189 +1,66 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
-import { getSupabaseAdmin } from "@/lib/supabase"
-import { contractGeneratorSchema } from "@/lib/schema-generator" // Your Zod schema for validation
-import type { BilingualPdfData } from "@/lib/types"
-import type { Database } from "@/types/supabase"
-import { format } from "date-fns"
-import { devLog } from "@/lib/dev-log"
-
-// Placeholder for your PDF generation logic (e.g., calling Google Docs API via Make.com)
-async function generateBilingualPdf(contractData: BilingualPdfData, contractId: string): Promise<string | null> {
-  const supabaseAdmin = getSupabaseAdmin() // Get client instance
-  const makeWebhookUrl = process.env.MAKE_WEBHOOK_URL
-  if (!makeWebhookUrl) {
-    console.error("Make.com webhook URL (MAKE_WEBHOOK_URL) is not configured.")
-    return null
-  }
-
-  const payloadForMake = {
-    contract_id: contractId,
-    first_party_name: contractData.first_party_name_en,
-    second_party_name: contractData.second_party_name_en,
-    promoter_name: contractData.promoter_name_en,
-    start_date: contractData.contract_start_date,
-    end_date: contractData.contract_end_date,
-    job_title: contractData.job_title,
-    email: contractData.email,
-  }
-
-  try {
-    const makeResponse = await fetch(makeWebhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payloadForMake),
-    })
-
-    if (!makeResponse.ok) {
-      const errorBody = await makeResponse.text()
-      console.error(`Make.com webhook failed: ${makeResponse.status} - ${errorBody}`)
-      return null
-    }
-
-    const pdfBlob = await makeResponse.blob()
-    if (pdfBlob.type !== "application/pdf") {
-      console.error("Make.com did not return a PDF. Mimetype:", pdfBlob.type)
-      return null
-    }
-
-    const filePath = `contract_pdfs/${contractId}/${Date.now()}.pdf`
-    const { error: uploadError } = await supabaseAdmin.storage.from("contracts").upload(filePath, pdfBlob, {
-      contentType: "application/pdf",
-      upsert: false,
-    })
-
-    if (uploadError) {
-      console.error("Supabase storage upload error:", uploadError)
-      return null
-    }
-
-    const { data: publicUrlData } = supabaseAdmin.storage.from("contracts").getPublicUrl(filePath)
-    return publicUrlData?.publicUrl || null
-  } catch (error) {
-    console.error("Error in PDF generation/upload process:", error)
-    return null
-  }
-}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const query = searchParams.get("q")
-  const status = searchParams.get("status")
+  const id = searchParams.get("id")
 
-  const supabase = createClient()
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
 
-  let queryBuilder = supabase.from("contracts").select("*")
-
-  if (query) {
-    queryBuilder = queryBuilder.or(
-      `first_party_name_en.ilike.%${query}%,first_party_name_ar.ilike.%${query}%,second_party_name_en.ilike.%${query}%,second_party_name_ar.ilike.%${query}%,promoter_name_en.ilike.%${query}%,promoter_name_ar.ilike.%${query}%,contract_id.ilike.%${query}%`,
-    )
-  }
-
-  if (status && status !== "all") {
-    queryBuilder = queryBuilder.eq("status", status)
-  }
-
-  queryBuilder = queryBuilder.order("created_at", { ascending: false })
-
-  const { data, error } = await queryBuilder
-
-  if (error) {
-    devLog("Error fetching contracts:", error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json(data)
-}
-
-export async function POST(request: NextRequest) {
-  const supabase = createClient()
-  const supabaseAdmin = getSupabaseAdmin() // Service role client
-  try {
-    const body = await request.json()
-    const validation = contractGeneratorSchema.safeParse(body)
-
-    if (!validation.success) {
-      return NextResponse.json({ message: "Invalid input", errors: validation.error.format() }, { status: 400 })
-    }
-
-    const { data: validatedData } = validation
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    const contractToInsert: Database["public"]["Tables"]["contracts"]["Insert"] = {
-      first_party_id: validatedData.first_party_id,
-      second_party_id: validatedData.second_party_id,
-      promoter_id: validatedData.promoter_id,
-      contract_start_date: format(validatedData.contract_start_date, "yyyy-MM-dd"),
-      contract_end_date: format(validatedData.contract_end_date, "yyyy-MM-dd"),
-      email: validatedData.email,
-      job_title: validatedData.job_title,
-      work_location: validatedData.work_location,
-      user_id: user?.id,
-    }
-
-    const { data: newContract, error: insertError } = await supabase
+  if (id) {
+    // Fetch a single contract by ID
+    const { data, error } = await supabase
       .from("contracts")
-      .insert(contractToInsert)
-      .select()
+      .select(
+        `
+        *,
+        parties_a:party_a_id(id, name, email, phone, address, type),
+        parties_b:party_b_id(id, name, email, phone, address, type),
+        promoters(id, name, email, phone, company, address, city, state, zip_code, country, bio, profile_picture_url)
+      `,
+      )
+      .eq("id", id)
       .single()
 
-    if (insertError) {
-      console.error("Supabase insert error:", insertError)
-      return NextResponse.json({ message: "Failed to create contract", error: insertError.message }, { status: 500 })
+    if (error) {
+      console.error("Error fetching contract:", error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
-    if (!newContract) {
-      return NextResponse.json(
-        { message: "Failed to create contract, no data returned after insert." },
-        { status: 500 },
+
+    if (!data) {
+      return NextResponse.json({ error: "Contract not found" }, { status: 404 })
+    }
+
+    return NextResponse.json(data)
+  } else {
+    // Fetch all contracts
+    const { data, error } = await supabase
+      .from("contracts")
+      .select(
+        `
+        id,
+        contract_id,
+        contract_name,
+        contract_type,
+        status,
+        effective_date,
+        termination_date,
+        created_at,
+        updated_at,
+        parties_a:party_a_id(name),
+        parties_b:party_b_id(name),
+        promoters(name)
+      `,
       )
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("Error fetching contracts:", error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const [party1, party2, promoterDetails] = await Promise.all([
-      supabase.from("parties").select("name_en, name_ar").eq("id", newContract.first_party_id).single(),
-      supabase.from("parties").select("name_en, name_ar").eq("id", newContract.second_party_id).single(),
-      supabase.from("promoters").select("name_en, name_ar").eq("id", newContract.promoter_id).single(),
-    ])
-
-    const pdfData: BilingualPdfData = {
-      first_party_name_en: party1.data?.name_en,
-      first_party_name_ar: party1.data?.name_ar,
-      second_party_name_en: party2.data?.name_en,
-      second_party_name_ar: party2.data?.name_ar,
-      promoter_name_en: promoterDetails.data?.name_en,
-      promoter_name_ar: promoterDetails.data?.name_ar,
-      contract_start_date: newContract.contract_start_date,
-      contract_end_date: newContract.contract_end_date,
-      job_title: newContract.job_title,
-      email: newContract.email,
-    }
-
-    const pdfUrl = await generateBilingualPdf(pdfData, newContract.id)
-
-    let finalContractData = newContract
-    if (pdfUrl) {
-      const { data: updatedContractWithPdf, error: updateError } = await supabase
-        .from("contracts")
-        .update({ pdf_url: pdfUrl }) // Ensure this is pdf_url
-        .eq("id", newContract.id)
-        .select()
-        .single()
-
-      if (updateError) {
-        console.error("Supabase update error (pdf_url):", updateError)
-      } else if (updatedContractWithPdf) {
-        finalContractData = updatedContractWithPdf
-      }
-    }
-
-    return NextResponse.json(
-      { message: "Contract created successfully!", contract: finalContractData },
-      { status: 201 },
-    )
-  } catch (error: any) {
-    console.error("API Route Error:", error)
-    return NextResponse.json({ message: "Internal server error", error: error.message }, { status: 500 })
+    return NextResponse.json(data)
   }
 }

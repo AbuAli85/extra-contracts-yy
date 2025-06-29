@@ -12,10 +12,10 @@ export function useMobile() {
 
     checkMobile() // Check on initial render
 
-    window.addEventListener("resize", checkMobile)
+    window.addEventListener("resize", checkMobile) // Add event listener for window resize
 
     return () => {
-      window.removeEventListener("resize", checkMobile)
+      window.removeEventListener("resize", checkMobile) // Clean up event listener
     }
   }, [])
 

@@ -1,159 +1,83 @@
 "use client"
 
 import { useState } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getPromoters, deletePromoter } from "@/hooks/use-promoters"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { useToast } from "@/components/ui/use-toast"
-import { PlusIcon, PencilIcon, Trash2Icon } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
+import { PlusCircle } from "lucide-react"
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { PromoterForm } from "@/components/promoter-form" // Named import
+import { usePromoters } from "@/hooks/use-promoters"
+import { DeletePromoterButton } from "@/components/delete-promoter-button"
+import Link from "next/link"
 
 export function ManagePromotersPage() {
   const t = useTranslations("ManagePromotersPage")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [promoterToDelete, setPromoterToDelete] = useState<string | null>(null)
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
-  const router = useRouter()
-
-  const {
-    data: promoters,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["promoters", searchTerm],
-    queryFn: () => getPromoters(searchTerm),
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: deletePromoter,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["promoters"] })
-      toast({
-        title: t("deleteSuccessTitle"),
-        description: t("deleteSuccessMessage"),
-      })
-      setIsDeleteDialogOpen(false)
-      setPromoterToDelete(null)
-    },
-    onError: (error) => {
-      toast({
-        title: t("deleteErrorTitle"),
-        description: error.message || t("deleteErrorMessage"),
-        variant: "destructive",
-      })
-    },
-  })
-
-  const handleDeleteClick = (promoterId: string) => {
-    setPromoterToDelete(promoterId)
-    setIsDeleteDialogOpen(true)
-  }
-
-  const handleConfirmDelete = () => {
-    if (promoterToDelete) {
-      deleteMutation.mutate(promoterToDelete)
-    }
-  }
+  const { data: promoters, isLoading, isError, error } = usePromoters()
+  const [showAddForm, setShowAddForm] = useState(false)
 
   if (isLoading) return <div>{t("loadingPromoters")}</div>
-  if (isError) return <div>{t("errorLoadingPromoters")}</div>
+  if (isError)
+    return (
+      <div className="text-red-500">
+        {t("errorLoadingPromoters")}: {error?.message}
+      </div>
+    )
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">{t("title")}</h1>
-        <Button onClick={() => router.push("/manage-promoters/new")}>
-          <PlusIcon className="mr-2 h-4 w-4" />
-          {t("addPromoterButton")}
-        </Button>
-      </div>
+    <div className="container mx-auto py-8 px-4 md:px-6">
+      <h1 className="text-3xl font-bold mb-6">{t("managePromoters")}</h1>
 
-      <div className="mb-6">
-        <Input
-          placeholder={t("searchPlaceholder")}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>{t("addNewPromoter")}</CardTitle>
+            <Button variant="outline" size="sm" onClick={() => setShowAddForm(!showAddForm)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              {showAddForm ? t("hideForm") : t("addPromoter")}
+            </Button>
+          </CardHeader>
+          <CardContent>{showAddForm && <PromoterForm onSuccess={() => setShowAddForm(false)} />}</CardContent>
+        </Card>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("name")}</TableHead>
-              <TableHead>{t("email")}</TableHead>
-              <TableHead>{t("phone")}</TableHead>
-              <TableHead>{t("company")}</TableHead>
-              <TableHead className="text-right">{t("actions")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {promoters?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
-                  {t("noPromotersFound")}
-                </TableCell>
-              </TableRow>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("existingPromoters")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {promoters && promoters.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("name")}</TableHead>
+                    <TableHead>{t("email")}</TableHead>
+                    <TableHead>{t("company")}</TableHead>
+                    <TableHead className="text-right">{t("actions")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {promoters.map((promoter) => (
+                    <TableRow key={promoter.id}>
+                      <TableCell className="font-medium">{promoter.name}</TableCell>
+                      <TableCell>{promoter.email}</TableCell>
+                      <TableCell>{promoter.company}</TableCell>
+                      <TableCell className="text-right flex gap-2 justify-end">
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={`/manage-promoters/${promoter.id}/edit`}>{t("edit")}</Link>
+                        </Button>
+                        <DeletePromoterButton promoterId={promoter.id} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             ) : (
-              promoters?.map((promoter) => (
-                <TableRow key={promoter.id}>
-                  <TableCell className="font-medium">{promoter.name}</TableCell>
-                  <TableCell>{promoter.email}</TableCell>
-                  <TableCell>{promoter.phone}</TableCell>
-                  <TableCell>{promoter.company_name}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/manage-promoters/${promoter.id}/edit`}>
-                        <PencilIcon className="h-4 w-4" />
-                        <span className="sr-only">{t("edit")}</span>
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive"
-                      onClick={() => handleDeleteClick(promoter.id)}
-                    >
-                      <Trash2Icon className="h-4 w-4" />
-                      <span className="sr-only">{t("delete")}</span>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+              <p className="text-center text-gray-500">{t("noPromotersFound")}</p>
             )}
-          </TableBody>
-        </Table>
+          </CardContent>
+        </Card>
       </div>
-
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("confirmDeleteTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("confirmDeleteDescription")}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancelButton")}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete}>{t("continueButton")}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

@@ -2,68 +2,71 @@
 
 import * as React from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { useTranslations } from "next-intl"
+import { FormControl } from "@/components/ui/form"
 
-interface ComboboxFieldProps {
-  options: { value: string; label: string }[]
-  value: string
+interface ComboboxFieldProps<T extends { id: string; name: string }> {
+  options: T[]
+  value: string | undefined
   onValueChange: (value: string) => void
-  placeholder?: string
-  searchPlaceholder?: string
-  emptyMessage?: string
+  placeholder: string
+  noResultsText: string
+  searchPlaceholder: string
   disabled?: boolean
 }
 
-export function ComboboxField({
+export function ComboboxField<T extends { id: string; name: string }>({
   options,
   value,
   onValueChange,
-  placeholder = "Select option...",
-  searchPlaceholder = "Search options...",
-  emptyMessage = "No option found.",
-  disabled = false,
-}: ComboboxFieldProps) {
+  placeholder,
+  noResultsText,
+  searchPlaceholder,
+  disabled,
+}: ComboboxFieldProps<T>) {
   const [open, setOpen] = React.useState(false)
   const t = useTranslations("ComboboxField")
 
-  const selectedOption = options.find((option) => option.value === value)
+  const selectedOption = options.find((option) => option.id === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between bg-transparent"
-          disabled={disabled}
-        >
-          {selectedOption ? selectedOption.label : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+        <FormControl>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between bg-transparent"
+            disabled={disabled}
+          >
+            {selectedOption ? selectedOption.name : placeholder}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </FormControl>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
-            <CommandEmpty>{emptyMessage}</CommandEmpty>
+            <CommandEmpty>{noResultsText}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
-                  key={option.value}
-                  value={option.label} // Use label for searchability
+                  value={option.name}
+                  key={option.id}
                   onSelect={() => {
-                    onValueChange(option.value)
+                    onValueChange(option.id === value ? "" : option.id)
                     setOpen(false)
                   }}
                 >
-                  <Check className={cn("mr-2 h-4 w-4", value === option.value ? "opacity-100" : "opacity-0")} />
-                  {option.label}
+                  <Check className={cn("mr-2 h-4 w-4", option.id === value ? "opacity-100" : "opacity-0")} />
+                  {option.name}
                 </CommandItem>
               ))}
             </CommandGroup>

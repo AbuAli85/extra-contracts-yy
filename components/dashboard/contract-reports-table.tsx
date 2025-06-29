@@ -41,13 +41,20 @@ export default function ContractReportsTable({ initialContracts = [] }: Contract
       const { data, error } = await supabase
         .from("contracts")
         .select(
-          "id, contract_id, first_party_name_en, second_party_name_en, promoter_name_en, contract_type, status, created_at, updated_at, start_date, end_date",
+          "id, contract_id, contract_name, contract_type, status, created_at, updated_at, effective_date, termination_date, parties_a:party_a_id(name), parties_b:party_b_id(name), promoters(name)",
         )
         .order(sortKey || "created_at", { ascending: sortDirection === "asc" })
         .limit(100)
 
       if (error) throw error
-      setContracts(data as Contract[])
+      // Flatten the nested party and promoter objects for easier consumption
+      const flattenedData = data.map((contract: any) => ({
+        ...contract,
+        parties_a: contract.parties_a || null,
+        parties_b: contract.parties_b || null,
+        promoters: contract.promoters || null,
+      })) as Contract[]
+      setContracts(flattenedData)
     } catch (error: any) {
       console.error("Error fetching contracts:", error)
       toast({ title: "Error Fetching Contracts", description: error.message, variant: "destructive" })
@@ -87,9 +94,10 @@ export default function ContractReportsTable({ initialContracts = [] }: Contract
     return contracts.filter(
       (contract) =>
         contract.contract_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.first_party_name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.second_party_name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.promoter_name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.contract_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.parties_a?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.parties_b?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.promoters?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         contract.contract_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
         contract.status.toLowerCase().includes(searchTerm.toLowerCase()),
     )
@@ -134,9 +142,10 @@ export default function ContractReportsTable({ initialContracts = [] }: Contract
             <TableHeader>
               <TableRow>
                 <SortableHeader tKey="contract_id" label={t("contractId")} />
-                <SortableHeader tKey="first_party_name_en" label={t("firstParty")} />
-                <SortableHeader tKey="second_party_name_en" label={t("secondParty")} />
-                <SortableHeader tKey="promoter_name_en" label={t("promoter")} />
+                <SortableHeader tKey="contract_name" label={t("contractName")} />
+                <SortableHeader tKey="parties_a.name" label={t("firstParty")} />
+                <SortableHeader tKey="parties_b.name" label={t("secondParty")} />
+                <SortableHeader tKey="promoters.name" label={t("promoter")} />
                 <SortableHeader tKey="contract_type" label={t("contractType")} />
                 <SortableHeader tKey="status" label={t("status")} />
                 <SortableHeader tKey="created_at" label={t("createdAt")} />
@@ -145,14 +154,14 @@ export default function ContractReportsTable({ initialContracts = [] }: Contract
             <TableBody>
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={8} className="h-24 text-center">
                     <Loader2 className="mx-auto h-8 w-8 animate-spin" />
                   </TableCell>
                 </TableRow>
               )}
               {!loading && filteredContracts.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={8} className="h-24 text-center">
                     {t("noContractsFound")}
                   </TableCell>
                 </TableRow>
@@ -161,9 +170,10 @@ export default function ContractReportsTable({ initialContracts = [] }: Contract
                 filteredContracts.map((contract) => (
                   <TableRow key={contract.id}>
                     <TableCell className="font-medium">{contract.contract_id}</TableCell>
-                    <TableCell>{contract.first_party_name_en}</TableCell>
-                    <TableCell>{contract.second_party_name_en}</TableCell>
-                    <TableCell>{contract.promoter_name_en}</TableCell>
+                    <TableCell>{contract.contract_name}</TableCell>
+                    <TableCell>{contract.parties_a?.name || "N/A"}</TableCell>
+                    <TableCell>{contract.parties_b?.name || "N/A"}</TableCell>
+                    <TableCell>{contract.promoters?.name || "N/A"}</TableCell>
                     <TableCell>{contract.contract_type}</TableCell>
                     <TableCell>
                       <LifecycleStatusIndicator status={contract.status} />

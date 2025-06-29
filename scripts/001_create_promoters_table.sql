@@ -1,35 +1,31 @@
-CREATE TABLE promoters (
+CREATE TABLE IF NOT EXISTS promoters (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
+    email TEXT NOT NULL UNIQUE,
     phone TEXT,
-    company_name TEXT NOT NULL,
-    company_address TEXT,
-    contact_person TEXT,
-    contact_email TEXT,
-    contact_phone TEXT,
+    company TEXT NOT NULL,
+    address TEXT,
+    city TEXT,
+    state TEXT,
+    zip_code TEXT,
+    country TEXT,
+    bio TEXT,
     website TEXT,
-    notes TEXT,
-    logo_url TEXT
+    profile_picture_url TEXT
 );
 
 ALTER TABLE promoters ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view their own promoters."
-ON promoters FOR SELECT
-USING (auth.uid() = user_id);
+CREATE POLICY "Enable read access for all users" ON promoters
+FOR SELECT USING (TRUE);
 
-CREATE POLICY "Users can insert their own promoters."
-ON promoters FOR INSERT
-WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Enable insert for authenticated users only" ON promoters
+FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
-CREATE POLICY "Users can update their own promoters."
-ON promoters FOR UPDATE
-USING (auth.uid() = user_id);
+CREATE POLICY "Enable update for users based on user_id" ON promoters
+FOR UPDATE USING (auth.uid() = id); -- Assuming promoter ID is linked to user ID for ownership
 
-CREATE POLICY "Users can delete their own promoters."
-ON promoters FOR DELETE
-USING (auth.uid() = user_id);
+CREATE POLICY "Enable delete for users based on user_id" ON promoters
+FOR DELETE USING (auth.uid() = id); -- Assuming promoter ID is linked to user ID for ownership

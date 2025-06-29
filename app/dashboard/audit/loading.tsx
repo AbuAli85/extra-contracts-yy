@@ -1,16 +1,64 @@
 import { Skeleton } from "@/components/ui/skeleton"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
-export default function AuditLoading() {
+export default function Loading() {
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-      <h1 className="text-2xl font-semibold">
-        <Skeleton className="h-8 w-48" />
+    <div className="container mx-auto py-8 px-4 md:px-6">
+      <h1 className="text-3xl font-bold mb-6">
+        <Skeleton className="h-9 w-64" />
       </h1>
-      <Card className="p-4">
-        <Skeleton className="h-8 w-full mb-4" />
-        <Skeleton className="h-[400px] w-full" />
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Skeleton className="h-7 w-48" />
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>
+                  <Skeleton className="h-5 w-24" />
+                </TableHead>
+                <TableHead>
+                  <Skeleton className="h-5 w-24" />
+                </TableHead>
+                <TableHead>
+                  <Skeleton className="h-5 w-24" />
+                </TableHead>
+                <TableHead>
+                  <Skeleton className="h-5 w-24" />
+                </TableHead>
+                <TableHead>
+                  <Skeleton className="h-5 w-24" />
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Skeleton className="h-5 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-48" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-16" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
       </Card>
-    </main>
+    </div>
   )
 }

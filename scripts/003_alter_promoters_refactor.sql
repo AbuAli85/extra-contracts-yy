@@ -1,53 +1,60 @@
--- Add new columns for English and Arabic names
-ALTER TABLE promoters ADD COLUMN name_en TEXT;
-ALTER TABLE promoters ADD COLUMN name_ar TEXT;
+-- Add 'profile_picture_url' column to 'promoters' table if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='profile_picture_url') THEN
+        ALTER TABLE promoters ADD COLUMN profile_picture_url TEXT;
+    END IF;
+END
+$$;
 
--- Add new columns for ID card and passport details
-ALTER TABLE promoters ADD COLUMN id_card_number TEXT;
-ALTER TABLE promoters ADD COLUMN id_card_expiry_date DATE;
-ALTER TABLE promoters ADD COLUMN id_card_url TEXT;
-ALTER TABLE promoters ADD COLUMN passport_number TEXT;
-ALTER TABLE promoters ADD COLUMN passport_expiry_date DATE;
-ALTER TABLE promoters ADD COLUMN passport_url TEXT;
+-- Add 'website' column to 'promoters' table if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='website') THEN
+        ALTER TABLE promoters ADD COLUMN website TEXT;
+    END IF;
+END
+$$;
 
--- Migrate data from 'name' to 'name_en'
-UPDATE promoters SET name_en = name;
+-- Add 'bio' column to 'promoters' table if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='bio') THEN
+        ALTER TABLE promoters ADD COLUMN bio TEXT;
+    END IF;
+END
+$$;
 
--- Make name_en NOT NULL, assuming all existing records will be populated
-ALTER TABLE promoters ALTER COLUMN name_en SET NOT NULL;
+-- Add 'city', 'state', 'zip_code', 'country' columns to 'promoters' table if they don't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='city') THEN
+        ALTER TABLE promoters ADD COLUMN city TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='state') THEN
+        ALTER TABLE promoters ADD COLUMN state TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='zip_code') THEN
+        ALTER TABLE promoters ADD COLUMN zip_code TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='country') THEN
+        ALTER TABLE promoters ADD COLUMN country TEXT;
+    END IF;
+END
+$$;
 
--- Drop the old 'name' column if it's no longer needed
-ALTER TABLE promoters DROP COLUMN name;
+-- Update RLS policies for 'promoters' table if necessary
+-- This assumes your RLS policies might need to be adjusted for new columns.
+-- If your existing policies are generic (e.g., based on user_id), you might not need to change them.
+-- Example:
+-- ALTER POLICY "Enable read access for all users" ON promoters
+-- FOR SELECT USING (TRUE);
 
--- Add a unique constraint to email if it's not already there
-ALTER TABLE promoters ADD CONSTRAINT promoters_email_key UNIQUE (email);
+-- ALTER POLICY "Enable insert for authenticated users only" ON promoters
+-- FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
--- Update RLS policies to reflect the new 'name_en' column if necessary
--- (This part depends on how your RLS policies are written.
--- If they refer to 'name', you'll need to update them to 'name_en' or 'name_ar' as appropriate.)
+-- ALTER POLICY "Enable update for users based on user_id" ON promoters
+-- FOR UPDATE USING (auth.uid() = id); -- Assuming promoter ID is linked to user ID for ownership
 
--- Example of updating RLS policies (adjust as per your actual policies)
--- You might need to drop and re-create policies if they directly reference the old 'name' column.
-
--- Revoke existing policies (if they exist and reference 'name')
--- DROP POLICY IF EXISTS "Users can view their own promoters." ON promoters;
--- DROP POLICY IF EXISTS "Users can insert their own promoters." ON promoters;
--- DROP POLICY IF EXISTS "Users can update their own promoters." ON promoters;
--- DROP POLICY IF EXISTS "Users can delete their own promoters." ON promoters;
-
--- Re-create policies with new column (example, adjust to your needs)
--- CREATE POLICY "Users can view their own promoters."
--- ON promoters FOR SELECT
--- USING (auth.uid() = user_id);
-
--- CREATE POLICY "Users can insert their own promoters."
--- ON promoters FOR INSERT
--- WITH CHECK (auth.uid() = user_id);
-
--- CREATE POLICY "Users can update their own promoters."
--- ON promoters FOR UPDATE
--- USING (auth.uid() = user_id);
-
--- CREATE POLICY "Users can delete their own promoters."
--- ON promoters FOR DELETE
--- USING (auth.uid() = user_id);
+-- ALTER POLICY "Enable delete for users based on user_id" ON promoters
+-- FOR DELETE USING (auth.uid() = id); -- Assuming promoter ID is linked to user ID for ownership

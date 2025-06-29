@@ -1,6 +1,7 @@
 "use client"
-import { format, startOfToday, addYears } from "date-fns"
+import { addDays, format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -15,62 +16,51 @@ interface DatePickerWithPresetsFieldProps {
   disabled?: boolean
 }
 
-export const DatePickerWithPresetsField = ({
-  date,
-  setDate,
-  placeholder = "Pick a date",
-  disabled = false,
-}: DatePickerWithPresetsFieldProps) => {
-  const defaultPresets = [
-    { label: "Today", date: startOfToday() },
-    { label: "+1Y", date: addYears(startOfToday(), 1) },
-    { label: "+2Y", date: addYears(startOfToday(), 2) },
-    { label: "+3Y", date: addYears(startOfToday(), 3) },
-    { label: "+4Y", date: addYears(startOfToday(), 4) },
-    { label: "+5Y", date: addYears(startOfToday(), 5) },
-  ]
+export function DatePickerWithPresetsField({ date, setDate, placeholder, disabled }: DatePickerWithPresetsFieldProps) {
+  const t = useTranslations("DatePicker")
 
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
-          className={cn(
-            "w-full justify-start text-left font-normal",
-            !date && "text-muted-foreground",
-            disabled && "opacity-50 cursor-not-allowed",
-          )}
+          className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
           disabled={disabled}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP") : <span>{placeholder}</span>}
+          {date ? format(date, "PPP") : <span>{placeholder || t("pickADate")}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
         <Select
           onValueChange={(value) => {
-            const selectedPreset = defaultPresets.find((p) => p.label === value)
-            if (selectedPreset) {
-              setDate(selectedPreset.date)
-            } else if (value === "none") {
+            const today = new Date()
+            if (value === "today") {
+              setDate(today)
+            } else if (value === "tomorrow") {
+              setDate(addDays(today, 1))
+            } else if (value === "nextWeek") {
+              setDate(addDays(today, 7))
+            } else if (value === "nextMonth") {
+              setDate(addDays(today, 30))
+            } else {
               setDate(undefined)
             }
           }}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select preset" />
+            <SelectValue placeholder={t("select")} />
           </SelectTrigger>
           <SelectContent position="popper">
-            {defaultPresets.map((preset) => (
-              <SelectItem key={preset.label} value={preset.label}>
-                {preset.label}
-              </SelectItem>
-            ))}
-            <SelectItem value="none">No date</SelectItem>
+            <SelectItem value="today">{t("today")}</SelectItem>
+            <SelectItem value="tomorrow">{t("tomorrow")}</SelectItem>
+            <SelectItem value="nextWeek">{t("nextWeek")}</SelectItem>
+            <SelectItem value="nextMonth">{t("nextMonth")}</SelectItem>
+            <SelectItem value="none">{t("clear")}</SelectItem>
           </SelectContent>
         </Select>
         <div className="rounded-md border">
-          <Calendar mode="single" selected={date} onSelect={setDate} initialFocus disabled={disabled} />
+          <Calendar mode="single" selected={date} onSelect={setDate} />
         </div>
       </PopoverContent>
     </Popover>
