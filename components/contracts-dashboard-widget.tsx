@@ -1,72 +1,80 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, Clock, CheckCircle, TrendingUp } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { FileText, Clock, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
 import { useContractsStore } from "@/lib/stores/contracts-store"
 
 export function ContractsDashboardWidget() {
-  const { contracts, fetchContracts } = useContractsStore()
+  const { contracts } = useContractsStore()
 
-  useEffect(() => {
-    fetchContracts()
-  }, [fetchContracts])
+  const stats = {
+    total: contracts.length,
+    pending: contracts.filter((c) => c.status === "pending").length,
+    queued: contracts.filter((c) => c.status === "queued").length,
+    processing: contracts.filter((c) => c.status === "processing").length,
+    completed: contracts.filter((c) => c.status === "completed").length,
+    failed: contracts.filter((c) => c.status === "failed").length,
+  }
 
-  const stats = useMemo(() => {
-    const total = contracts.length
-    const pending = contracts.filter((c) => c.status === "pending").length
-    const processing = contracts.filter((c) => c.status === "queued" || c.status === "processing").length
-    const completed = contracts.filter((c) => c.status === "completed").length
-    const failed = contracts.filter((c) => c.status === "failed").length
-
-    return { total, pending, processing, completed, failed }
-  }, [contracts])
+  const statCards = [
+    {
+      title: "Total Contracts",
+      value: stats.total,
+      icon: FileText,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+    },
+    {
+      title: "Pending",
+      value: stats.pending,
+      icon: Clock,
+      color: "text-gray-600",
+      bgColor: "bg-gray-50",
+    },
+    {
+      title: "In Progress",
+      value: stats.queued + stats.processing,
+      icon: Loader2,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-50",
+      animate: stats.processing > 0,
+    },
+    {
+      title: "Completed",
+      value: stats.completed,
+      icon: CheckCircle,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+    },
+    {
+      title: "Failed",
+      value: stats.failed,
+      icon: AlertCircle,
+      color: "text-red-600",
+      bgColor: "bg-red-50",
+    },
+  ]
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Contracts</CardTitle>
-          <FileText className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.total}</div>
-          <p className="text-xs text-muted-foreground">All contracts in system</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Pending</CardTitle>
-          <Clock className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.pending}</div>
-          <p className="text-xs text-muted-foreground">Awaiting generation</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Processing</CardTitle>
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.processing}</div>
-          <p className="text-xs text-muted-foreground">Currently generating</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Completed</CardTitle>
-          <CheckCircle className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.completed}</div>
-          <p className="text-xs text-muted-foreground">Ready for download</p>
-        </CardContent>
-      </Card>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      {statCards.map((stat) => {
+        const Icon = stat.icon
+        return (
+          <Card key={stat.title}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+                  <p className="text-2xl font-bold">{stat.value}</p>
+                </div>
+                <div className={`p-2 rounded-full ${stat.bgColor}`}>
+                  <Icon className={`h-4 w-4 ${stat.color} ${stat.animate ? "animate-spin" : ""}`} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )
+      })}
     </div>
   )
 }
