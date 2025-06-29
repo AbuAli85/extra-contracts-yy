@@ -6,7 +6,7 @@ import { useContractsStore } from "@/lib/stores/contracts-store"
 import { toast } from "sonner"
 
 export function useRealtimeContracts() {
-  const { updateContract, addContract } = useContractsStore()
+  const { addContract, updateContract } = useContractsStore()
 
   useEffect(() => {
     const supabase = createClient()
@@ -16,23 +16,29 @@ export function useRealtimeContracts() {
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "contracts",
         },
         (payload) => {
-          if (payload.eventType === "INSERT") {
-            addContract(payload.new as any)
-            toast.success("New contract created!")
-          } else if (payload.eventType === "UPDATE") {
-            updateContract(payload.new.id, payload.new as any)
+          addContract(payload.new as any)
+          toast.success("New contract created")
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "contracts",
+        },
+        (payload) => {
+          updateContract(payload.new.id, payload.new as any)
 
-            // Show status-specific notifications
-            if (payload.new.status === "completed") {
-              toast.success(`Contract ${payload.new.contract_number} completed!`)
-            } else if (payload.new.status === "failed") {
-              toast.error(`Contract ${payload.new.contract_number} failed!`)
-            }
+          if (payload.new.status === "completed") {
+            toast.success("Contract generation completed")
+          } else if (payload.new.status === "failed") {
+            toast.error("Contract generation failed")
           }
         },
       )
@@ -41,5 +47,5 @@ export function useRealtimeContracts() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [updateContract, addContract])
+  }, [addContract, updateContract])
 }

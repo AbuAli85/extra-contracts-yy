@@ -5,15 +5,16 @@ import { createClient } from "@/lib/supabase/client"
 export interface Contract {
   id: string
   contract_number: string
-  party_a: string
-  party_b: string
-  contract_type: string
+  party_a?: string
+  party_b?: string
+  contract_type?: string
   description?: string
-  status: "pending" | "queued" | "processing" | "completed" | "failed"
+  status: "pending" | "processing" | "completed" | "failed"
+  contract_data: any
   pdf_url?: string
   created_at: string
-  updated_at: string
-  user_id: string
+  updated_at?: string
+  user_id?: string
 }
 
 export interface ContractFormData {
@@ -89,15 +90,16 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
       const contracts: Contract[] = (data || []).map((item) => ({
         id: item.id,
         contract_number: item.contract_number,
-        party_a: item.party_a,
-        party_b: item.party_b,
-        contract_type: item.contract_type,
+        party_a: item.party_a || undefined,
+        party_b: item.party_b || undefined,
+        contract_type: item.contract_type || undefined,
         description: item.description || undefined,
-        status: item.status as "pending" | "queued" | "processing" | "completed" | "failed",
+        status: item.status as "pending" | "processing" | "completed" | "failed",
+        contract_data: item.contract_data,
         pdf_url: item.pdf_url || undefined,
         created_at: item.created_at,
-        updated_at: item.updated_at,
-        user_id: item.user_id,
+        updated_at: item.updated_at || undefined,
+        user_id: item.user_id || undefined,
       }))
 
       set({ contracts, isLoading: false })
@@ -213,8 +215,7 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
     const contracts = get().contracts
     return {
       total: contracts.length,
-      pending: contracts.filter((c) => c.status === "pending" || c.status === "queued" || c.status === "processing")
-        .length,
+      pending: contracts.filter((c) => c.status === "pending" || c.status === "processing").length,
       completed: contracts.filter((c) => c.status === "completed").length,
       failed: contracts.filter((c) => c.status === "failed").length,
     }

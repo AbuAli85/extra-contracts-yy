@@ -1,31 +1,45 @@
 {
   "dashboard": {
-    "title": "Panel de Contratos",
+    "title": "Panel de Control",
     "overview": "Resumen",
-    "recentContracts": "Contratos Recientes",
+    "contracts": "Contratos",
+    "generateContract": "Generar Contrato",
+    "manageParties": "Gestionar Partes",
+    "managePromoters": "Gestionar Promotores",
     "totalContracts": "Total de Contratos",
-    "pendingContracts": "Pendientes",
-    "completedContracts": "Completados",
-    "failedContracts": "Fallidos",
-    "statistics": "Estadísticas",
-    "recentActivity": "Actividad Reciente"
+    "pendingContracts": "Contratos Pendientes",
+    "completedContracts": "Contratos Completados",
+    "failedContracts": "Contratos Fallidos",
+    "recentActivity": "Actividad Reciente",
+    "quickActions": "Acciones Rápidas"
   },
   "contracts": {
     "title": "Contratos",
-    "generateNew": "Generar Nuevo Contrato",
     "generate": "Generar",
-    "partyA": "Parte A",
-    "partyB": "Parte B",
-    "contractType": "Tipo de Contrato",
-    "description": "Descripción",
-    "status": "Estado",
+    "retry": "Reintentar",
+    "download": "Descargar",
+    "status": {
+      "pending": "Pendiente",
+      "processing": "Procesando",
+      "completed": "Completado",
+      "failed": "Fallido"
+    },
+    "contractNumber": "Número de Contrato",
     "createdAt": "Creado el",
-    "action": "Acciones",
-    "number": "Número de Contrato",
-    "pending": "Pendiente",
-    "queued": "En Cola",
-    "processing": "Procesando",
-    "completed": "Completado",
-    "failed": "Fallido"
+    "actions": "Acciones"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar"
   }
 }

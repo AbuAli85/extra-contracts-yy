@@ -1,31 +1,45 @@
 {
   "dashboard": {
-    "title": "Contract Dashboard",
+    "title": "Dashboard",
     "overview": "Overview",
-    "recentContracts": "Recent Contracts",
+    "contracts": "Contracts",
+    "generateContract": "Generate Contract",
+    "manageParties": "Manage Parties",
+    "managePromoters": "Manage Promoters",
     "totalContracts": "Total Contracts",
-    "pendingContracts": "Pending",
-    "completedContracts": "Completed",
-    "failedContracts": "Failed",
-    "statistics": "Statistics",
-    "recentActivity": "Recent Activity"
+    "pendingContracts": "Pending Contracts",
+    "completedContracts": "Completed Contracts",
+    "failedContracts": "Failed Contracts",
+    "recentActivity": "Recent Activity",
+    "quickActions": "Quick Actions"
   },
   "contracts": {
     "title": "Contracts",
-    "generateNew": "Generate New Contract",
     "generate": "Generate",
-    "partyA": "Party A",
-    "partyB": "Party B",
-    "contractType": "Contract Type",
-    "description": "Description",
-    "status": "Status",
+    "retry": "Retry",
+    "download": "Download",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "contractNumber": "Contract Number",
     "createdAt": "Created At",
-    "action": "Actions",
-    "number": "Contract Number",
-    "pending": "Pending",
-    "queued": "Queued",
-    "processing": "Processing",
-    "completed": "Completed",
-    "failed": "Failed"
+    "actions": "Actions"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import"
   }
 }
