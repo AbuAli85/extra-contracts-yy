@@ -1,14 +1,16 @@
-"use client"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card } from "@/components/ui/card"
 
-import React from "react"
-import { Loader2 } from "lucide-react"
-
-export function Loading() {
+export default function DashboardContractsLoading() {
   return (
-    <div className="flex h-full w-full items-center justify-center">
-      <Loader2 className="h-10 w-10 animate-spin text-primary" />
-    </div>
+    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+      <h1 className="text-2xl font-semibold">
+        <Skeleton className="h-8 w-48" />
+      </h1>
+      <Card className="p-4">
+        <Skeleton className="h-8 w-full mb-4" />
+        <Skeleton className="h-[400px] w-full" />
+      </Card>
+    </main>
   )
 }
-
-

@@ -1,180 +1,113 @@
-"use client"
-import { useEffect, useState } from "react"
-import DashboardLayout from "@/components/dashboard/dashboard-layout"
-import SummaryWidget from "@/components/dashboard/summary-widget"
-import ChartsSection from "@/components/dashboard/charts-section"
+import { getTranslations } from "next-intl/server"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import {
+  getDashboardSummary,
+  getContractStatusDistribution,
+  getContractsByPromoter,
+  getNotifications,
+  getReviewItems,
+} from "@/lib/dashboard-data"
+import { BarChart, PieChart } from "@/components/dashboard/charts-section"
 import ContractReportsTable from "@/components/dashboard/contract-reports-table"
-import ReviewPanel from "@/components/dashboard/review-panel"
-import NotificationSystem from "@/components/dashboard/notification-system"
+import { NotificationSystem } from "@/components/dashboard/notification-system"
+import { ReviewPanel } from "@/components/dashboard/review-panel"
 import AdminTools from "@/components/dashboard/admin-tools"
-import AuditLogs from "@/components/dashboard/audit-logs"
-import { supabase } from "@/lib/supabase"
-import { devLog } from "@/lib/dev-log"
-import type { SummaryWidgetData, ContractStats } from "@/lib/dashboard-types"
-import { FileText, FileCheck, FileX, CalendarClock, Users, Building } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { Users, FileText, Clock } from "lucide-react"
 
-const initialStats: ContractStats = {
-  totalContracts: 0,
-  activeContracts: 0,
-  expiredContracts: 0,
-  expiringSoonContracts: 0,
-  totalPromoters: 0,
-  totalCompanies: 0,
-}
+export default async function DashboardPage() {
+  const t = await getTranslations("DashboardPage")
+  const summary = await getDashboardSummary()
+  const statusDistribution = await getContractStatusDistribution()
+  const contractsByPromoter = await getContractsByPromoter()
+  const notifications = await getNotifications()
+  const reviewItems = await getReviewItems()
 
-export default function DashboardPage() {
-  const [stats, setStats] = useState<ContractStats>(initialStats)
-  const [loadingStats, setLoadingStats] = useState(true)
-  const { toast } = useToast()
+  const statusChartData = statusDistribution.map((item) => ({
+    name: item.status,
+    value: item.count,
+  }))
 
-  useEffect(() => {
-    const fetchInitialStats = async () => {
-      setLoadingStats(true)
-      try {
-        const [
-          { count: totalContractsCount, error: totalError },
-          { count: activeContractsCount, error: activeError },
-          { count: expiredContractsCount, error: expiredError },
-          { count: expiringSoonContractsCount, error: expiringSoonError },
-          { count: totalPromotersCount, error: promotersError },
-          { count: totalCompaniesCount, error: partiesError },
-        ] = await Promise.all([
-          supabase.from("contracts").select("id", { count: "exact", head: true }),
-          supabase.from("contracts").select("id", { count: "exact", head: true }).eq("status", "Active"),
-          supabase.from("contracts").select("id", { count: "exact", head: true }).eq("status", "Expired"),
-          supabase.from("contracts").select("id", { count: "exact", head: true }).eq("status", "Soon-to-Expire"),
-          supabase.from("promoters").select("id", { count: "exact", head: true }),
-          supabase.from("parties").select("id", { count: "exact", head: true }),
-        ])
-
-        if (totalError) throw totalError
-        if (activeError) throw activeError
-        if (expiredError) throw expiredError
-        if (expiringSoonError) throw expiringSoonError
-        if (promotersError) throw promotersError
-        if (partiesError) throw partiesError
-
-        setStats({
-          totalContracts: totalContractsCount || 0,
-          activeContracts: activeContractsCount || 0,
-          expiredContracts: expiredContractsCount || 0,
-          expiringSoonContracts: expiringSoonContractsCount || 0,
-          totalPromoters: totalPromotersCount || 0,
-          totalCompanies: totalCompaniesCount || 0,
-        })
-      } catch (error: any) {
-        console.error("Error fetching initial stats:", error)
-        toast({
-          title: "Error Fetching Stats",
-          description: error.message || "Could not load dashboard statistics.",
-          variant: "destructive",
-        })
-      } finally {
-        setLoadingStats(false)
-      }
-    }
-
-    fetchInitialStats()
-
-    const contractsChannel = supabase
-      .channel("public:contracts:kpis") // Unique channel name for KPIs
-      .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, (payload) => {
-        devLog("Contracts table change for KPIs received!", payload)
-        fetchInitialStats()
-        toast({
-          title: "Dashboard Stats Updated",
-          description: "Key metrics have been updated in real-time.",
-        })
-      })
-      .subscribe()
-
-    // Assuming promoter and party counts also need to be real-time
-    const promotersChannel = supabase
-      .channel("public:promoters:kpis")
-      .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, () => fetchInitialStats())
-      .subscribe()
-
-    const partiesChannel = supabase
-      .channel("public:parties:kpis")
-      .on("postgres_changes", { event: "*", schema: "public", table: "parties" }, () => fetchInitialStats())
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(contractsChannel)
-      supabase.removeChannel(promotersChannel)
-      supabase.removeChannel(partiesChannel)
-    }
-  }, [])
-
-  const summaryWidgetsData: SummaryWidgetData[] = [
-    {
-      title: "Total Contracts",
-      titleAr: "إجمالي العقود",
-      value: loadingStats ? "..." : stats.totalContracts,
-      icon: FileText,
-      color: "text-blue-500",
-    },
-    {
-      title: "Active Contracts",
-      titleAr: "العقود النشطة",
-      value: loadingStats ? "..." : stats.activeContracts,
-      icon: FileCheck,
-      color: "text-green-500",
-    },
-    {
-      title: "Expired Contracts",
-      titleAr: "العقود منتهية الصلاحية",
-      value: loadingStats ? "..." : stats.expiredContracts,
-      icon: FileX,
-      color: "text-red-500",
-    },
-    {
-      title: "Expiring in 30 Days",
-      titleAr: "تنتهي خلال 30 يومًا",
-      value: loadingStats ? "..." : stats.expiringSoonContracts,
-      icon: CalendarClock,
-      color: "text-orange-500",
-    },
-    {
-      title: "Total Promoters",
-      titleAr: "إجمالي المروجين",
-      value: loadingStats ? "..." : stats.totalPromoters,
-      icon: Users,
-      color: "text-purple-500",
-    },
-    {
-      title: "Total Companies",
-      titleAr: "إجمالي الشركات",
-      value: loadingStats ? "..." : stats.totalCompanies,
-      icon: Building,
-      color: "text-teal-500",
-    },
-  ]
+  const promoterChartData = contractsByPromoter.map((item) => ({
+    name: item.promoter_name_en,
+    value: item.count,
+  }))
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {summaryWidgetsData.map((widget) => (
-            <SummaryWidget key={widget.title} data={widget} isLoading={loadingStats} />
-          ))}
-        </section>
+    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+      <h1 className="text-2xl font-semibold">{t("dashboardTitle")}</h1>
 
-        <ChartsSection />
-        <ContractReportsTable />
-
-        <section className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-8">
-            <ReviewPanel />
-          </div>
-          <div className="lg:col-span-1 space-y-8">
-            <NotificationSystem />
-            <AdminTools />
-          </div>
-        </section>
-        <AuditLogs />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t("totalContracts")}</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{summary.totalContracts}</div>
+            <p className="text-xs text-muted-foreground">{t("totalContractsDescription")}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t("activeContracts")}</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{summary.activeContracts}</div>
+            <p className="text-xs text-muted-foreground">{t("activeContractsDescription")}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t("totalPromoters")}</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{summary.totalPromoters}</div>
+            <p className="text-xs text-muted-foreground">{t("totalPromotersDescription")}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t("totalParties")}</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{summary.totalParties}</div>
+            <p className="text-xs text-muted-foreground">{t("totalPartiesDescription")}</p>
+          </CardContent>
+        </Card>
       </div>
-    </DashboardLayout>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>{t("contractStatusDistribution")}</CardTitle>
+            <CardDescription>{t("contractStatusDistributionDescription")}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-center justify-center">
+            <PieChart data={statusChartData} />
+          </CardContent>
+        </Card>
+        <NotificationSystem notifications={notifications} />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("contractsByPromoter")}</CardTitle>
+            <CardDescription>{t("contractsByPromoterDescription")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <BarChart data={promoterChartData} />
+          </CardContent>
+        </Card>
+        <ReviewPanel reviews={reviewItems} />
+      </div>
+
+      <ContractReportsTable />
+
+      <AdminTools />
+    </main>
   )
 }

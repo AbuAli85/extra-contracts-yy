@@ -1,123 +1,101 @@
 "use client"
-
 import { useState, useEffect, useMemo } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DatePickerWithRange } from "@/components/date-picker-with-range"
-import { Badge } from "@/components/ui/badge"
-import { Download, Search, ArrowUpDown, Loader2 } from "lucide-react"
-import type { ContractReportItem } from "@/lib/dashboard-types"
+import { Search, Loader2, ArrowUpDown } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
-import { format, parseISO, isValid } from "date-fns"
-import type { DateRange } from "react-day-picker"
+import type { Contract } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
+import { format } from "date-fns"
+import { LifecycleStatusIndicator } from "@/components/lifecycle-status-indicator"
+import { useTranslations } from "next-intl"
 
-type SortKey =
-  | keyof ContractReportItem
+type ContractSortKey =
+  | keyof Contract
   | "contract_id"
-  | "promoter_name"
-  | "employer_name"
-  | "client_name"
-  | "start_date"
-  | "end_date"
+  | "first_party_name_en"
+  | "promoter_name_en"
   | "status"
+  | "created_at"
   | null
 
-export default function ContractReportsTable() {
-  const [contracts, setContracts] = useState<ContractReportItem[]>([])
-  const [loading, setLoading] = useState(true)
+interface ContractReportsTableProps {
+  initialContracts?: Contract[]
+}
+
+export default function ContractReportsTable({ initialContracts = [] }: ContractReportsTableProps) {
+  const [contracts, setContracts] = useState<Contract[]>(initialContracts)
+  const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
-  const [sortKey, setSortKey] = useState<SortKey>("start_date")
+  const [sortKey, setSortKey] = useState<ContractSortKey>("created_at")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
   const { toast } = useToast()
+  const t = useTranslations("DashboardContractReportsTable")
 
   const fetchContracts = async () => {
     setLoading(true)
     try {
       const { data, error } = await supabase
-        .from("contracts_view")
-        .select("id, contract_id, promoter_name, employer_name, client_name, start_date, end_date, status")
-        .order(sortKey || "start_date", { ascending: sortDirection === "asc" })
+        .from("contracts")
+        .select(
+          "id, contract_id, first_party_name_en, second_party_name_en, promoter_name_en, contract_type, status, created_at, updated_at, start_date, end_date",
+        )
+        .order(sortKey || "created_at", { ascending: sortDirection === "asc" })
+        .limit(100)
 
       if (error) throw error
-      // Data from contracts_view should already match ContractReportItem structure due to aliasing in the view
-      setContracts(data as ContractReportItem[])
+      setContracts(data as Contract[])
     } catch (error: any) {
       console.error("Error fetching contracts:", error)
       toast({ title: "Error Fetching Contracts", description: error.message, variant: "destructive" })
-      setContracts([]) // Clear contracts on error
+      setContracts([])
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchContracts()
-  }, [sortKey, sortDirection])
+    if (initialContracts.length === 0) {
+      fetchContracts()
+    } else {
+      setLoading(false) // If initial data is provided, no need to load
+    }
+  }, [sortKey, sortDirection, initialContracts])
 
   useEffect(() => {
-    // For views, Supabase Realtime listens to changes on the underlying tables.
-    // So, we subscribe to `contracts`, `promoters`, and `parties`.
-    const handleTableChange = (payload: any, tableName: string) => {
-      devLog(`${tableName} table change for view:`, payload)
-      toast({ title: "Contract Data Updated", description: `Refreshing contract list due to changes in ${tableName}.` })
-      fetchContracts() // Refetch data from the view
-    }
-
-    const contractsBaseChannel = supabase
-      .channel("public:contracts:for-view")
-      .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, (p) =>
-        handleTableChange(p, "contracts"),
-      )
+    const channel = supabase
+      .channel("public:contracts:feed") // Unique channel name
+      .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, (payload) => {
+        devLog("Contract change received:", payload)
+        toast({
+          title: "Contract Updated",
+          description: `Contract ${payload.new?.contract_id || payload.old?.contract_id} has been updated.`,
+        })
+        fetchContracts() // Re-fetch all contracts to ensure consistency
+      })
       .subscribe()
-    const promotersChannel = supabase
-      .channel("public:promoters:for-view")
-      .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, (p) =>
-        handleTableChange(p, "promoters"),
-      )
-      .subscribe()
-    const partiesChannel = supabase
-      .channel("public:parties:for-view")
-      .on("postgres_changes", { event: "*", schema: "public", table: "parties" }, (p) =>
-        handleTableChange(p, "parties"),
-      )
-      .subscribe()
-
     return () => {
-      supabase.removeChannel(contractsBaseChannel)
-      supabase.removeChannel(promotersChannel)
-      supabase.removeChannel(partiesChannel)
+      supabase.removeChannel(channel)
     }
-  }, []) // subscribe once
+  }, [])
 
-  const filteredData = useMemo(() => {
+  const filteredContracts = useMemo(() => {
     if (!contracts) return []
-    return contracts.filter((item) => {
-      const sDate = parseISO(item.start_date)
-      const eDate = parseISO(item.end_date)
+    return contracts.filter(
+      (contract) =>
+        contract.contract_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.first_party_name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.second_party_name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.promoter_name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.contract_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.status.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+  }, [contracts, searchTerm])
 
-      const matchesSearch =
-        (item.contract_id?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-        (item.promoter_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-        (item.employer_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-        (item.client_name?.toLowerCase() || "").includes(searchTerm.toLowerCase())
-      const matchesStatus = statusFilter === "all" || item.status === statusFilter
-      const matchesDate =
-        !dateRange ||
-        !dateRange.from ||
-        !dateRange.to ||
-        (isValid(sDate) && isValid(eDate) && sDate >= dateRange.from && eDate <= dateRange.to)
-      return matchesSearch && matchesStatus && matchesDate
-    })
-  }, [contracts, searchTerm, statusFilter, dateRange])
-
-  const handleSort = (key: SortKey) => {
+  const handleSort = (key: ContractSortKey) => {
     if (sortKey === key) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc")
     } else {
@@ -126,45 +104,10 @@ export default function ContractReportsTable() {
     }
   }
 
-  const getStatusBadgeClass = (status: ContractReportItem["status"]) => {
-    switch (status) {
-      case "Active":
-        return "bg-green-100 text-green-700 border-green-300 dark:bg-green-700/20 dark:text-green-300 dark:border-green-700"
-      case "Expired":
-        return "bg-red-100 text-red-700 border-red-300 dark:bg-red-700/20 dark:text-red-300 dark:border-red-700"
-      case "Soon-to-Expire":
-        return "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-700/20 dark:text-orange-300 dark:border-orange-700"
-      default: // Covers "Pending Approval", "Draft", and any other status
-        return "bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-700/20 dark:text-gray-300 dark:border-gray-700"
-    }
-  }
-
-  const handleExportCSV = () => {
-    const headers = ["Contract ID", "Promoter", "Employer", "Client", "Start Date", "End Date", "Status"]
-    const rows = filteredData.map((item) =>
-      [
-        item.contract_id,
-        item.promoter_name,
-        item.employer_name,
-        item.client_name,
-        isValid(parseISO(item.start_date)) ? format(parseISO(item.start_date), "yyyy-MM-dd") : "",
-        isValid(parseISO(item.end_date)) ? format(parseISO(item.end_date), "yyyy-MM-dd") : "",
-        item.status,
-      ].join(","),
-    )
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n")
-    const link = document.createElement("a")
-    link.setAttribute("href", encodeURI(csvContent))
-    link.setAttribute("download", "contract_reports.csv")
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
-
-  const SortableHeader = ({ tKey, label, labelAr }: { tKey: SortKey; label: string; labelAr: string }) => (
+  const SortableHeader = ({ tKey, label }: { tKey: ContractSortKey; label: string }) => (
     <TableHead onClick={() => handleSort(tKey)} className="cursor-pointer hover:bg-muted/50">
       <div className="flex items-center">
-        {label} / {labelAr}
+        {label}
         {sortKey === tKey && <ArrowUpDown className="ml-2 h-4 w-4" />}
       </div>
     </TableHead>
@@ -173,93 +116,64 @@ export default function ContractReportsTable() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <CardTitle>Contract Reports / تقارير العقود</CardTitle>
-            <CardDescription>Detailed list of contracts. / قائمة مفصلة بالعقود.</CardDescription>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleExportCSV} disabled={loading || filteredData.length === 0}>
-              <Download className="mr-2 h-4 w-4" /> Export CSV
-            </Button>
-          </div>
-        </div>
+        <CardTitle>{t("contractReportsTitle")}</CardTitle>
+        <CardDescription>{t("contractReportsDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col md:flex-row gap-4 mb-6 p-4 border rounded-md bg-muted/50">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by ID, Promoter, Company..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 w-full"
-            />
-          </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full md:w-[180px]">
-              <SelectValue placeholder="Filter by Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="Active">Active</SelectItem>
-              <SelectItem value="Expired">Expired</SelectItem>
-              <SelectItem value="Soon-to-Expire">Soon-to-Expire</SelectItem>
-              <SelectItem value="Pending Approval">Pending Approval</SelectItem>
-              <SelectItem value="Draft">Draft</SelectItem>
-            </SelectContent>
-          </Select>
-          <DatePickerWithRange date={dateRange} onDateChange={setDateRange} className="w-full md:w-auto" />
+        <div className="relative mb-4">
+          <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("searchContracts")}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8 w-full"
+          />
         </div>
-
-        <div className="overflow-x-auto">
+        <ScrollArea className="h-[400px] border rounded-md">
           <Table>
             <TableHeader>
               <TableRow>
-                <SortableHeader tKey="contract_id" label="Contract ID" labelAr="معرف العقد" />
-                <SortableHeader tKey="promoter_name" label="Promoter" labelAr="المروج" />
-                <SortableHeader tKey="employer_name" label="Employer" labelAr="جهة العمل" />
-                <SortableHeader tKey="client_name" label="Client" labelAr="العميل" />
-                <SortableHeader tKey="start_date" label="Start Date" labelAr="تاريخ البدء" />
-                <SortableHeader tKey="end_date" label="End Date" labelAr="تاريخ الانتهاء" />
-                <SortableHeader tKey="status" label="Status" labelAr="الحالة" />
+                <SortableHeader tKey="contract_id" label={t("contractId")} />
+                <SortableHeader tKey="first_party_name_en" label={t("firstParty")} />
+                <SortableHeader tKey="second_party_name_en" label={t("secondParty")} />
+                <SortableHeader tKey="promoter_name_en" label={t("promoter")} />
+                <SortableHeader tKey="contract_type" label={t("contractType")} />
+                <SortableHeader tKey="status" label={t("status")} />
+                <SortableHeader tKey="created_at" label={t("createdAt")} />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
+              {loading && (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
                     <Loader2 className="mx-auto h-8 w-8 animate-spin" />
                   </TableCell>
                 </TableRow>
-              ) : filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.contract_id}</TableCell>
-                    <TableCell>{item.promoter_name}</TableCell>
-                    <TableCell>{item.employer_name}</TableCell>
-                    <TableCell>{item.client_name}</TableCell>
-                    <TableCell>
-                      {isValid(parseISO(item.start_date)) ? format(parseISO(item.start_date), "MMM d, yyyy") : "N/A"}
-                    </TableCell>
-                    <TableCell>
-                      {isValid(parseISO(item.end_date)) ? format(parseISO(item.end_date), "MMM d, yyyy") : "N/A"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusBadgeClass(item.status)}>{item.status}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
+              )}
+              {!loading && filteredContracts.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
-                    No contracts found matching your criteria.
+                    {t("noContractsFound")}
                   </TableCell>
                 </TableRow>
               )}
+              {!loading &&
+                filteredContracts.map((contract) => (
+                  <TableRow key={contract.id}>
+                    <TableCell className="font-medium">{contract.contract_id}</TableCell>
+                    <TableCell>{contract.first_party_name_en}</TableCell>
+                    <TableCell>{contract.second_party_name_en}</TableCell>
+                    <TableCell>{contract.promoter_name_en}</TableCell>
+                    <TableCell>{contract.contract_type}</TableCell>
+                    <TableCell>
+                      <LifecycleStatusIndicator status={contract.status} />
+                    </TableCell>
+                    <TableCell>{format(new Date(contract.created_at), "PPP")}</TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
-        </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   )

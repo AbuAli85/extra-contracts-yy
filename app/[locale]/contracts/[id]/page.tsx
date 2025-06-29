@@ -1,35 +1,124 @@
-import { getContract } from "@/lib/data"
-import { ManualErrorBoundary } from "@/components/ManualErrorBoundary"
+import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { ArrowLeftIcon, DownloadIcon, EditIcon, MailIcon, PrinterIcon } from "lucide-react"
+import { getContractById } from "@/lib/data"
+import { LifecycleStatusIndicator } from "@/components/lifecycle-status-indicator"
+import { format } from "date-fns"
 
-interface Props {
+interface ContractDetailsPageProps {
   params: {
     id: string
     locale: string
   }
 }
 
-export default async function ContractPage({ params: { id, locale } }: Props) {
-  const contract = await getContract(id)
+export default async function ContractDetailsPage({ params }: ContractDetailsPageProps) {
+  const t = await getTranslations("ContractDetailsPage")
+  const contract = await getContractById(params.id)
 
   if (!contract) {
-    return <div>Contract not found</div>
+    notFound()
   }
 
-  const promoterName =
-    contract.promoter_name_en ||
-      (locale === "ar"
-        ? contract.promoter_name_ar || contract.promoter_name_en
-        : contract.promoter_name_en || contract.promoter_name_ar) ||
-    "N/A"
-
   return (
-    <ManualErrorBoundary>
-      <div>
-        <h1>Contract Details</h1>
-        <p>ID: {contract.id}</p>
-        <p>Promoter: {promoterName}</p>
-        {/* Add more contract details here */}
+    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+      <div className="flex items-center">
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/${params.locale}/contracts`}>
+            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+            {t("backToContracts")}
+          </Link>
+        </Button>
+        <h1 className="ml-auto text-2xl font-semibold">{t("contractDetails")}</h1>
       </div>
-    </ManualErrorBoundary>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-xl font-medium">
+            {t("contractId")}: {contract.contract_id}
+          </CardTitle>
+          <LifecycleStatusIndicator status={contract.status} />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">{t("firstParty")}</p>
+              <p className="font-medium">{contract.first_party_name_en}</p>
+              <p className="text-sm text-muted-foreground">{contract.first_party_name_ar}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">{t("secondParty")}</p>
+              <p className="font-medium">{contract.second_party_name_en}</p>
+              <p className="text-sm text-muted-foreground">{contract.second_party_name_ar}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">{t("promoter")}</p>
+              <p className="font-medium">{contract.promoter_name_en}</p>
+              <p className="text-sm text-muted-foreground">{contract.promoter_name_ar}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">{t("contractType")}</p>
+              <p className="font-medium">{contract.contract_type}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">{t("startDate")}</p>
+              <p className="font-medium">{format(new Date(contract.start_date), "PPP")}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">{t("endDate")}</p>
+              <p className="font-medium">{format(new Date(contract.end_date), "PPP")}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">{t("createdAt")}</p>
+              <p className="font-medium">{format(new Date(contract.created_at), "PPP p")}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">{t("updatedAt")}</p>
+              <p className="font-medium">{format(new Date(contract.updated_at), "PPP p")}</p>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div>
+            <h3 className="text-lg font-semibold mb-2">{t("contractContent")}</h3>
+            <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: contract.content_en }} />
+            <Separator className="my-4" />
+            <div
+              className="prose prose-sm max-w-none text-right"
+              dangerouslySetInnerHTML={{ __html: contract.content_ar }}
+              dir="rtl"
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex flex-wrap gap-2 justify-end">
+            <Button variant="outline" size="sm">
+              <DownloadIcon className="mr-2 h-4 w-4" />
+              {t("downloadPdf")}
+            </Button>
+            <Button variant="outline" size="sm">
+              <PrinterIcon className="mr-2 h-4 w-4" />
+              {t("print")}
+            </Button>
+            <Button variant="outline" size="sm">
+              <MailIcon className="mr-2 h-4 w-4" />
+              {t("sendEmail")}
+            </Button>
+            <Button size="sm" asChild>
+              <Link href={`/${params.locale}/edit-contract/${contract.id}`}>
+                <EditIcon className="mr-2 h-4 w-4" />
+                {t("editContract")}
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </main>
   )
 }

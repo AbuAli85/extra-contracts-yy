@@ -1,59 +1,29 @@
 "use client"
 
+import { useLocale, useTranslations } from "next-intl"
 import { usePathname, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Check, ChevronDown } from "lucide-react"
-
-// Assuming you have flag SVGs or components. For simplicity, using text.
-// Replace with actual flag components/images if available.
-const locales = [
-  { value: "en", label: "English", flag: "🇺🇸" }, // Placeholder flag
-  { value: "ar", label: "العربية", flag: "🇸🇦" }, // Placeholder flag
-]
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export function LanguageSwitcher() {
+  const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
+  const t = useTranslations("LanguageSwitcher")
 
-  const segments = pathname.split("/")
-  const currentLocaleValue = segments[1] === "ar" ? "ar" : "en"
-  const currentLocale = locales.find((loc) => loc.value === currentLocaleValue) || locales[0]
-
-  const onSelectLocale = (newLocale: string) => {
-    const newPath = `/${newLocale}${pathname.substring(currentLocaleValue.length + 1)}`
-    router.push(newPath)
-    // router.refresh(); // Consider if refresh is needed for server components
+  const onSelectChange = (nextLocale: string) => {
+    const newPath = `/${nextLocale}${pathname.substring(3)}` // Assumes locale is always 2 chars
+    router.replace(newPath)
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="gap-x-1.5 px-2">
-          {" "}
-          {/* RTL: gap-x-1.5 */}
-          <span className="text-sm">{currentLocale.flag}</span>
-          <span className="hidden sm:inline text-sm font-medium">{currentLocale.label}</span>
-          <ChevronDown className="h-4 w-4 opacity-50" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[150px]">
-        {locales.map((locale) => (
-          <DropdownMenuItem
-            key={locale.value}
-            onClick={() => onSelectLocale(locale.value)}
-            className="flex items-center justify-between cursor-pointer"
-          >
-            <span className="flex items-center gap-x-2">
-              {" "}
-              {/* RTL: gap-x-2 */}
-              <span>{locale.flag}</span>
-              {locale.label}
-            </span>
-            {currentLocaleValue === locale.value && <Check className="h-4 w-4 text-primary" />}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Select value={locale} onValueChange={onSelectChange}>
+      <SelectTrigger className="w-[100px]">
+        <SelectValue placeholder={t("selectLanguage")} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="en">{t("english")}</SelectItem>
+        <SelectItem value="ar">{t("arabic")}</SelectItem>
+      </SelectContent>
+    </Select>
   )
 }

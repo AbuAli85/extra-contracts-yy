@@ -7,26 +7,28 @@ import { Input } from "@/components/ui/input"
 import { Search, Loader2, ArrowUpDown } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
-import type { AuditLogItem, AuditLogRow } from "@/lib/dashboard-types"
+import type { AuditLogItem, AuditLogRow, AuditLog } from "@/lib/dashboard-types"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
+import { useTranslations } from "next-intl"
 
-type AuditSortKey = keyof AuditLogItem | "user" | "action" | "ipAddress" | "timestamp" | "details" | null
+type AuditSortKey = keyof AuditLogItem | "user" | "action" | "ipAddress" | "timestamp" | "details" | "target" | null
 
-export default function AuditLogs() {
-  const [logs, setLogs] = useState<AuditLogItem[]>([])
+export function AuditLogs() {
+  const [logs, setLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [sortKey, setSortKey] = useState<AuditSortKey>("timestamp")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
   const { toast } = useToast()
+  const t = useTranslations("DashboardAuditLogs")
 
   const fetchAuditLogs = async () => {
     setLoading(true)
     try {
       const { data, error } = await supabase
         .from("audit_logs")
-        .select("id, user_email, action, ip_address, timestamp, details")
+        .select("id, user_email, action, ip_address, timestamp, details, target")
         .order(sortKey || "timestamp", { ascending: sortDirection === "asc" })
         .limit(100)
 
@@ -39,6 +41,7 @@ export default function AuditLogs() {
           ipAddress: log.ip_address || "N/A",
           timestamp: log.timestamp, // This is already an ISO string
           details: log.details,
+          target: log.target || "N/A",
         })),
       )
     } catch (error: any) {
@@ -57,11 +60,8 @@ export default function AuditLogs() {
   useEffect(() => {
     const channel = supabase
       .channel("public:audit_logs:feed") // Unique channel name
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "audit_logs" },
-        (payload) => {
-          const newLog = payload.new as AuditLogRow
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "audit_logs" }, (payload) => {
+        const newLog = payload.new as AuditLogRow
         devLog("New audit log received:", newLog)
         toast({
           title: "New Audit Log Entry",
@@ -77,6 +77,7 @@ export default function AuditLogs() {
                 ipAddress: newLog.ip_address || "N/A",
                 timestamp: newLog.timestamp,
                 details: newLog.details,
+                target: newLog.target || "N/A",
               },
               ...prev,
             ]
@@ -102,7 +103,8 @@ export default function AuditLogs() {
           log.details.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (log.details &&
           typeof log.details === "object" &&
-          JSON.stringify(log.details).toLowerCase().includes(searchTerm.toLowerCase())), // Search in stringified JSON
+          JSON.stringify(log.details).toLowerCase().includes(searchTerm.toLowerCase())) || // Search in stringified JSON
+        (log.target && log.target.toLowerCase().includes(searchTerm.toLowerCase())), // Search in target
     )
   }, [logs, searchTerm])
 
@@ -127,16 +129,14 @@ export default function AuditLogs() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Audit Logs / سجلات التدقيق</CardTitle>
-        <CardDescription>
-          Track system activities and user actions. / تتبع أنشطة النظام وإجراءات المستخدم.
-        </CardDescription>
+        <CardTitle>{t("auditLogs")}</CardTitle>
+        <CardDescription>{t("trackSystemActivities")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="relative mb-4">
           <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search logs by user, action, IP, or details..."
+            placeholder={t("searchLogs")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8 w-full"
@@ -146,11 +146,11 @@ export default function AuditLogs() {
           <Table>
             <TableHeader>
               <TableRow>
-                <SortableHeader tKey="timestamp" label="Timestamp" labelAr="التوقيت" />
-                <SortableHeader tKey="user" label="User" labelAr="المستخدم" />
-                <SortableHeader tKey="action" label="Action" labelAr="الإجراء" />
-                <SortableHeader tKey="ipAddress" label="IP Address" labelAr="عنوان IP" />
-                <SortableHeader tKey="details" label="Details" labelAr="التفاصيل" />
+                <SortableHeader tKey="timestamp" label={t("timestamp")} labelAr={t("timestampAr")} />
+                <SortableHeader tKey="user" label={t("user")} labelAr={t("userAr")} />
+                <SortableHeader tKey="action" label={t("action")} labelAr={t("actionAr")} />
+                <SortableHeader tKey="target" label={t("target")} labelAr={t("targetAr")} />
+                <SortableHeader tKey="details" label={t("details")} labelAr={t("detailsAr")} />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -164,18 +164,18 @@ export default function AuditLogs() {
               {!loading && filteredLogs.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
-                    No logs found matching your criteria.
+                    {t("noLogsFound")}
                   </TableCell>
                 </TableRow>
               )}
               {!loading &&
                 filteredLogs.map((log) => (
                   <TableRow key={log.id}>
-                    <TableCell>{format(new Date(log.timestamp), "MMM d, yyyy HH:mm:ss")}</TableCell>
+                    <TableCell className="whitespace-nowrap">{format(new Date(log.timestamp), "PPP p")}</TableCell>
                     <TableCell>{log.user}</TableCell>
                     <TableCell>{log.action}</TableCell>
-                    <TableCell>{log.ipAddress}</TableCell>
-                    <TableCell className="text-xs max-w-xs truncate">
+                    <TableCell>{log.target}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
                       {typeof log.details === "object" ? JSON.stringify(log.details) : log.details || "N/A"}
                     </TableCell>
                   </TableRow>

@@ -1,24 +1,35 @@
-CREATE TABLE IF NOT EXISTS promoters (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name_en TEXT NOT NULL,
-    name_ar TEXT NOT NULL,
-    id_card_number TEXT NOT NULL,
-    id_card_url TEXT,
-    passport_url TEXT,
-    employer_id UUID REFERENCES parties(id) ON DELETE SET NULL,
-    outsourced_to_id UUID REFERENCES parties(id) ON DELETE SET NULL,
-    job_title TEXT,
-    work_location TEXT,
-    status TEXT DEFAULT 'active',
-    contract_valid_until DATE,
-    id_card_expiry_date DATE,
-    passport_expiry_date DATE,
-    notify_days_before_id_expiry INTEGER DEFAULT 30,
-    notify_days_before_passport_expiry INTEGER DEFAULT 90,
-    notify_days_before_contract_expiry INTEGER DEFAULT 30,
+CREATE TABLE promoters (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    phone TEXT,
+    company_name TEXT NOT NULL,
+    company_address TEXT,
+    contact_person TEXT,
+    contact_email TEXT,
+    contact_phone TEXT,
+    website TEXT,
     notes TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    logo_url TEXT
 );
 
-CREATE INDEX IF NOT EXISTS idx_promoters_employer_id ON promoters(employer_id);
-CREATE INDEX IF NOT EXISTS idx_promoters_outsourced_to_id ON promoters(outsourced_to_id);
+ALTER TABLE promoters ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own promoters."
+ON promoters FOR SELECT
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own promoters."
+ON promoters FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own promoters."
+ON promoters FOR UPDATE
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own promoters."
+ON promoters FOR DELETE
+USING (auth.uid() = user_id);

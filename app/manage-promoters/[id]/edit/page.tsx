@@ -1,43 +1,60 @@
-"use client" // Placeholder page, might use client features later
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { notFound } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PromoterForm } from "@/components/promoter-form"
+import { getPromoterById } from "@/lib/data"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowLeftIcon, Construction } from "lucide-react"
-import { useParams } from "next/navigation"
+import { ArrowLeftIcon } from "lucide-react"
 
-export default function EditPromoterPage() {
-  const params = useParams()
-  const promoterId = params.id as string
+interface EditPromoterPageProps {
+  params: {
+    id: string
+  }
+}
+
+export default async function EditPromoterPage({ params }: EditPromoterPageProps) {
+  const promoter = await getPromoterById(params.id)
+
+  if (!promoter) {
+    notFound()
+  }
+
+  const initialData = {
+    nameEn: promoter.name_en,
+    nameAr: promoter.name_ar,
+    email: promoter.email,
+    phone: promoter.phone || "",
+    address: promoter.address || "",
+    city: promoter.city || "",
+    country: promoter.country || "",
+    zipCode: promoter.zip_code || "",
+    contactPerson: promoter.contact_person || "",
+    contactPersonEmail: promoter.contact_person_email || "",
+    contactPersonPhone: promoter.contact_person_phone || "",
+    website: promoter.website || "",
+    logoUrl: promoter.logo_url || "",
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
-      <Card className="w-full max-w-lg">
+    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+      <div className="flex items-center">
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/manage-promoters`}>
+            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+            Back to Promoters
+          </Link>
+        </Button>
+        <h1 className="ml-auto text-2xl font-semibold">Edit Promoter</h1>
+      </div>
+
+      <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">Edit Promoter</CardTitle>
-          <CardDescription className="text-slate-500 dark:text-slate-400">
-            Promoter ID: <span className="font-mono">{promoterId}</span>
-          </CardDescription>
+          <CardTitle>Edit Promoter Details</CardTitle>
         </CardHeader>
-        <CardContent className="text-center">
-          <Construction className="mx-auto h-16 w-16 text-amber-500 mb-4" />
-          <p className="text-slate-600 dark:text-slate-300 mb-6">
-            Editing functionality for promoters will be implemented here.
-          </p>
-          <Button asChild variant="outline" className="mr-2">
-            <Link href={`/manage-promoters/${promoterId}`}> 
-              <ArrowLeftIcon className="mr-2 h-4 w-4" />
-              Back to Promoter Details
-            </Link>
-          </Button>
-          <Button asChild variant="secondary">
-            <Link href="/manage-promoters">
-              <ArrowLeftIcon className="mr-2 h-4 w-4" />
-              Back to Promoter List
-            </Link>
-          </Button>
+        <CardContent>
+          <PromoterForm initialData={initialData} promoterId={promoter.id} />
         </CardContent>
       </Card>
-    </div>
+    </main>
   )
 }

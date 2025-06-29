@@ -2,173 +2,163 @@
 
 import type React from "react"
 
-import type { ReactNode } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ThemeProvider } from "@/components/theme-provider"
+import {
+  PanelLeftIcon,
+  FileTextIcon,
+  UsersIcon,
+  BarChartIcon,
+  BellIcon,
+  SettingsIcon,
+  LogOutIcon,
+  HomeIcon,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import {
-  Home,
-  BarChartBig,
-  FileText,
-  Users,
-  Bell,
-  ShieldCheck,
-  Settings,
-  LogOut,
-  Moon,
-  Sun,
-  PanelLeft,
-  Package2,
-} from "lucide-react"
-import { useTheme } from "next-themes"
-import { cn } from "@/lib/utils"
-
-interface NavItem {
-  href: string
-  label: string
-  labelAr: string
-  icon: React.ElementType
-}
-
-const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", labelAr: "لوحة التحكم", icon: Home },
-  { href: "/contracts", label: "Contracts", labelAr: "العقود", icon: FileText },
-  { href: "/dashboard/analytics", label: "Analytics", labelAr: "التحليلات", icon: BarChartBig },
-  { href: "/dashboard/users", label: "Users", labelAr: "المستخدمون", icon: Users },
-  { href: "/dashboard/notifications", label: "Notifications", labelAr: "الإشعارات", icon: Bell },
-  { href: "/dashboard/audit", label: "Audit Logs", labelAr: "سجلات التدقيق", icon: ShieldCheck },
-  { href: "/dashboard/settings", label: "Settings", labelAr: "الإعدادات", icon: Settings },
-]
+import { Separator } from "@/components/ui/separator"
+import { useTranslations } from "next-intl"
+import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
+import { useToast } from "@/components/ui/use-toast"
 
 interface DashboardLayoutProps {
-  children: ReactNode
+  children: React.ReactNode
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { theme, setTheme } = useTheme()
+  const t = useTranslations("DashboardLayout")
   const pathname = usePathname()
+  const router = useRouter()
+  const { toast } = useToast()
+  const supabase = createClient()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  const NavLink = ({ item, isMobile = false }: { item: NavItem; isMobile?: boolean }) => (
-    <Link
-      href={item.href}
-      className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
-        pathname === item.href ? "bg-muted text-primary" : "text-muted-foreground",
-        isMobile ? "text-lg" : "text-sm",
-      )}
-    >
-      <item.icon className="h-5 w-5" />
-      {item.label} / {item.labelAr}
-    </Link>
-  )
+  const navItems = [
+    { href: "/dashboard", icon: HomeIcon, label: t("home") },
+    { href: "/dashboard/analytics", icon: BarChartIcon, label: t("analytics") },
+    { href: "/dashboard/contracts", icon: FileTextIcon, label: t("contracts") },
+    { href: "/dashboard/notifications", icon: BellIcon, label: t("notifications") },
+    { href: "/dashboard/audit", icon: UsersIcon, label: t("auditLogs") },
+    { href: "/dashboard/users", icon: UsersIcon, label: t("users") },
+    { href: "/dashboard/settings", icon: SettingsIcon, label: t("settings") },
+  ]
 
-  const NavLinkIconOnly = ({ item }: { item: NavItem }) => (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Link
-            href={item.href}
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:text-foreground md:h-8 md:w-8",
-              pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground",
-            )}
-          >
-            <item.icon className="h-5 w-5" />
-            <span className="sr-only">{item.label}</span>
-          </Link>
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          {item.label} / {item.labelAr}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  )
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      toast({
+        title: t("logoutError"),
+        description: error.message,
+        variant: "destructive",
+      })
+    } else {
+      toast({
+        title: t("logoutSuccess"),
+        description: t("logoutSuccessMessage"),
+      })
+      router.push("/login")
+    }
+    setIsLoggingOut(false)
+  }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <div className="flex min-h-screen w-full flex-col bg-muted/40">
-        <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
-          <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-            <Link
-              href="/dashboard"
-              className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
-            >
-              <Package2 className="h-4 w-4 transition-all group-hover:scale-110" />
-              <span className="sr-only">Contract CRM</span>
-            </Link>
+    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+      <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+        <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
+          <Link
+            href="/"
+            className="group flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
+          >
+            <FileTextIcon className="h-4 w-4 transition-all group-hover:scale-110" />
+            <span className="sr-only">Contract App</span>
+          </Link>
+          <TooltipProvider>
             {navItems.map((item) => (
-              <NavLinkIconOnly key={item.href} item={item} />
-            ))}
-          </nav>
-          <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
-            <TooltipProvider delayDuration={0}>
-              <Tooltip>
+              <Tooltip key={item.href}>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="mt-auto rounded-lg"
-                    onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-                    aria-label="Toggle theme"
-                  >
-                    <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right">Toggle Theme</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </nav>
-        </aside>
-
-        <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-          <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 sm:justify-end">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button size="icon" variant="outline" className="sm:hidden">
-                  <PanelLeft className="h-5 w-5" />
-                  <span className="sr-only">Toggle Menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="sm:max-w-xs">
-                <nav className="grid gap-6 text-lg font-medium">
                   <Link
-                    href="/dashboard"
-                    className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
+                    href={item.href}
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:text-foreground md:h-8 md:w-8 ${
+                      pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                    }`}
                   >
-                    <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
-                    <span className="sr-only">Contract CRM</span>
+                    <item.icon className="h-5 w-5" />
+                    <span className="sr-only">{item.label}</span>
                   </Link>
-                  {navItems.map((item) => (
-                    <NavLink key={item.href} item={item} isMobile />
-                  ))}
-                  <Button
-                    variant="ghost"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-lg"
-                    onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-                    aria-label="Toggle theme"
+                </TooltipTrigger>
+                <TooltipContent side="right">{item.label}</TooltipContent>
+              </Tooltip>
+            ))}
+          </TooltipProvider>
+        </nav>
+        <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleLogout} disabled={isLoggingOut}>
+                  <LogOutIcon className="h-5 w-5" />
+                  <span className="sr-only">{t("logout")}</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">{t("logout")}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </nav>
+      </aside>
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button size="icon" variant="outline" className="sm:hidden bg-transparent">
+                <PanelLeftIcon className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="sm:max-w-xs">
+              <nav className="grid gap-6 text-lg font-medium">
+                <Link
+                  href="/"
+                  className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-semibold text-primary-foreground"
+                >
+                  <FileTextIcon className="h-5 w-5 transition-all group-hover:scale-110" />
+                  <span className="sr-only">Contract App</span>
+                </Link>
+                <Separator />
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-4 px-2.5 ${
+                      pathname === item.href ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                    }`}
                   >
-                    {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-                    Toggle Theme
-                  </Button>
-                </nav>
-              </SheetContent>
-            </Sheet>
-            {/* Placeholder for User Dropdown / Search Bar */}
-            <Button variant="outline" size="sm">
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout / تسجيل الخروج
-            </Button>
-          </header>
-          <main className="flex-1 p-4 sm:px-6 sm:py-0 md:gap-8">{children}</main>
-          <footer className="border-t py-4 text-center text-sm text-muted-foreground mt-auto">
-            © {new Date().getFullYear()} Contract Management System. All rights reserved.
-          </footer>
-        </div>
+                    <item.icon className="h-5 w-5" />
+                    {item.label}
+                  </Link>
+                ))}
+                <Separator />
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                >
+                  <LogOutIcon className="h-5 w-5" />
+                  {t("logout")}
+                </Button>
+              </nav>
+            </SheetContent>
+          </Sheet>
+          <h1 className="font-semibold text-lg md:text-2xl">
+            {navItems.find((item) => pathname.startsWith(item.href))?.label || t("dashboard")}
+          </h1>
+        </header>
+        {children}
       </div>
-    </ThemeProvider>
+    </div>
   )
 }

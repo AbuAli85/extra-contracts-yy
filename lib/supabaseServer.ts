@@ -1,28 +1,38 @@
-import { createServerClient } from "@supabase/ssr"
+import { createServerClient, type CookieOptions } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import type { Database } from "@/types/supabase"
 
 export function createServerComponentClient() {
   const cookieStore = cookies()
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      'Supabase URL or Anon Key is missing. Ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set.',
-    )
-  }
+  if (!supabaseUrl) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL")
+  if (!supabaseAnonKey) throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY")
 
   return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
       get(name: string) {
         return cookieStore.get(name)?.value
       },
-      set(name: string, value: string, options) {
-        cookieStore.set({ name, value, ...options })
+      set(name: string, value: string, options: CookieOptions) {
+        try {
+          cookieStore.set({ name, value, ...options })
+        } catch (error) {
+          // The `cookies().set()` method can't be called from a Server Component if a `NextRequest` is in the same scope.
+          // It's only supported when called from a Server Action or Route Handler.
+          console.warn("Could not set cookie from Server Component:", error)
+        }
       },
-      remove(name: string, options) {
-        cookieStore.delete({ name, ...options })
+      remove(name: string, options: CookieOptions) {
+        try {
+          cookieStore.set({ name, value: "", ...options })
+        } catch (error) {
+          // The `cookies().set()` method can't be called from a Server Component if a `NextRequest` is in the same scope.
+          // It's only supported when called from a Server Action or Route Handler.
+          console.warn("Could not remove cookie from Server Component:", error)
+        }
       },
     },
   })

@@ -1,48 +1,26 @@
 "use client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { SummaryWidgetData } from "@/lib/dashboard-types"
-import { cn } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
+import type React from "react"
+import { useTranslations } from "next-intl"
 
 interface SummaryWidgetProps {
-  data: SummaryWidgetData
-  isLoading?: boolean
+  title: string
+  value: string | number
+  description: string
+  icon: React.ElementType
 }
 
-export default function SummaryWidget({ data, isLoading = false }: SummaryWidgetProps) {
-  const Icon = data.icon
+export default function SummaryWidget({ title, value, description, icon: Icon }: SummaryWidgetProps) {
+  const t = useTranslations("DashboardSummaryWidget")
   return (
-    <Card className="shadow-sm hover:shadow-md transition-shadow">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        {isLoading ? (
-          <Skeleton className="h-4 w-3/4" />
-        ) : (
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            {data.title} / {data.titleAr}
-          </CardTitle>
-        )}
-        {isLoading ? (
-          <Skeleton className="h-5 w-5 rounded-full" />
-        ) : (
-          <Icon className={cn("h-5 w-5", data.color || "text-muted-foreground")} />
-        )}
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <>
-            <Skeleton className="h-8 w-1/2 mb-1" />
-            <Skeleton className="h-3 w-1/3" />
-          </>
-        ) : (
-          <>
-            <div className="text-3xl font-bold">{data.value}</div>
-            {data.comparison && (
-              <p className={cn("text-xs", data.color ? data.color.replace("text-", "text-") : "text-muted-foreground")}>
-                {data.comparison}
-              </p>
-            )}
-          </>
-        )}
+        <div className="text-2xl font-bold">{value}</div>
+        <p className="text-xs text-muted-foreground">{description}</p>
       </CardContent>
     </Card>
   )

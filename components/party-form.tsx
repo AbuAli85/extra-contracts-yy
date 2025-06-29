@@ -1,133 +1,146 @@
 "use client"
-import { useState, useEffect } from "react"
+
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { partyFormSchema, type PartyFormData } from "@/lib/party-schema"
-import type { Party } from "@/lib/types"
-import { supabase } from "@/lib/supabase"
-import { useToast } from "@/hooks/use-toast"
-
+import type { z } from "zod"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Loader2 } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast"
+import { useRouter } from "next/navigation"
+import { partySchema } from "@/lib/party-schema"
+import type { Party } from "@/lib/types"
+import { createParty, updateParty } from "@/hooks/use-parties"
+import { useTranslations } from "next-intl"
 
 interface PartyFormProps {
-  partyToEdit?: Party | null
-  onFormSubmit: () => void
+  initialData?: Party
 }
 
-export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps) {
+export function PartyForm({ initialData }: PartyFormProps) {
+  const t = useTranslations("PartyForm")
   const { toast } = useToast()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter()
 
-  const { reset, ...form } = useForm<PartyFormData>({
-    resolver: zodResolver(partyFormSchema),
-    defaultValues: {
-      name_en: "",
-      name_ar: "",
-      crn: "",
+  const form = useForm<z.infer<typeof partySchema>>({
+    resolver: zodResolver(partySchema),
+    defaultValues: initialData || {
+      name: "",
+      email: "",
+      phone: "",
+      type: "Client",
     },
   })
 
-  useEffect(() => {
-    if (partyToEdit) {
-      reset({
-        name_en: partyToEdit.name_en || "",
-        name_ar: partyToEdit.name_ar || "",
-        crn: partyToEdit.crn || "",
-      })
+  const createPartyMutation = createParty()
+  const updatePartyMutation = updateParty()
+
+  async function onSubmit(values: z.infer<typeof partySchema>) {
+    let result: { success: boolean; message: string; errors?: any }
+
+    if (initialData) {
+      result = await updatePartyMutation.mutateAsync({ id: initialData.id, ...values })
     } else {
-      reset({
-        name_en: "",
-        name_ar: "",
-        crn: "",
-      })
+      result = await createPartyMutation.mutateAsync(values)
     }
-  }, [partyToEdit, form])
 
-  async function onSubmit(values: PartyFormData) {
-    setIsSubmitting(true)
-    try {
-      const partyData: Omit<Party, "id"> = {
-        name_en: values.name_en,
-        name_ar: values.name_ar,
-        crn: values.crn,
-      }
-
-      if (partyToEdit?.id) {
-        const { error } = await supabase.from("parties").update(partyData).eq("id", partyToEdit.id).select()
-        if (error) throw error
-        toast({ title: "Success!", description: "Party updated successfully." })
-      } else {
-        const { error } = await supabase.from("parties").insert(partyData).select()
-        if (error) throw error
-        toast({ title: "Success!", description: "Party added successfully." })
-      }
-      onFormSubmit()
-    } catch (error: any) {
+    if (result.success) {
       toast({
-        title: "Error",
-        description: error.message || "An unexpected error occurred.",
+        title: t("successTitle"),
+        description: result.message,
+      })
+      router.push("/manage-parties")
+      router.refresh()
+    } else {
+      toast({
+        title: t("errorTitle"),
+        description: result.message,
         variant: "destructive",
       })
-    } finally {
-      setIsSubmitting(false)
+      if (result.errors) {
+        Object.keys(result.errors).forEach((key) => {
+          form.setError(key as keyof z.infer<typeof partySchema>, {
+            type: "server",
+            message: result.errors[key][0],
+          })
+        })
+      }
     }
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8 bg-card text-card-foreground shadow-lg rounded-lg">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center">
-        {partyToEdit ? "Edit Party" : "Add New Party"}
-      </h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name_en"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name (English)</FormLabel>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("nameLabel")}</FormLabel>
+              <FormControl>
+                <Input placeholder={t("namePlaceholder")} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("emailLabel")}</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder={t("emailPlaceholder")} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("phoneLabel")}</FormLabel>
+              <FormControl>
+                <Input type="tel" placeholder={t("phonePlaceholder")} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("typeLabel")}</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <Input placeholder="Party Name (EN)" {...field} />
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("selectTypePlaceholder")} />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="name_ar"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>الاسم (عربي)</FormLabel>
-                <FormControl>
-                  <Input placeholder="اسم الطرف (AR)" {...field} dir="rtl" className="text-right" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="crn"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Commercial Registration Number (CRN) / رقم السجل التجاري</FormLabel>
-                <FormControl>
-                  <Input placeholder="1010XXXXXX" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {partyToEdit ? "Update Party" : "Add Party"}
-          </Button>
-        </form>
-      </Form>
-    </div>
+                <SelectContent>
+                  <SelectItem value="Client">{t("typeClient")}</SelectItem>
+                  <SelectItem value="Vendor">{t("typeVendor")}</SelectItem>
+                  <SelectItem value="Other">{t("typeOther")}</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={createPartyMutation.isPending || updatePartyMutation.isPending}
+        >
+          {initialData ? t("updatePartyButton") : t("createPartyButton")}
+        </Button>
+      </form>
+    </Form>
   )
 }

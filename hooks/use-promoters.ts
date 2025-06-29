@@ -1,66 +1,82 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useEffect, useMemo } from "react"
-import { supabase } from "@/lib/supabase"
-import { devLog } from "@/lib/dev-log"
-import { useToast } from "@/hooks/use-toast"
-import type { Promoter } from "@/types/custom"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { createClient } from "@/lib/supabase/client"
+import type { Promoter } from "@/lib/types"
 
-const fetchPromoters = async (): Promise<Promoter[]> => {
-  const { data, error } = await supabase
-    .from("promoters")
-    .select("*")
-    .order("name_en", { ascending: true })
+const supabase = createClient()
 
-  if (error) {
-    console.error("Error fetching promoters:", error)
-    // Log the complete error object for easier debugging
-    console.error(error)
-    throw new Error(error.message)
-  }
-  return data || []
-}
+// Fetch all promoters
+export function usePromoters(query?: string) {
+  return useQuery<Promoter[], Error>({
+    queryKey: ["promoters", query],
+    queryFn: async () => {
+      let dbQuery = supabase.from("promoters").select("*")
 
-export const usePromoters = () => {
-  const queryClient = useQueryClient()
-  const queryKey = useMemo(() => ["promoters"], [])
-  const { toast } = useToast()
+      if (query) {
+        dbQuery = dbQuery.or(`name.ilike.%${query}%,email.ilike.%${query}%,company_name.ilike.%${query}%`)
+      }
 
-  const queryResult = useQuery<Promoter[], Error>({
-    queryKey,
-    queryFn: fetchPromoters,
-    staleTime: 1000 * 60 * 5,
-    retry: false,
-    onError: (error) => {
-      toast({
-        title: "Error loading promoters",
-        description: error.message,
-        variant: "destructive",
-      })
+      const { data, error } = await dbQuery
+      if (error) throw error
+      return data as Promoter[]
     },
   })
+}
 
-  useEffect(() => {
-    const channel = supabase
-      .channel("public-promoters-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "promoters" },
-        (payload) => {
-          devLog("Realtime promoter change received!", payload)
-          queryClient.invalidateQueries({ queryKey })
-        },
-      )
-      .subscribe((status, err) => {
-        if (status === "CHANNEL_ERROR") {
-          const message = err?.message ?? "Unknown channel error"
-          console.error(`Promoters channel error (${status}):`, message)
-        }
-      })
+// Fetch a single promoter by ID
+export function usePromoter(id: string) {
+  return useQuery<Promoter, Error>({
+    queryKey: ["promoter", id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("promoters").select("*").eq("id", id).single()
+      if (error) throw error
+      return data as Promoter
+    },
+  })
+}
 
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [queryClient, queryKey])
+// Create a new promoter
+export function useCreatePromoterMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (newPromoter: Omit<Promoter, "id" | "created_at" | "updated_at">) => {
+      const { data, error } = await supabase.from("promoters").insert([newPromoter]).select().single()
+      if (error) throw error
+      return { success: true, message: "Promoter created successfully!", data: data as Promoter }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["promoters"] })
+    },
+  })
+}
 
-  return { ...queryResult, errorMessage: queryResult.error?.message }
+// Update an existing promoter
+export function useUpdatePromoterMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (updatedPromoter: Partial<Promoter> & { id: string }) => {
+      const { id, ...updates } = updatedPromoter
+      const { data, error } = await supabase.from("promoters").update(updates).eq("id", id).select().single()
+      if (error) throw error
+      return { success: true, message: "Promoter updated successfully!", data: data as Promoter }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["promoter", variables.id] })
+      queryClient.invalidateQueries({ queryKey: ["promoters"] })
+    },
+  })
+}
+
+// Delete a promoter
+export function useDeletePromoterMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("promoters").delete().eq("id", id)
+      if (error) throw error
+      return { success: true, message: "Promoter deleted successfully!" }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["promoters"] })
+    },
+  })
 }

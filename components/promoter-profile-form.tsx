@@ -4,15 +4,8 @@ import { Label } from "@/components/ui/label"
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  promoterProfileSchema,
-  type PromoterProfileFormData,
-} from "@/lib/promoter-profile-schema"
-import {
-  sampleEmployers,
-  sampleClients,
-  promoterStatuses,
-} from "@/lib/fixtures/promoter-profile"
+import { promoterProfileSchema, type PromoterProfileFormData } from "@/lib/promoter-profile-schema"
+import { sampleEmployers, sampleClients, promoterStatuses } from "@/lib/fixtures/promoter-profile"
 import type { PromoterProfile } from "@/lib/types" // Assuming PromoterProfile is defined in lib/types.ts
 import { useToast } from "@/hooks/use-toast"
 
@@ -25,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import ImageUploadField from "@/components/image-upload-field"
-import DatePickerWithPresetsField from "@/components/date-picker-with-presets-field"
+import { DatePickerWithPresetsField } from "@/components/date-picker-with-presets-field" // Changed to named import
 import { Loader2 } from "lucide-react"
 import { format, parseISO } from "date-fns"
 
@@ -34,10 +27,7 @@ interface PromoterProfileFormProps {
   onFormSubmitSuccess?: (data: PromoterProfileFormData) => void // Callback for successful submission
 }
 
-type SubmissionData = Omit<
-  PromoterProfileFormData,
-  "id_card_image" | "passport_image"
-> & {
+type SubmissionData = Omit<PromoterProfileFormData, "id_card_image" | "passport_image"> & {
   id_card_url: string | null
   passport_url: string | null
   contract_valid_until: string | null
@@ -45,7 +35,7 @@ type SubmissionData = Omit<
   passport_expiry_date: string | null
 }
 
-export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSuccess }: PromoterProfileFormProps) {
+export const PromoterProfileForm = ({ promoterToEdit, onFormSubmitSuccess }: PromoterProfileFormProps) => {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isEditMode = !!promoterToEdit
@@ -98,7 +88,7 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
         notes: promoterToEdit.notes || "",
       })
     }
-  }, [isEditMode, promoterToEdit, form])
+  }, [isEditMode, promoterToEdit, reset]) // Added reset to dependency array
 
   async function onSubmit(values: PromoterProfileFormData) {
     setIsSubmitting(true)
@@ -309,12 +299,16 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
                   control={form.control}
                   name="id_card_expiry_date"
                   render={({ field }) => (
-                    <DatePickerWithPresetsField
-                      field={field}
-                      label="ID Card Expiry Date"
-                      placeholder="Select ID card expiry"
-                      disabled={formDisabled}
-                    />
+                    <FormItem>
+                      <FormLabel>ID Card Expiry Date</FormLabel>
+                      <DatePickerWithPresetsField
+                        date={field.value || undefined}
+                        setDate={field.onChange}
+                        placeholder="Select ID card expiry"
+                        disabled={formDisabled}
+                      />
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
               </div>
@@ -375,12 +369,16 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
                   control={form.control}
                   name="contract_valid_until"
                   render={({ field }) => (
-                    <DatePickerWithPresetsField
-                      field={field}
-                      label="Contract Valid Until"
-                      placeholder="Select contract end date"
-                      disabled={formDisabled}
-                    />
+                    <FormItem>
+                      <FormLabel>Contract Valid Until</FormLabel>
+                      <DatePickerWithPresetsField
+                        date={field.value || undefined}
+                        setDate={field.onChange}
+                        placeholder="Select contract end date"
+                        disabled={formDisabled}
+                      />
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
                 <FormField
@@ -405,12 +403,16 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
                   control={form.control}
                   name="passport_expiry_date"
                   render={({ field }) => (
-                    <DatePickerWithPresetsField
-                      field={field}
-                      label="Passport Expiry Date"
-                      placeholder="Select passport expiry"
-                      disabled={formDisabled}
-                    />
+                    <FormItem>
+                      <FormLabel>Passport Expiry Date</FormLabel>
+                      <DatePickerWithPresetsField
+                        date={field.value || undefined}
+                        setDate={field.onChange}
+                        placeholder="Select passport expiry"
+                        disabled={formDisabled}
+                      />
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
               </div>

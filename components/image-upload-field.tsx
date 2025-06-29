@@ -1,158 +1,164 @@
 "use client"
-// CORE INPUT COMPONENT: Does NOT render FormLabel, FormMessage by itself.
-// These will be provided by the parent FormField.
-import type React from "react"
-import { useState, useEffect, useRef } from "react"
-import Image from "next/image"
 
-// Use a direct path string so Next.js doesn't try to read from the filesystem
-// during the build phase. Importing the file caused errors like
-// `EISDIR: illegal operation on a directory` in some environments.
-const placeholderSrc = "/placeholder.svg"
+import type React from "react"
+
+import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-// Removed Label import from here, will be used from parent
-// Removed FormMessage import from here, will be used from parent
-import { UploadCloudIcon, Trash2Icon, FileIcon } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import { Loader2, UploadCloud, XCircle } from "lucide-react"
+import Image from "next/image"
+import { useToast } from "@/components/ui/use-toast"
+import { createClient } from "@/lib/supabase/client"
+import { v4 as uuidv4 } from "uuid"
+import { useTranslations } from "next-intl"
 
 interface ImageUploadFieldProps {
-  field: {
-    name: string
-    value: File | null | undefined // Value is the File object
-    onChange: (file: File | null) => void
-    onBlur: () => void
-    ref: React.Ref<any> // RHF provides a ref for the input
-  }
-  initialImageUrl?: string | null
+  value: string | undefined
+  onChange: (url: string | undefined) => void
+  label?: string
+  placeholder?: string
+  folder?: string // Supabase storage folder
   disabled?: boolean
-  onImageRemove?: () => void
-  id?: string // To connect with FormLabel from parent
 }
 
 export default function ImageUploadField({
-  field,
-  initialImageUrl,
-  disabled,
-  onImageRemove,
-  id,
+  value,
+  onChange,
+  label = "Image Upload",
+  placeholder = "Upload an image",
+  folder = "public", // Default Supabase folder
+  disabled = false,
 }: ImageUploadFieldProps) {
-  const [preview, setPreview] = useState<string | null>(initialImageUrl || null)
-  const [fileName, setFileName] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null) // Keep this for triggering click
+  const [uploading, setUploading] = useState(false)
+  const { toast } = useToast()
+  const supabase = createClient()
+  const t = useTranslations("ImageUploadField")
 
-  useEffect(() => {
-    if (field.value instanceof File) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPreview(reader.result as string)
+  const handleImageUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (!event.target.files || event.target.files.length === 0) {
+        toast({
+          title: t("noFileSelected"),
+          description: t("pleaseSelectFile"),
+          variant: "destructive",
+        })
+        return
       }
-      reader.readAsDataURL(field.value)
-      setFileName(field.value.name)
-    } else if (initialImageUrl !== preview) {
-      setPreview(initialImageUrl || null)
-      setFileName(null)
-    } else if (!field.value && !initialImageUrl) {
-      setPreview(null)
-      setFileName(null)
+
+      const file = event.target.files[0]
+      const fileExt = file.name.split(".").pop()
+      const fileName = `${uuidv4()}.${fileExt}`
+      const filePath = `${folder}/${fileName}`
+
+      setUploading(true)
+
+      const { error: uploadError } = await supabase.storage.from("images").upload(filePath, file)
+
+      if (uploadError) {
+        toast({
+          title: t("uploadError"),
+          description: uploadError.message,
+          variant: "destructive",
+        })
+        setUploading(false)
+        return
+      }
+
+      const { data: publicUrlData } = supabase.storage.from("images").getPublicUrl(filePath)
+
+      if (publicUrlData?.publicUrl) {
+        onChange(publicUrlData.publicUrl)
+        toast({
+          title: t("uploadSuccess"),
+          description: t("imageUploadedSuccessfully"),
+        })
+      } else {
+        toast({
+          title: t("publicUrlError"),
+          description: t("couldNotGetPublicUrl"),
+          variant: "destructive",
+        })
+      }
+      setUploading(false)
+    },
+    [onChange, folder, supabase.storage, toast, t],
+  )
+
+  const handleRemoveImage = useCallback(async () => {
+    if (!value) return
+
+    setUploading(true) // Use uploading state for deletion too
+    try {
+      const urlParts = value.split("/")
+      const fileNameWithFolder = urlParts.slice(urlParts.indexOf(folder)).join("/")
+
+      const { error: deleteError } = await supabase.storage.from("images").remove([fileNameWithFolder])
+
+      if (deleteError) {
+        throw deleteError
+      }
+
+      onChange(undefined)
+      toast({
+        title: t("removeSuccess"),
+        description: t("imageRemovedSuccessfully"),
+      })
+    } catch (error: any) {
+      toast({
+        title: t("removeError"),
+        description: error.message || t("failedToRemoveImage"),
+        variant: "destructive",
+      })
+    } finally {
+      setUploading(false)
     }
-  }, [field.value, initialImageUrl, preview])
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    field.onChange(file || null)
-  }
-
-  const handleRemoveImage = () => {
-    field.onChange(null)
-    onImageRemove?.()
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
-  }
-
-  const triggerFileInput = () => {
-    if (!disabled && fileInputRef.current) {
-      fileInputRef.current.click()
-    }
-  }
-
-  const displayPreviewUrl = field.value instanceof File ? preview : initialImageUrl
+  }, [value, onChange, folder, supabase.storage, toast, t])
 
   return (
     <div className="space-y-2">
-      {/* Label will be rendered by FormLabel in the parent FormField */}
-      <div
-        className={`relative group w-full h-48 border-2 border-dashed rounded-lg flex flex-col justify-center items-center transition-colors
-                  ${disabled ? "bg-muted/50 cursor-not-allowed opacity-50" : "border-muted-foreground/30 hover:border-primary cursor-pointer"}`}
-        onClick={triggerFileInput}
-        onKeyDown={(e) => {
-          if ((e.key === "Enter" || e.key === " ") && !disabled) triggerFileInput()
-        }}
-        tabIndex={disabled ? -1 : 0}
-        role="button"
-        aria-label={`Upload image`} // Generic, specific label will be outside
-      >
-        {displayPreviewUrl ? (
-          <>
-            <Image
-              // Use a simple placeholder path without query parameters
-              src={displayPreviewUrl || placeholderSrc}
-              alt={`Preview`}
-              fill
-              sizes="(max-width: 768px) 100vw, 480px" // Example sizes, adjust based on actual usage and container size
-              style={{ objectFit: "contain" }}
-              className="rounded-md p-1"
-              key={displayPreviewUrl}
-              onError={() => {
-                // This handles browser-side loading errors for the src
-                // The 400 error is likely from the Next.js optimization step before this
-                // Fall back to a static placeholder without query params
-                setPreview(placeholderSrc)
-              }}
-            />
-            {!disabled && (
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleRemoveImage()
-                }}
-                aria-label={`Remove image`}
-              >
-                <Trash2Icon className="h-4 w-4" />
-              </Button>
+      <Label htmlFor="image-upload">{label}</Label>
+      {value ? (
+        <div className="relative w-32 h-32 rounded-md overflow-hidden border group">
+          <Image src={value || "/placeholder.svg"} alt="Uploaded image" layout="fill" objectFit="cover" />
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon"
+            className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={handleRemoveImage}
+            disabled={uploading || disabled}
+          >
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+            <span className="sr-only">{t("removeImage")}</span>
+          </Button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-md cursor-pointer bg-muted/20 hover:bg-muted/30 transition-colors">
+          <Label
+            htmlFor="image-upload"
+            className="flex flex-col items-center justify-center w-full h-full cursor-pointer"
+          >
+            {uploading ? (
+              <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            ) : (
+              <>
+                <UploadCloud className="h-8 w-8 text-muted-foreground" />
+                <span className="mt-2 text-sm text-muted-foreground">{placeholder}</span>
+              </>
             )}
-          </>
-        ) : (
-          <div className="text-center text-muted-foreground">
-            <UploadCloudIcon className="mx-auto h-10 w-10 mb-2" />
-            <p className="text-sm">Click or drag file to upload</p>
-            <p className="text-xs">PNG, JPG, WEBP up to 5MB</p>
-          </div>
-        )}
-        {/* Hidden file input, RHF ref is passed here */}
-        <Input
-          ref={field.ref} // Pass RHF's ref to the actual input element
-          id={id || field.name} // Use provided id or field.name for label association
-          name={field.name} // field.name is important for RHF
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={handleFileChange}
-          onBlur={field.onBlur} // Pass onBlur
-          className="sr-only"
-          disabled={disabled}
-        />
-      </div>
-      {fileName && field.value instanceof File && (
-        <div className="text-xs text-muted-foreground flex items-center">
-          <FileIcon className="h-3 w-3 mr-1 flex-shrink-0" />
-          <span>{fileName}</span>
+            <Input
+              id="image-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="sr-only"
+              disabled={uploading || disabled}
+            />
+          </Label>
         </div>
       )}
-      {/* FormMessage will be rendered by FormField in the parent */}
+      {uploading && <p className="text-sm text-muted-foreground">{t("uploading")}</p>}
     </div>
   )
 }

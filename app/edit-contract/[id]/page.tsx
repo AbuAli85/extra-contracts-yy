@@ -1,41 +1,58 @@
-// Placeholder for Edit Contract Page
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ManualErrorBoundary } from "@/components/ManualErrorBoundary"
+import { notFound } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ContractGeneratorForm } from "@/components/contract-generator-form"
+import { getContractById } from "@/lib/data"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowLeftIcon, Construction } from "lucide-react"
+import { ArrowLeftIcon } from "lucide-react"
 
-export default function EditContractPage({ params }: { params: { id: string } }) {
+interface EditContractPageProps {
+  params: {
+    id: string
+  }
+}
+
+export default async function EditContractPage({ params }: EditContractPageProps) {
+  const contract = await getContractById(params.id)
+
+  if (!contract) {
+    notFound()
+  }
+
+  const initialData = {
+    firstPartyNameEn: contract.first_party_name_en,
+    firstPartyNameAr: contract.first_party_name_ar,
+    secondPartyNameEn: contract.second_party_name_en,
+    secondPartyNameAr: contract.second_party_name_ar,
+    promoterNameEn: contract.promoter_name_en,
+    promoterNameAr: contract.promoter_name_ar,
+    contractType: contract.contract_type,
+    startDate: new Date(contract.start_date),
+    endDate: new Date(contract.end_date),
+    contentEn: contract.content_en,
+    contentAr: contract.content_ar,
+  }
+
   return (
-    <ManualErrorBoundary>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-4">
-        <Card className="w-full max-w-lg">
+    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+      <div className="flex items-center">
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/contracts/${contract.id}`}>
+            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+            Back to Contract
+          </Link>
+        </Button>
+        <h1 className="ml-auto text-2xl font-semibold">Edit Contract</h1>
+      </div>
+
+      <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">Edit Contract</CardTitle>
-          <CardDescription className="text-slate-500 dark:text-slate-400">
-            Contract ID: <span className="font-mono">{params.id}</span>
-          </CardDescription>
+          <CardTitle>Edit Contract Details</CardTitle>
         </CardHeader>
-        <CardContent className="text-center">
-          <Construction className="mx-auto h-16 w-16 text-amber-500 mb-4" />
-          <p className="text-slate-600 dark:text-slate-300 mb-6">
-            This page is under construction. Editing functionality will be implemented here.
-          </p>
-          <Button asChild variant="outline" className="inline-block mr-2">
-            <Link href={`/contracts/${params.id}`}> 
-              <ArrowLeftIcon className="mr-2 h-4 w-4" />
-              Back to Details
-            </Link>
-          </Button>
-          <Button asChild variant="secondary" className="inline-block">
-            <Link href="/contracts">
-              <ArrowLeftIcon className="mr-2 h-4 w-4" />
-              Back to Contracts List
-            </Link>
-          </Button>
+        <CardContent>
+          <ContractGeneratorForm initialData={initialData} contractId={contract.id} />
         </CardContent>
       </Card>
-    </div>
-    </ManualErrorBoundary>
+    </main>
   )
 }

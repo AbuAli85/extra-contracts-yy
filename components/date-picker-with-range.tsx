@@ -1,33 +1,39 @@
 "use client"
-
-import type * as React from "react"
 import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
 import type { DateRange } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon } from "lucide-react"
 
-interface DatePickerWithRangeProps extends React.HTMLAttributes<HTMLDivElement> {
+interface DatePickerWithRangeProps {
   date: DateRange | undefined
-  onDateChange: (date: DateRange | undefined) => void
-  className?: string
+  setDate: (date: DateRange | undefined) => void
+  placeholder?: string
+  disabled?: boolean
 }
 
-export function DatePickerWithRange({ className, date, onDateChange }: DatePickerWithRangeProps) {
+export function DatePickerWithRange({
+  date,
+  setDate,
+  placeholder = "Pick a date range",
+  disabled = false,
+}: DatePickerWithRangeProps) {
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div className="grid gap-2">
       <Popover>
         <PopoverTrigger asChild>
           <Button
             id="date"
             variant={"outline"}
             className={cn(
-              "w-full justify-start text-left font-normal", // Changed from w-[300px] to w-full
-              !date && "text-muted-foreground",
+              "w-full justify-start text-left font-normal",
+              !date?.from && "text-muted-foreground",
+              disabled && "opacity-50 cursor-not-allowed",
             )}
+            disabled={disabled}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {date?.from ? (
@@ -39,7 +45,7 @@ export function DatePickerWithRange({ className, date, onDateChange }: DatePicke
                 format(date.from, "LLL dd, y")
               )
             ) : (
-              <span>Pick a date range</span>
+              <span>{placeholder}</span>
             )}
           </Button>
         </PopoverTrigger>
@@ -49,8 +55,9 @@ export function DatePickerWithRange({ className, date, onDateChange }: DatePicke
             mode="range"
             defaultMonth={date?.from}
             selected={date}
-            onSelect={onDateChange}
+            onSelect={setDate}
             numberOfMonths={2}
+            disabled={disabled}
           />
         </PopoverContent>
       </Popover>

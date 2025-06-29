@@ -20,6 +20,7 @@ const dateOptionalNullableSchema = z
   .nullable()
 
 export const promoterProfileSchema = z.object({
+  name: z.string().min(1, "Promoter name is required."),
   name_en: z.string().min(1, "Name (English) is required."),
   name_ar: z.string().min(1, "Name (Arabic) is required."),
   id_card_number: z.string().min(1, "ID card number is required."),
@@ -35,7 +36,43 @@ export const promoterProfileSchema = z.object({
   existing_passport_url: z.string().optional().nullable(),
   id_card_expiry_date: dateOptionalNullableSchema,
   passport_expiry_date: dateOptionalNullableSchema,
-  notes: z.string().optional().nullable(),
+  email: z.string().email("Invalid email address.").min(1, "Email is required."),
+  phone: z.string().min(1, "Phone number is required."),
+  company_name: z.string().min(1, "Company name is required."),
+  company_address: z.string().min(1, "Company address is required."),
+  contact_person: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((e) => (e === "" ? null : e)),
+  contact_email: z
+    .string()
+    .email("Invalid email address.")
+    .nullable()
+    .optional()
+    .transform((e) => (e === "" ? null : e)),
+  contact_phone: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((e) => (e === "" ? null : e)),
+  website: z
+    .string()
+    .url("Invalid URL format.")
+    .nullable()
+    .optional()
+    .transform((e) => (e === "" ? null : e)),
+  notes: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((e) => (e === "" ? null : e)),
+  logo_url: z
+    .string()
+    .url("Invalid URL format.")
+    .nullable()
+    .optional()
+    .transform((e) => (e === "" ? null : e)),
 })
 
 export type PromoterProfileFormData = z.infer<typeof promoterProfileSchema>

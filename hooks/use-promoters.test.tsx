@@ -1,83 +1,123 @@
-import { render, waitFor } from "@testing-library/react"
+import type React from "react"
+import { renderHook, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { usePromoters } from "@/hooks/use-promoters"
+import {
+  usePromoters,
+  usePromoter,
+  useCreatePromoterMutation,
+  useUpdatePromoterMutation,
+  useDeletePromoterMutation,
+} from "./use-promoters"
+import jest from "jest" // Import jest to declare it
 
-const toastMock = jest.fn()
-
-jest.mock("next/navigation", () => ({
-  usePathname: jest.fn(() => "/"),
-  useSearchParams: jest.fn(() => new URLSearchParams()),
+// Mock Supabase client
+jest.mock("@/lib/supabase/client", () => ({
+  createClient: jest.fn(() => ({
+    from: jest.fn(() => ({
+      select: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          single: jest.fn(() => ({ data: { id: "1", name: "Test Promoter" }, error: null })),
+        })),
+        order: jest.fn(() => ({
+          data: [{ id: "1", name: "Test Promoter" }],
+          error: null,
+        })),
+      })),
+      insert: jest.fn(() => ({
+        select: jest.fn(() => ({
+          single: jest.fn(() => ({ data: { id: "2", name: "New Promoter" }, error: null })),
+        })),
+      })),
+      update: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          select: jest.fn(() => ({
+            single: jest.fn(() => ({ data: { id: "1", name: "Updated Promoter" }, error: null })),
+          })),
+        })),
+      })),
+      delete: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          data: null,
+          error: null,
+        })),
+      })),
+    })),
+  })),
 }))
 
-jest.mock("@/hooks/use-toast", () => ({
-  useToast: () => ({
-    toast: toastMock,
-  }),
-}))
+describe("Promoter Hooks", () => {
+  let queryClient: QueryClient
 
-const fromMock = jest.fn()
-
-jest.mock("@/lib/supabase", () => ({
-  supabase: {
-    from: fromMock,
-    channel: jest.fn(() => ({ on: jest.fn().mockReturnThis(), subscribe: jest.fn(() => "chan") })),
-    removeChannel: jest.fn(),
-  },
-}))
-
-describe("usePromoters", () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
-  it("shows toast when unauthenticated", async () => {
-
-    const queryClient = new QueryClient()
-
-    const TestComponent = () => {
-      usePromoters()
-      return null
-    }
-
-    render(
-      <QueryClientProvider client={queryClient}>
-        <TestComponent />
-      </QueryClientProvider>,
-    )
-
-    await waitFor(() => {
-      expect(toastMock).toHaveBeenCalledWith(
-        expect.objectContaining({ title: "Error loading promoters" }),
-      )
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
     })
   })
 
-  it("shows toast without redirect for other errors", async () => {
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
 
-    fromMock.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      order: jest.fn(() =>
-        Promise.resolve({ data: null, error: { message: "DB Error" } }),
-      ),
+  describe("usePromoters", () => {
+    it("fetches promoters successfully", async () => {
+      const { result } = renderHook(() => usePromoters(), { wrapper })
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+      expect(result.current.data).toEqual([{ id: "1", name: "Test Promoter" }])
     })
+  })
 
-    const queryClient = new QueryClient()
+  describe("usePromoter", () => {
+    it("fetches a single promoter successfully", async () => {
+      const { result } = renderHook(() => usePromoter("1"), { wrapper })
 
-    const TestComponent = () => {
-      usePromoters()
-      return null
-    }
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+      expect(result.current.data).toEqual({ id: "1", name: "Test Promoter" })
+    })
+  })
 
-    render(
-      <QueryClientProvider client={queryClient}>
-        <TestComponent />
-      </QueryClientProvider>,
-    )
+  describe("useCreatePromoterMutation", () => {
+    it("creates a promoter successfully", async () => {
+      const { result } = renderHook(() => useCreatePromoterMutation(), { wrapper })
 
-    await waitFor(() => {
-      expect(toastMock).toHaveBeenCalledWith(
-        expect.objectContaining({ title: "Error loading promoters" }),
-      )
+      result.current.mutate({ name: "New Promoter", email: "new@example.com", phone: "555", company_name: "New Co" })
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+      expect(result.current.data).toEqual({
+        success: true,
+        message: "Promoter created successfully!",
+        data: { id: "2", name: "New Promoter" },
+      })
+    })
+  })
+
+  describe("useUpdatePromoterMutation", () => {
+    it("updates a promoter successfully", async () => {
+      const { result } = renderHook(() => useUpdatePromoterMutation(), { wrapper })
+
+      result.current.mutate({ id: "1", name: "Updated Promoter" })
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+      expect(result.current.data).toEqual({
+        success: true,
+        message: "Promoter updated successfully!",
+        data: { id: "1", name: "Updated Promoter" },
+      })
+    })
+  })
+
+  describe("useDeletePromoterMutation", () => {
+    it("deletes a promoter successfully", async () => {
+      const { result } = renderHook(() => useDeletePromoterMutation(), { wrapper })
+
+      result.current.mutate("1")
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+      expect(result.current.data).toEqual({ success: true, message: "Promoter deleted successfully!" })
     })
   })
 })

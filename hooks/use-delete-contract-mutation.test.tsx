@@ -1,48 +1,54 @@
-import { render, fireEvent, waitFor, screen } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useDeleteContractMutation } from "@/hooks/use-contracts";
+import type React from "react"
+import { renderHook, waitFor } from "@testing-library/react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { useDeleteContractMutation } from "./use-contracts"
+import { deleteContract as deleteContractAction } from "@/app/actions/contracts"
+import jest from "jest" // Declare the jest variable
 
-const toastMock = jest.fn();
-
-jest.mock("@/hooks/use-toast", () => ({
-  useToast: () => ({
-    toast: toastMock,
-  }),
-}));
-
-const deleteContractMock = jest.fn();
-
+// Mock the server action
 jest.mock("@/app/actions/contracts", () => ({
-  deleteContract: deleteContractMock,
-}));
+  deleteContract: jest.fn(),
+}))
 
 describe("useDeleteContractMutation", () => {
+  let queryClient: QueryClient
+
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    })
+    ;(deleteContractAction as jest.Mock).mockClear()
+  })
 
-  it("shows toast when deletion fails", async () => {
-    deleteContractMock.mockRejectedValue(new Error("Delete failed"));
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
 
-    const queryClient = new QueryClient();
+  it("successfully deletes a contract", async () => {
+    ;(deleteContractAction as jest.Mock).mockResolvedValue({ success: true, message: "Deleted" })
 
-    const TestComponent = () => {
-      const mutation = useDeleteContractMutation();
-      return <button onClick={() => mutation.mutate("123")}>Delete</button>;
-    };
+    const { result } = renderHook(() => useDeleteContractMutation(), { wrapper })
 
-    render(
-      <QueryClientProvider client={queryClient}>
-        <TestComponent />
-      </QueryClientProvider>,
-    );
+    result.current.mutate("contract-id-1")
 
-    fireEvent.click(screen.getByRole("button"));
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(deleteContractAction).toHaveBeenCalledWith("contract-id-1")
+  })
 
-    await waitFor(() => {
-      expect(toastMock).toHaveBeenCalledWith(
-        expect.objectContaining({ variant: "destructive" }),
-      );
-    });
-  });
-});
+  it("handles deletion error", async () => {
+    const errorMessage = "Failed to delete"
+    ;(deleteContractAction as jest.Mock).mockResolvedValue({ success: false, message: errorMessage })
+
+    const { result } = renderHook(() => useDeleteContractMutation(), { wrapper })
+
+    result.current.mutate("contract-id-1")
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(result.current.error?.message).toBe(errorMessage)
+    expect(deleteContractAction).toHaveBeenCalledWith("contract-id-1")
+  })
+})

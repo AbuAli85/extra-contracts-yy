@@ -1,134 +1,229 @@
 # Bilingual Contract Generator
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+This is a Next.js application designed to generate bilingual contracts, manage parties and promoters, and provide a dashboard for analytics and audit logs. It leverages Supabase for database and authentication, and Next.js App Router for server-side rendering and API routes.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/abuali85s-projects/v0-fork-of-v0-dev-form-component)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/zVc3ijHfuT4)
+## Features
 
-## Overview
+- **Bilingual Contract Generation**: Generate contracts in English and Arabic.
+- **Party Management**: Create, view, edit, and delete contract parties.
+- **Promoter Management**: Create, view, edit, and delete promoters.
+- **Dashboard**:
+  - **Analytics**: Overview of contract statuses and trends.
+  - **Audit Logs**: Track system activities and user actions.
+  - **Notifications**: Real-time system alerts.
+- **Authentication**: User login and session management using Supabase Auth.
+- **Internationalization (i18n)**: Support for English and Arabic languages using `next-intl`.
+- **Responsive Design**: Optimized for various screen sizes using Tailwind CSS and Shadcn UI.
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+## Technologies Used
 
-## Deployment
+- [Next.js](https://nextjs.org/) (App Router)
+- [React](https://react.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Supabase](https://supabase.com/) (Database, Auth, Realtime)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Shadcn UI](https://ui.shadcn.com/)
+- [Zod](https://zod.dev/) for schema validation
+- [React Hook Form](https://react-hook-form.com/)
+- [next-intl](https://next-intl-docs.vercel.app/) for internationalization
+- [date-fns](https://date-fns.org/) for date manipulation
+- [use-debounce](https://www.npmjs.com/package/use-debounce) for debouncing input
+- [Lucide React](https://lucide.dev/icons/) for icons
 
-Your project is live at:
+## Getting Started
 
-**[https://vercel.com/abuali85s-projects/v0-fork-of-v0-dev-form-component](https://vercel.com/abuali85s-projects/v0-fork-of-v0-dev-form-component)**
+### Prerequisites
 
-## Build your app
+- Node.js (v20 or higher)
+- npm or Yarn
+- A Supabase project
 
-This project requires **Node.js 20**. If you use [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to select this version.
+### Installation
 
-Install dependencies before running any scripts:
+1.  **Clone the repository:**
 
-\`\`\`bash
-pnpm install
-# or
-npm install
+    \`\`\`bash
+    git clone https://github.com/your-username/bilingual-contract-generator.git
+    cd bilingual-contract-generator
+    \`\`\`
+
+2.  **Install dependencies:**
+
+    \`\`\`bash
+    npm install
+    # or
+    yarn install
+    \`\`\`
+
+3.  **Set up Supabase:**
+
+    - Create a new Supabase project.
+    - Go to "Project Settings" -> "API" and copy your `Project URL` and `anon public` key.
+    - Create a `.env.local` file in the root of your project and add the following environment variables:
+
+      \`\`\`env
+      NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL
+      NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+      SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY # Only needed for server-side operations that require elevated privileges
+      \`\`\`
+
+    - **Run SQL migrations:**
+      The `scripts/` directory contains SQL files to set up your database schema. You can run these manually in your Supabase SQL Editor or use a migration tool.
+      Ensure you run them in order (e.g., `001_create_promoters_table.sql`, `002_alter_parties_add_type.sql`, etc.).
+
+      **Important Tables:**
+      - `promoters`: Stores information about promoters.
+      - `parties`: Stores information about contract parties.
+      - `contracts`: Stores contract details.
+      - `audit_logs`: Stores system audit trails.
+      - `notifications`: Stores system notifications.
+
+      **Enable Row Level Security (RLS):**
+      RLS is crucial for security. Ensure RLS is enabled on your tables (e.g., `promoters`, `parties`, `contracts`, `audit_logs`, `notifications`) and appropriate policies are set up. The `scripts/007_update_rls_policies.sql` file provides examples.
+
+4.  **Run the development server:**
+
+    \`\`\`bash
+    npm run dev
+    # or
+    yarn dev
+    \`\`\`
+
+    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Project Structure
+
+\`\`\`
+.
+├── .github/workflows/ci.yml       # GitHub Actions CI configuration
+├── app/                           # Next.js App Router root
+│   ├── [locale]/                  # Internationalization routing
+│   │   ├── contracts/             # Contract listing and details
+│   │   ├── generate-contract/     # Contract generation form
+│   │   ├── login/                 # Login page
+│   │   ├── manage-parties/        # Party management
+│   │   ├── manage-promoters/      # Promoter management
+│   │   ├── page.tsx               # Root page for locale
+│   │   └── ... (error, loading files)
+│   ├── actions/                   # Server Actions
+│   │   ├── contracts.ts
+│   │   └── promoters.ts
+│   ├── api/contracts/route.ts     # API route for contracts
+│   ├── dashboard/                 # Dashboard pages
+│   │   ├── analytics/
+│   │   ├── audit/
+│   │   ├── contracts/
+│   │   ├── notifications/
+│   │   ├── settings/
+│   │   ├── users/
+│   │   └── page.tsx
+│   ├── edit-contract/[id]/        # Edit contract page
+│   ├── layout.tsx                 # Root layout
+│   ├── loading.tsx                # Root loading state
+│   ├── not-found.tsx              # 404 page
+│   ├── providers.tsx              # React context providers
+│   └── supabase-listener.tsx      # Supabase auth listener
+├── components/                    # Reusable React components
+│   ├── dashboard/                 # Dashboard specific components
+│   │   ├── admin-tools.tsx
+│   │   ├── audit-logs.tsx
+│   │   ├── charts-section.tsx
+│   │   ├── contract-reports-table.tsx
+│   │   ├── dashboard-layout.tsx
+│   │   ├── notification-system.tsx
+│   │   └── review-panel.tsx
+│   ├── ui/                        # Shadcn UI components
+│   │   └── ...
+│   ├── auth-form.tsx
+│   ├── combobox-field.tsx
+│   ├── contract-generator-form.tsx
+│   ├── contract-search-input.tsx
+│   ├── contract-status-filter.tsx
+│   ├── date-picker-with-manual-input.tsx
+│   ├── date-picker-with-presets-field.tsx
+│   ├── date-picker-with-range.tsx
+│   ├── image-upload-field.tsx
+│   ├── language-switcher.tsx
+│   ├── lifecycle-status-indicator.tsx
+│   ├── main-nav.tsx
+│   ├── mobile-nav.tsx
+│   ├── party-form.tsx
+│   └── promoter-form.tsx
+├── hooks/                         # Custom React hooks
+│   ├── use-contracts.ts
+│   ├── use-delete-contract-mutation.test.tsx
+│   ├── use-mobile.tsx
+│   ├── use-parties.ts
+│   ├── use-promoters.test.tsx
+│   ├── use-promoters.ts
+│   └── use-toast.ts
+├── lib/                           # Utility functions, schemas, Supabase client
+│   ├── __tests__/
+│   ├── dashboard-data.ts
+│   ├── dashboard-types.ts
+│   ├── data.ts
+│   ├── dev-log.ts
+│   ├── document-status.ts
+│   ├── fixtures/
+│   ├── generate-contract-form-schema.ts
+│   ├── party-schema.ts
+│   ├── promoter-profile-schema.ts
+│   ├── schema-generator.ts
+│   ├── supabase/                  # Supabase client configurations
+│   │   ├── admin.ts
+│   │   ├── client.ts
+│   │   └── server.ts
+│   ├── supabase.ts                # Main Supabase client instance
+│   ├── supabaseServer.ts
+│   ├── types.ts
+│   ├── utils.ts                   # General utilities (e.g., `cn` for Tailwind)
+│   └── validations/               # Zod schemas for validation
+├── public/                        # Static assets
+│   ├── placeholder-logo.png
+│   ├── placeholder-logo.svg
+│   ├── placeholder-user.jpg
+│   ├── placeholder.jpg
+│   └── placeholder.svg
+├── scripts/                       # Database migration scripts, utility scripts
+│   ├── 001_create_promoters_table.sql
+│   ├── 002_alter_parties_add_type.sql
+│   ├── 003_alter_promoters_refactor.sql
+│   ├── 004_create_contracts_table.sql
+│   ├── 005_create_dashboard_rpc.sql
+│   ├── 007_update_rls_policies.sql
+│   ├── analyze-csv.js
+│   └── build-form.cjs
+├── styles/globals.css             # Global CSS styles
+├── tailwind.config.ts             # Tailwind CSS configuration
+├── tsconfig.json                  # TypeScript configuration
+└── ... (other config files: package.json, next.config.mjs, etc.)
 \`\`\`
 
-After updating dependencies, run `pnpm install` again and commit the resulting
-`pnpm-lock.yaml`. The CI pipeline runs with a frozen lockfile and will fail if
-`package.json` and the lockfile are out of sync.
+## Internationalization
 
-After the dependencies are installed you can lint the project:
+The application uses `next-intl` for internationalization.
+Messages are located in `messages/` directory (e.g., `messages/en.json`, `messages/ar.json`).
+The `[locale]` segment in the `app` directory handles dynamic routing for different languages.
 
-\`\`\`bash
-npm run lint
-\`\`\`
+## Supabase Integration
 
-The form at `public/index.html` is generated from `index.html` using the
-`NEXT_PUBLIC_MAKE_WEBHOOK_URL` environment variable. When you run `npm run dev`
-or `npm run build`, the script `scripts/build-form.cjs` replaces the placeholder
-`__MAKE_WEBHOOK_URL__` in `index.html` and writes the result to
-`public/index.html`.
-
-If `next lint` reports "not found," install Next.js:
-
-\`\`\`bash
-pnpm add next
-# or
-npm install next
-\`\`\`
-
-
-## Environment Variables
-
-Use the provided `env.example` file as a template for your local environment.
-Copy it to `.env.local` and replace the placeholders with your project specific
-values. Environment variables prefixed with `NEXT_PUBLIC_` are required on the
-client, while the others should remain server-side. Important keys include:
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `NEXT_PUBLIC_MAKE_WEBHOOK_URL`
-- `MAKE_WEBHOOK_URL`
-- `MAKE_WEBHOOK_SECRET`
-
-| Variable | Purpose | Scope |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Base URL of your Supabase project | client |
-| `SUPABASE_URL` | Private Supabase project URL used on the server | server |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key used by the browser | client |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key for Supabase admin operations | server |
-| `NEXT_PUBLIC_MAKE_WEBHOOK_URL` | Public URL for Make.com form submissions; used to generate `public/index.html` | client |
-| `MAKE_WEBHOOK_URL` | Make.com endpoint for generating PDFs | server |
-| `MAKE_WEBHOOK_SECRET` | Optional secret for Make.com, not referenced yet | server |
-| `GOOGLE_CREDENTIALS_JSON` | Google service account credentials | server |
-| `GOOGLE_DOCS_TEMPLATE_ID` | ID of the Google Docs template contract | server |
-| `SMTP_HOST` | SMTP server host for sending PDF emails | server |
-| `SMTP_PORT` | SMTP server port | server |
-| `SMTP_USER` | Username or email for SMTP authentication | server |
-| `SMTP_PASS` | Password for SMTP authentication | server |
-
-
-Continue building your app on:
-
-**[https://v0.dev/chat/projects/zVc3ijHfuT4](https://v0.dev/chat/projects/zVc3ijHfuT4)**
-
-## How It Works
-
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
-
-## Generate Supabase Types
-
-Install the [Supabase CLI](https://supabase.com/docs/guides/cli) globally:
-
-\`\`\`bash
-npm install -g supabase
-\`\`\`
-
-After installing, generate TypeScript definitions for your database:
-
-\`\`\`bash
-npx supabase gen types typescript --project-id <YOUR_PROJECT_REF> --schema public > types/supabase.ts
-\`\`\`
-
-Running this command whenever your database schema changes will keep
-`types/supabase.ts` in sync with your Supabase project.
+- **Client-side Supabase**: `lib/supabase/client.ts` for browser-side interactions.
+- **Server-side Supabase**: `lib/supabase/server.ts` for server components and API routes.
+- **Admin Supabase**: `lib/supabase/admin.ts` for privileged server actions (requires `SUPABASE_SERVICE_ROLE_KEY`).
+- **Realtime Subscriptions**: Used in `components/dashboard/audit-logs.tsx` and `components/dashboard/notification-system.tsx` for live updates.
 
 ## Running Tests
 
-Ensure you have **Node.js** and **pnpm** installed. Install project
-dependencies before running the tests:
-
 \`\`\`bash
-pnpm install
+npm test
+# or
+yarn test
 \`\`\`
 
-You must run `pnpm install` before `pnpm test` so all dependencies are available.
-After the install completes, execute the Jest test suite with:
+## Deployment
 
-\`\`\`bash
-pnpm test
-\`\`\`
+This project can be easily deployed to Vercel. Ensure your environment variables are configured correctly on Vercel.
 
-Tests rely on the dependencies installed locally by `pnpm install` and will
-fail if they are missing. This command runs all unit tests defined in the
-repository.
+## Support
+
+If you encounter any issues or have questions, please open a support ticket at [vercel.com/help](https://vercel.com/help).

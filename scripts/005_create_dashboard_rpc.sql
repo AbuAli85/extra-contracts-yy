@@ -1,123 +1,141 @@
--- Drop existing view and functions if they exist to ensure clean recreation
-DROP VIEW IF EXISTS contracts_view;
-DROP FUNCTION IF EXISTS get_contract_status_counts();
-DROP FUNCTION IF EXISTS get_monthly_contract_revenue();
-
--- Function to get contract status counts
-CREATE OR REPLACE FUNCTION get_contract_status_counts()
-RETURNS TABLE(name TEXT, count BIGINT)
+-- Function to get dashboard summary
+CREATE OR REPLACE FUNCTION get_dashboard_summary(user_uuid UUID)
+RETURNS TABLE(total_contracts BIGINT, active_contracts BIGINT, pending_contracts BIGINT)
 LANGUAGE plpgsql
+SECURITY DEFINER
 AS $$
 BEGIN
-  RETURN QUERY
-  SELECT
-    contracts.status::TEXT AS name,
-    COUNT(*) AS count
-  FROM contracts
-  GROUP BY contracts.status;
+    RETURN QUERY
+    SELECT
+        (SELECT COUNT(*) FROM contracts WHERE user_id = user_uuid) AS total_contracts,
+        (SELECT COUNT(*) FROM contracts WHERE user_id = user_uuid AND status = 'Active') AS active_contracts,
+        (SELECT COUNT(*) FROM contracts WHERE user_id = user_uuid AND status = 'Pending Review') AS pending_contracts;
 END;
 $$;
 
--- Function to get monthly contract and revenue
-CREATE OR REPLACE FUNCTION get_monthly_contract_revenue()
-RETURNS TABLE(month TEXT, contracts BIGINT, revenue NUMERIC)
+-- Function to get contract trends (e.g., new contracts per month)
+-- This is a simplified example. A real trend function would involve date truncations and grouping.
+CREATE OR REPLACE FUNCTION get_contract_trends(user_uuid UUID, months_back INT DEFAULT 6)
+RETURNS TABLE(month TEXT, new_contracts BIGINT, completed_contracts BIGINT)
 LANGUAGE plpgsql
+SECURITY DEFINER
 AS $$
 BEGIN
-  RETURN QUERY
-  SELECT
-    to_char(contracts.contract_start_date, 'Mon') AS month,
-    COUNT(contracts.id) AS contracts,
-    SUM(COALESCE(contracts.contract_value, 0)) AS revenue -- Assuming 'contract_value' column exists
-  FROM contracts
-  WHERE contracts.contract_start_date >= date_trunc('year', CURRENT_DATE) -- Current year example
-  GROUP BY to_char(contracts.contract_start_date, 'Mon'), date_part('month', contracts.contract_start_date)
-  ORDER BY date_part('month', contracts.contract_start_date);
+    RETURN QUERY
+    SELECT
+        TO_CHAR(date_trunc('month', generate_series(NOW() - INTERVAL '1 month' * (months_back - 1), NOW(), INTERVAL '1 month')), 'YYYY-MM') AS month,
+        (SELECT COUNT(*) FROM contracts WHERE user_id = user_uuid AND date_trunc('month', created_at) = date_trunc('month', generate_series)) AS new_contracts,
+        (SELECT COUNT(*) FROM contracts WHERE user_id = user_uuid AND date_trunc('month', updated_at) = date_trunc('month', generate_series) AND status = 'Completed') AS completed_contracts
+    FROM generate_series(NOW() - INTERVAL '1 month' * (months_back - 1), NOW(), INTERVAL '1 month')
+    GROUP BY month
+    ORDER BY month;
 END;
 $$;
 
--- View for easier contract reporting, ensuring required column names
-CREATE OR REPLACE VIEW contracts_view AS
-SELECT
-  c.id, -- Keep the original table's PK for uniqueness if needed by frontend/keys
-  c.contract_id,
-  c.contract_start_date AS start_date,
-  c.contract_end_date AS end_date,
-  c.status,
-  p_promoter.name_en AS promoter_name,
-  p_promoter.name_ar AS promoter_name_ar,
-  p_first.name_en AS employer_name,
-  p_first.name_ar AS employer_name_ar,
-  p_second.name_en AS client_name,
-  p_second.name_ar AS client_name_ar,
-  c.user_id, -- Retain user_id if needed for RLS or context
-  c.created_at -- Retain created_at for sorting or context
-FROM
-  contracts c
-LEFT JOIN
-  promoters p_promoter ON c.promoter_id = p_promoter.id
-LEFT JOIN
-  parties p_first ON c.first_party_id = p_first.id -- Assuming first_party is employer
-LEFT JOIN
-  parties p_second ON c.second_party_id = p_second.id; -- Assuming second_party is client
+-- Function to get contract status distribution
+CREATE OR REPLACE FUNCTION get_contract_status_distribution(user_uuid UUID)
+RETURNS TABLE(status TEXT, count BIGINT)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        c.status,
+        COUNT(c.id) AS count
+    FROM
+        contracts c
+    WHERE
+        c.user_id = user_uuid
+    GROUP BY
+        c.status
+    ORDER BY
+        count DESC;
+END;
+$$;
 
--- Create 'notifications' table
-CREATE TABLE IF NOT EXISTS notifications (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  type TEXT NOT NULL CHECK (type IN ('success', 'error', 'warning', 'info', 'default')),
-  message TEXT NOT NULL,
-  is_read BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  user_email TEXT, -- Denormalized for easier display
-  related_contract_id UUID REFERENCES contracts(id) ON DELETE SET NULL, -- Required column
-  related_entity_id UUID,
-  related_entity_type TEXT
-);
--- Ensure RLS is enabled
-ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
--- Policies for 'notifications'
-DROP POLICY IF EXISTS "Enable read access for relevant users" ON notifications;
-CREATE POLICY "Enable read access for relevant users" ON notifications
-  FOR SELECT
-  USING (auth.uid() = user_id OR user_id IS NULL);
+-- Function to get audit logs for a user
+CREATE OR REPLACE FUNCTION get_user_audit_logs(user_uuid UUID, limit_count INT DEFAULT 10)
+RETURNS TABLE(id UUID, timestamp TIMESTAMP WITH TIME ZONE, user_email TEXT, action TEXT, target TEXT, details JSONB)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        al.id,
+        al.timestamp,
+        al.user_email,
+        al.action,
+        al.target,
+        al.details
+    FROM
+        audit_logs al
+    WHERE
+        al.user_id = user_uuid -- Assuming audit_logs table has a user_id column
+    ORDER BY
+        al.timestamp DESC
+    LIMIT limit_count;
+END;
+$$;
 
-DROP POLICY IF EXISTS "Allow service role to insert" ON notifications;
-CREATE POLICY "Allow service role to insert" ON notifications
-  FOR INSERT
-  WITH CHECK (auth.role() = 'service_role');
+-- Function to get pending reviews for a user (e.g., contracts needing approval)
+CREATE OR REPLACE FUNCTION get_pending_reviews(user_uuid UUID, limit_count INT DEFAULT 5)
+RETURNS TABLE(id UUID, title TEXT, description TEXT, created_at TIMESTAMP WITH TIME ZONE)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        c.id,
+        c.contract_name AS title,
+        'Contract needs your review.' AS description,
+        c.created_at
+    FROM
+        contracts c
+    WHERE
+        c.user_id = user_uuid AND c.status = 'Pending Review'
+    ORDER BY
+        c.created_at ASC
+    LIMIT limit_count;
+END;
+$$;
 
+-- Function to get admin actions (mock data for now)
+CREATE OR REPLACE FUNCTION get_admin_actions()
+RETURNS TABLE(id TEXT, name TEXT, description TEXT)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    RETURN QUERY VALUES
+    ('1', 'Run Database Migration', 'Apply latest schema changes.'),
+    ('2', 'Clear Application Cache', 'Clear cached data for all users.'),
+    ('3', 'Generate System Report', 'Generate a comprehensive system health report.');
+END;
+$$;
 
--- Create 'audit_logs' table
-CREATE TABLE IF NOT EXISTS audit_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  user_email TEXT, -- Required
-  action TEXT NOT NULL, -- Required
-  details JSONB, -- Required
-  ip_address TEXT, -- Required
-  timestamp TIMESTAMPTZ DEFAULT now() NOT NULL -- Required, ensure NOT NULL
-);
--- Ensure RLS is enabled
-ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
--- Policies for 'audit_logs'
-DROP POLICY IF EXISTS "Enable read access for service_role" ON audit_logs;
-CREATE POLICY "Enable read access for service_role" ON audit_logs
-  FOR SELECT
-  USING (auth.role() = 'service_role'); -- Or a specific admin role
-
-DROP POLICY IF EXISTS "Allow service role to insert audit logs" ON audit_logs;
-CREATE POLICY "Allow service role to insert audit logs" ON audit_logs
-  FOR INSERT
-  WITH CHECK (auth.role() = 'service_role');
-
--- Grant permissions for Supabase Realtime (if not already handled by enabling it on tables via UI)
--- This is often not needed if you enable realtime via the Supabase dashboard,
--- as it sets up the publication automatically.
--- However, explicitly:
--- GRANT SELECT ON TABLE public.contracts_view TO supabase_realtime;
--- GRANT SELECT ON TABLE public.notifications TO supabase_realtime;
--- GRANT SELECT ON TABLE public.audit_logs TO supabase_realtime;
--- GRANT SELECT ON TABLE public.contracts TO supabase_realtime;
--- GRANT SELECT ON TABLE public.promoters TO supabase_realtime;
--- GRANT SELECT ON TABLE public.parties TO supabase_realtime;
+-- Function to get notifications for a user
+CREATE OR REPLACE FUNCTION get_user_notifications(user_uuid UUID, limit_count INT DEFAULT 10)
+RETURNS TABLE(id UUID, type TEXT, message TEXT, created_at TIMESTAMP WITH TIME ZONE, is_read BOOLEAN)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        n.id,
+        n.type,
+        n.message,
+        n.created_at,
+        n.is_read
+    FROM
+        notifications n
+    WHERE
+        n.user_id = user_uuid
+    ORDER BY
+        n.created_at DESC
+    LIMIT limit_count;
+END;
+$$;

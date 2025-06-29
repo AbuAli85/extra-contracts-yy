@@ -1,14 +1,15 @@
-"use client"
-import DashboardLayout from "@/components/dashboard/dashboard-layout"
-import NotificationSystem from "@/components/dashboard/notification-system" // Re-use the panel for a full page view
+import { getTranslations } from "next-intl/server"
+import { NotificationSystem } from "@/components/dashboard/notification-system"
+import { getNotifications } from "@/lib/dashboard-data"
 
-export default function NotificationsPage() {
+export default async function NotificationsPage() {
+  const t = await getTranslations("DashboardNotifications")
+  const initialNotifications = await getNotifications()
+
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <h1 className="text-2xl font-semibold">All Notifications / جميع الإشعارات</h1>
-        <NotificationSystem /> {/* Can be enhanced for a full page view with more filters/actions */}
-      </div>
-    </DashboardLayout>
+    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+      <h1 className="text-2xl font-semibold">{t("notificationsTitle")}</h1>
+      <NotificationSystem notifications={initialNotifications} />
+    </main>
   )
 }

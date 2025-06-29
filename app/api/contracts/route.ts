@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
-// Import the lazy-initialized admin client
+import { createClient } from "@/lib/supabase/server"
 import { getSupabaseAdmin } from "@/lib/supabase/admin"
-import { createServerComponentClient } from "@/lib/supabaseServer"
 import { contractGeneratorSchema } from "@/lib/schema-generator" // Your Zod schema for validation
 import type { BilingualPdfData } from "@/lib/types"
 import type { Database } from "@/types/supabase"
 import { format } from "date-fns"
+import { devLog } from "@/lib/dev-log"
 
 // Placeholder for your PDF generation logic (e.g., calling Google Docs API via Make.com)
 async function generateBilingualPdf(contractData: BilingualPdfData, contractId: string): Promise<string | null> {
@@ -65,8 +65,39 @@ async function generateBilingualPdf(contractData: BilingualPdfData, contractId: 
   }
 }
 
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const query = searchParams.get("q")
+  const status = searchParams.get("status")
+
+  const supabase = createClient()
+
+  let queryBuilder = supabase.from("contracts").select("*")
+
+  if (query) {
+    queryBuilder = queryBuilder.or(
+      `first_party_name_en.ilike.%${query}%,first_party_name_ar.ilike.%${query}%,second_party_name_en.ilike.%${query}%,second_party_name_ar.ilike.%${query}%,promoter_name_en.ilike.%${query}%,promoter_name_ar.ilike.%${query}%,contract_id.ilike.%${query}%`,
+    )
+  }
+
+  if (status && status !== "all") {
+    queryBuilder = queryBuilder.eq("status", status)
+  }
+
+  queryBuilder = queryBuilder.order("created_at", { ascending: false })
+
+  const { data, error } = await queryBuilder
+
+  if (error) {
+    devLog("Error fetching contracts:", error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json(data)
+}
+
 export async function POST(request: NextRequest) {
-  const supabase = createServerComponentClient()
+  const supabase = createClient()
   const supabaseAdmin = getSupabaseAdmin() // Service role client
   try {
     const body = await request.json()
@@ -77,9 +108,9 @@ export async function POST(request: NextRequest) {
     }
 
     const { data: validatedData } = validation
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     const contractToInsert: Database["public"]["Tables"]["contracts"]["Insert"] = {
       first_party_id: validatedData.first_party_id,

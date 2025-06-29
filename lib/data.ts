@@ -1,39 +1,129 @@
-import type { ContractWithRelations } from "@/hooks/use-contracts"
-import { createServerComponentClient } from "@/lib/supabaseServer"
+import { createClient } from "@/lib/supabase/server"
+import type { Contract, Party, Promoter } from "./types"
 
-export const getContract = async (
-  contractId: string,
-): Promise<ContractWithRelations | null> => {
-  if (!contractId) {
-    console.warn("getContract called with no contractId")
-    return null
+const supabase = createClient()
+
+export async function getContracts(query?: string, status?: string): Promise<Contract[]> {
+  let dbQuery = supabase
+    .from("contracts")
+    .select(`
+      id,
+      contract_name,
+      contract_type,
+      start_date,
+      end_date,
+      contract_value,
+      content_english,
+      content_spanish,
+      status,
+      created_at,
+      updated_at,
+      parties_contracts_party_a_id_fkey(name),
+      parties_contracts_party_b_id_fkey(name),
+      promoters(name)
+    `)
+    .order("created_at", { ascending: false })
+
+  if (query) {
+    dbQuery = dbQuery.or(`contract_name.ilike.%${query}%,contract_type.ilike.%${query}%`)
   }
 
-  const supabase = createServerComponentClient()
+  if (status && status !== "all") {
+    dbQuery = dbQuery.eq("status", status)
+  }
 
+  const { data, error } = await dbQuery
+
+  if (error) {
+    console.error("Error fetching contracts:", error)
+    return []
+  }
+
+  // Flatten the data to match the Contract type
+  return data.map((contract: any) => ({
+    ...contract,
+    party_a_name: contract.parties_contracts_party_a_id_fkey?.name || "N/A",
+    party_b_name: contract.parties_contracts_party_b_id_fkey?.name || "N/A",
+    promoter_name: contract.promoters?.name || "N/A",
+  })) as Contract[]
+}
+
+export async function getContractById(id: string): Promise<Contract | null> {
   const { data, error } = await supabase
     .from("contracts")
     .select(`
-      *,
-      promoter_name_en:promoter_id(name_en),
-      promoter_name_ar:promoter_id(name_ar),
-      parties!contracts_employer_id_fkey(id,name_en,name_ar),
-      parties!contracts_client_id_fkey(id,name_en,name_ar),
-      promoters(id,name_en,name_ar)
+      id,
+      contract_name,
+      contract_type,
+      start_date,
+      end_date,
+      contract_value,
+      content_english,
+      content_spanish,
+      status,
+      created_at,
+      updated_at,
+      parties_contracts_party_a_id_fkey(name),
+      parties_contracts_party_b_id_fkey(name),
+      promoters(name)
     `)
-    .eq("id", contractId)
+    .eq("id", id)
     .single()
 
   if (error) {
-    console.error("Error fetching contract:", error.message)
-    // Consider how to handle errors. Throwing might be appropriate for React Query's error state.
-    // If the error is because the contract doesn't exist (e.g., RLS or actual missing row),
-    // Supabase often returns a specific error code or null data.
-    if (error.code === "PGRST116") {
-      // PGRST116: "The result contains 0 rows"
-      return null // Contract not found
-    }
-    throw error
+    console.error("Error fetching contract:", error)
+    return null
   }
-  return data as ContractWithRelations | null
+
+  if (!data) {
+    return null
+  }
+
+  // Flatten the data to match the Contract type
+  return {
+    ...data,
+    party_a_name: (data as any).parties_contracts_party_a_id_fkey?.name || "N/A",
+    party_b_name: (data as any).parties_contracts_party_b_id_fkey?.name || "N/A",
+    promoter_name: (data as any).promoters?.name || "N/A",
+  } as Contract
+}
+
+export async function getParties(): Promise<Party[]> {
+  const { data, error } = await supabase.from("parties").select("*").order("name", { ascending: true })
+
+  if (error) {
+    console.error("Error fetching parties:", error)
+    return []
+  }
+  return data as Party[]
+}
+
+export async function getPartyById(id: string): Promise<Party | null> {
+  const { data, error } = await supabase.from("parties").select("*").eq("id", id).single()
+
+  if (error) {
+    console.error("Error fetching party:", error)
+    return null
+  }
+  return data as Party
+}
+
+export async function getPromoters(): Promise<Promoter[]> {
+  const { data, error } = await supabase.from("promoters").select("*").order("name", { ascending: true })
+
+  if (error) {
+    console.error("Error fetching promoters:", error)
+    return []
+  }
+  return data as Promoter[]
+}
+
+export async function getPromoterById(id: string): Promise<Promoter | null> {
+  const { data, error } = await supabase.from("promoters").select("*").eq("id", id).single()
+
+  if (error) {
+    console.error("Error fetching promoter:", error)
+    return null
+  }
+  return data as Promoter
 }
