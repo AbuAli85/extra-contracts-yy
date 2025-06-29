@@ -12,15 +12,16 @@ export function SupabaseListener() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.access_token !== supabase.auth.currentSession?.access_token) {
+      if (event === "SIGNED_IN") {
         router.refresh()
+      }
+      if (event === "SIGNED_OUT") {
+        router.push("/login")
       }
     })
 
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [router, supabase])
+    return () => subscription.unsubscribe()
+  }, [router, supabase.auth])
 
   return null
 }

@@ -1,27 +1,27 @@
-import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
+import { cookies } from "next/headers"
+import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const id = searchParams.get("id")
+  const contractId = searchParams.get("id")
 
   const cookieStore = cookies()
   const supabase = createClient(cookieStore)
 
-  if (id) {
-    // Fetch a single contract by ID
+  if (contractId) {
+    // Fetch a single contract
     const { data, error } = await supabase
       .from("contracts")
       .select(
         `
         *,
-        parties_a:party_a_id(id, name, email, phone, address, type),
-        parties_b:party_b_id(id, name, email, phone, address, type),
-        promoters(id, name, email, phone, company, address, city, state, zip_code, country, bio, profile_picture_url)
+        parties_a:party_a_id(name),
+        parties_b:party_b_id(name),
+        promoters(name)
       `,
       )
-      .eq("id", id)
+      .eq("id", contractId)
       .single()
 
     if (error) {
@@ -40,15 +40,7 @@ export async function GET(request: Request) {
       .from("contracts")
       .select(
         `
-        id,
-        contract_id,
-        contract_name,
-        contract_type,
-        status,
-        effective_date,
-        termination_date,
-        created_at,
-        updated_at,
+        *,
         parties_a:party_a_id(name),
         parties_b:party_b_id(name),
         promoters(name)
@@ -63,4 +55,105 @@ export async function GET(request: Request) {
 
     return NextResponse.json(data)
   }
+}
+
+export async function POST(request: Request) {
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const body = await request.json()
+
+  const { data, error } = await supabase
+    .from("contracts")
+    .insert({
+      ...body,
+      user_id: user.id,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error("Error creating contract:", error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json(data, { status: 201 })
+}
+
+export async function PUT(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const contractId = searchParams.get("id")
+
+  if (!contractId) {
+    return NextResponse.json({ error: "Contract ID is required" }, { status: 400 })
+  }
+
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const body = await request.json()
+
+  const { data, error } = await supabase
+    .from("contracts")
+    .update(body)
+    .eq("id", contractId)
+    .eq("user_id", user.id) // Ensure user can only update their own contracts
+    .select()
+    .single()
+
+  if (error) {
+    console.error("Error updating contract:", error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  if (!data) {
+    return NextResponse.json({ error: "Contract not found or unauthorized" }, { status: 404 })
+  }
+
+  return NextResponse.json(data)
+}
+
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const contractId = searchParams.get("id")
+
+  if (!contractId) {
+    return NextResponse.json({ error: "Contract ID is required" }, { status: 400 })
+  }
+
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const { error } = await supabase.from("contracts").delete().eq("id", contractId).eq("user_id", user.id) // Ensure user can only delete their own contracts
+
+  if (error) {
+    console.error("Error deleting contract:", error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ message: "Contract deleted successfully" }, { status: 200 })
 }

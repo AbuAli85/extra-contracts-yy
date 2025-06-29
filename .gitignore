@@ -2,85 +2,34 @@
 .next/
 out/
 
-# Node.js
+# Dependencies
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 .pnpm-store/
-.pnpm-debug.log*
-
-# Environment variables
-.env
-.env*.local
-
-# IDEs and editors
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-
-# macOS
-.DS_Store
-
-# npm package manager
-package-lock.json
-
-# Vercel
-.vercel/
-
-# Logs
-logs/
-*.log
-
-# Test coverage
-/coverage
-
-# Build artifacts
-/build
-dist/
-
-# Thumbnails
-.thumbnails/
-
-# Database
-*.sqlite
-*.sqlite3
-*.db
-*.db-journal
-
-# Supabase
-supabase/
-!lib/supabase/
-types/supabase.ts
 
 # TypeScript
 *.tsbuildinfo
-next-env.d.ts
 
-# PEM files
-*.pem
+# dotenv
+.env.local
+.env.*.local
 
-# dependencies
-/.pnp
-.pnp.js
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
-.env*.local
-.env
+# OS
+.DS_Store
+Thumbs.db
 
-# vercel
-.vercel
+# IDEs
+.vscode/
+.idea/
+
+# Testing
+/coverage
+
+# Supabase
+supabase/.temp/
+supabase/db/

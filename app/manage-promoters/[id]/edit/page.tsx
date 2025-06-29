@@ -1,34 +1,60 @@
-import { getTranslations } from "next-intl/server"
-import { notFound } from "next/navigation"
+"use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import PromoterForm from "@/components/promoter-form" // Default import
-import { getPromoterById } from "@/app/actions/promoters"
+import { PromoterForm } from "@/components/promoter-form"
+import { useTranslations } from "next-intl"
+import { useParams } from "next/navigation"
+import { usePromoters } from "@/hooks/use-promoters"
+import { useEffect, useState } from "react"
+import { Loader2 } from "lucide-react"
+import type { Promoter } from "@/lib/types"
 
-interface EditPromoterPageProps {
-  params: {
-    id: string
+export default function EditPromoterPage() {
+  const t = useTranslations("EditPromoterPage")
+  const params = useParams()
+  const promoterId = params.id as string
+
+  const { data: promoters, isLoading, isError, error } = usePromoters()
+  const [promoterToEdit, setPromoterToEdit] = useState<Promoter | null>(null)
+
+  useEffect(() => {
+    if (promoters) {
+      const foundPromoter = promoters.find((p) => p.id === promoterId)
+      if (foundPromoter) {
+        setPromoterToEdit(foundPromoter)
+      }
+    }
+  }, [promoters, promoterId])
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="sr-only">{t("loadingPromoter")}</span>
+      </div>
+    )
   }
-}
 
-export default async function EditPromoterPage({ params }: EditPromoterPageProps) {
-  const t = await getTranslations("EditPromoterPage")
-  const { data: promoter, error } = await getPromoterById(params.id)
+  if (isError) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center text-red-500">
+        {t("errorLoading")}: {error?.message || t("unknownError")}
+      </div>
+    )
+  }
 
-  if (error || !promoter) {
-    console.error("Error fetching promoter for edit:", error)
-    notFound()
+  if (!promoterToEdit) {
+    return <div className="flex min-h-[80vh] items-center justify-center text-gray-500">{t("promoterNotFound")}</div>
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
-      <h1 className="text-3xl font-bold mb-6">{t("editPromoter")}</h1>
+    <div className="container mx-auto py-8">
       <Card>
         <CardHeader>
-          <CardTitle>{t("promoterDetails")}</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <PromoterForm initialData={promoter} />
+          <PromoterForm promoter={promoterToEdit} />
         </CardContent>
       </Card>
     </div>

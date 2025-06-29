@@ -1,28 +1,14 @@
-import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+"use client"
 
-export default function Loading() {
+import { Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
+
+export default function EditContractLoading() {
+  const t = useTranslations("Loading")
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
-      <h1 className="text-3xl font-bold mb-6">
-        <Skeleton className="h-9 w-80" />
-      </h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-7 w-60" />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ))}
-          <Skeleton className="h-10 w-full" />
-        </CardContent>
-      </Card>
+    <div className="flex min-h-[80vh] items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin" />
+      <span className="sr-only">{t("loadingContract")}</span>
     </div>
   )
 }

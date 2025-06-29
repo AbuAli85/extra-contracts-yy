@@ -1,30 +1,30 @@
 "use client"
 
 import type React from "react"
-
-import { ThemeProvider } from "next-themes"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+import { SupabaseListener } from "@/app/supabase-listener"
+import { usePathname } from "next/navigation"
 import { NextIntlClientProvider } from "next-intl"
-import { Toaster } from "@/components/ui/sonner"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { SupabaseListener } from "@/app/supabase-listener" // Ensure this is a named import
+import { pick } from "lodash"
 
-interface ClientLayoutProps {
-  children: React.ReactNode
-  messages: Record<string, string>
-  locale: string
-}
+// Create a client
+const queryClient = new QueryClient()
 
-const ClientLayout = ({ children, messages, locale }: ClientLayoutProps) => {
+export function ClientLayout({ children, messages }: { children: React.ReactNode; messages: any }) {
+  const pathname = usePathname()
+
   return (
-    <NextIntlClientProvider messages={messages} locale={locale}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <TooltipProvider>
+    <QueryClientProvider client={queryClient}>
+      <NextIntlClientProvider messages={pick(messages, pathname)}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <SupabaseListener />
           {children}
           <Toaster />
-        </TooltipProvider>
-      </ThemeProvider>
-    </NextIntlClientProvider>
+        </ThemeProvider>
+      </NextIntlClientProvider>
+    </QueryClientProvider>
   )
 }
 

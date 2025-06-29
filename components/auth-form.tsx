@@ -1,63 +1,98 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
-import { Auth } from "@supabase/auth-ui-react"
-import { ThemeSupa } from "@supabase/auth-ui-shared"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useToast } from "@/components/ui/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { useTheme } from "next-themes"
+import { Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 export function AuthForm() {
-  const supabase = createClient()
-  const { theme } = useTheme()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [isSignUp, setIsSignUp] = useState(false)
+  const { toast } = useToast()
   const t = useTranslations("AuthForm")
 
-  const [view, setView] = useState<"sign_in" | "sign_up" | "forgot_password" | "update_password">("sign_in")
+  const supabase = createClient()
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (error) {
+      toast({
+        title: t("loginError"),
+        description: error.message,
+        variant: "destructive",
+      })
+    } else {
+      toast({
+        title: t("loginSuccess"),
+        description: t("loggedInMessage"),
+      })
+    }
+    setLoading(false)
+  }
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    const { error } = await supabase.auth.signUp({ email, password })
+
+    if (error) {
+      toast({
+        title: t("signUpError"),
+        description: error.message,
+        variant: "destructive",
+      })
+    } else {
+      toast({
+        title: t("signUpSuccess"),
+        description: t("checkEmailMessage"),
+      })
+    }
+    setLoading(false)
+  }
 
   return (
-    <Auth
-      supabaseClient={supabase}
-      appearance={{ theme: ThemeSupa }}
-      providers={["google", "github"]}
-      redirectTo={`${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`}
-      localization={{
-        variables: {
-          sign_in: {
-            email_label: t("emailLabel"),
-            password_label: t("passwordLabel"),
-            email_input_placeholder: t("emailPlaceholder"),
-            password_input_placeholder: t("passwordPlaceholder"),
-            button_label: t("signInButton"),
-            social_auth_button_text: t("signInWithSocial"),
-            link_text: t("alreadyHaveAccount"),
-            forgotten_password: t("forgotPassword"),
-            no_account: t("noAccount"),
-          },
-          sign_up: {
-            email_label: t("emailLabel"),
-            password_label: t("passwordLabel"),
-            email_input_placeholder: t("emailPlaceholder"),
-            password_input_placeholder: t("passwordPlaceholder"),
-            button_label: t("signUpButton"),
-            social_auth_button_text: t("signUpWithSocial"),
-            link_text: t("alreadyHaveAccount"),
-          },
-          forgotten_password: {
-            email_label: t("emailLabel"),
-            email_input_placeholder: t("emailPlaceholder"),
-            button_label: t("sendResetInstructions"),
-            link_text: t("rememberPassword"),
-          },
-          update_password: {
-            password_label: t("newPasswordLabel"),
-            password_input_placeholder: t("newPasswordPlaceholder"),
-            button_label: t("updatePassword"),
-          },
-        },
-      }}
-      theme={theme === "dark" ? "dark" : "default"}
-      view={view}
-      onViewChange={setView}
-    />
+    <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="space-y-4">
+      <div>
+        <Label htmlFor="email">{t("emailLabel")}</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="m@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          disabled={loading}
+        />
+      </div>
+      <div>
+        <Label htmlFor="password">{t("passwordLabel")}</Label>
+        <Input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          disabled={loading}
+        />
+      </div>
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {isSignUp ? t("signUpButton") : t("signInButton")}
+      </Button>
+      <Button type="button" variant="link" className="w-full" onClick={() => setIsSignUp(!isSignUp)}>
+        {isSignUp ? t("alreadyHaveAccount") : t("dontHaveAccount")}
+      </Button>
+    </form>
   )
 }

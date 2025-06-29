@@ -1,46 +1,118 @@
-import type React from "react"
-import { getTranslations } from "next-intl/server"
-import { Home, BarChart3, FileText, Users, Bell, Settings } from "lucide-react"
+"use client"
 
-import { MainNav } from "@/components/main-nav"
-import { MobileNav } from "@/components/mobile-nav"
-import { AuthStatus } from "@/components/auth-status"
-import { LanguageSwitcher } from "@/components/language-switcher"
-import { ThemeToggle } from "@/components/theme-toggle" // Named import
+import type React from "react"
+
+import { usePathname } from "next/navigation"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
+import { useTranslations } from "next-intl"
+import { LayoutDashboard, BarChart, FileText, Bell, Users, Settings, ArrowLeftRight, UserRound } from "lucide-react"
+import { Link } from "@/navigation"
+import { AuthStatus } from "../auth-status"
+import { LanguageSwitcher } from "../language-switcher"
+import { ThemeToggle } from "../theme-toggle"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
-export async function DashboardLayout({ children }: DashboardLayoutProps) {
-  const t = await getTranslations("DashboardLayout")
+export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const t = useTranslations("DashboardLayout")
+  const pathname = usePathname()
 
   const navItems = [
-    { href: "/dashboard", label: t("overview"), icon: Home },
-    { href: "/dashboard/analytics", label: t("analytics"), icon: BarChart3 },
-    { href: "/dashboard/contracts", label: t("contracts"), icon: FileText },
-    { href: "/dashboard/users", label: t("users"), icon: Users },
-    { href: "/dashboard/notifications", label: t("notifications"), icon: Bell },
-    { href: "/dashboard/settings", label: t("settings"), icon: Settings },
+    {
+      title: t("overview"),
+      href: "/dashboard",
+      icon: LayoutDashboard,
+      isActive: pathname === "/dashboard",
+    },
+    {
+      title: t("analytics"),
+      href: "/dashboard/analytics",
+      icon: BarChart,
+      isActive: pathname === "/dashboard/analytics",
+    },
+    {
+      title: t("contracts"),
+      href: "/dashboard/contracts",
+      icon: FileText,
+      isActive: pathname === "/dashboard/contracts",
+    },
+    {
+      title: t("parties"),
+      href: "/manage-parties",
+      icon: ArrowLeftRight,
+      isActive: pathname === "/manage-parties",
+    },
+    {
+      title: t("promoters"),
+      href: "/manage-promoters",
+      icon: UserRound,
+      isActive: pathname === "/manage-promoters",
+    },
+    {
+      title: t("notifications"),
+      href: "/dashboard/notifications",
+      icon: Bell,
+      isActive: pathname === "/dashboard/notifications",
+    },
+    {
+      title: t("users"),
+      href: "/dashboard/users",
+      icon: Users,
+      isActive: pathname === "/dashboard/users",
+    },
+    {
+      title: t("auditLogs"),
+      href: "/dashboard/audit",
+      icon: FileText, // Reusing FileText for audit logs, consider a different icon if available
+      isActive: pathname === "/dashboard/audit",
+    },
+    {
+      title: t("settings"),
+      href: "/dashboard/settings",
+      icon: Settings,
+      isActive: pathname === "/dashboard/settings",
+    },
   ]
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 w-full border-b bg-background">
-        <div className="container flex h-16 items-center justify-between py-4">
-          <MainNav items={navItems} />
-          <MobileNav items={navItems} />
-          <div className="flex items-center space-x-4">
-            <LanguageSwitcher />
-            <ThemeToggle />
-            <AuthStatus />
-          </div>
+    <div className="flex flex-1">
+      <Sidebar className="hidden lg:flex">
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              {navItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton asChild isActive={item.isActive}>
+                    <Link href={item.href}>
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {item.title}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+      <main className="flex flex-1 flex-col">
+        <div className="flex h-16 items-center justify-end gap-4 border-b px-4 lg:justify-end">
+          <LanguageSwitcher />
+          <ThemeToggle />
+          <Separator orientation="vertical" className="h-6" />
+          <AuthStatus />
         </div>
-      </header>
-      <main className="flex-1">{children}</main>
-      <footer className="border-t bg-background py-6 text-center text-sm text-muted-foreground">
-        <div className="container">{t("footerText")}</div>
-      </footer>
+        {children}
+      </main>
     </div>
   )
 }

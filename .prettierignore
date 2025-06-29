@@ -1,6 +1,5 @@
 .next
-.pnpm-store
-coverage
+node_modules
 dist
 build
-node_modules
+coverage

@@ -1,6 +1,10 @@
 import { z } from "zod"
 
-export const contractGeneratorSchema = z.object({
+export const schemaGenerator = (fields: Record<string, z.ZodTypeAny>) => {
+  return z.object(fields)
+}
+
+const contractGeneratorFields = {
   first_party_id: z.string().min(1, "First party is required."),
   second_party_id: z.string().min(1, "Second party is required."),
   promoter_id: z.string().min(1, "Promoter is required."),
@@ -15,4 +19,6 @@ export const contractGeneratorSchema = z.object({
   job_title: z.string().min(1, "Job title is required."),
   email: z.string().email("Invalid email address.").min(1, "Email is required."),
   work_location: z.string().min(1, "Work location is required."),
-})
+}
+
+export const contractGeneratorSchema = schemaGenerator(contractGeneratorFields)

@@ -139,3 +139,25 @@ BEGIN
     LIMIT limit_count;
 END;
 $$;
+
+-- Function to get dashboard analytics
+CREATE OR REPLACE FUNCTION get_dashboard_analytics()
+RETURNS TABLE(
+    total_contracts BIGINT,
+    active_contracts BIGINT,
+    pending_review_contracts BIGINT,
+    total_parties BIGINT,
+    total_promoters BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        (SELECT COUNT(*) FROM contracts) AS total_contracts,
+        (SELECT COUNT(*) FROM contracts WHERE status = 'Active') AS active_contracts,
+        (SELECT COUNT(*) FROM contracts WHERE status = 'Pending Review') AS pending_review_contracts,
+        (SELECT COUNT(*) FROM parties) AS total_parties,
+        (SELECT COUNT(*) FROM promoters) AS total_promoters;
+END;
+$$;

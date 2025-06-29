@@ -28,7 +28,7 @@ interface AdminToolsProps {
 
 export function AdminTools({ actions }: AdminToolsProps) {
   const { toast } = useToast()
-  const t = useTranslations("DashboardAdminTools")
+  const t = useTranslations("AdminTools")
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -119,105 +119,109 @@ export function AdminTools({ actions }: AdminToolsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("adminTools")}</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4">
-        {actions.length > 0 ? (
-          actions.map((action) => (
-            <div key={action.id} className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">{action.name}</p>
-                <p className="text-sm text-muted-foreground">{action.description}</p>
+      <CardContent>
+        <div className="grid gap-4">
+          {actions.length === 0 ? (
+            <p className="text-muted-foreground">{t("noActions")}</p>
+          ) : (
+            actions.map((action) => (
+              <div key={action.id} className="flex items-center justify-between rounded-md border p-3">
+                <div>
+                  <p className="font-medium">{action.action}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("lastPerformed")}: {new Date(action.timestamp).toLocaleString()} by {action.user_id}
+                  </p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => handleAction(action.action)}>
+                  {t("run")}
+                </Button>
               </div>
-              <Button onClick={() => handleAction(action.name)} size="sm">
-                {t("run")}
+            ))
+          )}
+          <div className="space-y-6 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="announcement-title">{t("sendAnnouncement")}</Label>
+              <Input id="announcement-title" placeholder={t("announcementTitle")} />
+              <Textarea id="announcement-content" placeholder={t("announcementContent")} rows={3} />
+              <Button className="w-full">{t("sendAnnouncementButton")}</Button>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="user-management">{t("userManagement")}</Label>
+              <Link href="/dashboard/users">
+                <Button variant="outline" className="w-full bg-transparent">
+                  {t("manageUsers")}
+                </Button>
+              </Link>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="audit-logs">{t("auditLogs")}</Label>
+              <Link href="/dashboard/audit">
+                <Button variant="outline" className="w-full bg-transparent">
+                  {t("viewAuditLogs")}
+                </Button>
+              </Link>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <Button onClick={handleRunMigration} disabled={loading}>
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
+                {t("runMigrations")}
+              </Button>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button disabled={loading}>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    {t("createNewUser")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{t("createNewUserTitle")}</DialogTitle>
+                    <DialogDescription>{t("createNewUserDescription")}</DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleCreateUser} className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">{t("emailLabel")}</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="user@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="password">{t("passwordLabel")}</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                    <Button type="submit" disabled={loading}>
+                      {loading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <UserPlus className="mr-2 h-4 w-4" />
+                      )}
+                      {t("createUserButton")}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              <Button onClick={handleSendWelcomeEmail} disabled={loading}>
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+                {t("sendWelcomeEmail")}
               </Button>
             </div>
-          ))
-        ) : (
-          <p className="text-center text-muted-foreground">{t("noActionsAvailable")}</p>
-        )}
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="announcement-title">{t("sendAnnouncement")}</Label>
-            <Input id="announcement-title" placeholder={t("announcementTitle")} />
-            <Textarea id="announcement-content" placeholder={t("announcementContent")} rows={3} />
-            <Button className="w-full">{t("sendAnnouncementButton")}</Button>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="user-management">{t("userManagement")}</Label>
-            <Link href="/dashboard/users">
-              <Button variant="outline" className="w-full bg-transparent">
-                {t("manageUsers")}
-              </Button>
-            </Link>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="audit-logs">{t("auditLogs")}</Label>
-            <Link href="/dashboard/audit">
-              <Button variant="outline" className="w-full bg-transparent">
-                {t("viewAuditLogs")}
-              </Button>
-            </Link>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Button onClick={handleRunMigration} disabled={loading}>
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
-              {t("runMigrations")}
-            </Button>
-
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button disabled={loading}>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  {t("createNewUser")}
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t("createNewUserTitle")}</DialogTitle>
-                  <DialogDescription>{t("createNewUserDescription")}</DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleCreateUser} className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">{t("emailLabel")}</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="user@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="password">{t("passwordLabel")}</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                  <Button type="submit" disabled={loading}>
-                    {loading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <UserPlus className="mr-2 h-4 w-4" />
-                    )}
-                    {t("createUserButton")}
-                  </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
-
-            <Button onClick={handleSendWelcomeEmail} disabled={loading}>
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
-              {t("sendWelcomeEmail")}
-            </Button>
           </div>
         </div>
       </CardContent>

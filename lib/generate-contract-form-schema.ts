@@ -1,18 +1,21 @@
 import { z } from "zod"
 
-export const contractFormSchema = z.object({
-  first_party_id: z.string().min(1, "First party is required."),
-  second_party_id: z.string().min(1, "Second party is required."),
-  promoter_id: z.string().min(1, "Promoter is required."),
-  contract_start_date: z.date({
-    required_error: "Contract start date is required.",
-    invalid_type_error: "Invalid date format for start date.",
+export const generateContractFormSchema = z.object({
+  contractName: z.string().min(1, "Contract name is required."),
+  contractType: z.string().min(1, "Contract type is required."),
+  partyA: z.string().min(1, "First party is required."),
+  partyB: z.string().min(1, "Second party is required."),
+  promoter: z.string().optional().nullable(),
+  effectiveDate: z.date({
+    required_error: "Effective date is required.",
+    invalid_type_error: "Invalid date format for effective date.",
   }),
-  contract_end_date: z.date({
-    required_error: "Contract end date is required.",
-    invalid_type_error: "Invalid date format for end date.",
+  terminationDate: z.date({
+    required_error: "Termination date is required.",
+    invalid_type_error: "Invalid date format for termination date.",
   }),
-  job_title: z.string().min(1, "Job title is required."),
-  email: z.string().email("Invalid email address.").min(1, "Email is required."),
-  work_location: z.string().min(1, "Work location is required."),
+  contractValue: z.number().min(0, "Contract value must be a positive number.").optional().nullable(),
+  paymentTerms: z.string().optional().nullable(),
+  contentEnglish: z.string().min(1, "English content is required."),
+  contentSpanish: z.string().min(1, "Spanish content is required."),
 })

@@ -1,150 +1,108 @@
 "use client"
 
-import React from "react"
-import { useActionState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { useTranslations } from "next-intl"
+import { zodResolver } from "@hookform/resolvers/zod"
 import type { z } from "zod"
-
-import { createPromoter, updatePromoter } from "@/app/actions/promoters"
-import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { promoterProfileSchema } from "@/lib/promoter-profile-schema"
-import { ImageUploadField } from "@/components/image-upload-field"
+import { createPromoter, updatePromoter } from "@/app/actions/promoters"
+import { useActionState } from "react"
+import { Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import type { Promoter } from "@/lib/types"
+import { promoterProfileSchema } from "@/lib/promoter-profile-schema"
+import { ImageUploadField } from "./image-upload-field"
 
 interface PromoterFormProps {
-  onSuccess?: () => void
-  initialData?: Promoter
+  promoter?: Promoter // Optional prop for editing existing promoters
+  onFormSuccess?: () => void // Callback to close dialog on success
 }
 
-const PromoterForm = ({ onSuccess, initialData }: PromoterFormProps) => {
+export function PromoterForm({ promoter, onFormSuccess }: PromoterFormProps) {
   const t = useTranslations("PromoterForm")
   const { toast } = useToast()
+  const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null)
 
   const form = useForm<z.infer<typeof promoterProfileSchema>>({
     resolver: zodResolver(promoterProfileSchema),
     defaultValues: {
-      name: initialData?.name || "",
-      email: initialData?.email || "",
-      phone: initialData?.phone || "",
-      company: initialData?.company || "",
-      address: initialData?.address || "",
-      city: initialData?.city || "",
-      state: initialData?.state || "",
-      zip_code: initialData?.zip_code || "",
-      country: initialData?.country || "",
-      bio: initialData?.bio || "",
-      website: initialData?.website || "",
-      profile_picture_url: initialData?.profile_picture_url || null,
+      name: promoter?.name || "",
+      contact_email: promoter?.contact_email || "",
+      contact_phone: promoter?.contact_phone || "",
+      company_name: promoter?.company_name || "",
+      website: promoter?.website || "",
+      profile_picture_url: promoter?.profile_picture_url || null,
     },
   })
 
-  const [state, formAction] = useActionState(
-    initialData ? updatePromoter.bind(null, initialData.id) : createPromoter,
-    null,
+  const [createState, createAction, createPending] = useActionState(createPromoter, {
+    success: false,
+    message: "",
+  })
+  const [updateState, updateAction, updatePending] = useActionState(
+    // Bind promoter.id to the updatePromoter action if promoter exists
+    promoter
+      ? updatePromoter.bind(null, promoter.id)
+      : async () => ({ success: false, message: "No promoter ID provided for update." }),
+    { success: false, message: "" },
   )
 
-  const fileRef = React.useRef<File | null>(null)
-  const [imageRemoved, setImageRemoved] = React.useState(false)
-
-  const handleFileChange = (file: File | null) => {
-    fileRef.current = file
-    if (file === null && initialData?.profile_picture_url) {
-      setImageRemoved(true)
-    } else {
-      setImageRemoved(false)
+  useEffect(() => {
+    const state = promoter ? updateState : createState
+    if (state.message) {
+      toast({
+        title: state.success ? t("successMessage") : t("errorMessage"),
+        description: state.message,
+        variant: state.success ? "default" : "destructive",
+      })
+      if (state.success && onFormSuccess) {
+        onFormSuccess()
+      }
     }
-  }
+    if (state.errors) {
+      for (const field in state.errors) {
+        form.setError(field as keyof z.infer<typeof promoterProfileSchema>, {
+          type: "server",
+          message: state.errors[field]?.[0],
+        })
+      }
+    }
+  }, [createState, updateState, toast, t, form, promoter, onFormSuccess])
 
   const onSubmit = (data: z.infer<typeof promoterProfileSchema>) => {
     const formData = new FormData()
-    for (const key in data) {
-      if (data[key as keyof typeof data] !== undefined && data[key as keyof typeof data] !== null) {
-        if (key === "profile_picture_url") {
-          // Handle file separately
-          continue
-        }
-        formData.append(key, String(data[key as keyof typeof data]))
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value)
       }
+    })
+    if (profilePictureFile) {
+      formData.append("profile_picture", profilePictureFile)
     }
 
-    if (fileRef.current) {
-      formData.append("profile_picture_url", fileRef.current)
-    } else if (imageRemoved) {
-      formData.append("profile_picture_url_removed", "true")
+    if (promoter) {
+      updateAction(formData)
+    } else {
+      createAction(formData)
     }
-
-    formAction(formData)
   }
 
-  React.useEffect(() => {
-    if (state) {
-      if (state.success) {
-        toast({
-          title: t("success"),
-          description: state.message,
-        })
-        if (!initialData) {
-          form.reset()
-          fileRef.current = null
-          setPreview(null) // Clear image preview on successful creation
-        }
-        onSuccess?.()
-      } else {
-        toast({
-          title: t("error"),
-          description: state.message || t("somethingWentWrong"),
-          variant: "destructive",
-        })
-        if (state.errors) {
-          for (const [field, messages] of Object.entries(state.errors)) {
-            form.setError(field as keyof typeof promoterProfileSchema, {
-              type: "server",
-              message: messages?.join(", "),
-            })
-          }
-        }
-      }
-    }
-  }, [state, toast, form, onSuccess, initialData, t])
-
-  const [preview, setPreview] = React.useState<string | null>(initialData?.profile_picture_url || null)
+  const isPending = createPending || updatePending
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="profile_picture_url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("profilePicture")}</FormLabel>
-              <FormControl>
-                <ImageUploadField
-                  id="profile_picture_url"
-                  name="profile_picture_url"
-                  existingImageUrl={initialData?.profile_picture_url}
-                  onFileChange={handleFileChange}
-                  placeholder={t("uploadProfilePicture")}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("name")}</FormLabel>
+              <FormLabel>{t("nameLabel")}</FormLabel>
               <FormControl>
-                <Input placeholder={t("namePlaceholder")} {...field} />
+                <Input {...field} disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -152,12 +110,12 @@ const PromoterForm = ({ onSuccess, initialData }: PromoterFormProps) => {
         />
         <FormField
           control={form.control}
-          name="email"
+          name="contact_email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("email")}</FormLabel>
+              <FormLabel>{t("contactEmailLabel")}</FormLabel>
               <FormControl>
-                <Input type="email" placeholder={t("emailPlaceholder")} {...field} />
+                <Input type="email" {...field} disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -165,12 +123,12 @@ const PromoterForm = ({ onSuccess, initialData }: PromoterFormProps) => {
         />
         <FormField
           control={form.control}
-          name="phone"
+          name="contact_phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("phone")}</FormLabel>
+              <FormLabel>{t("contactPhoneLabel")}</FormLabel>
               <FormControl>
-                <Input type="tel" placeholder={t("phonePlaceholder")} {...field} />
+                <Input {...field} disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -178,12 +136,12 @@ const PromoterForm = ({ onSuccess, initialData }: PromoterFormProps) => {
         />
         <FormField
           control={form.control}
-          name="company"
+          name="company_name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("company")}</FormLabel>
+              <FormLabel>{t("companyNameLabel")}</FormLabel>
               <FormControl>
-                <Input placeholder={t("companyPlaceholder")} {...field} />
+                <Input {...field} disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -194,9 +152,9 @@ const PromoterForm = ({ onSuccess, initialData }: PromoterFormProps) => {
           name="website"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("website")}</FormLabel>
+              <FormLabel>{t("websiteLabel")}</FormLabel>
               <FormControl>
-                <Input type="url" placeholder={t("websitePlaceholder")} {...field} />
+                <Input {...field} disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -204,96 +162,32 @@ const PromoterForm = ({ onSuccess, initialData }: PromoterFormProps) => {
         />
         <FormField
           control={form.control}
-          name="address"
+          name="profile_picture_url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("address")}</FormLabel>
+              <FormLabel>{t("profilePictureLabel")}</FormLabel>
               <FormControl>
-                <Textarea placeholder={t("addressPlaceholder")} {...field} />
+                <ImageUploadField
+                  label={t("profilePictureLabel")}
+                  value={field.value || undefined}
+                  onChange={setProfilePictureFile}
+                  onClear={() => {
+                    field.onChange(null) // Clear the URL in the form state
+                    setProfilePictureFile(null) // Clear the file state
+                  }}
+                  disabled={isPending}
+                  isLoading={isPending}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="city"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("city")}</FormLabel>
-                <FormControl>
-                  <Input placeholder={t("cityPlaceholder")} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="state"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("state")}</FormLabel>
-                <FormControl>
-                  <Input placeholder={t("statePlaceholder")} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="zip_code"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("zipCode")}</FormLabel>
-                <FormControl>
-                  <Input placeholder={t("zipCodePlaceholder")} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <FormField
-          control={form.control}
-          name="country"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("country")}</FormLabel>
-              <FormControl>
-                <Input placeholder={t("countryPlaceholder")} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="bio"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("bio")}</FormLabel>
-              <FormControl>
-                <Textarea placeholder={t("bioPlaceholder")} {...field} rows={5} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting
-            ? initialData
-              ? t("updating")
-              : t("creating")
-            : initialData
-              ? t("updatePromoter")
-              : t("createPromoter")}
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {promoter ? t("updateButton") : t("submitButton")}
         </Button>
       </form>
     </Form>
   )
 }
-
-export default PromoterForm
