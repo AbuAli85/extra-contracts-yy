@@ -53,9 +53,10 @@ export async function POST(request: Request) {
     }
 
     // Trigger Make.com webhook if configured
-    if (process.env.MAKE_FETCH_CONTRACT_WEBHOOK) {
+    if (process.env.MAKE_WEBHOOK_URL || process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL) {
       try {
-        const makeResponse = await fetch(process.env.MAKE_FETCH_CONTRACT_WEBHOOK, {
+        const webhookUrl = process.env.MAKE_WEBHOOK_URL || process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL
+        const makeResponse = await fetch(webhookUrl!, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

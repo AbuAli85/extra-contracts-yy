@@ -2,16 +2,17 @@
 
 import { useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { useContractsStore } from "@/lib/stores/contracts-store"
+import { useContractsStore, type Contract } from "@/lib/stores/contracts-store"
 
 export function useRealtimeContracts() {
-  const { updateContract, addContract } = useContractsStore()
+  const { updateContract, fetchContracts } = useContractsStore()
 
   useEffect(() => {
     const supabase = createClient()
 
-    const subscription = supabase
-      .channel("contracts-realtime")
+    // Subscribe to real-time changes on the contracts table
+    const channel = supabase
+      .channel("contracts-changes")
       .on(
         "postgres_changes",
         {
@@ -22,27 +23,19 @@ export function useRealtimeContracts() {
         (payload) => {
           console.log("Real-time contract update:", payload)
 
-          switch (payload.eventType) {
-            case "INSERT":
-              if (payload.new) {
-                addContract(payload.new as any)
-              }
-              break
-            case "UPDATE":
-              if (payload.new) {
-                updateContract(payload.new as any)
-              }
-              break
-            case "DELETE":
-              // Handle deletion if needed
-              break
+          if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+            updateContract(payload.new as Contract)
+          } else if (payload.eventType === "DELETE") {
+            // Refetch all contracts if one is deleted
+            fetchContracts()
           }
         },
       )
       .subscribe()
 
+    // Cleanup subscription on unmount
     return () => {
-      subscription.unsubscribe()
+      supabase.removeChannel(channel)
     }
-  }, [updateContract, addContract])
+  }, [updateContract, fetchContracts])
 }
