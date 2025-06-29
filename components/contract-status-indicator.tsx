@@ -1,54 +1,54 @@
-"use client"
-
 import { Badge } from "@/components/ui/badge"
-import { useTranslations } from "next-intl"
-import { Clock, CheckCircle, XCircle, Loader2, Timer } from "lucide-react"
+import { Clock, CheckCircle, XCircle, Loader2, AlertCircle } from "lucide-react"
 
 interface ContractStatusIndicatorProps {
   status: "pending" | "queued" | "processing" | "completed" | "failed"
 }
 
 export function ContractStatusIndicator({ status }: ContractStatusIndicatorProps) {
-  const t = useTranslations("contracts")
-
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "pending":
         return {
-          label: t("pending"),
+          label: "Pending",
           variant: "secondary" as const,
           icon: Clock,
+          className: "text-yellow-600 bg-yellow-50 border-yellow-200",
         }
       case "queued":
         return {
-          label: t("queued"),
-          variant: "outline" as const,
-          icon: Timer,
+          label: "Queued",
+          variant: "secondary" as const,
+          icon: AlertCircle,
+          className: "text-blue-600 bg-blue-50 border-blue-200",
         }
       case "processing":
         return {
-          label: t("processing"),
-          variant: "default" as const,
+          label: "Processing",
+          variant: "secondary" as const,
           icon: Loader2,
+          className: "text-blue-600 bg-blue-50 border-blue-200",
         }
       case "completed":
         return {
-          label: t("completed"),
+          label: "Completed",
           variant: "default" as const,
           icon: CheckCircle,
-          className: "bg-green-100 text-green-800 hover:bg-green-100",
+          className: "text-green-600 bg-green-50 border-green-200",
         }
       case "failed":
         return {
-          label: t("failed"),
+          label: "Failed",
           variant: "destructive" as const,
           icon: XCircle,
+          className: "text-red-600 bg-red-50 border-red-200",
         }
       default:
         return {
-          label: status,
+          label: "Unknown",
           variant: "secondary" as const,
-          icon: Clock,
+          icon: AlertCircle,
+          className: "text-gray-600 bg-gray-50 border-gray-200",
         }
     }
   }
@@ -57,8 +57,8 @@ export function ContractStatusIndicator({ status }: ContractStatusIndicatorProps
   const Icon = config.icon
 
   return (
-    <Badge variant={config.variant} className={config.className}>
-      <Icon className={`h-3 w-3 mr-1 ${status === "processing" ? "animate-spin" : ""}`} />
+    <Badge variant={config.variant} className={`flex items-center gap-1 ${config.className}`}>
+      <Icon className={`h-3 w-3 ${status === "processing" ? "animate-spin" : ""}`} />
       {config.label}
     </Badge>
   )

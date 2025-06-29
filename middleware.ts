@@ -3,15 +3,13 @@ import { createMiddlewareClient } from "@supabase/ssr"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import type { Database } from "@/types/supabase"
-import { locales, localePrefix } from "./navigation"
 
 export default createMiddleware({
   // A list of all locales that are supported
-  locales,
+  locales: ["en", "es"],
 
   // Used when no locale matches
   defaultLocale: "en",
-  localePrefix,
 })
 
 export async function middleware(request: NextRequest) {
@@ -26,12 +24,7 @@ export async function middleware(request: NextRequest) {
   const publicPaths = ["/login", "/auth/callback", "/"] // Add other public paths as needed
 
   // Check if the current path (without locale prefix) is a public path
-  const pathnameWithoutLocale = locales.reduce((path, locale) => {
-    if (path.startsWith(`/${locale}`)) {
-      return path.substring(locale.length + 1)
-    }
-    return path
-  }, request.nextUrl.pathname)
+  const pathnameWithoutLocale = request.nextUrl.pathname.split("/").slice(2).join("/")
 
   const isPublicPath =
     publicPaths.includes(pathnameWithoutLocale) ||
@@ -41,7 +34,7 @@ export async function middleware(request: NextRequest) {
     const loginUrl = new URL("/login", request.url)
     // Preserve the locale in the redirect URL if it was present
     const locale = request.nextUrl.pathname.split("/")[1]
-    if (locales.includes(locale)) {
+    if (["en", "es"].includes(locale)) {
       loginUrl.pathname = `/${locale}/login`
     } else {
       loginUrl.pathname = `/${"en"}/login`
@@ -54,5 +47,5 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   // Match only internationalized pathnames
-  matcher: ["/", "/(en|es)/:path*", "/((?!_next|_vercel|.*\\..*).*)"],
+  matcher: ["/", "/(en|es)/:path*"],
 }
