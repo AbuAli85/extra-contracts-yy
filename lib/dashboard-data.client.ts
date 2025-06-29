@@ -1,12 +1,19 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import type { ServerActionResponse } from "./dashboard-types";
+import type {
+  ServerActionResponse,
+  DashboardAnalytics,
+  PendingReview,
+  AdminAction,
+} from "./dashboard-types";
 
 /**
  * Fetches dashboard analytics data
  */
-export async function getDashboardAnalytics() {
+export async function getDashboardAnalytics(): Promise<
+  ServerActionResponse<DashboardAnalytics>
+> {
   const supabase = createClient();
   
   try {
@@ -22,7 +29,7 @@ export async function getDashboardAnalytics() {
     return {
       success: true,
       message: "Analytics fetched successfully",
-      data
+      data: data as DashboardAnalytics
     };
   } catch (error) {
     return {
@@ -35,7 +42,9 @@ export async function getDashboardAnalytics() {
 /**
  * Fetches pending reviews data
  */
-export async function getPendingReviews() {
+export async function getPendingReviews(): Promise<
+  ServerActionResponse<PendingReview[]>
+> {
   const supabase = createClient();
   
   try {
@@ -55,7 +64,7 @@ export async function getPendingReviews() {
     return {
       success: true,
       message: "Pending reviews fetched successfully",
-      data
+      data: data as PendingReview[]
     };
   } catch (error) {
     return {
@@ -68,7 +77,9 @@ export async function getPendingReviews() {
 /**
  * Fetches admin actions data
  */
-export async function getAdminActions() {
+export async function getAdminActions(): Promise<
+  ServerActionResponse<AdminAction[]>
+> {
   const supabase = createClient();
   
   try {
@@ -88,7 +99,7 @@ export async function getAdminActions() {
     return {
       success: true,
       message: "Admin actions fetched successfully",
-      data
+      data: data as AdminAction[]
     };
   } catch (error) {
     return {
