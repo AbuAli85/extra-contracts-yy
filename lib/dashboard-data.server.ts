@@ -37,7 +37,7 @@ export async function getPendingReviews(): Promise<ServerActionResponse<PendingR
     const { data, error } = await supabase
       .from("contracts")
       .select("id, contract_name, status, updated_at")
-      .in("status", ["pending", "processing", "pending_review"])
+      .in("status", ["pending", "processing", "Pending Review"])
       .order("updated_at", { ascending: false })
       .limit(10)
 
