@@ -12,26 +12,22 @@ export async function POST(request: Request) {
     }
 
     // 1) Trigger Make.com webhook
-    const makeWebhookUrl = process.env.MAKE_WEBHOOK_URL || process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL
+    const makeWebhookUrl = process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL || process.env.MAKE_WEBHOOK_URL
 
     if (makeWebhookUrl) {
-      try {
-        const makeRes = await fetch(makeWebhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contract_number }),
-        })
+      const makeRes = await fetch(makeWebhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contract_number }),
+      })
 
-        if (!makeRes.ok) {
-          console.error("Make.com webhook failed:", await makeRes.text())
-        }
-      } catch (error) {
-        console.error("Make.com webhook error:", error)
+      if (!makeRes.ok) {
+        console.error("Make.com webhook failed:", await makeRes.text())
       }
     }
 
     // 2) Update contract status to queued in Supabase
-    const { error: updateError } = await supabase
+    const { error } = await supabase
       .from("contracts")
       .update({
         status: "queued",
@@ -39,8 +35,8 @@ export async function POST(request: Request) {
       })
       .eq("contract_number", contract_number)
 
-    if (updateError) {
-      console.error("Supabase update failed:", updateError)
+    if (error) {
+      console.error("Supabase update failed:", error)
       return NextResponse.json({ error: "Failed to update contract status" }, { status: 500 })
     }
 

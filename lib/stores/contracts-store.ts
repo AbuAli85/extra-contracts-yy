@@ -21,11 +21,10 @@ interface ContractsState {
   setContracts: (contracts: Contract[]) => void
   updateContract: (contract: Contract) => void
   addContract: (contract: Contract) => void
-  removeContract: (id: string) => void
-  setLoading: (loading: boolean) => void
-  setError: (error: string | null) => void
   fetchContracts: () => Promise<void>
   generateContract: (contractNumber: string) => Promise<void>
+  setLoading: (loading: boolean) => void
+  setError: (error: string | null) => void
 }
 
 export const useContractsStore = create<ContractsState>((set, get) => ({
@@ -37,17 +36,14 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
 
   updateContract: (updatedContract) =>
     set((state) => ({
-      contracts: state.contracts.map((contract) => (contract.id === updatedContract.id ? updatedContract : contract)),
+      contracts: state.contracts.map((contract) =>
+        contract.contract_number === updatedContract.contract_number ? { ...contract, ...updatedContract } : contract,
+      ),
     })),
 
   addContract: (contract) =>
     set((state) => ({
       contracts: [contract, ...state.contracts],
-    })),
-
-  removeContract: (id) =>
-    set((state) => ({
-      contracts: state.contracts.filter((contract) => contract.id !== id),
     })),
 
   setLoading: (loading) => set({ loading }),
@@ -71,7 +67,8 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
     }
   },
 
-  generateContract: async (contractNumber: string) => {
+  generateContract: async (contractNumber) => {
+    set({ loading: true, error: null })
     try {
       const response = await fetch("/api/generate-contract", {
         method: "POST",
@@ -84,12 +81,13 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
         throw new Error(errorData.error || "Failed to generate contract")
       }
 
-      const result = await response.json()
-      console.log("Contract generation initiated:", result)
+      set({ loading: false })
     } catch (error) {
       console.error("Error generating contract:", error)
-      set({ error: error instanceof Error ? error.message : "Failed to generate contract" })
-      throw error
+      set({
+        error: error instanceof Error ? error.message : "Failed to generate contract",
+        loading: false,
+      })
     }
   },
 }))

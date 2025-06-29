@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, Clock, Loader2, CheckCircle, XCircle } from "lucide-react"
+import { FileText, Clock, CheckCircle, TrendingUp } from "lucide-react"
 import { useContractsStore } from "@/lib/stores/contracts-store"
 
 export function ContractsDashboardWidget() {
@@ -23,62 +23,50 @@ export function ContractsDashboardWidget() {
   }, [contracts])
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center text-lg">
-          <FileText className="h-5 w-5 mr-2" />
-          Contract Overview
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-            <div className="text-sm text-gray-600">Total</div>
-          </div>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Contracts</CardTitle>
+          <FileText className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.total}</div>
+          <p className="text-xs text-muted-foreground">All contracts in system</p>
+        </CardContent>
+      </Card>
 
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-1">
-              <Clock className="h-4 w-4 text-gray-500 mr-1" />
-              <span className="text-2xl font-bold text-gray-600">{stats.pending}</span>
-            </div>
-            <div className="text-sm text-gray-600">Pending</div>
-          </div>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Pending</CardTitle>
+          <Clock className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.pending}</div>
+          <p className="text-xs text-muted-foreground">Awaiting generation</p>
+        </CardContent>
+      </Card>
 
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-1">
-              <Loader2 className="h-4 w-4 text-blue-500 mr-1 animate-spin" />
-              <span className="text-2xl font-bold text-blue-600">{stats.processing}</span>
-            </div>
-            <div className="text-sm text-gray-600">Processing</div>
-          </div>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Processing</CardTitle>
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.processing}</div>
+          <p className="text-xs text-muted-foreground">Currently generating</p>
+        </CardContent>
+      </Card>
 
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-1">
-              <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-2xl font-bold text-green-600">{stats.completed}</span>
-            </div>
-            <div className="text-sm text-gray-600">Completed</div>
-          </div>
-
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-1">
-              <XCircle className="h-4 w-4 text-red-500 mr-1" />
-              <span className="text-2xl font-bold text-red-600">{stats.failed}</span>
-            </div>
-            <div className="text-sm text-gray-600">Failed</div>
-          </div>
-        </div>
-
-        {stats.processing > 0 && (
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-            <div className="flex items-center text-sm text-blue-800">
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              {stats.processing} contract{stats.processing > 1 ? "s" : ""} currently processing
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Completed</CardTitle>
+          <CheckCircle className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.completed}</div>
+          <p className="text-xs text-muted-foreground">Ready for download</p>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
