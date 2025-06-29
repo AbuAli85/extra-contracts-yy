@@ -8,38 +8,46 @@ interface ServerActionResponse<T = any> {
   errors?: Record<string, string[]> | null
 }
 
-// Client-side implementations that will be used in pages/ directory
-export async function getDashboardAnalyticsClient(): Promise<ServerActionResponse<DashboardAnalytics>> {
+// Client-safe implementations
+export async function getDashboardAnalytics(): Promise<ServerActionResponse<DashboardAnalytics>> {
   const supabase = createClient()
 
-  const { data, error } = await supabase.rpc("get_dashboard_analytics")
+  try {
+    const { data, error } = await supabase.rpc("get_dashboard_analytics")
 
-  if (error) {
-    console.error("Error fetching dashboard analytics:", error)
+    if (error) {
+      console.error("Error fetching dashboard analytics:", error)
+      return {
+        success: false,
+        message: `Failed to fetch dashboard analytics: ${error.message}`,
+      }
+    }
+
+    return {
+      success: true,
+      message: "Dashboard analytics fetched successfully.",
+      data: data as DashboardAnalytics,
+    }
+  } catch (error) {
+    console.error("Error in getDashboardAnalytics:", error)
     return {
       success: false,
-      message: `Failed to fetch dashboard analytics: ${error.message}`,
+      message: `An unexpected error occurred: ${(error as Error).message}`,
     }
   }
-
-  return {
-    success: true,
-    message: "Dashboard analytics fetched successfully.",
-    data: data as DashboardAnalytics,
-  }
 }
 
-// Continue with all the other client-side functions, but add "Client" suffix to their names
-export async function getPendingReviewsClient(): Promise<ServerActionResponse<PendingReview[]>> {
+// Add other client-safe implementations
+export async function getPendingReviews(): Promise<ServerActionResponse<PendingReview[]>> {
   const supabase = createClient()
-  // ...function implementation...
+  // Implementation...
   return { success: true, message: "Success", data: [] }
 }
 
-export async function getAdminActionsClient(): Promise<ServerActionResponse<AdminAction[]>> {
+export async function getAdminActions(): Promise<ServerActionResponse<AdminAction[]>> {
   const supabase = createClient()
-  // ...function implementation...
+  // Implementation...
   return { success: true, message: "Success", data: [] }
 }
 
-// ... other client-only functions ...
+// Add other client-safe implementations here...
