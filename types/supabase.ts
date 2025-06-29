@@ -34,64 +34,46 @@ export type Database = {
       }
       contracts: {
         Row: {
-          content_english: string
-          content_spanish: string
-          contract_name: string
-          contract_type: string
-          contract_value: number | null
-          created_at: string
-          effective_date: string | null
           id: string
-          is_archived: boolean
-          is_template: boolean
-          party_a_id: string
-          party_b_id: string
-          payment_terms: string | null
-          promoter_id: string | null
-          status: Database["public"]["Enums"]["contract_status"]
-          termination_date: string | null
-          updated_at: string
+          contract_number: string
+          party_a: string
+          party_b: string
+          contract_type: string
+          description: string | null
+          status: "pending" | "queued" | "processing" | "completed" | "failed"
+          pdf_url: string | null
+          error_message: string | null
           user_id: string
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          content_english: string
-          content_spanish: string
-          contract_name: string
-          contract_type: string
-          contract_value?: number | null
-          created_at?: string
-          effective_date?: string | null
           id?: string
-          is_archived?: boolean
-          is_template?: boolean
-          party_a_id: string
-          party_b_id: string
-          payment_terms?: string | null
-          promoter_id?: string | null
-          status?: Database["public"]["Enums"]["contract_status"]
-          termination_date?: string | null
-          updated_at?: string
+          contract_number: string
+          party_a: string
+          party_b: string
+          contract_type: string
+          description?: string | null
+          status?: "pending" | "queued" | "processing" | "completed" | "failed"
+          pdf_url?: string | null
+          error_message?: string | null
           user_id: string
+          created_at?: string
+          updated_at?: string
         }
         Update: {
-          content_english?: string
-          content_spanish?: string
-          contract_name?: string
-          contract_type?: string
-          contract_value?: number | null
-          created_at?: string
-          effective_date?: string | null
           id?: string
-          is_archived?: boolean
-          is_template?: boolean
-          party_a_id?: string
-          party_b_id?: string
-          payment_terms?: string | null
-          promoter_id?: string | null
-          status?: Database["public"]["Enums"]["contract_status"]
-          termination_date?: string | null
-          updated_at?: string
+          contract_number?: string
+          party_a?: string
+          party_b?: string
+          contract_type?: string
+          description?: string | null
+          status?: "pending" | "queued" | "processing" | "completed" | "failed"
+          pdf_url?: string | null
+          error_message?: string | null
           user_id?: string
+          created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
