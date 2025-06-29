@@ -8,7 +8,14 @@ import { Toaster } from "@/components/ui/toaster"
 import { SupabaseListener } from "./supabase-listener"
 
 // Create a client
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
