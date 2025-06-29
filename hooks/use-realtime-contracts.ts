@@ -3,9 +3,7 @@
 import { useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useContractsStore } from "@/lib/stores/contracts-store"
-import type { Database } from "@/types/supabase"
-
-type Contract = Database["public"]["Tables"]["contracts"]["Row"]
+import { toast } from "sonner"
 
 export function useRealtimeContracts() {
   const { updateContract, addContract } = useContractsStore()
@@ -23,30 +21,18 @@ export function useRealtimeContracts() {
           table: "contracts",
         },
         (payload) => {
-          console.log("Real-time contract update:", payload)
-
           if (payload.eventType === "INSERT") {
-            const newContract = payload.new as Contract
-            addContract({
-              id: newContract.id,
-              contract_number: newContract.contract_number,
-              party_a: newContract.party_a,
-              party_b: newContract.party_b,
-              contract_type: newContract.contract_type,
-              description: newContract.description,
-              status: newContract.status as "pending" | "queued" | "processing" | "completed" | "failed",
-              pdf_url: newContract.pdf_url,
-              created_at: newContract.created_at,
-              updated_at: newContract.updated_at,
-              user_id: newContract.user_id,
-            })
+            addContract(payload.new as any)
+            toast.success("New contract created!")
           } else if (payload.eventType === "UPDATE") {
-            const updatedContract = payload.new as Contract
-            updateContract(updatedContract.id, {
-              status: updatedContract.status as "pending" | "queued" | "processing" | "completed" | "failed",
-              pdf_url: updatedContract.pdf_url,
-              updated_at: updatedContract.updated_at,
-            })
+            updateContract(payload.new.id, payload.new as any)
+
+            // Show status-specific notifications
+            if (payload.new.status === "completed") {
+              toast.success(`Contract ${payload.new.contract_number} completed!`)
+            } else if (payload.new.status === "failed") {
+              toast.error(`Contract ${payload.new.contract_number} failed!`)
+            }
           }
         },
       )
