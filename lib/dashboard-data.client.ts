@@ -1,111 +1,105 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import type { 
-  DashboardAnalytics, 
-  PendingReview, 
-  AdminAction,
-  ServerActionResponse 
-} from "./dashboard-types";
+
+// Simple response interface
+interface ServerActionResponse<T = any> {
+  success: boolean;
+  message: string;
+  data?: T | null;
+}
 
 /**
- * Client-safe implementation for fetching dashboard analytics
+ * Fetches dashboard analytics data
  */
-export async function getDashboardAnalytics(): Promise<ServerActionResponse<DashboardAnalytics>> {
+export async function getDashboardAnalytics() {
   const supabase = createClient();
-
+  
   try {
     const { data, error } = await supabase.rpc("get_dashboard_analytics");
-
+    
     if (error) {
-      console.error("Error fetching dashboard analytics:", error);
       return {
         success: false,
-        message: `Failed to fetch dashboard analytics: ${error.message}`,
+        message: `Failed to fetch analytics: ${error.message}`
       };
     }
-
+    
     return {
       success: true,
-      message: "Dashboard analytics fetched successfully.",
-      data: data as DashboardAnalytics,
+      message: "Analytics fetched successfully",
+      data
     };
   } catch (error) {
-    console.error("Error in getDashboardAnalytics:", error);
     return {
       success: false,
-      message: `An unexpected error occurred: ${(error as Error).message}`,
+      message: `Error: ${(error as Error).message}`
     };
   }
 }
 
 /**
- * Client-safe implementation for fetching pending reviews
+ * Fetches pending reviews data
  */
-export async function getPendingReviews(): Promise<ServerActionResponse<PendingReview[]>> {
+export async function getPendingReviews() {
   const supabase = createClient();
-
+  
   try {
     const { data, error } = await supabase
       .from("contracts")
       .select("id, contract_name, status, updated_at")
-      .in("status", ["pending", "processing", "pending_review"])
-      .order("updated_at", { ascending: false })
-      .limit(10);
-
+      .eq("status", "pending_review")
+      .order("updated_at", { ascending: false });
+    
     if (error) {
-      console.error("Error fetching pending reviews:", error);
       return {
         success: false,
-        message: `Failed to fetch pending reviews: ${error.message}`,
+        message: `Failed to fetch pending reviews: ${error.message}`
       };
     }
-
+    
     return {
       success: true,
-      message: "Pending reviews fetched successfully.",
-      data: data as PendingReview[],
+      message: "Pending reviews fetched successfully",
+      data
     };
   } catch (error) {
-    console.error("Error in getPendingReviews:", error);
     return {
       success: false,
-      message: `An unexpected error occurred: ${(error as Error).message}`,
+      message: `Error: ${(error as Error).message}`
     };
   }
 }
 
 /**
- * Client-safe implementation for fetching admin actions
+ * Fetches admin actions data
  */
-export async function getAdminActions(): Promise<ServerActionResponse<AdminAction[]>> {
+export async function getAdminActions() {
   const supabase = createClient();
-
+  
   try {
     const { data, error } = await supabase
       .from("audit_logs")
       .select("id, action, created_at, user_id")
       .order("created_at", { ascending: false })
       .limit(10);
-
+    
     if (error) {
-      console.error("Error fetching admin actions:", error);
       return {
         success: false,
-        message: `Failed to fetch admin actions: ${error.message}`,
+        message: `Failed to fetch admin actions: ${error.message}`
       };
     }
-
+    
     return {
       success: true,
-      message: "Admin actions fetched successfully.",
-      data: data as AdminAction[],
+      message: "Admin actions fetched successfully",
+      data
     };
   } catch (error) {
-    console.error("Error in getAdminActions:", error);
     return {
       success: false,
-      message: `An unexpected error occurred: ${(error as Error).message}`,
+      message: `Error: ${(error as Error).message}`
     };
   }
 }
