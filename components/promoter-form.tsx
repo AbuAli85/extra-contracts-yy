@@ -239,3 +239,5 @@ export default function PromoterForm({ initialData }: PromoterFormProps) {
     </Form>
   )
 }
+
+export { PromoterForm }
