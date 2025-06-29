@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { NotificationSystem } from "@/components/dashboard/notification-system"
 import { useQuery } from "@tanstack/react-query"
-import { getNotifications } from "@/lib/dashboard-data"
+import { getNotifications } from "@/lib/dashboard-data.client"
 import { Loader2 } from "lucide-react"
 
 export default function DashboardNotificationsPage() {

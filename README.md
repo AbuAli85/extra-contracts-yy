@@ -46,5 +46,12 @@ This is a Next.js application designed to generate bilingual contracts, manage p
     -   Navigate to `Settings > API` and copy your `Project URL` and `anon public` key.
     -   Create a `.env.local` file in the root of your project and add the following:
         \`\`\`env
-        NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL
-        NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+
+
+### Dashboard data modules
+
+Client components should import helpers from `lib/dashboard-data.client.ts`.
+Server components use `lib/dashboard-data.server.ts`.
+This explicit separation replaces the former dynamic helper.
