@@ -3,12 +3,11 @@
 import { useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
 import { useContractsStore } from "@/lib/stores/contracts-store"
-import type { Contract } from "@/lib/stores/contracts-store"
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
 export function useRealtimeContracts() {
-  const { updateContract, addContract, removeContract } = useContractsStore()
+  const { addContract, updateContract, removeContract } = useContractsStore()
 
   useEffect(() => {
     const channel = supabase
@@ -21,8 +20,7 @@ export function useRealtimeContracts() {
           table: "contracts",
         },
         (payload) => {
-          console.log("New contract:", payload.new)
-          addContract(payload.new as Contract)
+          addContract(payload.new as any)
         },
       )
       .on(
@@ -33,8 +31,7 @@ export function useRealtimeContracts() {
           table: "contracts",
         },
         (payload) => {
-          console.log("Contract updated:", payload.new)
-          updateContract(payload.new as Contract)
+          updateContract(payload.new as any)
         },
       )
       .on(
@@ -45,8 +42,7 @@ export function useRealtimeContracts() {
           table: "contracts",
         },
         (payload) => {
-          console.log("Contract deleted:", payload.old)
-          removeContract((payload.old as Contract).id)
+          removeContract(payload.old.id)
         },
       )
       .subscribe()
@@ -54,5 +50,5 @@ export function useRealtimeContracts() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [updateContract, addContract, removeContract])
+  }, [addContract, updateContract, removeContract])
 }

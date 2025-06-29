@@ -18,18 +18,14 @@ interface ContractsState {
   contracts: Contract[]
   loading: boolean
   error: string | null
-
-  // Actions
   setContracts: (contracts: Contract[]) => void
   addContract: (contract: Contract) => void
   updateContract: (contract: Contract) => void
   removeContract: (id: string) => void
-  setLoading: (loading: boolean) => void
-  setError: (error: string | null) => void
-
-  // Async actions
   fetchContracts: () => Promise<void>
   generateContract: (contractNumber: string) => Promise<void>
+  setLoading: (loading: boolean) => void
+  setError: (error: string | null) => void
 }
 
 export const useContractsStore = create<ContractsState>((set, get) => ({
@@ -54,35 +50,24 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
       contracts: state.contracts.filter((contract) => contract.id !== id),
     })),
 
-  setLoading: (loading) => set({ loading }),
-
-  setError: (error) => set({ error }),
-
   fetchContracts: async () => {
     set({ loading: true, error: null })
-
     try {
       const { data, error } = await supabase.from("contracts").select("*").order("created_at", { ascending: false })
 
       if (error) throw error
-
       set({ contracts: data || [], loading: false })
     } catch (error) {
-      console.error("Error fetching contracts:", error)
-      set({
-        error: "Failed to fetch contracts",
-        loading: false,
-      })
+      set({ error: (error as Error).message, loading: false })
     }
   },
 
   generateContract: async (contractNumber: string) => {
+    set({ loading: true, error: null })
     try {
       const response = await fetch("/api/generate-contract", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contract_number: contractNumber }),
       })
 
@@ -91,11 +76,12 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
         throw new Error(errorData.error || "Failed to generate contract")
       }
 
-      // Contract will be updated via real-time subscription
+      set({ loading: false })
     } catch (error) {
-      console.error("Error generating contract:", error)
-      set({ error: error instanceof Error ? error.message : "Failed to generate contract" })
-      throw error
+      set({ error: (error as Error).message, loading: false })
     }
   },
+
+  setLoading: (loading) => set({ loading }),
+  setError: (error) => set({ error }),
 }))
