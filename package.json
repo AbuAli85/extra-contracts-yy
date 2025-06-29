@@ -19,7 +19,6 @@
     "@radix-ui/react-alert-dialog": "latest",
     "@radix-ui/react-aspect-ratio": "latest",
     "@radix-ui/react-avatar": "latest",
-    "@radix-ui/react-badge": "^1.0.0",
     "@radix-ui/react-breadcrumb": "^1.0.0",
     "@radix-ui/react-checkbox": "latest",
     "@radix-ui/react-collapsible": "latest",
