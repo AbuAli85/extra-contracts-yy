@@ -12,6 +12,8 @@ export interface Contract {
   updated_at: string
   title?: string
   description?: string
+  contract_name?: string
+  contract_type?: string
 }
 
 interface ContractsState {
@@ -37,12 +39,14 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
 
   addContract: (contract) =>
     set((state) => ({
-      contracts: [...state.contracts, contract],
+      contracts: [contract, ...state.contracts],
     })),
 
   updateContract: (updatedContract) =>
     set((state) => ({
-      contracts: state.contracts.map((contract) => (contract.id === updatedContract.id ? updatedContract : contract)),
+      contracts: state.contracts.map((contract) =>
+        contract.id === updatedContract.id ? { ...contract, ...updatedContract } : contract,
+      ),
     })),
 
   removeContract: (id) =>
@@ -62,7 +66,11 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
       if (error) throw error
       set({ contracts: data || [], loading: false })
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      console.error("Error fetching contracts:", error)
+      set({
+        error: error instanceof Error ? error.message : "Failed to fetch contracts",
+        loading: false,
+      })
     }
   },
 
@@ -81,7 +89,8 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
 
       // Contract status will be updated via real-time subscription
     } catch (error) {
-      set({ error: (error as Error).message })
+      console.error("Error generating contract:", error)
+      set({ error: error instanceof Error ? error.message : "Failed to generate contract" })
       throw error
     }
   },

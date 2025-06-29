@@ -20,6 +20,7 @@ export function useRealtimeContracts() {
           table: "contracts",
         },
         (payload) => {
+          console.log("Contract updated:", payload.new)
           updateContract(payload.new as Contract)
         },
       )
@@ -31,6 +32,7 @@ export function useRealtimeContracts() {
           table: "contracts",
         },
         (payload) => {
+          console.log("Contract inserted:", payload.new)
           addContract(payload.new as Contract)
         },
       )
