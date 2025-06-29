@@ -11,44 +11,34 @@ export async function POST(request: Request) {
 
     const supabase = createClient()
 
-    // Get the current user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+    // Check if contract exists
+    const { data: existingContract, error: fetchError } = await supabase
+      .from("contracts")
+      .select("*")
+      .eq("contract_number", contract_number)
+      .single()
 
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (fetchError && fetchError.code !== "PGRST116") {
+      console.error("Error fetching contract:", fetchError)
+      return NextResponse.json({ error: "Failed to fetch contract" }, { status: 500 })
     }
 
-    // 1) Trigger Make.com webhook
-    const makeWebhookUrl = process.env.MAKE_WEBHOOK_URL || process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL
+    // If contract doesn't exist, create it
+    if (!existingContract) {
+      const { error: insertError } = await supabase.from("contracts").insert({
+        contract_number,
+        status: "pending",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
 
-    if (makeWebhookUrl) {
-      try {
-        const makeResponse = await fetch(makeWebhookUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            contract_number,
-            user_id: user.id,
-            callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/generate-contract/callback`,
-          }),
-        })
-
-        if (!makeResponse.ok) {
-          console.error("Make.com webhook failed:", await makeResponse.text())
-          return NextResponse.json({ error: "Webhook failed" }, { status: 502 })
-        }
-      } catch (webhookError) {
-        console.error("Make.com webhook error:", webhookError)
-        return NextResponse.json({ error: "Webhook failed" }, { status: 502 })
+      if (insertError) {
+        console.error("Error creating contract:", insertError)
+        return NextResponse.json({ error: "Failed to create contract" }, { status: 500 })
       }
     }
 
-    // 2) Update contract status to queued in Supabase
+    // Update status to queued
     const { error: updateError } = await supabase
       .from("contracts")
       .update({
@@ -58,8 +48,29 @@ export async function POST(request: Request) {
       .eq("contract_number", contract_number)
 
     if (updateError) {
-      console.error("Supabase update failed:", updateError)
-      return NextResponse.json({ error: "Database update failed" }, { status: 500 })
+      console.error("Error updating contract status:", updateError)
+      return NextResponse.json({ error: "Failed to update contract status" }, { status: 500 })
+    }
+
+    // Trigger Make.com webhook if configured
+    if (process.env.MAKE_FETCH_CONTRACT_WEBHOOK) {
+      try {
+        const makeResponse = await fetch(process.env.MAKE_FETCH_CONTRACT_WEBHOOK, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ contract_number }),
+        })
+
+        if (!makeResponse.ok) {
+          console.error("Make.com webhook failed:", await makeResponse.text())
+          // Don't fail the entire request if webhook fails
+        }
+      } catch (webhookError) {
+        console.error("Error calling Make.com webhook:", webhookError)
+        // Don't fail the entire request if webhook fails
+      }
     }
 
     return NextResponse.json({
@@ -67,18 +78,18 @@ export async function POST(request: Request) {
       contract_number,
     })
   } catch (error) {
-    console.error("API error:", error)
+    console.error("Error in generate-contract API:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
-// Callback endpoint for Make.com to update contract status
+// Handle Make.com callbacks
 export async function PUT(request: Request) {
   try {
-    const { contract_number, status, pdf_url, error_message } = await request.json()
+    const { contract_number, status, pdf_url } = await request.json()
 
-    if (!contract_number) {
-      return NextResponse.json({ error: "Contract number is required" }, { status: 400 })
+    if (!contract_number || !status) {
+      return NextResponse.json({ error: "Contract number and status are required" }, { status: 400 })
     }
 
     const supabase = createClient()
@@ -92,20 +103,20 @@ export async function PUT(request: Request) {
       updateData.pdf_url = pdf_url
     }
 
-    if (error_message) {
-      updateData.error_message = error_message
-    }
-
     const { error } = await supabase.from("contracts").update(updateData).eq("contract_number", contract_number)
 
     if (error) {
-      console.error("Failed to update contract:", error)
+      console.error("Error updating contract:", error)
       return NextResponse.json({ error: "Failed to update contract" }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      message: "Contract updated successfully",
+      contract_number,
+      status,
+    })
   } catch (error) {
-    console.error("Callback error:", error)
-    return NextResponse.json({ error: "Callback failed" }, { status: 500 })
+    console.error("Error in contract update API:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
