@@ -86,6 +86,15 @@
     "systemHealth": "System Health",
     "performance": "Performance",
     "metrics": "Metrics"
+    ,
+    "activeContracts": "Active Contracts",
+    "activeContractsDescription": "Contracts that are currently active",
+    "totalContractsDescription": "Total number of contracts in the system",
+    "pendingContractsDescription": "Contracts awaiting approval or completion",
+    "contractTrends": "Contract Trends",
+    "contractStatusDistribution": "Contract Status Distribution",
+    "newContracts": "New Contracts",
+    "adminTools": "Admin Tools"
   },
   "contracts": {
     "title": "Contracts",
