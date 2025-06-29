@@ -53,7 +53,7 @@ export async function getPendingReviews(): Promise<
     const { data, error } = await supabase
       .from("contracts")
       .select("id, contract_name, status, updated_at")
-      .eq("status", "pending_review")
+      .eq("status", "Pending Review")
       .order("updated_at", { ascending: false });
     
     if (error) {

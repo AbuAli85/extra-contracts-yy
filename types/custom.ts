@@ -17,7 +17,7 @@ export const promoterFormSchema = z.object({
   id_card_number: z.string().min(5, "ID card number is required."),
   // Add other promoter fields as necessary, e.g., status, employer_id, etc.
   // For example:
-  // status: z.enum(["active", "inactive", "pending_review"]),
+  // status: z.enum(["active", "inactive", "Pending Review"]),
   // employer_id: z.string().uuid().nullable(),
   id_card_url: z.string().url().optional().nullable(),
   passport_url: z.string().url().optional().nullable(),
@@ -29,7 +29,7 @@ export type PromoterFormData = z.infer<typeof promoterFormSchema>
 export const promoterStatusesList = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
-  { value: "pending_review", label: "Pending Review" },
+  { value: "Pending Review", label: "Pending Review" },
   // Add other statuses if needed
 ]
 
