@@ -1,16 +1,20 @@
 "use client"
 
 import { useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@supabase/supabase-js"
 import { useContractsStore } from "@/lib/stores/contracts-store"
 import type { Contract } from "@/lib/stores/contracts-store"
 
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+
 export function useRealtimeContracts() {
-  const { updateContract, addContract } = useContractsStore()
+  const { updateContract, fetchContracts } = useContractsStore()
 
   useEffect(() => {
-    const supabase = createClient()
+    // Initial fetch
+    fetchContracts()
 
+    // Set up real-time subscription
     const channel = supabase
       .channel("contracts-changes")
       .on(
@@ -23,17 +27,21 @@ export function useRealtimeContracts() {
         (payload) => {
           console.log("Real-time contract update:", payload)
 
-          if (payload.eventType === "INSERT") {
-            addContract(payload.new as Contract)
-          } else if (payload.eventType === "UPDATE") {
+          if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
             updateContract(payload.new as Contract)
+          } else if (payload.eventType === "DELETE") {
+            // Handle deletion if needed
+            fetchContracts()
           }
         },
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log("Subscription status:", status)
+      })
 
+    // Cleanup subscription on unmount
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [updateContract, addContract])
+  }, [updateContract, fetchContracts])
 }

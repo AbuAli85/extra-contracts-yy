@@ -1,29 +1,11 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, Clock, Loader2, CheckCircle, AlertCircle } from "lucide-react"
 import { useContractsStore } from "@/lib/stores/contracts-store"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { FileText, Loader2, CheckCircle, AlertCircle } from "lucide-react"
 
 export function ContractsDashboardWidget() {
-  const { contracts, loading, fetchContracts } = useContractsStore()
-
-  useEffect(() => {
-    if (contracts.length === 0) {
-      fetchContracts()
-    }
-  }, [contracts.length, fetchContracts])
-
-  const stats = useMemo(() => {
-    const total = contracts.length
-    const pending = contracts.filter((c) => c.status === "pending").length
-    const queued = contracts.filter((c) => c.status === "queued").length
-    const processing = contracts.filter((c) => c.status === "processing").length
-    const completed = contracts.filter((c) => c.status === "completed").length
-    const failed = contracts.filter((c) => c.status === "failed").length
-
-    return { total, pending, queued, processing, completed, failed }
-  }, [contracts])
+  const { stats, loading } = useContractsStore()
 
   const statCards = [
     {
@@ -34,19 +16,11 @@ export function ContractsDashboardWidget() {
       bgColor: "bg-blue-50",
     },
     {
-      title: "Pending",
-      value: stats.pending,
-      icon: Clock,
-      color: "text-gray-600",
-      bgColor: "bg-gray-50",
-    },
-    {
-      title: "Processing",
+      title: "In Progress",
       value: stats.queued + stats.processing,
       icon: Loader2,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      animate: stats.processing > 0,
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
     },
     {
       title: "Completed",
@@ -65,7 +39,7 @@ export function ContractsDashboardWidget() {
   ]
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {statCards.map((stat) => {
         const Icon = stat.icon
         return (
@@ -73,13 +47,16 @@ export function ContractsDashboardWidget() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
               <div className={`p-2 rounded-full ${stat.bgColor}`}>
-                <Icon className={`h-4 w-4 ${stat.color} ${stat.animate ? "animate-spin" : ""}`} />
+                <Icon className={`h-4 w-4 ${stat.color}`} />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {loading ? <div className="h-8 w-8 bg-gray-200 animate-pulse rounded" /> : stat.value}
-              </div>
+              <div className="text-2xl font-bold">{loading ? "..." : stat.value}</div>
+              {stat.title === "In Progress" && (
+                <p className="text-xs text-muted-foreground">
+                  {stats.queued} queued, {stats.processing} processing
+                </p>
+              )}
             </CardContent>
           </Card>
         )

@@ -1,5 +1,3 @@
-"use client"
-
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Clock, AlertCircle, Loader2, FileText } from "lucide-react"
 
@@ -14,29 +12,30 @@ export function ContractStatusIndicator({ status }: ContractStatusIndicatorProps
         return {
           label: "Pending",
           variant: "secondary" as const,
-          icon: Clock,
+          icon: FileText,
           className: "text-gray-600",
         }
       case "queued":
         return {
           label: "Queued",
           variant: "outline" as const,
-          icon: FileText,
+          icon: Clock,
           className: "text-blue-600",
         }
       case "processing":
         return {
           label: "Processing",
-          variant: "outline" as const,
+          variant: "default" as const,
           icon: Loader2,
-          className: "text-blue-600 animate-spin",
+          className: "text-blue-600",
+          animate: true,
         }
       case "completed":
         return {
           label: "Completed",
           variant: "default" as const,
           icon: CheckCircle,
-          className: "text-green-600",
+          className: "text-green-600 bg-green-50 border-green-200",
         }
       case "failed":
         return {
@@ -49,7 +48,7 @@ export function ContractStatusIndicator({ status }: ContractStatusIndicatorProps
         return {
           label: "Unknown",
           variant: "secondary" as const,
-          icon: Clock,
+          icon: FileText,
           className: "text-gray-600",
         }
     }
@@ -59,8 +58,8 @@ export function ContractStatusIndicator({ status }: ContractStatusIndicatorProps
   const Icon = config.icon
 
   return (
-    <Badge variant={config.variant} className="flex items-center gap-1">
-      <Icon className={`h-3 w-3 ${config.className}`} />
+    <Badge variant={config.variant} className={config.className}>
+      <Icon className={`h-3 w-3 mr-1 ${config.animate ? "animate-spin" : ""}`} />
       {config.label}
     </Badge>
   )
