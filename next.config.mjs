@@ -1,9 +1,12 @@
 /** @type {import('next').NextConfig} */
-import createNextIntlPlugin from 'next-intl/plugin';
-
-const withNextIntl = createNextIntlPlugin();
-
 const nextConfig = {
+  webpack: (config) => {
+    config.externals.push({
+      "node:fs": "commonjs node:fs",
+      "node:path": "commonjs node:path",
+    });
+    return config;
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -11,22 +14,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**.supabase.co',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.example.com', // For placeholder images if needed
-      },
-      {
-        protocol: 'https',
-        hostname: 'via.placeholder.com', // For placeholder images if needed
-      },
-    ],
     unoptimized: true,
   },
 };
 
-export default withNextIntl(nextConfig);
+export default nextConfig;
