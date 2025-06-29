@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-const supabase = createClient(process.env.PUBLIC_SUPABASE_URL!, process.env.PUBLIC_SUPABASE_ANON_KEY!)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+)
 
 export async function POST(request: Request) {
   try {
@@ -12,31 +15,45 @@ export async function POST(request: Request) {
     }
 
     // 1) Trigger Make.com webhook
-    const makeRes = await fetch(process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL!, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contract_number }),
-    })
+    const makeWebhookUrl = process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL
+    if (makeWebhookUrl) {
+      try {
+        const makeResponse = await fetch(makeWebhookUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ contract_number }),
+        })
 
-    if (!makeRes.ok) {
-      console.error("Make.com failed:", await makeRes.text())
-      return NextResponse.json({ error: "Webhook failed" }, { status: 502 })
+        if (!makeResponse.ok) {
+          console.error("Make.com webhook failed:", await makeResponse.text())
+        }
+      } catch (error) {
+        console.error("Make.com webhook error:", error)
+      }
     }
 
     // 2) Update contract status to queued
     const { error } = await supabase
       .from("contracts")
-      .update({ status: "queued", updated_at: new Date().toISOString() })
+      .update({
+        status: "queued",
+        updated_at: new Date().toISOString(),
+      })
       .eq("contract_number", contract_number)
 
     if (error) {
       console.error("Supabase update failed:", error)
-      return NextResponse.json({ error: "Database update failed" }, { status: 500 })
+      return NextResponse.json({ error: "Failed to update contract status" }, { status: 500 })
     }
 
-    return NextResponse.json({ message: "Contract generation queued successfully" })
+    return NextResponse.json({
+      message: "Contract generation queued successfully",
+      contract_number,
+    })
   } catch (error) {
-    console.error("API error:", error)
+    console.error("Contract generation error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
