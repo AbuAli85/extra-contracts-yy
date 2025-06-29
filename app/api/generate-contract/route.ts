@@ -5,7 +5,7 @@ import { nanoid } from "nanoid"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { party_a, party_b, contract_type, description, retry_id } = body
+    const { party_a, party_b, contract_type, description } = body
 
     // Validate required fields
     if (!party_a || !party_b || !contract_type) {
@@ -19,36 +19,30 @@ export async function POST(request: NextRequest) {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser()
-
     if (authError || !user) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 
     // Generate contract number
-    const contractNumber = `CT-${Date.now()}-${nanoid(6)}`
+    const contractNumber = `CNT-${nanoid(8).toUpperCase()}`
 
     // Create contract record
-    const contractData = {
-      id: nanoid(),
-      contract_number: contractNumber,
-      party_a,
-      party_b,
-      contract_type,
-      description: description || null,
-      status: "pending" as const,
-      user_id: user.id,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-
     const { data: contract, error: insertError } = await supabase
       .from("contracts")
-      .insert(contractData)
+      .insert({
+        contract_number: contractNumber,
+        party_a,
+        party_b,
+        contract_type,
+        description,
+        status: "pending",
+        user_id: user.id,
+      })
       .select()
       .single()
 
     if (insertError) {
-      console.error("Error inserting contract:", insertError)
+      console.error("Error creating contract:", insertError)
       return NextResponse.json({ success: false, error: "Failed to create contract" }, { status: 500 })
     }
 
@@ -76,43 +70,39 @@ export async function POST(request: NextRequest) {
           // Update contract status to failed
           await supabase
             .from("contracts")
-            .update({
-              status: "failed",
-              error_message: "Webhook processing failed",
-              updated_at: new Date().toISOString(),
-            })
+            .update({ status: "failed", error_message: "Webhook failed" })
             .eq("id", contract.id)
         } else {
           // Update contract status to queued
-          await supabase
-            .from("contracts")
-            .update({
-              status: "queued",
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", contract.id)
+          await supabase.from("contracts").update({ status: "queued" }).eq("id", contract.id)
         }
       } catch (webhookError) {
         console.error("Webhook error:", webhookError)
         // Update contract status to failed
         await supabase
           .from("contracts")
-          .update({
-            status: "failed",
-            error_message: "Webhook connection failed",
-            updated_at: new Date().toISOString(),
-          })
+          .update({ status: "failed", error_message: "Webhook error" })
           .eq("id", contract.id)
       }
     }
 
     return NextResponse.json({
       success: true,
-      contract,
-      message: "Contract generation initiated successfully",
+      contract: {
+        id: contract.id,
+        contract_number: contract.contract_number,
+        party_a: contract.party_a,
+        party_b: contract.party_b,
+        contract_type: contract.contract_type,
+        description: contract.description,
+        status: contract.status,
+        created_at: contract.created_at,
+        updated_at: contract.updated_at,
+        user_id: contract.user_id,
+      },
     })
   } catch (error) {
-    console.error("API Error:", error)
+    console.error("API error:", error)
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
   }
 }
@@ -129,33 +119,24 @@ export async function PUT(request: NextRequest) {
     const supabase = createClient()
 
     // Update contract status
-    const updateData: any = {
-      status,
-      updated_at: new Date().toISOString(),
-    }
+    const { error: updateError } = await supabase
+      .from("contracts")
+      .update({
+        status,
+        pdf_url,
+        error_message,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", contract_id)
 
-    if (pdf_url) {
-      updateData.pdf_url = pdf_url
-    }
-
-    if (error_message) {
-      updateData.error_message = error_message
-    }
-
-    const { data, error } = await supabase.from("contracts").update(updateData).eq("id", contract_id).select().single()
-
-    if (error) {
-      console.error("Error updating contract:", error)
+    if (updateError) {
+      console.error("Error updating contract:", updateError)
       return NextResponse.json({ success: false, error: "Failed to update contract" }, { status: 500 })
     }
 
-    return NextResponse.json({
-      success: true,
-      contract: data,
-      message: "Contract updated successfully",
-    })
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("API Error:", error)
+    console.error("API error:", error)
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
   }
 }
