@@ -49,11 +49,9 @@ This is a Next.js application designed to generate bilingual contracts, manage p
 
 2.  **Install dependencies:**
 
-    \`\`\`bash
-    npm install
-    # or
-    yarn install
-    \`\`\`
+    ```bash
+    pnpm install
+    ```
 
 3.  **Set up Supabase:**
 
