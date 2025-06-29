@@ -15,6 +15,7 @@ interface ClientLayoutProps {
   locale: string
 }
 
+// Changed to named export
 const ClientLayout = ({ children, messages, locale }: ClientLayoutProps) => {
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
@@ -29,4 +30,5 @@ const ClientLayout = ({ children, messages, locale }: ClientLayoutProps) => {
   )
 }
 
+// Default export
 export default ClientLayout
