@@ -6,9 +6,11 @@ import { SummaryWidget } from "@/components/dashboard/summary-widget"
 import { ReviewPanel } from "@/components/dashboard/review-panel"
 import { AdminTools } from "@/components/dashboard/admin-tools"
 import { useQuery } from "@tanstack/react-query"
-import { getDashboardAnalytics, getPendingReviews, getAdminActions } from "@/lib/dashboard-data"
+// Import from the client-safe version instead
+import { getDashboardAnalytics, getPendingReviews, getAdminActions } from "@/lib/dashboard-data-client"
 import { Loader2 } from "lucide-react"
 
+// Rest of your component remains the same
 export default function DashboardOverviewPage() {
   const t = useTranslations("DashboardOverviewPage")
 
