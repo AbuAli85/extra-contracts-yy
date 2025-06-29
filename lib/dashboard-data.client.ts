@@ -1,50 +1,12 @@
 import { createClient } from "@/lib/supabase/client"
-
-export interface DashboardAnalytics {
-  totalContracts: number
-  pendingContracts: number
-  completedContracts: number
-  failedContracts: number
-  contractsThisMonth: number
-  contractsLastMonth: number
-  averageProcessingTime: number
-  successRate: number
-}
-
-export interface PendingReview {
-  id: string
-  contract_name: string
-  status: string
-  updated_at: string
-}
-
-export interface AdminAction {
-  id: string
-  action: string
-  created_at: string
-  user_id: string
-}
-
-export interface Notification {
-  id: string
-  message: string
-  created_at: string
-  read: boolean
-}
-
-export interface User {
-  id: string
-  email: string
-  role: string
-  created_at: string
-}
-
-interface ServerActionResponse<T = any> {
-  success: boolean
-  message: string
-  data?: T | null
-  errors?: Record<string, string[]> | null
-}
+import type {
+  AdminAction,
+  DashboardAnalytics,
+  Notification,
+  PendingReview,
+  ServerActionResponse,
+  User,
+} from "./dashboard-types"
 
 export async function getDashboardAnalytics(): Promise<ServerActionResponse<DashboardAnalytics>> {
   const supabase = createClient()
