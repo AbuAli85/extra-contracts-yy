@@ -87,7 +87,7 @@ export default function HomePage() {
           {contracts.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500 mb-4">No contracts found</p>
-              <Button>
+              <Button onClick={() => handleGenerate(`CONTRACT-${Date.now()}`)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create New Contract
               </Button>

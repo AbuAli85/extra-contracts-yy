@@ -1,59 +1,69 @@
+"use client"
+
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, Clock, AlertCircle, Loader2, FileText } from "lucide-react"
+import { Loader2, CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react"
 
 interface ContractStatusIndicatorProps {
   status: "pending" | "queued" | "processing" | "completed" | "failed"
+  className?: string
 }
 
-export function ContractStatusIndicator({ status }: ContractStatusIndicatorProps) {
+export function ContractStatusIndicator({ status, className }: ContractStatusIndicatorProps) {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "pending":
         return {
-          label: "Pending",
           variant: "secondary" as const,
-          icon: <FileText className="h-3 w-3" />,
+          icon: Clock,
+          color: "text-gray-600",
+          bgColor: "bg-gray-100",
         }
       case "queued":
         return {
-          label: "Queued",
           variant: "outline" as const,
-          icon: <Clock className="h-3 w-3" />,
+          icon: Clock,
+          color: "text-blue-600",
+          bgColor: "bg-blue-50",
         }
       case "processing":
         return {
-          label: "Processing",
           variant: "default" as const,
-          icon: <Loader2 className="h-3 w-3 animate-spin" />,
+          icon: Loader2,
+          color: "text-yellow-600",
+          bgColor: "bg-yellow-50",
+          animate: true,
         }
       case "completed":
         return {
-          label: "Completed",
           variant: "default" as const,
-          icon: <CheckCircle className="h-3 w-3" />,
-          className: "bg-green-100 text-green-800 hover:bg-green-100",
+          icon: CheckCircle,
+          color: "text-green-600",
+          bgColor: "bg-green-50",
         }
       case "failed":
         return {
-          label: "Failed",
           variant: "destructive" as const,
-          icon: <AlertCircle className="h-3 w-3" />,
+          icon: XCircle,
+          color: "text-red-600",
+          bgColor: "bg-red-50",
         }
       default:
         return {
-          label: "Unknown",
           variant: "secondary" as const,
-          icon: <FileText className="h-3 w-3" />,
+          icon: AlertCircle,
+          color: "text-gray-600",
+          bgColor: "bg-gray-100",
         }
     }
   }
 
   const config = getStatusConfig(status)
+  const Icon = config.icon
 
   return (
-    <Badge variant={config.variant} className={config.className}>
-      {config.icon}
-      <span className="ml-1">{config.label}</span>
+    <Badge variant={config.variant} className={`${config.bgColor} ${config.color} ${className}`}>
+      <Icon className={`w-3 h-3 mr-1 ${config.animate ? "animate-spin" : ""}`} />
+      {status.charAt(0).toUpperCase() + status.slice(1)}
     </Badge>
   )
 }
