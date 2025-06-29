@@ -1,43 +1,40 @@
-"use client"
-
 import { Badge } from "@/components/ui/badge"
-import { useTranslations } from "next-intl"
+import { Clock, CheckCircle, XCircle, Loader2 } from "lucide-react"
 
 interface ContractStatusIndicatorProps {
-  status: "pending" | "queued" | "processing" | "completed" | "failed"
+  status: "pending" | "processing" | "completed" | "failed"
 }
 
 export function ContractStatusIndicator({ status }: ContractStatusIndicatorProps) {
-  const t = useTranslations("contracts")
-
   const statusConfig = {
     pending: {
-      label: t("pending"),
+      label: "Pending",
       variant: "secondary" as const,
-    },
-    queued: {
-      label: t("queued"),
-      variant: "outline" as const,
+      icon: Clock,
     },
     processing: {
-      label: t("processing"),
+      label: "Processing",
       variant: "default" as const,
+      icon: Loader2,
     },
     completed: {
-      label: t("completed"),
+      label: "Completed",
       variant: "default" as const,
-      className: "bg-green-100 text-green-800 hover:bg-green-100",
+      icon: CheckCircle,
     },
     failed: {
-      label: t("failed"),
+      label: "Failed",
       variant: "destructive" as const,
+      icon: XCircle,
     },
   }
 
   const config = statusConfig[status]
+  const Icon = config.icon
 
   return (
-    <Badge variant={config.variant} className={config.className}>
+    <Badge variant={config.variant} className="flex items-center gap-1">
+      <Icon className={`h-3 w-3 ${status === "processing" ? "animate-spin" : ""}`} />
       {config.label}
     </Badge>
   )
