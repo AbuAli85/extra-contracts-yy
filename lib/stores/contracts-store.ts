@@ -1,223 +1,134 @@
 import { create } from "zustand"
-import { toast } from "sonner"
 import { createClient } from "@/lib/supabase/client"
 
-export interface Contract {
+interface Contract {
   id: string
   contract_number: string
-  party_a?: string
-  party_b?: string
-  contract_type?: string
-  description?: string
-  status: "pending" | "processing" | "completed" | "failed"
-  contract_data: any
-  pdf_url?: string
-  created_at: string
-  updated_at?: string
-  user_id?: string
-}
-
-export interface ContractFormData {
+  contract_name: string
   party_a: string
   party_b: string
   contract_type: string
-  description?: string
+  terms: string
+  status: string
+  pdf_url?: string
+  created_at: string
+  updated_at: string
 }
 
-interface ContractsState {
+interface ContractsStore {
   contracts: Contract[]
-  isLoading: boolean
-  error: string | null
-
-  // Actions
-  setContracts: (contracts: Contract[]) => void
-  addContract: (contract: Contract) => void
-  updateContract: (id: string, updates: Partial<Contract>) => void
-  removeContract: (id: string) => void
-  setLoading: (loading: boolean) => void
-  setError: (error: string | null) => void
-
-  // API actions
-  fetchContracts: () => Promise<void>
-  generateContract: (data: ContractFormData) => Promise<void>
-  retryContract: (id: string) => Promise<void>
-  downloadContract: (contract: Contract) => Promise<void>
-
-  // Statistics
-  getStatistics: () => {
+  loading: boolean
+  statistics: {
     total: number
     pending: number
     completed: number
     failed: number
   }
+  fetchContracts: () => Promise<void>
+  generateContract: (
+    data: Omit<Contract, "id" | "contract_number" | "status" | "created_at" | "updated_at">,
+  ) => Promise<void>
+  retryContract: (contractId: string) => Promise<void>
+  updateStatistics: () => Promise<void>
 }
 
-export const useContractsStore = create<ContractsState>((set, get) => ({
+export const useContractsStore = create<ContractsStore>((set, get) => ({
   contracts: [],
-  isLoading: false,
-  error: null,
-
-  setContracts: (contracts) => set({ contracts }),
-
-  addContract: (contract) =>
-    set((state) => ({
-      contracts: [contract, ...state.contracts],
-    })),
-
-  updateContract: (id, updates) =>
-    set((state) => ({
-      contracts: state.contracts.map((contract) => (contract.id === id ? { ...contract, ...updates } : contract)),
-    })),
-
-  removeContract: (id) =>
-    set((state) => ({
-      contracts: state.contracts.filter((contract) => contract.id !== id),
-    })),
-
-  setLoading: (isLoading) => set({ isLoading }),
-
-  setError: (error) => set({ error }),
+  loading: false,
+  statistics: {
+    total: 0,
+    pending: 0,
+    completed: 0,
+    failed: 0,
+  },
 
   fetchContracts: async () => {
-    set({ isLoading: true, error: null })
-
+    set({ loading: true })
     try {
       const supabase = createClient()
       const { data, error } = await supabase.from("contracts").select("*").order("created_at", { ascending: false })
 
       if (error) throw error
 
-      const contracts: Contract[] = (data || []).map((item) => ({
-        id: item.id,
-        contract_number: item.contract_number,
-        party_a: item.party_a || undefined,
-        party_b: item.party_b || undefined,
-        contract_type: item.contract_type || undefined,
-        description: item.description || undefined,
-        status: item.status as "pending" | "processing" | "completed" | "failed",
-        contract_data: item.contract_data,
-        pdf_url: item.pdf_url || undefined,
-        created_at: item.created_at,
-        updated_at: item.updated_at || undefined,
-        user_id: item.user_id || undefined,
-      }))
-
-      set({ contracts, isLoading: false })
+      set({ contracts: data || [] })
+      get().updateStatistics()
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to fetch contracts"
-      set({ error: errorMessage, isLoading: false })
-      toast.error(errorMessage)
+      console.error("Error fetching contracts:", error)
+    } finally {
+      set({ loading: false })
     }
   },
 
-  generateContract: async (data) => {
-    set({ isLoading: true, error: null })
-
+  generateContract: async (contractData) => {
     try {
       const response = await fetch("/api/generate-contract", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(contractData),
       })
 
       if (!response.ok) {
         throw new Error("Failed to generate contract")
       }
 
-      const result = await response.json()
-
-      if (result.success) {
-        get().addContract(result.contract)
-        toast.success("Contract generation started successfully!")
-      } else {
-        throw new Error(result.error || "Failed to generate contract")
-      }
+      // Refresh contracts list
+      get().fetchContracts()
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
-      set({ error: errorMessage })
-      toast.error(errorMessage)
-    } finally {
-      set({ isLoading: false })
+      console.error("Error generating contract:", error)
+      throw error
     }
   },
 
-  retryContract: async (id) => {
-    const contract = get().contracts.find((c) => c.id === id)
-    if (!contract) return
-
-    set({ isLoading: true, error: null })
-
+  retryContract: async (contractId) => {
     try {
-      const response = await fetch("/api/generate-contract", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          party_a: contract.party_a,
-          party_b: contract.party_b,
-          contract_type: contract.contract_type,
-          description: contract.description,
-          retry_id: id,
-        }),
-      })
+      const supabase = createClient()
 
-      if (!response.ok) {
-        throw new Error("Failed to retry contract generation")
+      // Update status to generating
+      const { error } = await supabase.from("contracts").update({ status: "generating" }).eq("id", contractId)
+
+      if (error) throw error
+
+      // Get contract data for retry
+      const { data: contract } = await supabase.from("contracts").select("*").eq("id", contractId).single()
+
+      if (contract && process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL) {
+        // Send to Make.com webhook for reprocessing
+        await fetch(process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contractId: contract.id,
+            contractNumber: contract.contract_number,
+            contract_name: contract.contract_name,
+            party_a: contract.party_a,
+            party_b: contract.party_b,
+            contract_type: contract.contract_type,
+            terms: contract.terms,
+            retry: true,
+          }),
+        })
       }
 
-      const result = await response.json()
-
-      if (result.success) {
-        get().updateContract(id, { status: "pending" })
-        toast.success("Contract retry initiated successfully!")
-      } else {
-        throw new Error(result.error || "Failed to retry contract generation")
-      }
+      // Refresh contracts list
+      get().fetchContracts()
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
-      set({ error: errorMessage })
-      toast.error(errorMessage)
-    } finally {
-      set({ isLoading: false })
+      console.error("Error retrying contract:", error)
+      throw error
     }
   },
 
-  downloadContract: async (contract) => {
-    if (!contract.pdf_url) {
-      toast.error("PDF not available for download")
-      return
-    }
-
-    try {
-      const response = await fetch(contract.pdf_url)
-      if (!response.ok) throw new Error("Failed to download PDF")
-
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `contract-${contract.contract_number}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-
-      toast.success("Contract downloaded successfully!")
-    } catch (error) {
-      toast.error("Failed to download contract")
-    }
-  },
-
-  getStatistics: () => {
-    const contracts = get().contracts
-    return {
+  updateStatistics: async () => {
+    const { contracts } = get()
+    const statistics = {
       total: contracts.length,
-      pending: contracts.filter((c) => c.status === "pending" || c.status === "processing").length,
+      pending: contracts.filter((c) => c.status === "generating" || c.status === "pending").length,
       completed: contracts.filter((c) => c.status === "completed").length,
       failed: contracts.filter((c) => c.status === "failed").length,
     }
+    set({ statistics })
   },
 }))

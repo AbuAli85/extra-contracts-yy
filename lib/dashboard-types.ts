@@ -1,50 +1,76 @@
-export interface SummaryData {
-  totalContracts: number
-  activeContracts: number
-  pendingContracts: number
-}
-
-export interface ContractsByMonth {
-  month: string // e.g., "Jan 2023"
-  count: number
-}
-
-export interface ContractsByStatus {
-  status: string // e.g., "Draft", "Active", "Completed"
-  count: number
-}
-
 export interface DashboardAnalytics {
-  summary: SummaryData
-  contractTrends: ContractsByMonth[]
-  contractStatusDistribution: ContractsByStatus[]
+  totalContracts: number
+  pendingContracts: number
+  completedContracts: number
+  failedContracts: number
+  contractsThisMonth: number
+  contractsLastMonth: number
+  averageProcessingTime: number
+  successRate: number
 }
 
-export interface Review {
+export interface PendingReview {
   id: string
-  title: string
-  description: string
-  submitter: string
-  avatar?: string
-  period: string // e.g., "2 days ago"
+  contract_name: string
+  status: string
+  updated_at: string
 }
 
 export interface AdminAction {
   id: string
-  name: string
-  description: string
+  action: string
+  created_at: string
+  user_id: string
+  details?: string
+  resource_type?: string
+  resource_id?: string
 }
 
 export interface Notification {
   id: string
   message: string
-  timestamp: string // ISO string
-  isRead: boolean
+  created_at: string
+  read: boolean
+  type?: string
+  user_id: string
 }
 
 export interface User {
   id: string
   email: string
-  role: string // e.g., "Admin", "User"
-  createdAt: string // ISO string
+  role: string
+  created_at: string
+  full_name?: string
+  last_sign_in_at?: string
+}
+
+export interface ContractStats {
+  total: number
+  pending: number
+  completed: number
+  failed: number
+  thisMonth: number
+  lastMonth: number
+  growth: number
+}
+
+export interface ChartData {
+  name: string
+  value: number
+  color?: string
+}
+
+export interface AuditLog extends AdminAction {
+  ip_address?: string
+  user_agent?: string
+  details: string
+  resource_type: string
+  resource_id: string
+}
+
+export interface ServerActionResponse<T = any> {
+  success: boolean
+  message: string
+  data?: T | null
+  errors?: Record<string, string[]> | null
 }

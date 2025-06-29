@@ -5,222 +5,211 @@ export type Database = {
     Tables: {
       audit_logs: {
         Row: {
+          id: string
           action: string
           created_at: string
-          id: string
           user_id: string
+          details: Json | null
         }
         Insert: {
+          id?: string
           action: string
           created_at?: string
-          id?: string
           user_id: string
+          details?: Json | null
         }
         Update: {
+          id?: string
           action?: string
           created_at?: string
-          id?: string
           user_id?: string
+          details?: Json | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "audit_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       contracts: {
         Row: {
           id: string
-          contract_number: string
-          party_a: string
-          party_b: string
-          contract_type: string
-          description: string | null
+          contract_name: string
           status: string
-          pdf_url: string | null
-          error_message: string | null
           created_at: string
           updated_at: string
-          user_id: string
+          user_id: string | null
+          contract_data: Json | null
+          contract_url: string | null
+          contract_number: string | null
+          party_1_name: string | null
+          party_1_email: string | null
+          party_2_name: string | null
+          party_2_email: string | null
+          contract_type: string | null
+          language: string | null
         }
         Insert: {
           id?: string
-          contract_number: string
-          party_a: string
-          party_b: string
-          contract_type: string
-          description?: string | null
+          contract_name: string
           status?: string
-          pdf_url?: string | null
-          error_message?: string | null
           created_at?: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
+          contract_data?: Json | null
+          contract_url?: string | null
+          contract_number?: string | null
+          party_1_name?: string | null
+          party_1_email?: string | null
+          party_2_name?: string | null
+          party_2_email?: string | null
+          contract_type?: string | null
+          language?: string | null
         }
         Update: {
           id?: string
-          contract_number?: string
-          party_a?: string
-          party_b?: string
-          contract_type?: string
-          description?: string | null
+          contract_name?: string
           status?: string
-          pdf_url?: string | null
-          error_message?: string | null
           created_at?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
+          contract_data?: Json | null
+          contract_url?: string | null
+          contract_number?: string | null
+          party_1_name?: string | null
+          party_1_email?: string | null
+          party_2_name?: string | null
+          party_2_email?: string | null
+          contract_type?: string | null
+          language?: string | null
         }
         Relationships: []
       }
       notifications: {
         Row: {
-          created_at: string
           id: string
           message: string
+          created_at: string
           read: boolean
           user_id: string
         }
         Insert: {
-          created_at?: string
           id?: string
           message: string
+          created_at?: string
           read?: boolean
           user_id: string
         }
         Update: {
-          created_at?: string
           id?: string
           message?: string
+          created_at?: string
           read?: boolean
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       parties: {
         Row: {
-          address: string | null
-          contact_email: string | null
-          contact_phone: string | null
-          created_at: string
           id: string
           name: string
-          type: Database["public"]["Enums"]["party_type"]
+          email: string
+          phone: string | null
+          address: string | null
+          created_at: string
           updated_at: string
-          user_id: string
+          user_id: string | null
+          type: string | null
         }
         Insert: {
-          address?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
-          created_at?: string
           id?: string
           name: string
-          type: Database["public"]["Enums"]["party_type"]
+          email: string
+          phone?: string | null
+          address?: string | null
+          created_at?: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
+          type?: string | null
         }
         Update: {
-          address?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
-          created_at?: string
           id?: string
           name?: string
-          type?: Database["public"]["Enums"]["party_type"]
+          email?: string
+          phone?: string | null
+          address?: string | null
+          created_at?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
+          type?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "parties_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       promoters: {
         Row: {
-          company_name: string | null
-          contact_email: string | null
-          contact_phone: string | null
-          created_at: string
           id: string
           name: string
-          profile_picture_url: string | null
+          email: string
+          phone: string | null
+          company: string | null
+          created_at: string
           updated_at: string
-          user_id: string
+          user_id: string | null
+          bio: string | null
           website: string | null
+          social_media: Json | null
+          profile_image: string | null
         }
         Insert: {
-          company_name?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
-          created_at?: string
           id?: string
           name: string
-          profile_picture_url?: string | null
+          email: string
+          phone?: string | null
+          company?: string | null
+          created_at?: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
+          bio?: string | null
           website?: string | null
+          social_media?: Json | null
+          profile_image?: string | null
         }
         Update: {
-          company_name?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
-          created_at?: string
           id?: string
           name?: string
-          profile_picture_url?: string | null
+          email?: string
+          phone?: string | null
+          company?: string | null
+          created_at?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
+          bio?: string | null
           website?: string | null
+          social_media?: Json | null
+          profile_image?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "promoters_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       users: {
         Row: {
-          created_at: string
-          email: string
           id: string
-          role: Database["public"]["Enums"]["user_role"]
+          email: string
+          role: string
+          created_at: string
           updated_at: string
+          full_name: string | null
         }
         Insert: {
-          created_at?: string
-          email: string
           id?: string
-          role?: Database["public"]["Enums"]["user_role"]
+          email: string
+          role?: string
+          created_at?: string
           updated_at?: string
+          full_name?: string | null
         }
         Update: {
-          created_at?: string
-          email?: string
           id?: string
-          role?: Database["public"]["Enums"]["user_role"]
+          email?: string
+          role?: string
+          created_at?: string
           updated_at?: string
+          full_name?: string | null
         }
         Relationships: []
       }
@@ -232,26 +221,25 @@ export type Database = {
       get_dashboard_analytics: {
         Args: Record<PropertyKey, never>
         Returns: {
-          total_contracts: number
-          active_contracts: number
-          pending_review_contracts: number
-          total_parties: number
-          total_promoters: number
-        }[]
+          totalContracts: number
+          pendingContracts: number
+          completedContracts: number
+          failedContracts: number
+          contractsThisMonth: number
+          contractsLastMonth: number
+          averageProcessingTime: number
+          successRate: number
+        }
       }
     }
     Enums: {
-      contract_status: "Draft" | "Pending Review" | "Active" | "Archived" | "Terminated"
-      party_type: "Individual" | "Company"
-      user_role: "user" | "admin"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
     }
   }
 }
-
-type PublicSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
   PublicTableNameOrOptions extends

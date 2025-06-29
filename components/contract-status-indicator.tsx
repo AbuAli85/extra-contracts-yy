@@ -1,40 +1,47 @@
 import { Badge } from "@/components/ui/badge"
-import { Clock, CheckCircle, XCircle, Loader2 } from "lucide-react"
+import { Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react"
 
 interface ContractStatusIndicatorProps {
-  status: "pending" | "processing" | "completed" | "failed"
+  status: string
 }
 
 export function ContractStatusIndicator({ status }: ContractStatusIndicatorProps) {
-  const statusConfig = {
-    pending: {
-      label: "Pending",
-      variant: "secondary" as const,
-      icon: Clock,
-    },
-    processing: {
-      label: "Processing",
-      variant: "default" as const,
-      icon: Loader2,
-    },
-    completed: {
-      label: "Completed",
-      variant: "default" as const,
-      icon: CheckCircle,
-    },
-    failed: {
-      label: "Failed",
-      variant: "destructive" as const,
-      icon: XCircle,
-    },
+  const getStatusConfig = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "generating":
+      case "pending":
+        return {
+          variant: "secondary" as const,
+          icon: Clock,
+          label: "Generating",
+        }
+      case "completed":
+        return {
+          variant: "default" as const,
+          icon: CheckCircle,
+          label: "Completed",
+        }
+      case "failed":
+        return {
+          variant: "destructive" as const,
+          icon: XCircle,
+          label: "Failed",
+        }
+      default:
+        return {
+          variant: "outline" as const,
+          icon: AlertCircle,
+          label: status,
+        }
+    }
   }
 
-  const config = statusConfig[status]
+  const config = getStatusConfig(status)
   const Icon = config.icon
 
   return (
     <Badge variant={config.variant} className="flex items-center gap-1">
-      <Icon className={`h-3 w-3 ${status === "processing" ? "animate-spin" : ""}`} />
+      <Icon className="h-3 w-3" />
       {config.label}
     </Badge>
   )
