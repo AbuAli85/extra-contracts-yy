@@ -12,55 +12,48 @@ export function ContractStatusIndicator({ status }: ContractStatusIndicatorProps
         return {
           label: "Pending",
           variant: "secondary" as const,
-          icon: FileText,
-          className: "text-gray-600",
+          icon: <FileText className="h-3 w-3" />,
         }
       case "queued":
         return {
           label: "Queued",
           variant: "outline" as const,
-          icon: Clock,
-          className: "text-blue-600",
+          icon: <Clock className="h-3 w-3" />,
         }
       case "processing":
         return {
           label: "Processing",
           variant: "default" as const,
-          icon: Loader2,
-          className: "text-blue-600",
-          animate: true,
+          icon: <Loader2 className="h-3 w-3 animate-spin" />,
         }
       case "completed":
         return {
           label: "Completed",
           variant: "default" as const,
-          icon: CheckCircle,
-          className: "text-green-600 bg-green-50 border-green-200",
+          icon: <CheckCircle className="h-3 w-3" />,
+          className: "bg-green-100 text-green-800 hover:bg-green-100",
         }
       case "failed":
         return {
           label: "Failed",
           variant: "destructive" as const,
-          icon: AlertCircle,
-          className: "text-red-600",
+          icon: <AlertCircle className="h-3 w-3" />,
         }
       default:
         return {
           label: "Unknown",
           variant: "secondary" as const,
-          icon: FileText,
-          className: "text-gray-600",
+          icon: <FileText className="h-3 w-3" />,
         }
     }
   }
 
   const config = getStatusConfig(status)
-  const Icon = config.icon
 
   return (
     <Badge variant={config.variant} className={config.className}>
-      <Icon className={`h-3 w-3 mr-1 ${config.animate ? "animate-spin" : ""}`} />
-      {config.label}
+      {config.icon}
+      <span className="ml-1">{config.label}</span>
     </Badge>
   )
 }

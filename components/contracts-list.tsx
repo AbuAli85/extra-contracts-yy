@@ -1,75 +1,63 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
-import { useContractsStore } from "@/lib/stores/contracts-store"
-import { useRealtimeContracts } from "@/hooks/use-realtime-contracts"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useContractsStore } from "@/lib/stores/contracts-store"
+import { useRealtimeContracts } from "@/hooks/use-realtime-contracts"
 import { ContractStatusIndicator } from "./contract-status-indicator"
 import { Download, Plus, RefreshCw, FileText } from "lucide-react"
 import { toast } from "sonner"
 
 export function ContractsList() {
-  const { contracts, loading, generateContract, retryContract, downloadContract } = useContractsStore()
+  const { contracts, loading, fetchContracts, generateContract, retryContract, downloadContract } = useContractsStore()
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false)
-  const [formData, setFormData] = useState({
-    contract_number: "",
-    party1_id: "",
-    party2_id: "",
-    contract_type: "service_agreement",
-  })
+  const [contractNumber, setContractNumber] = useState("")
+  const [isGenerating, setIsGenerating] = useState(false)
 
   // Set up real-time subscriptions
   useRealtimeContracts()
 
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Fetch contracts on component mount
+  useEffect(() => {
+    fetchContracts()
+  }, [fetchContracts])
 
-    if (!formData.contract_number.trim()) {
-      toast.error("Contract number is required")
+  const handleGenerateContract = async () => {
+    if (!contractNumber.trim()) {
+      toast.error("Please enter a contract number")
       return
     }
 
+    setIsGenerating(true)
     try {
-      await generateContract(formData)
+      await generateContract(contractNumber.trim())
+      setContractNumber("")
       setIsGenerateDialogOpen(false)
-      setFormData({
-        contract_number: "",
-        party1_id: "",
-        party2_id: "",
-        contract_type: "service_agreement",
-      })
-    } catch (error) {
-      console.error("Error generating contract:", error)
+    } finally {
+      setIsGenerating(false)
     }
   }
 
-  const handleRetry = async (contract_number: string) => {
-    try {
-      await retryContract(contract_number)
-    } catch (error) {
-      console.error("Error retrying contract:", error)
-    }
+  const handleRetryContract = async (contractNum: string) => {
+    await retryContract(contractNum)
   }
 
-  const handleDownload = (pdf_url: string, contract_number: string) => {
-    downloadContract(pdf_url, contract_number)
+  const handleDownloadContract = (pdfUrl: string, contractNum: string) => {
+    downloadContract(pdfUrl, contractNum)
   }
 
   if (loading && contracts.length === 0) {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-8">
-          <div className="text-center">
-            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
-            <p>Loading contracts...</p>
+          <div className="flex items-center space-x-2">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            <span>Loading contracts...</span>
           </div>
         </CardContent>
       </Card>
@@ -78,93 +66,76 @@ export function ContractsList() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          Contracts
-        </CardTitle>
-        <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Generate Contract
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Generate New Contract</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleGenerate} className="space-y-4">
-              <div>
-                <Label htmlFor="contract_number">Contract Number *</Label>
-                <Input
-                  id="contract_number"
-                  value={formData.contract_number}
-                  onChange={(e) => setFormData({ ...formData, contract_number: e.target.value })}
-                  placeholder="Enter contract number"
-                  required
-                />
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Contracts
+            </CardTitle>
+            <CardDescription>Manage and track your contract generation</CardDescription>
+          </div>
+          <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Generate Contract
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Generate New Contract</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="contract-number">Contract Number</Label>
+                  <Input
+                    id="contract-number"
+                    value={contractNumber}
+                    onChange={(e) => setContractNumber(e.target.value)}
+                    placeholder="Enter contract number"
+                    disabled={isGenerating}
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={() => setIsGenerateDialogOpen(false)} disabled={isGenerating}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleGenerateContract} disabled={isGenerating}>
+                    {isGenerating ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      "Generate"
+                    )}
+                  </Button>
+                </div>
               </div>
-              <div>
-                <Label htmlFor="contract_type">Contract Type</Label>
-                <Select
-                  value={formData.contract_type}
-                  onValueChange={(value) => setFormData({ ...formData, contract_type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="service_agreement">Service Agreement</SelectItem>
-                    <SelectItem value="employment_contract">Employment Contract</SelectItem>
-                    <SelectItem value="nda">Non-Disclosure Agreement</SelectItem>
-                    <SelectItem value="partnership">Partnership Agreement</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="party1_id">Party 1 ID (Optional)</Label>
-                <Input
-                  id="party1_id"
-                  value={formData.party1_id}
-                  onChange={(e) => setFormData({ ...formData, party1_id: e.target.value })}
-                  placeholder="Enter party 1 ID"
-                />
-              </div>
-              <div>
-                <Label htmlFor="party2_id">Party 2 ID (Optional)</Label>
-                <Input
-                  id="party2_id"
-                  value={formData.party2_id}
-                  onChange={(e) => setFormData({ ...formData, party2_id: e.target.value })}
-                  placeholder="Enter party 2 ID"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsGenerateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Generate</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         {contracts.length === 0 ? (
           <div className="text-center py-8">
-            <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground">No contracts found</p>
-            <p className="text-sm text-muted-foreground">Generate your first contract to get started</p>
+            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No contracts found</h3>
+            <p className="text-muted-foreground mb-4">Get started by generating your first contract</p>
+            <Button onClick={() => setIsGenerateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Generate Contract
+            </Button>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Contract Number</TableHead>
-                <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Created</TableHead>
+                <TableHead>Updated</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -173,26 +144,39 @@ export function ContractsList() {
                 <TableRow key={contract.id}>
                   <TableCell className="font-medium">{contract.contract_number}</TableCell>
                   <TableCell>
-                    {contract.contract_type?.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase()) || "N/A"}
-                  </TableCell>
-                  <TableCell>
                     <ContractStatusIndicator status={contract.status} />
                   </TableCell>
                   <TableCell>{new Date(contract.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(contract.updated_at).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      {contract.status === "completed" && contract.pdf_url && (
+                    <div className="flex items-center space-x-2">
+                      {contract.status === "failed" && (
                         <Button
-                          size="sm"
                           variant="outline"
-                          onClick={() => handleDownload(contract.pdf_url!, contract.contract_number)}
+                          size="sm"
+                          onClick={() => handleRetryContract(contract.contract_number)}
                         >
-                          <Download className="h-4 w-4" />
+                          <RefreshCw className="h-4 w-4 mr-1" />
+                          Retry
                         </Button>
                       )}
-                      {contract.status === "failed" && (
-                        <Button size="sm" variant="outline" onClick={() => handleRetry(contract.contract_number)}>
-                          <RefreshCw className="h-4 w-4" />
+                      {contract.status === "completed" && contract.pdf_url && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownloadContract(contract.pdf_url!, contract.contract_number)}
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          Download
+                        </Button>
+                      )}
+                      {contract.status === "pending" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleRetryContract(contract.contract_number)}
+                        >
+                          Generate
                         </Button>
                       )}
                     </div>
