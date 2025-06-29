@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { FileText, Clock, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Clock, Loader2, CheckCircle, XCircle, PlayCircle, FileText } from "lucide-react"
 import { useContractsStore } from "@/lib/stores/contracts-store"
 
 export function ContractsDashboardWidget() {
@@ -21,68 +21,57 @@ export function ContractsDashboardWidget() {
     failed: contracts.filter((c) => c.status === "failed").length,
   }
 
-  const inProgress = stats.queued + stats.processing
-
   const statCards = [
     {
       title: "Total Contracts",
       value: stats.total,
       icon: FileText,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      borderColor: "border-blue-200",
+      className: "text-blue-600",
     },
     {
       title: "Pending",
       value: stats.pending,
       icon: Clock,
-      color: "text-gray-600",
-      bgColor: "bg-gray-50",
-      borderColor: "border-gray-200",
+      className: "text-gray-600",
     },
     {
-      title: "In Progress",
-      value: inProgress,
+      title: "In Queue",
+      value: stats.queued,
+      icon: PlayCircle,
+      className: "text-blue-600",
+    },
+    {
+      title: "Processing",
+      value: stats.processing,
       icon: Loader2,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-50",
-      borderColor: "border-yellow-200",
-      animate: stats.processing > 0,
+      className: "text-blue-600 animate-spin",
     },
     {
       title: "Completed",
       value: stats.completed,
       icon: CheckCircle,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-      borderColor: "border-green-200",
+      className: "text-green-600",
     },
     {
       title: "Failed",
       value: stats.failed,
-      icon: AlertCircle,
-      color: "text-red-600",
-      bgColor: "bg-red-50",
-      borderColor: "border-red-200",
+      icon: XCircle,
+      className: "text-red-600",
     },
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       {statCards.map((stat) => {
         const Icon = stat.icon
         return (
-          <Card key={stat.title} className={`${stat.borderColor}`}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">{stat.title}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                </div>
-                <div className={`p-2 rounded-full ${stat.bgColor}`}>
-                  <Icon className={`h-4 w-4 ${stat.color} ${stat.animate ? "animate-spin" : ""}`} />
-                </div>
-              </div>
+          <Card key={stat.title}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+              <Icon className={`h-4 w-4 ${stat.className}`} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stat.value}</div>
             </CardContent>
           </Card>
         )

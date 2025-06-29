@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Download, RefreshCw, Play, AlertCircle, Loader2 } from "lucide-react"
+import { Download, Play, RotateCcw, CheckCircle, XCircle, Loader2 } from "lucide-react"
 import { useContractsStore } from "@/lib/stores/contracts-store"
 import { useRealtimeContracts } from "@/hooks/use-realtime-contracts"
 import { ContractStatusIndicator } from "./contract-status-indicator"
 import { toast } from "sonner"
 
 export function ContractsList() {
-  const { contracts, loading, error, fetchContracts, generateContract } = useContractsStore()
+  const { contracts, loading, error, fetchContracts, generateContract, retryContract } = useContractsStore()
 
   // Set up real-time subscriptions
   useRealtimeContracts()
@@ -30,22 +30,31 @@ export function ContractsList() {
     }
   }
 
+  const handleRetry = async (contractNumber: string) => {
+    try {
+      await retryContract(contractNumber)
+      toast.success("Contract generation retried!")
+    } catch (error) {
+      toast.error("Failed to retry contract generation")
+    }
+  }
+
   const handleDownload = (pdfUrl: string, contractNumber: string) => {
     const link = document.createElement("a")
     link.href = pdfUrl
     link.download = `contract-${contractNumber}.pdf`
-    link.target = "_blank"
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+    toast.success("Download started!")
   }
 
   if (loading && contracts.length === 0) {
     return (
       <Card>
-        <CardContent className="flex items-center justify-center p-8">
-          <Loader2 className="h-6 w-6 animate-spin mr-2" />
-          <span>Loading contracts...</span>
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Loading contracts...</span>
         </CardContent>
       </Card>
     )
@@ -54,9 +63,9 @@ export function ContractsList() {
   if (error) {
     return (
       <Card>
-        <CardContent className="flex items-center justify-center p-8 text-red-600">
-          <AlertCircle className="h-6 w-6 mr-2" />
-          <span>Error: {error}</span>
+        <CardContent className="flex items-center justify-center py-8">
+          <XCircle className="h-8 w-8 text-red-500" />
+          <span className="ml-2 text-red-600">{error}</span>
         </CardContent>
       </Card>
     )
@@ -65,22 +74,15 @@ export function ContractsList() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Contracts</span>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">{contracts.length} total</Badge>
-            <Button variant="outline" size="sm" onClick={fetchContracts} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
-          </div>
+        <CardTitle className="flex items-center gap-2">
+          <CheckCircle className="h-5 w-5" />
+          Contracts ({contracts.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
         {contracts.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <div className="mb-4">No contracts found.</div>
-            <div className="text-sm">Create your first contract to get started.</div>
+            No contracts found. Create your first contract to get started.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -91,22 +93,20 @@ export function ContractsList() {
                   <TableHead>Title</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {contracts.map((contract) => (
                   <TableRow key={contract.id}>
-                    <TableCell className="font-mono text-sm">{contract.contract_number}</TableCell>
-                    <TableCell>{contract.title || contract.contract_name || "Untitled Contract"}</TableCell>
+                    <TableCell className="font-mono">{contract.contract_number}</TableCell>
+                    <TableCell>{contract.title || "Untitled Contract"}</TableCell>
                     <TableCell>
                       <ContractStatusIndicator status={contract.status} />
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(contract.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <TableCell>{new Date(contract.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
                         {contract.status === "pending" && (
                           <Button
                             size="sm"
@@ -122,10 +122,10 @@ export function ContractsList() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleGenerate(contract.contract_number)}
+                            onClick={() => handleRetry(contract.contract_number)}
                             className="flex items-center gap-1"
                           >
-                            <RefreshCw className="h-3 w-3" />
+                            <RotateCcw className="h-3 w-3" />
                             Retry
                           </Button>
                         )}
@@ -140,6 +140,13 @@ export function ContractsList() {
                             <Download className="h-3 w-3" />
                             Download
                           </Button>
+                        )}
+
+                        {(contract.status === "queued" || contract.status === "processing") && (
+                          <Badge variant="secondary" className="flex items-center gap-1">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            {contract.status === "queued" ? "Queued" : "Processing"}
+                          </Badge>
                         )}
                       </div>
                     </TableCell>

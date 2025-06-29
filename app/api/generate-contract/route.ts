@@ -1,12 +1,9 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-)
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { contract_number } = await request.json()
 
@@ -14,26 +11,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Contract number is required" }, { status: 400 })
     }
 
-    // 1) Trigger Make.com FetchContract webhook
-    const makeWebhookUrl = process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL || process.env.MAKE_WEBHOOK_URL
-
+    // 1. Trigger Make.com webhook
+    const makeWebhookUrl = process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL
     if (makeWebhookUrl) {
-      try {
-        const makeRes = await fetch(makeWebhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contract_number }),
-        })
+      const makeResponse = await fetch(makeWebhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ contract_number }),
+      })
 
-        if (!makeRes.ok) {
-          console.error("Make.com webhook failed:", await makeRes.text())
-        }
-      } catch (error) {
-        console.error("Make.com webhook error:", error)
+      if (!makeResponse.ok) {
+        console.error("Make.com webhook failed:", await makeResponse.text())
       }
     }
 
-    // 2) Mark status=queued in Supabase
+    // 2. Update contract status to queued
     const { error } = await supabase
       .from("contracts")
       .update({
@@ -43,7 +37,7 @@ export async function POST(request: Request) {
       .eq("contract_number", contract_number)
 
     if (error) {
-      console.error("Supabase update failed:", error)
+      console.error("Supabase update error:", error)
       return NextResponse.json({ error: "Failed to update contract status" }, { status: 500 })
     }
 
@@ -52,7 +46,7 @@ export async function POST(request: Request) {
       contract_number,
     })
   } catch (error) {
-    console.error("Contract generation error:", error)
+    console.error("API error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
