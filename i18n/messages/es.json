@@ -86,6 +86,15 @@
     "systemHealth": "Estado del Sistema",
     "performance": "Rendimiento",
     "metrics": "Métricas"
+    ,
+    "activeContracts": "Contratos Activos",
+    "activeContractsDescription": "Contratos que están actualmente activos",
+    "totalContractsDescription": "Número total de contratos en el sistema",
+    "pendingContractsDescription": "Contratos que están pendientes de aprobación o finalización",
+    "contractTrends": "Tendencias de Contratos",
+    "contractStatusDistribution": "Distribución del Estado de Contratos",
+    "newContracts": "Nuevos Contratos",
+    "adminTools": "Herramientas de Administración"
   },
   "contracts": {
     "title": "Contratos",
