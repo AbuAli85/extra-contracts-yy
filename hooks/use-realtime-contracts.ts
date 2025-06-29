@@ -11,7 +11,6 @@ export function useRealtimeContracts() {
   useEffect(() => {
     const supabase = createClient()
 
-    // Subscribe to contract changes
     const channel = supabase
       .channel("contracts-changes")
       .on(
@@ -22,12 +21,12 @@ export function useRealtimeContracts() {
           table: "contracts",
         },
         (payload) => {
-          console.log("Contract change received:", payload)
+          console.log("Real-time contract update:", payload)
 
           if (payload.eventType === "INSERT") {
             addContract(payload.new as Contract)
           } else if (payload.eventType === "UPDATE") {
-            updateContract(payload.new.id, payload.new as Partial<Contract>)
+            updateContract(payload.new as Contract)
           }
         },
       )

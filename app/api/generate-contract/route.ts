@@ -1,26 +1,14 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { z } from "zod"
 
-const generateContractSchema = z.object({
-  contractData: z.object({
-    parties: z.array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        type: z.enum(["individual", "company"]),
-        email: z.string().email().optional(),
-        address: z.string().optional(),
-      }),
-    ),
-    contractType: z.string(),
-    terms: z.record(z.any()),
-    language: z.enum(["en", "es", "both"]).default("both"),
-  }),
-})
-
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
+    const { contract_number } = await request.json()
+
+    if (!contract_number) {
+      return NextResponse.json({ error: "Contract number is required" }, { status: 400 })
+    }
+
     const supabase = createClient()
 
     // Get the current user
@@ -28,121 +16,87 @@ export async function POST(request: NextRequest) {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser()
+
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const body = await request.json()
-    const { contractData } = generateContractSchema.parse(body)
-
-    // Create contract record in database
-    const { data: contract, error: dbError } = await supabase
-      .from("contracts")
-      .insert({
-        user_id: user.id,
-        status: "pending",
-        contract_type: contractData.contractType,
-        parties: contractData.parties,
-        terms: contractData.terms,
-        language: contractData.language,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
-
-    if (dbError) {
-      console.error("Database error:", dbError)
-      return NextResponse.json({ error: "Failed to create contract" }, { status: 500 })
-    }
-
-    // Trigger Make.com webhook for contract generation
+    // 1) Trigger Make.com webhook
     const makeWebhookUrl = process.env.MAKE_WEBHOOK_URL || process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL
 
     if (makeWebhookUrl) {
       try {
-        const webhookPayload = {
-          contractId: contract.id,
-          userId: user.id,
-          contractData: {
-            ...contractData,
-            contractId: contract.id,
-          },
-          callbackUrl: `${request.nextUrl.origin}/api/contracts/${contract.id}/callback`,
-        }
-
-        const webhookResponse = await fetch(makeWebhookUrl, {
+        const makeResponse = await fetch(makeWebhookUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(webhookPayload),
+          body: JSON.stringify({
+            contract_number,
+            user_id: user.id,
+            callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/generate-contract/callback`,
+          }),
         })
 
-        if (!webhookResponse.ok) {
-          throw new Error(`Webhook failed: ${webhookResponse.status}`)
+        if (!makeResponse.ok) {
+          console.error("Make.com webhook failed:", await makeResponse.text())
+          return NextResponse.json({ error: "Webhook failed" }, { status: 502 })
         }
-
-        // Update status to processing
-        await supabase
-          .from("contracts")
-          .update({
-            status: "processing",
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", contract.id)
       } catch (webhookError) {
-        console.error("Webhook error:", webhookError)
-
-        // Update status to failed
-        await supabase
-          .from("contracts")
-          .update({
-            status: "failed",
-            error_message: "Failed to trigger contract generation",
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", contract.id)
+        console.error("Make.com webhook error:", webhookError)
+        return NextResponse.json({ error: "Webhook failed" }, { status: 502 })
       }
     }
 
+    // 2) Update contract status to queued in Supabase
+    const { error: updateError } = await supabase
+      .from("contracts")
+      .update({
+        status: "queued",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("contract_number", contract_number)
+
+    if (updateError) {
+      console.error("Supabase update failed:", updateError)
+      return NextResponse.json({ error: "Database update failed" }, { status: 500 })
+    }
+
     return NextResponse.json({
-      success: true,
-      contractId: contract.id,
-      status: contract.status,
+      message: "Contract generation queued successfully",
+      contract_number,
     })
   } catch (error) {
-    console.error("Contract generation error:", error)
-    return NextResponse.json({ error: "Failed to generate contract" }, { status: 500 })
+    console.error("API error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
 // Callback endpoint for Make.com to update contract status
-export async function PUT(request: NextRequest) {
+export async function PUT(request: Request) {
   try {
-    const supabase = createClient()
-    const body = await request.json()
+    const { contract_number, status, pdf_url, error_message } = await request.json()
 
-    const { contractId, status, pdfUrl, errorMessage } = body
-
-    if (!contractId) {
-      return NextResponse.json({ error: "Contract ID required" }, { status: 400 })
+    if (!contract_number) {
+      return NextResponse.json({ error: "Contract number is required" }, { status: 400 })
     }
+
+    const supabase = createClient()
 
     const updateData: any = {
       status,
       updated_at: new Date().toISOString(),
     }
 
-    if (pdfUrl) {
-      updateData.pdf_url = pdfUrl
+    if (pdf_url) {
+      updateData.pdf_url = pdf_url
     }
 
-    if (errorMessage) {
-      updateData.error_message = errorMessage
+    if (error_message) {
+      updateData.error_message = error_message
     }
 
-    const { error } = await supabase.from("contracts").update(updateData).eq("id", contractId)
+    const { error } = await supabase.from("contracts").update(updateData).eq("contract_number", contract_number)
 
     if (error) {
       console.error("Failed to update contract:", error)
