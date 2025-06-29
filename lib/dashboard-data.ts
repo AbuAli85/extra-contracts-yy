@@ -21,10 +21,8 @@ async function getSupabaseClient() {
   // In server environment
   try {
     // Dynamically import server-only modules
-    const { cookies } = await import('next/headers')
-    const { createClient: createServerClient } = await import("@/lib/supabase/server") 
-    const cookieStore = cookies()
-    return createServerClient(cookieStore)
+    const { createClient: createServerClient } = await import("@/lib/supabase/server")
+    return createServerClient()
   } catch (error) {
     // Fallback to browser client
     console.warn('Falling back to browser client in server environment')
