@@ -7,7 +7,7 @@ import { usePromoters } from "@/hooks/use-promoters"
 import { createContract, updateContract } from "@/app/actions/contracts"
 import { NextIntlClientProvider } from "next-intl"
 import messages from "@/messages/en.json" // Import your English messages file
-import jest from "jest" // Import jest to declare it
+import { jest } from "@jest/globals" // Import jest globals
 
 // Mock next-intl useTranslations
 jest.mock("next-intl", () => ({
