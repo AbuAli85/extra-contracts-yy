@@ -54,4 +54,5 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 
 Client components should import helpers from `lib/dashboard-data.client.ts`.
 Server components use `lib/dashboard-data.server.ts`.
-This explicit separation replaces the former dynamic helper.
+This explicit separation replaces the former dynamic helper. The deprecated
+`lib/client-data.ts` file has been removed.
