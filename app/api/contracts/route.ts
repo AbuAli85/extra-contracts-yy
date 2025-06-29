@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { getSupabaseAdmin } from "@/lib/supabase/admin"
+import { getSupabaseAdmin } from "@/lib/supabase"
 import { contractGeneratorSchema } from "@/lib/schema-generator" // Your Zod schema for validation
 import type { BilingualPdfData } from "@/lib/types"
 import type { Database } from "@/types/supabase"
