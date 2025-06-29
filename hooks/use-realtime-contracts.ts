@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { useContractsStore, type Contract } from "@/lib/stores/contracts-store"
+import { useContractsStore } from "@/lib/stores/contracts-store"
 
 export function useRealtimeContracts() {
   const { updateContract, fetchContracts } = useContractsStore()
@@ -10,7 +10,7 @@ export function useRealtimeContracts() {
   useEffect(() => {
     const supabase = createClient()
 
-    // Subscribe to real-time changes on the contracts table
+    // Subscribe to contract changes
     const channel = supabase
       .channel("contracts-changes")
       .on(
@@ -21,19 +21,20 @@ export function useRealtimeContracts() {
           table: "contracts",
         },
         (payload) => {
-          console.log("Real-time contract update:", payload)
+          console.log("Contract change received:", payload)
 
-          if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
-            updateContract(payload.new as Contract)
-          } else if (payload.eventType === "DELETE") {
-            // Refetch all contracts if one is deleted
+          if (payload.eventType === "INSERT") {
+            // Refresh all contracts when a new one is inserted
             fetchContracts()
+          } else if (payload.eventType === "UPDATE") {
+            // Update specific contract
+            const updatedContract = payload.new as any
+            updateContract(updatedContract.id, updatedContract)
           }
         },
       )
       .subscribe()
 
-    // Cleanup subscription on unmount
     return () => {
       supabase.removeChannel(channel)
     }

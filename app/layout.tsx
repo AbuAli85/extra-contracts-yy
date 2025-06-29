@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Bilingual Contract Generator",
-  description: "Generate and manage bilingual contracts with ease",
+  description: "Generate and manage bilingual contracts with real-time processing",
     generator: 'v0.dev'
 }
 
