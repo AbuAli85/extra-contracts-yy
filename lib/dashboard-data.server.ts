@@ -1,13 +1,13 @@
 import { createClient } from "@/lib/supabase/server"
 import 'server-only' // Mark this module as server-only
-import type { AdminAction, DashboardAnalytics, Notification, PendingReview, User } from "./dashboard-types"
-
-interface ServerActionResponse<T = any> {
-  success: boolean
-  message: string
-  data?: T | null
-  errors?: Record<string, string[]> | null
-}
+import type {
+  AdminAction,
+  DashboardAnalytics,
+  Notification,
+  PendingReview,
+  ServerActionResponse,
+  User,
+} from "./dashboard-types"
 
 // Server-only implementations
 export async function getDashboardAnalytics(): Promise<ServerActionResponse<DashboardAnalytics>> {
