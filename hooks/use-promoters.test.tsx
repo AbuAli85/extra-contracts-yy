@@ -14,7 +14,7 @@ import { toast } from "@/components/ui/use-toast" // Assuming this is the correc
 import { useRouter } from "next/navigation"
 import { NextIntlClientProvider } from "next-intl/client"
 import messages from "@/messages/en.json" // Adjust path as necessary
-import jest from "jest" // Import jest to fix the undeclared variable error
+import { jest } from "@jest/globals" // Import jest globals
 
 // Mock the server actions
 jest.mock("@/app/actions/promoters", () => ({
