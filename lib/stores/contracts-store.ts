@@ -18,10 +18,18 @@ interface ContractsState {
   contracts: Contract[]
   loading: boolean
   error: string | null
+
+  // Actions
+  setContracts: (contracts: Contract[]) => void
+  addContract: (contract: Contract) => void
+  updateContract: (contract: Contract) => void
+  removeContract: (id: string) => void
+  setLoading: (loading: boolean) => void
+  setError: (error: string | null) => void
+
+  // Async actions
   fetchContracts: () => Promise<void>
   generateContract: (contractNumber: string) => Promise<void>
-  updateContract: (contract: Contract) => void
-  retryContract: (contractNumber: string) => Promise<void>
 }
 
 export const useContractsStore = create<ContractsState>((set, get) => ({
@@ -29,8 +37,30 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
   loading: false,
   error: null,
 
+  setContracts: (contracts) => set({ contracts }),
+
+  addContract: (contract) =>
+    set((state) => ({
+      contracts: [contract, ...state.contracts],
+    })),
+
+  updateContract: (updatedContract) =>
+    set((state) => ({
+      contracts: state.contracts.map((contract) => (contract.id === updatedContract.id ? updatedContract : contract)),
+    })),
+
+  removeContract: (id) =>
+    set((state) => ({
+      contracts: state.contracts.filter((contract) => contract.id !== id),
+    })),
+
+  setLoading: (loading) => set({ loading }),
+
+  setError: (error) => set({ error }),
+
   fetchContracts: async () => {
     set({ loading: true, error: null })
+
     try {
       const { data, error } = await supabase.from("contracts").select("*").order("created_at", { ascending: false })
 
@@ -38,8 +68,9 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
 
       set({ contracts: data || [], loading: false })
     } catch (error) {
+      console.error("Error fetching contracts:", error)
       set({
-        error: error instanceof Error ? error.message : "Failed to fetch contracts",
+        error: "Failed to fetch contracts",
         loading: false,
       })
     }
@@ -56,25 +87,15 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
       })
 
       if (!response.ok) {
-        throw new Error("Failed to generate contract")
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to generate contract")
       }
 
-      // Contract status will be updated via real-time subscription
+      // Contract will be updated via real-time subscription
     } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : "Failed to generate contract",
-      })
+      console.error("Error generating contract:", error)
+      set({ error: error instanceof Error ? error.message : "Failed to generate contract" })
+      throw error
     }
-  },
-
-  updateContract: (updatedContract: Contract) => {
-    set((state) => ({
-      contracts: state.contracts.map((contract) => (contract.id === updatedContract.id ? updatedContract : contract)),
-    }))
-  },
-
-  retryContract: async (contractNumber: string) => {
-    const { generateContract } = get()
-    await generateContract(contractNumber)
   },
 }))

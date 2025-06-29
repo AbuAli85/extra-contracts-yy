@@ -7,7 +7,7 @@ export default function ContractsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Contracts</h1>
-          <p className="text-muted-foreground">Manage and generate your bilingual contracts</p>
+          <p className="text-muted-foreground">Manage and generate your contracts</p>
         </div>
       </div>
 

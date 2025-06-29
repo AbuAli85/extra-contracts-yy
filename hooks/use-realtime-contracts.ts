@@ -2,12 +2,13 @@
 
 import { useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
-import { useContractsStore, type Contract } from "@/lib/stores/contracts-store"
+import { useContractsStore } from "@/lib/stores/contracts-store"
+import type { Contract } from "@/lib/stores/contracts-store"
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
 export function useRealtimeContracts() {
-  const updateContract = useContractsStore((state) => state.updateContract)
+  const { updateContract, addContract, removeContract } = useContractsStore()
 
   useEffect(() => {
     const channel = supabase
@@ -15,14 +16,37 @@ export function useRealtimeContracts() {
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "contracts",
         },
         (payload) => {
-          if (payload.eventType === "UPDATE" || payload.eventType === "INSERT") {
-            updateContract(payload.new as Contract)
-          }
+          console.log("New contract:", payload.new)
+          addContract(payload.new as Contract)
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "contracts",
+        },
+        (payload) => {
+          console.log("Contract updated:", payload.new)
+          updateContract(payload.new as Contract)
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "contracts",
+        },
+        (payload) => {
+          console.log("Contract deleted:", payload.old)
+          removeContract((payload.old as Contract).id)
         },
       )
       .subscribe()
@@ -30,5 +54,5 @@ export function useRealtimeContracts() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [updateContract])
+  }, [updateContract, addContract, removeContract])
 }
