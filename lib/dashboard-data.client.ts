@@ -1,11 +1,13 @@
 import { createClient } from "@/lib/supabase/client"
 import type {
-  AdminAction,
   DashboardAnalytics,
-  Notification,
+  ContractTrend,
+  ContractStatusDistribution,
   PendingReview,
-  ServerActionResponse,
+  AdminAction,
+  Notification,
   User,
+  ServerActionResponse,
 } from "./dashboard-types"
 
 export async function getDashboardAnalytics(): Promise<ServerActionResponse<DashboardAnalytics>> {
