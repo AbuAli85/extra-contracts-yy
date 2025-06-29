@@ -1,222 +1,177 @@
 "use client"
 
-import type { z } from "zod"
+import React from "react"
+import { useActionState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
+import { useTranslations } from "next-intl"
+import type { z } from "zod"
+import { useRouter } from "next/navigation"
+
+import { createContract, updateContract } from "@/app/actions/contracts"
 import { ComboboxField } from "@/components/combobox-field"
 import { DatePickerWithPresetsField } from "@/components/date-picker-with-presets-field"
-import { contractFormSchema } from "@/lib/generate-contract-form-schema"
-import { createContract, updateContract } from "@/app/actions/contracts"
-import { useEffect, useState } from "react"
-import { getParties, getPromoters } from "@/lib/data"
-import type { Party, Promoter } from "@/lib/types"
-import { useTranslations } from "next-intl"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/components/ui/use-toast"
+import { contractSchema } from "@/lib/validations/contract"
+import type { Party, Promoter, Contract } from "@/lib/types"
 
 interface ContractGeneratorFormProps {
-  initialData?: z.infer<typeof contractFormSchema>
-  contractId?: string
+  parties: Party[]
+  promoters: Promoter[]
+  initialData?: Contract
 }
 
-export function ContractGeneratorForm({ initialData, contractId }: ContractGeneratorFormProps) {
-  const t = useTranslations("ContractForm")
-  const [parties, setParties] = useState<Party[]>([])
-  const [promoters, setPromoters] = useState<Promoter[]>([])
-  const [loading, setLoading] = useState(true)
+export function ContractGeneratorForm({ parties, promoters, initialData }: ContractGeneratorFormProps) {
+  const t = useTranslations("ContractGeneratorForm")
+  const { toast } = useToast()
+  const router = useRouter()
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true)
-      try {
-        const [partiesData, promotersData] = await Promise.all([getParties(), getPromoters()])
-        setParties(partiesData)
-        setPromoters(promotersData)
-      } catch (error) {
-        console.error("Failed to fetch parties or promoters:", error)
-        toast({
-          title: t("fetchErrorTitle"),
-          description: t("fetchErrorDescription"),
-          variant: "destructive",
-        })
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [t])
-
-  const form = useForm<z.infer<typeof contractFormSchema>>({
-    resolver: zodResolver(contractFormSchema),
-    defaultValues: initialData || {
-      firstPartyNameEn: "",
-      firstPartyNameAr: "",
-      secondPartyNameEn: "",
-      secondPartyNameAr: "",
-      promoterNameEn: "",
-      promoterNameAr: "",
-      contractType: "",
-      startDate: undefined,
-      endDate: undefined,
-      contentEn: "",
-      contentAr: "",
+  const form = useForm<z.infer<typeof contractSchema>>({
+    resolver: zodResolver(contractSchema),
+    defaultValues: {
+      contract_name: initialData?.contract_name || "",
+      contract_type: initialData?.contract_type || "",
+      status: initialData?.status || "Draft",
+      party_a_id: initialData?.party_a_id || "",
+      party_b_id: initialData?.party_b_id || "",
+      promoter_id: initialData?.promoter_id || "",
+      effective_date: initialData?.effective_date ? new Date(initialData.effective_date) : undefined,
+      termination_date: initialData?.termination_date ? new Date(initialData.termination_date) : undefined,
+      contract_value: initialData?.contract_value || undefined,
+      payment_terms: initialData?.payment_terms || "",
+      content_english: initialData?.content_english || "",
+      content_spanish: initialData?.content_spanish || "",
+      is_template: initialData?.is_template || false,
+      is_archived: initialData?.is_archived || false,
     },
   })
 
-  const onSubmit = async (values: z.infer<typeof contractFormSchema>) => {
-    try {
-      if (contractId) {
-        await updateContract(contractId, values)
+  const [state, formAction] = useActionState(
+    initialData ? updateContract.bind(null, initialData.id) : createContract,
+    null,
+  )
+
+  React.useEffect(() => {
+    if (state) {
+      if (state.success) {
         toast({
-          title: t("updateSuccessTitle"),
-          description: t("updateSuccessDescription"),
+          title: t("success"),
+          description: state.message,
         })
+        if (!initialData) {
+          form.reset()
+        }
+        router.push(initialData ? `/contracts/${initialData.id}` : "/contracts")
+        router.refresh()
       } else {
-        await createContract(values)
         toast({
-          title: t("successTitle"),
-          description: t("successDescription"),
+          title: t("error"),
+          description: state.message || t("somethingWentWrong"),
+          variant: "destructive",
         })
+        if (state.errors) {
+          for (const [field, messages] of Object.entries(state.errors)) {
+            form.setError(field as keyof typeof contractSchema, {
+              type: "server",
+              message: messages?.join(", "),
+            })
+          }
+        }
       }
-    } catch (error: any) {
-      toast({
-        title: t("errorTitle"),
-        description: error.message || t("errorDescription"),
-        variant: "destructive",
-      })
     }
-  }
-
-  const partyOptions = parties.map((party) => ({
-    value: party.name_en, // Using English name as value for simplicity
-    label: `${party.name_en} (${party.name_ar})`,
-  }))
-
-  const promoterOptions = promoters.map((promoter) => ({
-    value: promoter.name_en, // Using English name as value for simplicity
-    label: `${promoter.name_en} (${promoter.name_ar})`,
-  }))
-
-  const contractTypeOptions = [
-    { value: "Service Agreement", label: t("contractTypeServiceAgreement") },
-    { value: "Partnership Agreement", label: t("contractTypePartnershipAgreement") },
-    { value: "NDA", label: t("contractTypeNDA") },
-    { value: "Lease Agreement", label: t("contractTypeLeaseAgreement") },
-    { value: "Employment Contract", label: t("contractTypeEmploymentContract") },
-    { value: "Other", label: t("contractTypeOther") },
-  ]
-
-  if (loading) {
-    return <div className="text-center py-8">{t("loadingData")}</div>
-  }
+  }, [state, toast, form, initialData, router, t])
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form action={formAction} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="contract_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("contractName")}</FormLabel>
+              <FormControl>
+                <Input placeholder={t("contractNamePlaceholder")} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="firstPartyNameEn"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("firstPartyNameEn")}</FormLabel>
-                <ComboboxField
-                  options={partyOptions}
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  placeholder={t("selectFirstParty")}
-                  searchPlaceholder={t("searchParty")}
-                  emptyMessage={t("noPartyFound")}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="firstPartyNameAr"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("firstPartyNameAr")}</FormLabel>
-                <Input {...field} dir="rtl" />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="secondPartyNameEn"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("secondPartyNameEn")}</FormLabel>
-                <ComboboxField
-                  options={partyOptions}
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  placeholder={t("selectSecondParty")}
-                  searchPlaceholder={t("searchParty")}
-                  emptyMessage={t("noPartyFound")}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="secondPartyNameAr"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("secondPartyNameAr")}</FormLabel>
-                <Input {...field} dir="rtl" />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="promoterNameEn"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("promoterNameEn")}</FormLabel>
-                <ComboboxField
-                  options={promoterOptions}
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  placeholder={t("selectPromoter")}
-                  searchPlaceholder={t("searchPromoter")}
-                  emptyMessage={t("noPromoterFound")}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="promoterNameAr"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("promoterNameAr")}</FormLabel>
-                <Input {...field} dir="rtl" />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="contractType"
+            name="contract_type"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("contractType")}</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("selectContractType")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Service">{t("service")}</SelectItem>
+                    <SelectItem value="Sales">{t("sales")}</SelectItem>
+                    <SelectItem value="Partnership">{t("partnership")}</SelectItem>
+                    <SelectItem value="NDA">{t("nda")}</SelectItem>
+                    <SelectItem value="Other">{t("other")}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("status")}</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("selectStatus")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Draft">{t("draft")}</SelectItem>
+                    <SelectItem value="Pending Review">{t("pendingReview")}</SelectItem>
+                    <SelectItem value="Approved">{t("approved")}</SelectItem>
+                    <SelectItem value="Active">{t("active")}</SelectItem>
+                    <SelectItem value="Completed">{t("completed")}</SelectItem>
+                    <SelectItem value="Archived">{t("archived")}</SelectItem>
+                    <SelectItem value="Terminated">{t("terminated")}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="party_a_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("partyA")}</FormLabel>
                 <ComboboxField
-                  options={contractTypeOptions}
+                  options={parties}
                   value={field.value}
                   onValueChange={field.onChange}
-                  placeholder={t("selectContractType")}
-                  searchPlaceholder={t("searchContractType")}
-                  emptyMessage={t("noContractTypeFound")}
+                  placeholder={t("selectPartyA")}
+                  noResultsText={t("noPartyFound")}
+                  searchPlaceholder={t("searchParty")}
                 />
                 <FormMessage />
               </FormItem>
@@ -224,12 +179,92 @@ export function ContractGeneratorForm({ initialData, contractId }: ContractGener
           />
           <FormField
             control={form.control}
-            name="startDate"
+            name="party_b_id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("startDate")}</FormLabel>
+                <FormLabel>{t("partyB")}</FormLabel>
+                <ComboboxField
+                  options={parties}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder={t("selectPartyB")}
+                  noResultsText={t("noPartyFound")}
+                  searchPlaceholder={t("searchParty")}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="promoter_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("promoter")}</FormLabel>
+                <ComboboxField
+                  options={promoters}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder={t("selectPromoter")}
+                  noResultsText={t("noPromoterFound")}
+                  searchPlaceholder={t("searchPromoter")}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="effective_date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel className="mb-1">{t("effectiveDate")}</FormLabel>
+                <DatePickerWithPresetsField
+                  date={field.value}
+                  setDate={(date) => field.onChange(date)}
+                  placeholder={t("pickEffectiveDate")}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="termination_date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel className="mb-1">{t("terminationDate")}</FormLabel>
+                <DatePickerWithPresetsField
+                  date={field.value}
+                  setDate={(date) => field.onChange(date)}
+                  placeholder={t("pickTerminationDate")}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="contract_value"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("contractValue")}</FormLabel>
                 <FormControl>
-                  <DatePickerWithPresetsField date={field.value} setDate={field.onChange} />
+                  <Input
+                    type="number"
+                    placeholder={t("contractValuePlaceholder")}
+                    {...field}
+                    value={field.value === undefined ? "" : field.value}
+                    onChange={(e) =>
+                      field.onChange(e.target.value === "" ? undefined : Number.parseFloat(e.target.value))
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -237,48 +272,88 @@ export function ContractGeneratorForm({ initialData, contractId }: ContractGener
           />
           <FormField
             control={form.control}
-            name="endDate"
+            name="payment_terms"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("endDate")}</FormLabel>
+                <FormLabel>{t("paymentTerms")}</FormLabel>
                 <FormControl>
-                  <DatePickerWithPresetsField date={field.value} setDate={field.onChange} />
+                  <Input placeholder={t("paymentTermsPlaceholder")} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+
         <FormField
           control={form.control}
-          name="contentEn"
+          name="content_english"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("contentEn")}</FormLabel>
-              <Textarea rows={10} {...field} />
+              <FormLabel>{t("contentEnglish")}</FormLabel>
+              <FormControl>
+                <Textarea placeholder={t("contentEnglishPlaceholder")} {...field} rows={8} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
-          name="contentAr"
+          name="content_spanish"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("contentAr")}</FormLabel>
-              <Textarea rows={10} {...field} dir="rtl" />
+              <FormLabel>{t("contentSpanish")}</FormLabel>
+              <FormControl>
+                <Textarea placeholder={t("contentSpanishPlaceholder")} {...field} rows={8} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        <div className="flex items-center space-x-2">
+          <FormField
+            control={form.control}
+            name="is_template"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+                <FormControl>
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>{t("isTemplate")}</FormLabel>
+                  <p className="text-sm text-muted-foreground">{t("isTemplateDescription")}</p>
+                </div>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="is_archived"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+                <FormControl>
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>{t("isArchived")}</FormLabel>
+                  <p className="text-sm text-muted-foreground">{t("isArchivedDescription")}</p>
+                </div>
+              </FormItem>
+            )}
+          />
+        </div>
+
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting
-            ? contractId
-              ? t("updatingContract")
-              : t("generatingContract")
-            : contractId
+            ? initialData
+              ? t("updating")
+              : t("creating")
+            : initialData
               ? t("updateContract")
-              : t("generateContract")}
+              : t("createContract")}
         </Button>
       </form>
     </Form>

@@ -1,20 +1,21 @@
+import createMiddleware from "next-intl/middleware"
 import { createMiddlewareClient } from "@supabase/ssr"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import type { Database } from "@/types/supabase"
-import createIntlMiddleware from "next-intl/middleware"
+import { locales, localePrefix } from "./navigation"
 
-const locales = ["en", "es"]
-const defaultLocale = "en"
-
-const handleI18nRouting = createIntlMiddleware({
+export default createMiddleware({
+  // A list of all locales that are supported
   locales,
-  defaultLocale,
-  localePrefix: "as-needed", // or 'always' or 'never'
+
+  // Used when no locale matches
+  defaultLocale: "en",
+  localePrefix,
 })
 
 export async function middleware(request: NextRequest) {
-  const response = handleI18nRouting(request) as NextResponse
+  const response = NextResponse.next()
 
   const supabase = createMiddlewareClient<Database>({ req: request, res: response })
 
@@ -43,7 +44,7 @@ export async function middleware(request: NextRequest) {
     if (locales.includes(locale)) {
       loginUrl.pathname = `/${locale}/login`
     } else {
-      loginUrl.pathname = `/${defaultLocale}/login`
+      loginUrl.pathname = `/${"en"}/login`
     }
     return NextResponse.redirect(loginUrl)
   }
@@ -52,9 +53,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    // Match all routes except static files and APIs
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-    "/",
-  ],
+  // Match only internationalized pathnames
+  matcher: ["/", "/(en|es)/:path*", "/((?!_next|_vercel|.*\\..*).*)"],
 }

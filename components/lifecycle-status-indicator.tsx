@@ -1,42 +1,51 @@
-import { cn } from "@/lib/utils"
+"use client"
+
+import { Badge } from "@/components/ui/badge"
+import { useTranslations } from "next-intl"
 
 interface LifecycleStatusIndicatorProps {
   status: string
 }
 
-export const LifecycleStatusIndicator = ({ status }: LifecycleStatusIndicatorProps) => {
-  let colorClass = ""
-  switch (status.toLowerCase()) {
-    case "draft":
-      colorClass = "bg-gray-500"
+export function LifecycleStatusIndicator({ status }: LifecycleStatusIndicatorProps) {
+  const t = useTranslations("LifecycleStatusIndicator")
+
+  let variant: "default" | "secondary" | "destructive" | "outline" | "success" | "info" | "warning" = "secondary"
+  let translatedStatus = status
+
+  switch (status) {
+    case "Draft":
+      variant = "outline"
+      translatedStatus = t("draft")
       break
-    case "pending review":
-      colorClass = "bg-yellow-500"
+    case "Pending Review":
+      variant = "info"
+      translatedStatus = t("pendingReview")
       break
-    case "approved":
-      colorClass = "bg-blue-500"
+    case "Approved":
+      variant = "success"
+      translatedStatus = t("approved")
       break
-    case "signed":
-      colorClass = "bg-purple-500"
+    case "Active":
+      variant = "default"
+      translatedStatus = t("active")
       break
-    case "active":
-      colorClass = "bg-green-500"
+    case "Completed":
+      variant = "secondary"
+      translatedStatus = t("completed")
       break
-    case "completed":
-      colorClass = "bg-teal-500"
+    case "Archived":
+      variant = "outline"
+      translatedStatus = t("archived")
       break
-    case "archived":
-      colorClass = "bg-red-500"
+    case "Terminated":
+      variant = "destructive"
+      translatedStatus = t("terminated")
       break
     default:
-      colorClass = "bg-gray-400"
+      variant = "secondary"
+      break
   }
 
-  return (
-    <span
-      className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white", colorClass)}
-    >
-      {status}
-    </span>
-  )
+  return <Badge variant={variant}>{translatedStatus}</Badge>
 }

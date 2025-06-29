@@ -1,189 +1,288 @@
 "use client"
 
+import type React from "react"
+
 import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { ContractGeneratorForm } from "./contract-generator-form"
-import { createContract, updateContract } from "@/app/actions/contracts"
-import { useToast } from "@/components/ui/use-toast"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { NextIntlClientProvider } from "next-intl/client"
+import messages from "@/messages/en.json" // Adjust path as necessary
+import { act } from "react-dom/test-utils"
 import jest from "jest" // Import jest to declare it
 
-// Mock next-intl useTranslations
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
+// Mock the server actions
+jest.mock("@/app/actions/contracts", () => ({
+  createContract: jest.fn((_prevState, formData) => {
+    const data = Object.fromEntries(formData.entries())
+    if (data.contract_name === "Test Contract Success") {
+      return Promise.resolve({ success: true, message: "Contract created successfully!" })
+    }
+    return Promise.resolve({ success: false, message: "Failed to create contract." })
+  }),
+  updateContract: jest.fn((_id, _prevState, formData) => {
+    const data = Object.fromEntries(formData.entries())
+    if (data.contract_name === "Updated Contract Success") {
+      return Promise.resolve({ success: true, message: "Contract updated successfully!" })
+    }
+    return Promise.resolve({ success: false, message: "Failed to update contract." })
+  }),
 }))
 
-// Mock server actions and data fetching
-jest.mock("@/app/actions/contracts", () => ({
-  createContract: jest.fn(),
-  updateContract: jest.fn(),
+jest.mock("@/app/actions/parties", () => ({
+  getParties: jest.fn(() => Promise.resolve({ data: [{ id: "party1", name: "Party A" }], success: true })),
 }))
-jest.mock("@/lib/data", () => ({
-  getParties: jest.fn(() =>
-    Promise.resolve([
-      { id: "p1", name_en: "Party A", name_ar: "الطرف أ", type: "Client" },
-      { id: "p2", name_en: "Party B", name_ar: "الطرف ب", type: "Vendor" },
-    ]),
-  ),
-  getPromoters: jest.fn(() =>
-    Promise.resolve([
-      { id: "pr1", name_en: "Promoter X", name_ar: "المروج س", email: "x@example.com" },
-      { id: "pr2", name_en: "Promoter Y", name_ar: "المروج ص", email: "y@example.com" },
-    ]),
-  ),
+
+jest.mock("@/app/actions/promoters", () => ({
+  getPromoters: jest.fn(() => Promise.resolve({ data: [{ id: "promoter1", name: "Promoter X" }], success: true })),
 }))
+
+// Mock useToast
 jest.mock("@/components/ui/use-toast", () => ({
   useToast: () => ({
     toast: jest.fn(),
   }),
 }))
 
-describe("ContractGeneratorForm", () => {
-  const mockToast = useToast().toast as jest.Mock
-  const mockCreateContract = createContract as jest.Mock
-  const mockUpdateContract = updateContract as jest.Mock
+// Mock useRouter
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    refresh: jest.fn(),
+  }),
+}))
 
+// Mock next-intl useTranslations
+jest.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key, // Simple mock that returns the key
+}))
+
+const queryClient = new QueryClient()
+
+const mockParties = [
+  { id: "party1", name: "Party A", email: "a@example.com", phone: "111", address: "123 Main", type: "Individual" },
+  { id: "party2", name: "Party B", email: "b@example.com", phone: "222", address: "456 Oak", type: "Company" },
+]
+
+const mockPromoters = [
+  {
+    id: "promoter1",
+    name: "Promoter X",
+    email: "x@example.com",
+    phone: "333",
+    company: "X Corp",
+    address: "789 Pine",
+    city: "CityX",
+    state: "ST",
+    zip_code: "12345",
+    country: "USA",
+    bio: "BioX",
+    profile_picture_url: null,
+  },
+  {
+    id: "promoter2",
+    name: "Promoter Y",
+    email: "y@example.com",
+    phone: "444",
+    company: "Y Inc",
+    address: "101 Elm",
+    city: "CityY",
+    state: "ST",
+    zip_code: "67890",
+    country: "USA",
+    bio: "BioY",
+    profile_picture_url: null,
+  },
+]
+
+const renderWithProviders = (ui: React.ReactElement, { locale = "en" } = {}) => {
+  return render(
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+    </NextIntlClientProvider>,
+  )
+}
+
+describe("ContractGeneratorForm", () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  it("renders the form fields correctly", async () => {
-    render(<ContractGeneratorForm />)
+  it("renders the form fields correctly for creation", async () => {
+    renderWithProviders(<ContractGeneratorForm parties={mockParties} promoters={mockPromoters} />)
+
+    expect(screen.getByLabelText(/contractName/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/contractType/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/status/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/partyA/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/partyB/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/promoter/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/effectiveDate/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/terminationDate/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/contractValue/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/paymentTerms/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/contentEnglish/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/contentSpanish/i)).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /createContract/i })).toBeInTheDocument()
+  })
+
+  it("submits the form successfully for creation", async () => {
+    const { createContract } = require("@/app/actions/contracts")
+    const { toast } = require("@/components/ui/use-toast")
+    const { useRouter } = require("next/navigation")
+
+    renderWithProviders(<ContractGeneratorForm parties={mockParties} promoters={mockPromoters} />)
+
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText(/contractName/i), { target: { value: "Test Contract Success" } })
+      fireEvent.change(screen.getByLabelText(/contractType/i), { target: { value: "Service" } })
+      fireEvent.change(screen.getByLabelText(/status/i), { target: { value: "Draft" } })
+      fireEvent.change(screen.getByLabelText(/contractValue/i), { target: { value: "1000" } })
+      fireEvent.change(screen.getByLabelText(/paymentTerms/i), { target: { value: "Net 30" } })
+      fireEvent.change(screen.getByLabelText(/contentEnglish/i), { target: { value: "English content" } })
+      fireEvent.change(screen.getByLabelText(/contentSpanish/i), { target: { value: "Spanish content" } })
+
+      // Select Party A
+      fireEvent.mouseDown(screen.getByRole("button", { name: /selectPartyA/i }))
+      await waitFor(() => expect(screen.getByText("Party A")).toBeInTheDocument())
+      fireEvent.click(screen.getByText("Party A"))
+
+      // Select Party B
+      fireEvent.mouseDown(screen.getByRole("button", { name: /selectPartyB/i }))
+      await waitFor(() => expect(screen.getByText("Party B")).toBeInTheDocument())
+      fireEvent.click(screen.getByText("Party B"))
+
+      // Select Promoter
+      fireEvent.mouseDown(screen.getByRole("button", { name: /selectPromoter/i }))
+      await waitFor(() => expect(screen.getByText("Promoter X")).toBeInTheDocument())
+      fireEvent.click(screen.getByText("Promoter X"))
+
+      fireEvent.click(screen.getByRole("button", { name: /createContract/i }))
+    })
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/First Party $$English$$/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/First Party $$Arabic$$/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Second Party $$English$$/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Second Party $$Arabic$$/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Promoter $$English$$/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Promoter $$Arabic$$/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Contract Type/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Start Date/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/End Date/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Contract Content $$English$$/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Contract Content $$Arabic$$/i)).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: /Generate Contract/i })).toBeInTheDocument()
+      expect(createContract).toHaveBeenCalled()
+      expect(toast).toHaveBeenCalledWith({
+        title: "success",
+        description: "Contract created successfully!",
+      })
+      expect(useRouter().push).toHaveBeenCalledWith("/contracts")
+      expect(useRouter().refresh).toHaveBeenCalled()
     })
   })
 
-  it("pre-fills form with initialData when provided", async () => {
+  it("displays error message on failed submission for creation", async () => {
+    const { createContract } = require("@/app/actions/contracts")
+    const { toast } = require("@/components/ui/use-toast")
+
+    renderWithProviders(<ContractGeneratorForm parties={mockParties} promoters={mockPromoters} />)
+
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText(/contractName/i), { target: { value: "Failed Contract" } })
+      fireEvent.click(screen.getByRole("button", { name: /createContract/i }))
+    })
+
+    await waitFor(() => {
+      expect(createContract).toHaveBeenCalled()
+      expect(toast).toHaveBeenCalledWith({
+        title: "error",
+        description: "Failed to create contract.",
+        variant: "destructive",
+      })
+    })
+  })
+
+  it("populates form fields correctly for editing", async () => {
     const initialData = {
-      firstPartyNameEn: "Initial Party1 EN",
-      firstPartyNameAr: "Initial Party1 AR",
-      secondPartyNameEn: "Initial Party2 EN",
-      secondPartyNameAr: "Initial Party2 AR",
-      promoterNameEn: "Initial Promoter EN",
-      promoterNameAr: "Initial Promoter AR",
-      contractType: "Service Agreement",
-      startDate: new Date("2023-01-01"),
-      endDate: new Date("2023-12-31"),
-      contentEn: "Initial English content.",
-      contentAr: "Initial Arabic content.",
+      id: "contract123",
+      contract_id: "C-001",
+      contract_name: "Existing Contract",
+      contract_type: "Sale",
+      status: "Active",
+      party_a_id: "party1",
+      party_b_id: "party2",
+      promoter_id: "promoter1",
+      effective_date: "2023-01-01T00:00:00.000Z",
+      termination_date: "2024-01-01T00:00:00.000Z",
+      contract_value: 5000,
+      payment_terms: "Upon delivery",
+      content_english: "Existing English content.",
+      content_spanish: "Existing Spanish content.",
+      is_template: false,
+      is_archived: false,
+      created_at: "2022-12-01T00:00:00.000Z",
+      updated_at: "2022-12-01T00:00:00.000Z",
+      parties_a: { id: "party1", name: "Party A" },
+      parties_b: { id: "party2", name: "Party B" },
+      promoters: { id: "promoter1", name: "Promoter X" },
     }
 
-    render(<ContractGeneratorForm initialData={initialData} />)
+    renderWithProviders(
+      <ContractGeneratorForm parties={mockParties} promoters={mockPromoters} initialData={initialData} />,
+    )
 
-    await waitFor(() => {
-      expect(screen.getByLabelText(/First Party $$English$$/i)).toHaveValue("Initial Party1 EN")
-      expect(screen.getByLabelText(/Contract Content $$English$$/i)).toHaveValue("Initial English content.")
-    })
+    expect(screen.getByLabelText(/contractName/i)).toHaveValue("Existing Contract")
+    expect(screen.getByLabelText(/contractType/i)).toHaveValue("Sale")
+    expect(screen.getByLabelText(/status/i)).toHaveValue("Active")
+    expect(screen.getByRole("button", { name: "Party A" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Party B" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Promoter X" })).toBeInTheDocument()
+    expect(screen.getByLabelText(/contractValue/i)).toHaveValue(5000)
+    expect(screen.getByLabelText(/paymentTerms/i)).toHaveValue("Upon delivery")
+    expect(screen.getByLabelText(/contentEnglish/i)).toHaveValue("Existing English content.")
+    expect(screen.getByLabelText(/contentSpanish/i)).toHaveValue("Existing Spanish content.")
+    expect(screen.getByRole("button", { name: /updateContract/i })).toBeInTheDocument()
   })
 
-  it("calls createContract on submission for new contract", async () => {
-    render(<ContractGeneratorForm />)
+  it("submits the form successfully for editing", async () => {
+    const { updateContract } = require("@/app/actions/contracts")
+    const { toast } = require("@/components/ui/use-toast")
+    const { useRouter } = require("next/navigation")
 
-    await waitFor(() => {
-      fireEvent.change(screen.getByLabelText(/First Party $$English$$/i), {
-        target: { value: "New Party1 EN" },
-      })
-      fireEvent.change(screen.getByLabelText(/First Party $$Arabic$$/i), {
-        target: { value: "New Party1 AR" },
-      })
-      fireEvent.change(screen.getByLabelText(/Second Party $$English$$/i), {
-        target: { value: "New Party2 EN" },
-      })
-      fireEvent.change(screen.getByLabelText(/Second Party $$Arabic$$/i), {
-        target: { value: "New Party2 AR" },
-      })
-      fireEvent.change(screen.getByLabelText(/Promoter $$English$$/i), {
-        target: { value: "New Promoter EN" },
-      })
-      fireEvent.change(screen.getByLabelText(/Promoter $$Arabic$$/i), {
-        target: { value: "New Promoter AR" },
-      })
-      fireEvent.change(screen.getByLabelText(/Contract Type/i), {
-        target: { value: "NDA" },
-      })
-      // For date pickers, we might need to simulate more complex interactions or just set the value directly if possible
-      // For simplicity in testing, let's assume direct value setting works for now or mock the component
-      fireEvent.change(screen.getByLabelText(/Start Date/i), {
-        target: { value: "2024-01-01" },
-      })
-      fireEvent.change(screen.getByLabelText(/End Date/i), {
-        target: { value: "2024-12-31" },
-      })
-      fireEvent.change(screen.getByLabelText(/Contract Content $$English$$/i), {
-        target: { value: "Test English content." },
-      })
-      fireEvent.change(screen.getByLabelText(/Contract Content $$Arabic$$/i), {
-        target: { value: "Test Arabic content." },
-      })
-    })
-
-    fireEvent.click(screen.getByRole("button", { name: /Generate Contract/i }))
-
-    await waitFor(() => {
-      expect(mockCreateContract).toHaveBeenCalledTimes(1)
-      expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({ title: "contractForm.successTitle" }))
-    })
-  })
-
-  it("calls updateContract on submission for existing contract", async () => {
-    const contractId = "some-contract-id"
     const initialData = {
-      firstPartyNameEn: "Existing Party1 EN",
-      firstPartyNameAr: "Existing Party1 AR",
-      secondPartyNameEn: "Existing Party2 EN",
-      secondPartyNameAr: "Existing Party2 AR",
-      promoterNameEn: "Existing Promoter EN",
-      promoterNameAr: "Existing Promoter AR",
-      contractType: "Consulting",
-      startDate: new Date("2023-01-01"),
-      endDate: new Date("2023-12-31"),
-      contentEn: "Existing English content.",
-      contentAr: "Existing Arabic content.",
+      id: "contract123",
+      contract_id: "C-001",
+      contract_name: "Existing Contract",
+      contract_type: "Sale",
+      status: "Active",
+      party_a_id: "party1",
+      party_b_id: "party2",
+      promoter_id: "promoter1",
+      effective_date: "2023-01-01T00:00:00.000Z",
+      termination_date: "2024-01-01T00:00:00.000Z",
+      contract_value: 5000,
+      payment_terms: "Upon delivery",
+      content_english: "Existing English content.",
+      content_spanish: "Existing Spanish content.",
+      is_template: false,
+      is_archived: false,
+      created_at: "2022-12-01T00:00:00.000Z",
+      updated_at: "2022-12-01T00:00:00.000Z",
+      parties_a: { id: "party1", name: "Party A" },
+      parties_b: { id: "party2", name: "Party B" },
+      promoters: { id: "promoter1", name: "Promoter X" },
     }
 
-    render(<ContractGeneratorForm initialData={initialData} contractId={contractId} />)
+    renderWithProviders(
+      <ContractGeneratorForm parties={mockParties} promoters={mockPromoters} initialData={initialData} />,
+    )
 
-    await waitFor(() => {
-      fireEvent.change(screen.getByLabelText(/First Party $$English$$/i), {
-        target: { value: "Updated Party1 EN" },
-      })
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText(/contractName/i), { target: { value: "Updated Contract Success" } })
+      fireEvent.click(screen.getByRole("button", { name: /updateContract/i }))
     })
 
-    fireEvent.click(screen.getByRole("button", { name: /Update Contract/i }))
-
     await waitFor(() => {
-      expect(mockUpdateContract).toHaveBeenCalledTimes(1)
-      expect(mockUpdateContract).toHaveBeenCalledWith(
-        contractId,
-        expect.objectContaining({ firstPartyNameEn: "Updated Party1 EN" }),
+      expect(updateContract).toHaveBeenCalledWith(
+        "contract123",
+        expect.any(Object), // prevState
+        expect.any(FormData),
       )
-      expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({ title: "contractForm.updateSuccessTitle" }))
-    })
-  })
-
-  it("displays validation errors for invalid input", async () => {
-    render(<ContractGeneratorForm />)
-
-    fireEvent.click(screen.getByRole("button", { name: /Generate Contract/i }))
-
-    await waitFor(() => {
-      expect(screen.getByText(/First Party English name is required/i)).toBeInTheDocument()
-      expect(screen.getByText(/Contract type is required/i)).toBeInTheDocument()
-      expect(screen.getByText(/Start date is required/i)).toBeInTheDocument()
-      expect(screen.getByText(/End date is required/i)).toBeInTheDocument()
-      expect(screen.getByText(/English content is required/i)).toBeInTheDocument()
-      expect(screen.getByText(/Arabic content is required/i)).toBeInTheDocument()
+      expect(toast).toHaveBeenCalledWith({
+        title: "success",
+        description: "Contract updated successfully!",
+      })
+      expect(useRouter().push).toHaveBeenCalledWith("/contracts/contract123")
+      expect(useRouter().refresh).toHaveBeenCalled()
     })
   })
 })

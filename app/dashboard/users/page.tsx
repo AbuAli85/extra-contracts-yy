@@ -1,62 +1,62 @@
 import { getTranslations } from "next-intl/server"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+
+import { getUsers } from "@/lib/dashboard-data"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { getUsers } from "@/lib/dashboard-data"
 import { format } from "date-fns"
 
 export default async function UsersPage() {
-  const t = await getTranslations("DashboardUsers")
-  const users = await getUsers()
+  const t = await getTranslations("DashboardUsersPage")
+  const { data: users, error } = await getUsers()
+
+  if (error) {
+    console.error("Error fetching users:", error)
+    return <div className="text-red-500">{t("errorLoadingUsers")}</div>
+  }
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-      <h1 className="text-2xl font-semibold">{t("usersTitle")}</h1>
+    <div className="container mx-auto px-4 py-8 md:px-6">
+      <h1 className="mb-6 text-3xl font-bold">{t("userManagement")}</h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("allUsers")}</CardTitle>
-          <CardDescription>{t("allUsersDescription")}</CardDescription>
+          <CardTitle>{t("systemUsers")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("email")}</TableHead>
-                <TableHead>{t("role")}</TableHead>
-                <TableHead>{t("status")}</TableHead>
-                <TableHead>{t("createdAt")}</TableHead>
-                <TableHead>{t("lastSignIn")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.length === 0 ? (
+          {users && users.length > 0 ? (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    {t("noUsersFound")}
-                  </TableCell>
+                  <TableHead>{t("email")}</TableHead>
+                  <TableHead>{t("role")}</TableHead>
+                  <TableHead>{t("createdAt")}</TableHead>
+                  <TableHead className="text-right">{t("actions")}</TableHead>
                 </TableRow>
-              ) : (
-                users.map((user) => (
+              </TableHeader>
+              <TableBody>
+                {users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.email}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{user.role}</Badge>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={user.status === "ACTIVE" ? "default" : "secondary"}>{user.status}</Badge>
-                    </TableCell>
-                    <TableCell>{format(new Date(user.created_at), "PPP")}</TableCell>
-                    <TableCell>
-                      {user.last_sign_in_at ? format(new Date(user.last_sign_in_at), "PPP p") : "N/A"}
+                    <TableCell>{format(new Date(user.createdAt), "PPP")}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" disabled>
+                        {t("edit")}
+                      </Button>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="text-center text-gray-500">{t("noUsersFound")}</p>
+          )}
         </CardContent>
       </Card>
-    </main>
+    </div>
   )
 }

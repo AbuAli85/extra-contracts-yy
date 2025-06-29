@@ -1,15 +1,14 @@
 import { getTranslations } from "next-intl/server"
-import ContractReportsTable from "@/components/dashboard/contract-reports-table"
-import { getContracts } from "@/lib/data"
 
-export default async function DashboardContractsPage() {
-  const t = await getTranslations("DashboardContracts")
-  const contracts = await getContracts() // Fetch all contracts for the table
+import ContractReportsTable from "@/components/dashboard/contract-reports-table" // Default import
+
+export default async function ContractsPage() {
+  const t = await getTranslations("DashboardContractsPage")
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-      <h1 className="text-2xl font-semibold">{t("contractsTitle")}</h1>
-      <ContractReportsTable initialContracts={contracts} />
-    </main>
+    <div className="container mx-auto py-8 px-4 md:px-6">
+      <h1 className="text-3xl font-bold mb-6">{t("contractReports")}</h1>
+      <ContractReportsTable />
+    </div>
   )
 }

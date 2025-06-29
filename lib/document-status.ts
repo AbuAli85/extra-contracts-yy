@@ -2,6 +2,18 @@ import type React from "react"
 import { format, isPast, isFuture, parseISO, isValid, addDays } from "date-fns"
 import { CheckCircle2Icon, XCircleIcon, AlertTriangleIcon, ClockIcon, HelpCircleIcon } from "lucide-react" // Added HelpCircleIcon
 
+export const CONTRACT_STATUSES = [
+  "Draft",
+  "Pending Review",
+  "Approved",
+  "Active",
+  "Completed",
+  "Archived",
+  "Terminated",
+] as const
+
+export type ContractStatus = (typeof CONTRACT_STATUSES)[number]
+
 type DocumentStatus = {
   text: string
   colorClass: string

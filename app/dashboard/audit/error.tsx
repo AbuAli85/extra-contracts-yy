@@ -1,22 +1,38 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { FrownIcon } from "lucide-react"
 import { useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { useTranslations } from "next-intl"
 
-export default function AuditError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  const t = useTranslations("ErrorPage")
+
   useEffect(() => {
     // Log the error to an error reporting service
     console.error(error)
   }, [error])
 
   return (
-    <div className="flex min-h-[calc(100vh-theme(spacing.16))] flex-col items-center justify-center gap-4 py-10">
-      <FrownIcon className="h-16 w-16 text-destructive" />
-      <h2 className="text-2xl font-bold text-destructive">Something went wrong!</h2>
-      <p className="text-muted-foreground">Could not load audit logs.</p>
-      <p className="text-sm text-muted-foreground">Error: {error.message}</p>
-      <Button onClick={() => reset()}>Try again</Button>
+    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center p-4">
+      <Card className="w-full max-w-md text-center">
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold text-red-600">{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
+            {t("errorMessage")}: {error.message}
+          </p>
+          <Button onClick={() => reset()}>{t("tryAgain")}</Button>
+        </CardContent>
+      </Card>
     </div>
   )
 }

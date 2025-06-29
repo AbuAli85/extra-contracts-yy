@@ -1,87 +1,80 @@
 import { getTranslations } from "next-intl/server"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { PlusCircle } from "lucide-react"
 import Link from "next/link"
-import { PlusCircleIcon, FileTextIcon } from "lucide-react"
-import { getContracts } from "@/lib/data"
-import { ContractSearchInput } from "@/components/contract-search-input"
-import { ContractStatusFilter } from "@/components/contract-status-filter"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { getContracts } from "@/app/actions/contracts"
+import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
-import { LifecycleStatusIndicator } from "@/components/lifecycle-status-indicator"
 
-interface ContractsPageProps {
-  searchParams: {
-    q?: string
-    status?: string
-  }
-  params: {
-    locale: string
-  }
-}
-
-export default async function ContractsPage({ searchParams, params }: ContractsPageProps) {
+export default async function ContractsPage() {
   const t = await getTranslations("ContractsPage")
-  const contracts = await getContracts(searchParams.q, searchParams.status)
+  const { data: contracts, error } = await getContracts()
+
+  if (error) {
+    console.error("Error fetching contracts:", error)
+    return <div className="text-red-500">{t("errorLoadingContracts")}</div>
+  }
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-      <div className="flex items-center">
-        <h1 className="text-2xl font-semibold">{t("contractsTitle")}</h1>
-        <Button asChild className="ml-auto">
-          <Link href={`/${params.locale}/generate-contract`}>
-            <PlusCircleIcon className="mr-2 h-4 w-4" />
+    <div className="container mx-auto py-8 px-4 md:px-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">{t("contractsTitle")}</h1>
+        <Button asChild>
+          <Link href="/generate-contract">
+            <PlusCircle className="mr-2 h-4 w-4" />
             {t("newContract")}
           </Link>
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("allContracts")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
-            <ContractSearchInput placeholder={t("searchPlaceholder")} />
-            <ContractStatusFilter />
-          </div>
-          {contracts.length === 0 ? (
-            <div className="text-center py-8">
-              <FileTextIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-muted-foreground">{t("noContractsFound")}</p>
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {contracts.map((contract) => (
-                <Link key={contract.id} href={`/${params.locale}/contracts/${contract.id}`} className="block">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="grid gap-1">
-                      <h3 className="font-semibold text-lg">
-                        {contract.contract_id} - {contract.contract_type}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {t("parties")}: {contract.first_party_name_en} & {contract.second_party_name_en}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {t("promoter")}: {contract.promoter_name_en}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {t("dates")}: {format(new Date(contract.start_date), "PPP")} -{" "}
-                        {format(new Date(contract.end_date), "PPP")}
-                      </p>
-                    </div>
-                    <div className="mt-3 sm:mt-0 flex items-center gap-2">
-                      <LifecycleStatusIndicator status={contract.status} />
-                      <Button variant="outline" size="sm">
-                        {t("viewDetails")}
-                      </Button>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+      {contracts && contracts.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-lg text-muted-foreground">{t("noContractsYet")}</p>
+          <Button asChild className="mt-4">
+            <Link href="/generate-contract">{t("createFirstContract")}</Link>
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {contracts?.map((contract) => (
+            <Card key={contract.id} className="flex flex-col">
+              <CardHeader>
+                <CardTitle className="text-xl">{contract.contract_name}</CardTitle>
+                <CardDescription className="flex items-center justify-between">
+                  <span>
+                    {t("id")}: {contract.contract_id}
+                  </span>
+                  <Badge variant="secondary">{contract.status}</Badge>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow flex flex-col justify-between">
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <p>
+                    <span className="font-medium">{t("type")}:</span> {contract.contract_type}
+                  </p>
+                  <p>
+                    <span className="font-medium">{t("partyA")}:</span> {contract.parties_a?.name || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">{t("promoter")}:</span> {contract.promoters?.name || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">{t("effectiveDate")}:</span>{" "}
+                    {contract.effective_date ? format(new Date(contract.effective_date), "PPP") : "N/A"}
+                  </p>
+                </div>
+                <div className="mt-4">
+                  <Button asChild className="w-full">
+                    <Link href={`/contracts/${contract.id}`}>{t("viewDetails")}</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

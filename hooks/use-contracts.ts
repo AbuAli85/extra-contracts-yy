@@ -1,76 +1,81 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { createClient } from "@/lib/supabase/client"
-import type { Contract } from "@/lib/types"
-import {
-  createContract as createContractAction,
-  updateContract as updateContractAction,
-  deleteContract as deleteContractAction,
-} from "@/app/actions/contracts"
+import { createContract, getContracts, getContractById, updateContract, deleteContract } from "@/app/actions/contracts"
 
-const supabase = createClient()
-
-// Fetch all contracts
-export function useContracts(query?: string, status?: string) {
-  return useQuery<Contract[], Error>({
-    queryKey: ["contracts", query, status],
+// Query hook for fetching all contracts
+export function useContracts() {
+  return useQuery({
+    queryKey: ["contracts"],
     queryFn: async () => {
-      let dbQuery = supabase.from("contracts").select("*")
-
-      if (query) {
-        dbQuery = dbQuery.or(`contract_name.ilike.%${query}%,contract_type.ilike.%${query}%`)
+      const response = await getContracts()
+      if (!response.success) {
+        throw new Error(response.message)
       }
-
-      if (status && status !== "all") {
-        dbQuery = dbQuery.eq("status", status)
-      }
-
-      const { data, error } = await dbQuery
-      if (error) throw error
-      return data as Contract[]
+      return response.data
     },
   })
 }
 
-// Fetch a single contract by ID
+// Query hook for fetching a single contract by ID
 export function useContract(id: string) {
-  return useQuery<Contract, Error>({
-    queryKey: ["contract", id],
+  return useQuery({
+    queryKey: ["contracts", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("contracts").select("*").eq("id", id).single()
-      if (error) throw error
-      return data as Contract
+      const response = await getContractById(id)
+      if (!response.success) {
+        throw new Error(response.message)
+      }
+      return response.data
     },
+    enabled: !!id, // Only run query if id is available
   })
 }
 
-// Create a new contract
+// Mutation hook for creating a contract
 export function useCreateContractMutation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: createContractAction,
+    mutationFn: async (formData: FormData) => {
+      const response = await createContract(null, formData)
+      if (!response.success) {
+        throw new Error(response.message)
+      }
+      return response.data
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contracts"] })
     },
   })
 }
 
-// Update an existing contract
+// Mutation hook for updating a contract
 export function useUpdateContractMutation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, formData }: { id: string; formData: FormData }) => updateContractAction(id, formData),
+    mutationFn: async ({ id, formData }: { id: string; formData: FormData }) => {
+      const response = await updateContract(id, null, formData)
+      if (!response.success) {
+        throw new Error(response.message)
+      }
+      return response.data
+    },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["contract", variables.id] })
+      queryClient.invalidateQueries({ queryKey: ["contracts", variables.id] })
       queryClient.invalidateQueries({ queryKey: ["contracts"] })
     },
   })
 }
 
-// Delete a contract
+// Mutation hook for deleting a contract
 export function useDeleteContractMutation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: deleteContractAction,
+    mutationFn: async (id: string) => {
+      const response = await deleteContract(id)
+      if (!response.success) {
+        throw new Error(response.message)
+      }
+      return response.data
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contracts"] })
     },

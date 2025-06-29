@@ -1,164 +1,108 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useCallback } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Loader2, UploadCloud, XCircle } from "lucide-react"
+import React, { useState, useCallback } from "react"
 import Image from "next/image"
-import { useToast } from "@/components/ui/use-toast"
-import { createClient } from "@/lib/supabase/client"
-import { v4 as uuidv4 } from "uuid"
+import { useDropzone } from "react-dropzone"
+import { UploadCloud, XCircle } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 
 interface ImageUploadFieldProps {
-  value: string | undefined
-  onChange: (url: string | undefined) => void
+  id: string
+  name: string
   label?: string
   placeholder?: string
-  folder?: string // Supabase storage folder
-  disabled?: boolean
+  existingImageUrl?: string | null
+  onFileChange?: (file: File | null) => void
 }
 
-export default function ImageUploadField({
-  value,
-  onChange,
-  label = "Image Upload",
-  placeholder = "Upload an image",
-  folder = "public", // Default Supabase folder
-  disabled = false,
+export function ImageUploadField({
+  id,
+  name,
+  label,
+  placeholder,
+  existingImageUrl,
+  onFileChange,
 }: ImageUploadFieldProps) {
-  const [uploading, setUploading] = useState(false)
-  const { toast } = useToast()
-  const supabase = createClient()
   const t = useTranslations("ImageUploadField")
+  const [preview, setPreview] = useState<string | null>(existingImageUrl || null)
+  const [file, setFile] = useState<File | null>(null)
 
-  const handleImageUpload = useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (!event.target.files || event.target.files.length === 0) {
-        toast({
-          title: t("noFileSelected"),
-          description: t("pleaseSelectFile"),
-          variant: "destructive",
-        })
-        return
+  React.useEffect(() => {
+    setPreview(existingImageUrl || null)
+  }, [existingImageUrl])
+
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        const selectedFile = acceptedFiles[0]
+        setFile(selectedFile)
+        setPreview(URL.createObjectURL(selectedFile))
+        onFileChange?.(selectedFile)
       }
-
-      const file = event.target.files[0]
-      const fileExt = file.name.split(".").pop()
-      const fileName = `${uuidv4()}.${fileExt}`
-      const filePath = `${folder}/${fileName}`
-
-      setUploading(true)
-
-      const { error: uploadError } = await supabase.storage.from("images").upload(filePath, file)
-
-      if (uploadError) {
-        toast({
-          title: t("uploadError"),
-          description: uploadError.message,
-          variant: "destructive",
-        })
-        setUploading(false)
-        return
-      }
-
-      const { data: publicUrlData } = supabase.storage.from("images").getPublicUrl(filePath)
-
-      if (publicUrlData?.publicUrl) {
-        onChange(publicUrlData.publicUrl)
-        toast({
-          title: t("uploadSuccess"),
-          description: t("imageUploadedSuccessfully"),
-        })
-      } else {
-        toast({
-          title: t("publicUrlError"),
-          description: t("couldNotGetPublicUrl"),
-          variant: "destructive",
-        })
-      }
-      setUploading(false)
     },
-    [onChange, folder, supabase.storage, toast, t],
+    [onFileChange],
   )
 
-  const handleRemoveImage = useCallback(async () => {
-    if (!value) return
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "image/*": [".jpeg", ".png", ".jpg", ".gif", ".webp"],
+    },
+    multiple: false,
+  })
 
-    setUploading(true) // Use uploading state for deletion too
-    try {
-      const urlParts = value.split("/")
-      const fileNameWithFolder = urlParts.slice(urlParts.indexOf(folder)).join("/")
-
-      const { error: deleteError } = await supabase.storage.from("images").remove([fileNameWithFolder])
-
-      if (deleteError) {
-        throw deleteError
-      }
-
-      onChange(undefined)
-      toast({
-        title: t("removeSuccess"),
-        description: t("imageRemovedSuccessfully"),
-      })
-    } catch (error: any) {
-      toast({
-        title: t("removeError"),
-        description: error.message || t("failedToRemoveImage"),
-        variant: "destructive",
-      })
-    } finally {
-      setUploading(false)
-    }
-  }, [value, onChange, folder, supabase.storage, toast, t])
+  const handleRemoveImage = () => {
+    setFile(null)
+    setPreview(null)
+    onFileChange?.(null)
+  }
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="image-upload">{label}</Label>
-      {value ? (
-        <div className="relative w-32 h-32 rounded-md overflow-hidden border group">
-          <Image src={value || "/placeholder.svg"} alt="Uploaded image" layout="fill" objectFit="cover" />
-          <Button
-            type="button"
-            variant="destructive"
-            size="icon"
-            className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={handleRemoveImage}
-            disabled={uploading || disabled}
-          >
-            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
-            <span className="sr-only">{t("removeImage")}</span>
-          </Button>
-        </div>
-      ) : (
-        <div className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-md cursor-pointer bg-muted/20 hover:bg-muted/30 transition-colors">
-          <Label
-            htmlFor="image-upload"
-            className="flex flex-col items-center justify-center w-full h-full cursor-pointer"
-          >
-            {uploading ? (
-              <Loader2 className="h-8 w-8 text-primary animate-spin" />
-            ) : (
-              <>
-                <UploadCloud className="h-8 w-8 text-muted-foreground" />
-                <span className="mt-2 text-sm text-muted-foreground">{placeholder}</span>
-              </>
-            )}
-            <Input
-              id="image-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="sr-only"
-              disabled={uploading || disabled}
+      {label && <Label htmlFor={id}>{label}</Label>}
+      <div
+        {...getRootProps()}
+        className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-md cursor-pointer transition-colors
+          ${isDragActive ? "border-primary bg-primary/10" : "border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600"}`}
+      >
+        <input id={id} name={name} {...getInputProps()} />
+        {preview ? (
+          <div className="relative w-32 h-32 mb-4">
+            <Image
+              src={preview || "/placeholder.svg"}
+              alt="Preview"
+              layout="fill"
+              objectFit="contain"
+              className="rounded-md"
             />
-          </Label>
-        </div>
-      )}
-      {uploading && <p className="text-sm text-muted-foreground">{t("uploading")}</p>}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-background"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleRemoveImage()
+              }}
+            >
+              <XCircle className="h-5 w-5 text-destructive" />
+              <span className="sr-only">{t("removeImage")}</span>
+            </Button>
+          </div>
+        ) : (
+          <>
+            <UploadCloud className="h-10 w-10 text-muted-foreground mb-3" />
+            <p className="text-sm text-muted-foreground text-center">
+              {isDragActive ? t("dropHere") : placeholder || t("dragAndDrop")}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">{t("orClickToSelect")}</p>
+          </>
+        )}
+      </div>
+      {/* Hidden input to signal if image was removed when initialData was present */}
+      {existingImageUrl && preview === null && <input type="hidden" name={`${name}_removed`} value="true" />}
     </div>
   )
 }

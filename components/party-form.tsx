@@ -1,83 +1,78 @@
 "use client"
 
-import { useForm } from "react-hook-form"
+import React from "react"
+import { useActionState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { useTranslations } from "next-intl"
 import type { z } from "zod"
+
+import { createParty } from "@/app/actions/parties"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
-import { useRouter } from "next/navigation"
 import { partySchema } from "@/lib/party-schema"
-import type { Party } from "@/lib/types"
-import { createParty, updateParty } from "@/hooks/use-parties"
-import { useTranslations } from "next-intl"
 
 interface PartyFormProps {
-  initialData?: Party
+  onSuccess?: () => void
 }
 
-export function PartyForm({ initialData }: PartyFormProps) {
+export function PartyForm({ onSuccess }: PartyFormProps) {
   const t = useTranslations("PartyForm")
   const { toast } = useToast()
-  const router = useRouter()
 
   const form = useForm<z.infer<typeof partySchema>>({
     resolver: zodResolver(partySchema),
-    defaultValues: initialData || {
+    defaultValues: {
       name: "",
       email: "",
       phone: "",
-      type: "Client",
+      address: "",
+      type: "Individual",
     },
   })
 
-  const createPartyMutation = createParty()
-  const updatePartyMutation = updateParty()
+  const [state, formAction] = useActionState(createParty, null)
 
-  async function onSubmit(values: z.infer<typeof partySchema>) {
-    let result: { success: boolean; message: string; errors?: any }
-
-    if (initialData) {
-      result = await updatePartyMutation.mutateAsync({ id: initialData.id, ...values })
-    } else {
-      result = await createPartyMutation.mutateAsync(values)
-    }
-
-    if (result.success) {
-      toast({
-        title: t("successTitle"),
-        description: result.message,
-      })
-      router.push("/manage-parties")
-      router.refresh()
-    } else {
-      toast({
-        title: t("errorTitle"),
-        description: result.message,
-        variant: "destructive",
-      })
-      if (result.errors) {
-        Object.keys(result.errors).forEach((key) => {
-          form.setError(key as keyof z.infer<typeof partySchema>, {
-            type: "server",
-            message: result.errors[key][0],
-          })
+  React.useEffect(() => {
+    if (state) {
+      if (state.success) {
+        toast({
+          title: t("success"),
+          description: state.message,
         })
+        form.reset()
+        onSuccess?.()
+      } else {
+        toast({
+          title: t("error"),
+          description: state.message || t("somethingWentWrong"),
+          variant: "destructive",
+        })
+        if (state.errors) {
+          for (const [field, messages] of Object.entries(state.errors)) {
+            form.setError(field as keyof typeof partySchema, {
+              type: "server",
+              message: messages?.join(", "),
+            })
+          }
+        }
       }
     }
-  }
+  }, [state, toast, form, onSuccess, t])
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form action={formAction} className="space-y-6">
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("nameLabel")}</FormLabel>
+              <FormLabel>{t("name")}</FormLabel>
               <FormControl>
                 <Input placeholder={t("namePlaceholder")} {...field} />
               </FormControl>
@@ -90,7 +85,7 @@ export function PartyForm({ initialData }: PartyFormProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("emailLabel")}</FormLabel>
+              <FormLabel>{t("email")}</FormLabel>
               <FormControl>
                 <Input type="email" placeholder={t("emailPlaceholder")} {...field} />
               </FormControl>
@@ -103,9 +98,22 @@ export function PartyForm({ initialData }: PartyFormProps) {
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("phoneLabel")}</FormLabel>
+              <FormLabel>{t("phone")}</FormLabel>
               <FormControl>
                 <Input type="tel" placeholder={t("phonePlaceholder")} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("address")}</FormLabel>
+              <FormControl>
+                <Textarea placeholder={t("addressPlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -116,29 +124,24 @@ export function PartyForm({ initialData }: PartyFormProps) {
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("typeLabel")}</FormLabel>
+              <FormLabel>{t("type")}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder={t("selectTypePlaceholder")} />
+                    <SelectValue placeholder={t("selectType")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Client">{t("typeClient")}</SelectItem>
-                  <SelectItem value="Vendor">{t("typeVendor")}</SelectItem>
-                  <SelectItem value="Other">{t("typeOther")}</SelectItem>
+                  <SelectItem value="Individual">{t("individual")}</SelectItem>
+                  <SelectItem value="Company">{t("company")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={createPartyMutation.isPending || updatePartyMutation.isPending}
-        >
-          {initialData ? t("updatePartyButton") : t("createPartyButton")}
+        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? t("creating") : t("createParty")}
         </Button>
       </form>
     </Form>

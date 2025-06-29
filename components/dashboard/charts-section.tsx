@@ -109,3 +109,42 @@ export function PieChart({ data }: PieChartProps) {
     </ResponsiveContainer>
   )
 }
+
+// This is the main component that uses the charts
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import type { ContractsByMonth, ContractsByStatus } from "@/lib/dashboard-types"
+
+interface ChartsSectionProps {
+  contractsByStatus: ContractsByStatus[]
+  contractsByMonth: ContractsByMonth[]
+}
+
+export function ChartsSection({ contractsByStatus, contractsByMonth }: ChartsSectionProps) {
+  const t = useTranslations("DashboardChartsSection")
+
+  // Transform data for BarChart and PieChart if necessary
+  const barChartData = contractsByMonth.map((item) => ({ name: item.month, value: item.count }))
+  const pieChartData = contractsByStatus.map((item) => ({ name: item.status, value: item.count }))
+
+  return (
+    <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("contractsByStatus")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PieChart data={pieChartData} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("contractsOverTime")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <BarChart data={barChartData} />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

@@ -1,97 +1,68 @@
+import { getTranslations } from "next-intl/server"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { PlusCircleIcon, EditIcon, Trash2Icon } from "lucide-react"
-import { getParties } from "@/lib/data"
 import { PartyForm } from "@/components/party-form"
-import { deleteParty } from "@/app/actions/parties"
-import { revalidatePath } from "next/cache"
-import type { Party } from "@/lib/types"
+import { getParties } from "@/app/actions/parties"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DeletePartyButton } from "@/components/delete-party-button"
 
 export default async function ManagePartiesPage() {
-  const parties = await getParties()
+  const t = await getTranslations("ManagePartiesPage")
+  const { data: parties, error } = await getParties()
 
-  const handleDelete = async (id: string) => {
-    "use server"
-    await deleteParty(id)
-    revalidatePath("/manage-parties")
+  if (error) {
+    console.error("Error fetching parties:", error)
+    return <div className="text-red-500">{t("errorLoadingParties")}</div>
   }
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-      <div className="flex items-center">
-        <h1 className="text-2xl font-semibold">Manage Parties</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="ml-auto">
-              <PlusCircleIcon className="mr-2 h-4 w-4" />
-              New Party
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Add New Party</DialogTitle>
-              <DialogDescription>Fill in the details to add a new party.</DialogDescription>
-            </DialogHeader>
-            <PartyForm />
-          </DialogContent>
-        </Dialog>
-      </div>
+    <div className="container mx-auto py-8 px-4 md:px-6">
+      <h1 className="text-3xl font-bold mb-6">{t("manageParties")}</h1>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Parties</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {parties.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>No parties found. Add a new party to get started.</p>
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {parties.map((party: Party) => (
-                <div key={party.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h3 className="font-semibold text-lg">{party.name_en}</h3>
-                    <p className="text-sm text-muted-foreground">{party.name_ar}</p>
-                    <p className="text-sm text-muted-foreground">{party.type}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <EditIcon className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[600px]">
-                        <DialogHeader>
-                          <DialogTitle>Edit Party</DialogTitle>
-                          <DialogDescription>Update the details for this party.</DialogDescription>
-                        </DialogHeader>
-                        <PartyForm initialData={party} />
-                      </DialogContent>
-                    </Dialog>
-                    <form action={handleDelete.bind(null, party.id)}>
-                      <Button variant="destructive" size="sm" type="submit">
-                        <Trash2Icon className="h-4 w-4" />
-                        <span className="sr-only">Delete</span>
-                      </Button>
-                    </form>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("addNewParty")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PartyForm />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("existingParties")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {parties && parties.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("name")}</TableHead>
+                    <TableHead>{t("email")}</TableHead>
+                    <TableHead>{t("type")}</TableHead>
+                    <TableHead className="text-right">{t("actions")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {parties.map((party) => (
+                    <TableRow key={party.id}>
+                      <TableCell className="font-medium">{party.name}</TableCell>
+                      <TableCell>{party.email}</TableCell>
+                      <TableCell>{party.type}</TableCell>
+                      <TableCell className="text-right">
+                        <DeletePartyButton partyId={party.id} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-center text-gray-500">{t("noPartiesFound")}</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   )
 }

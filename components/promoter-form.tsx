@@ -1,98 +1,150 @@
 "use client"
 
-import { useForm } from "react-hook-form"
+import React from "react"
+import { useActionState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { useTranslations } from "next-intl"
 import type { z } from "zod"
+
+import { createPromoter, updatePromoter } from "@/app/actions/promoters"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
-import { useRouter } from "next/navigation"
 import { promoterProfileSchema } from "@/lib/promoter-profile-schema"
+import { ImageUploadField } from "@/components/image-upload-field"
 import type { Promoter } from "@/lib/types"
-import { createPromoter, updatePromoter } from "@/app/actions/promoters"
-import ImageUploadField from "@/components/image-upload-field"
 
 interface PromoterFormProps {
+  onSuccess?: () => void
   initialData?: Promoter
 }
 
-// Changed to default export
-export default function PromoterForm({ initialData }: PromoterFormProps) {
+const PromoterForm = ({ onSuccess, initialData }: PromoterFormProps) => {
+  const t = useTranslations("PromoterForm")
   const { toast } = useToast()
-  const router = useRouter()
 
   const form = useForm<z.infer<typeof promoterProfileSchema>>({
     resolver: zodResolver(promoterProfileSchema),
-    defaultValues: initialData || {
-      name: "",
-      email: "",
-      phone: "",
-      company_name: "",
-      company_address: "",
-      contact_person: "",
-      contact_email: "",
-      contact_phone: "",
-      website: "",
-      notes: "",
-      logo_url: null,
+    defaultValues: {
+      name: initialData?.name || "",
+      email: initialData?.email || "",
+      phone: initialData?.phone || "",
+      company: initialData?.company || "",
+      address: initialData?.address || "",
+      city: initialData?.city || "",
+      state: initialData?.state || "",
+      zip_code: initialData?.zip_code || "",
+      country: initialData?.country || "",
+      bio: initialData?.bio || "",
+      website: initialData?.website || "",
+      profile_picture_url: initialData?.profile_picture_url || null,
     },
   })
 
-  async function onSubmit(values: z.infer<typeof promoterProfileSchema>) {
-    const formData = new FormData()
-    Object.entries(values).forEach(([key, value]) => {
-      if (value instanceof File) {
-        formData.append(key, value)
-      } else if (value !== null && value !== undefined) {
-        formData.append(key, String(value))
-      }
-    })
+  const [state, formAction] = useActionState(
+    initialData ? updatePromoter.bind(null, initialData.id) : createPromoter,
+    null,
+  )
 
-    let result: { success: boolean; message: string; errors?: any }
+  const fileRef = React.useRef<File | null>(null)
+  const [imageRemoved, setImageRemoved] = React.useState(false)
 
-    if (initialData) {
-      result = await updatePromoter(initialData.id, formData)
+  const handleFileChange = (file: File | null) => {
+    fileRef.current = file
+    if (file === null && initialData?.profile_picture_url) {
+      setImageRemoved(true)
     } else {
-      result = await createPromoter(formData)
-    }
-
-    if (result.success) {
-      toast({
-        title: "Success",
-        description: result.message,
-      })
-      router.push("/manage-promoters")
-      router.refresh()
-    } else {
-      toast({
-        title: "Error",
-        description: result.message,
-        variant: "destructive",
-      })
-      if (result.errors) {
-        Object.keys(result.errors).forEach((key) => {
-          form.setError(key as keyof z.infer<typeof promoterProfileSchema>, {
-            type: "server",
-            message: result.errors[key][0],
-          })
-        })
-      }
+      setImageRemoved(false)
     }
   }
 
+  const onSubmit = (data: z.infer<typeof promoterProfileSchema>) => {
+    const formData = new FormData()
+    for (const key in data) {
+      if (data[key as keyof typeof data] !== undefined && data[key as keyof typeof data] !== null) {
+        if (key === "profile_picture_url") {
+          // Handle file separately
+          continue
+        }
+        formData.append(key, String(data[key as keyof typeof data]))
+      }
+    }
+
+    if (fileRef.current) {
+      formData.append("profile_picture_url", fileRef.current)
+    } else if (imageRemoved) {
+      formData.append("profile_picture_url_removed", "true")
+    }
+
+    formAction(formData)
+  }
+
+  React.useEffect(() => {
+    if (state) {
+      if (state.success) {
+        toast({
+          title: t("success"),
+          description: state.message,
+        })
+        if (!initialData) {
+          form.reset()
+          fileRef.current = null
+          setPreview(null) // Clear image preview on successful creation
+        }
+        onSuccess?.()
+      } else {
+        toast({
+          title: t("error"),
+          description: state.message || t("somethingWentWrong"),
+          variant: "destructive",
+        })
+        if (state.errors) {
+          for (const [field, messages] of Object.entries(state.errors)) {
+            form.setError(field as keyof typeof promoterProfileSchema, {
+              type: "server",
+              message: messages?.join(", "),
+            })
+          }
+        }
+      }
+    }
+  }, [state, toast, form, onSuccess, initialData, t])
+
+  const [preview, setPreview] = React.useState<string | null>(initialData?.profile_picture_url || null)
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="profile_picture_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("profilePicture")}</FormLabel>
+              <FormControl>
+                <ImageUploadField
+                  id="profile_picture_url"
+                  name="profile_picture_url"
+                  existingImageUrl={initialData?.profile_picture_url}
+                  onFileChange={handleFileChange}
+                  placeholder={t("uploadProfilePicture")}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Promoter Name</FormLabel>
+              <FormLabel>{t("name")}</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder={t("namePlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -103,9 +155,9 @@ export default function PromoterForm({ initialData }: PromoterFormProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t("email")}</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="john.doe@example.com" {...field} />
+                <Input type="email" placeholder={t("emailPlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -116,9 +168,9 @@ export default function PromoterForm({ initialData }: PromoterFormProps) {
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone</FormLabel>
+              <FormLabel>{t("phone")}</FormLabel>
               <FormControl>
-                <Input type="tel" placeholder="123-456-7890" {...field} />
+                <Input type="tel" placeholder={t("phonePlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -126,64 +178,12 @@ export default function PromoterForm({ initialData }: PromoterFormProps) {
         />
         <FormField
           control={form.control}
-          name="company_name"
+          name="company"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Company Name</FormLabel>
+              <FormLabel>{t("company")}</FormLabel>
               <FormControl>
-                <Input placeholder="Acme Corp" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="company_address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Company Address</FormLabel>
-              <FormControl>
-                <Textarea placeholder="123 Main St, Anytown, USA" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="contact_person"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Additional Contact Person (Optional)</FormLabel>
-              <FormControl>
-                <Input placeholder="Jane Smith" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="contact_email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Additional Contact Email (Optional)</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="jane.smith@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="contact_phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Additional Contact Phone (Optional)</FormLabel>
-              <FormControl>
-                <Input type="tel" placeholder="098-765-4321" {...field} />
+                <Input placeholder={t("companyPlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -194,9 +194,9 @@ export default function PromoterForm({ initialData }: PromoterFormProps) {
           name="website"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Website (Optional)</FormLabel>
+              <FormLabel>{t("website")}</FormLabel>
               <FormControl>
-                <Input type="url" placeholder="https://www.example.com" {...field} />
+                <Input type="url" placeholder={t("websitePlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -204,12 +204,66 @@ export default function PromoterForm({ initialData }: PromoterFormProps) {
         />
         <FormField
           control={form.control}
-          name="notes"
+          name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Notes (Optional)</FormLabel>
+              <FormLabel>{t("address")}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Any relevant notes about the promoter." className="min-h-[100px]" {...field} />
+                <Textarea placeholder={t("addressPlaceholder")} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="city"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("city")}</FormLabel>
+                <FormControl>
+                  <Input placeholder={t("cityPlaceholder")} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="state"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("state")}</FormLabel>
+                <FormControl>
+                  <Input placeholder={t("statePlaceholder")} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="zip_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("zipCode")}</FormLabel>
+                <FormControl>
+                  <Input placeholder={t("zipCodePlaceholder")} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <FormField
+          control={form.control}
+          name="country"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("country")}</FormLabel>
+              <FormControl>
+                <Input placeholder={t("countryPlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -217,27 +271,29 @@ export default function PromoterForm({ initialData }: PromoterFormProps) {
         />
         <FormField
           control={form.control}
-          name="logo_url"
-          render={({ field: { onChange, value, ...restField } }) => (
+          name="bio"
+          render={({ field }) => (
             <FormItem>
-              <FormLabel>Company Logo (Optional)</FormLabel>
+              <FormLabel>{t("bio")}</FormLabel>
               <FormControl>
-                <ImageUploadField
-                  onFileChange={(file) => onChange(file)}
-                  existingImageUrl={typeof value === "string" ? value : undefined}
-                  id="logo_url"
-                />
+                <Textarea placeholder={t("bioPlaceholder")} {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-          {initialData ? "Update Promoter" : "Create Promoter"}
+          {form.formState.isSubmitting
+            ? initialData
+              ? t("updating")
+              : t("creating")
+            : initialData
+              ? t("updatePromoter")
+              : t("createPromoter")}
         </Button>
       </form>
     </Form>
   )
 }
 
-export { PromoterForm }
+export default PromoterForm

@@ -1,17 +1,30 @@
 import { Skeleton } from "@/components/ui/skeleton"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 
-export default function NotificationsLoading() {
+export default function Loading() {
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-      <h1 className="text-2xl font-semibold">
-        <Skeleton className="h-8 w-48" />
+    <div className="container mx-auto py-8 px-4 md:px-6">
+      <h1 className="text-3xl font-bold mb-6">
+        <Skeleton className="h-9 w-64" />
       </h1>
-      <Card className="p-4">
-        <Skeleton className="h-8 w-full mb-4" />
-        <Skeleton className="h-[300px] w-full" />
-        <Skeleton className="h-10 w-full mt-4" />
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Skeleton className="h-7 w-48" />
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="space-y-2 py-4">
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/4" />
+              {i < 4 && <Separator className="mt-4" />}
+            </div>
+          ))}
+        </CardContent>
       </Card>
-    </main>
+    </div>
   )
 }

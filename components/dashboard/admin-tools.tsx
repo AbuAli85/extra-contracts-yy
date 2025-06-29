@@ -1,9 +1,16 @@
 "use client"
 import { useState } from "react"
 import type React from "react"
-
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { useTranslations } from "next-intl"
+import { createClient } from "@/lib/supabase/client"
+import { devLog } from "@/lib/dev-log"
+import { Loader2, Database, UserPlus, Mail } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Link } from "@/navigation"
 import {
   Dialog,
   DialogContent,
@@ -12,21 +19,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Loader2, Database, UserPlus, Mail } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { createClient } from "@/lib/supabase/client"
-import { devLog } from "@/lib/dev-log"
-import { useTranslations } from "next-intl"
+import { useToast } from "@/components/ui/use-toast"
+import type { AdminAction } from "@/lib/dashboard-types"
 
-export default function AdminTools() {
+interface AdminToolsProps {
+  actions: AdminAction[]
+}
+
+export function AdminTools({ actions }: AdminToolsProps) {
+  const { toast } = useToast()
+  const t = useTranslations("DashboardAdminTools")
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const { toast } = useToast()
   const supabase = createClient()
-  const t = useTranslations("DashboardAdminTools")
+
+  const handleAction = (actionName: string) => {
+    toast({
+      title: t("actionTriggered"),
+      description: t("actionTriggeredDescription", { actionName }),
+    })
+    // In a real application, you would call a server action or API route here
+    console.log(`Admin action triggered: ${actionName}`)
+  }
 
   const handleRunMigration = async () => {
     setLoading(true)
@@ -104,63 +119,107 @@ export default function AdminTools() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("adminToolsTitle")}</CardTitle>
-        <CardDescription>{t("adminToolsDescription")}</CardDescription>
+        <CardTitle>{t("adminTools")}</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Button onClick={handleRunMigration} disabled={loading}>
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
-          {t("runMigrations")}
-        </Button>
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button disabled={loading}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              {t("createNewUser")}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t("createNewUserTitle")}</DialogTitle>
-              <DialogDescription>{t("createNewUserDescription")}</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleCreateUser} className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="email">{t("emailLabel")}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="user@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={loading}
-                />
+      <CardContent className="grid gap-4">
+        {actions.length > 0 ? (
+          actions.map((action) => (
+            <div key={action.id} className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">{action.name}</p>
+                <p className="text-sm text-muted-foreground">{action.description}</p>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">{t("passwordLabel")}</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-              <Button type="submit" disabled={loading}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
-                {t("createUserButton")}
+              <Button onClick={() => handleAction(action.name)} size="sm">
+                {t("run")}
               </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-muted-foreground">{t("noActionsAvailable")}</p>
+        )}
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="announcement-title">{t("sendAnnouncement")}</Label>
+            <Input id="announcement-title" placeholder={t("announcementTitle")} />
+            <Textarea id="announcement-content" placeholder={t("announcementContent")} rows={3} />
+            <Button className="w-full">{t("sendAnnouncementButton")}</Button>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="user-management">{t("userManagement")}</Label>
+            <Link href="/dashboard/users">
+              <Button variant="outline" className="w-full bg-transparent">
+                {t("manageUsers")}
+              </Button>
+            </Link>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="audit-logs">{t("auditLogs")}</Label>
+            <Link href="/dashboard/audit">
+              <Button variant="outline" className="w-full bg-transparent">
+                {t("viewAuditLogs")}
+              </Button>
+            </Link>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Button onClick={handleRunMigration} disabled={loading}>
+              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
+              {t("runMigrations")}
+            </Button>
 
-        <Button onClick={handleSendWelcomeEmail} disabled={loading}>
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
-          {t("sendWelcomeEmail")}
-        </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button disabled={loading}>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  {t("createNewUser")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t("createNewUserTitle")}</DialogTitle>
+                  <DialogDescription>{t("createNewUserDescription")}</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleCreateUser} className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">{t("emailLabel")}</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="user@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="password">{t("passwordLabel")}</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                  <Button type="submit" disabled={loading}>
+                    {loading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <UserPlus className="mr-2 h-4 w-4" />
+                    )}
+                    {t("createUserButton")}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+
+            <Button onClick={handleSendWelcomeEmail} disabled={loading}>
+              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+              {t("sendWelcomeEmail")}
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

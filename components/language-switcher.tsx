@@ -1,8 +1,10 @@
 "use client"
 
 import { useLocale, useTranslations } from "next-intl"
-import { usePathname, useRouter } from "next/navigation"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { usePathname, useRouter } from "@/navigation" // Named imports
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { Globe } from "lucide-react"
 
 export function LanguageSwitcher() {
   const locale = useLocale()
@@ -11,19 +13,25 @@ export function LanguageSwitcher() {
   const t = useTranslations("LanguageSwitcher")
 
   const onSelectChange = (nextLocale: string) => {
-    const newPath = `/${nextLocale}${pathname.substring(3)}` // Assumes locale is always 2 chars
-    router.replace(newPath)
+    router.replace(pathname, { locale: nextLocale })
   }
 
   return (
-    <Select value={locale} onValueChange={onSelectChange}>
-      <SelectTrigger className="w-[100px]">
-        <SelectValue placeholder={t("selectLanguage")} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="en">{t("english")}</SelectItem>
-        <SelectItem value="ar">{t("arabic")}</SelectItem>
-      </SelectContent>
-    </Select>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Globe className="h-[1.2rem] w-[1.2rem]" />
+          <span className="sr-only">{t("toggleLanguage")}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => onSelectChange("en")} className={locale === "en" ? "font-bold" : ""}>
+          English
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onSelectChange("es")} className={locale === "es" ? "font-bold" : ""}>
+          Español
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

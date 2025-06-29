@@ -2,8 +2,9 @@ import globals from "globals"
 import pluginJs from "@eslint/js"
 import tseslint from "typescript-eslint"
 import pluginReactConfig from "eslint-plugin-react/configs/recommended.js"
+import { fixupConfig } from "@eslint/compat"
 
-export default [
+export default tseslint.config(
   {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
     languageOptions: {
@@ -20,21 +21,13 @@ export default [
   },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
-  {
-    ...pluginReactConfig,
-    settings: {
-      react: {
-        version: "detect",
-      },
-    },
-  },
+  fixupConfig(pluginReactConfig),
   {
     rules: {
-      // Custom rules or overrides
+      // Your custom rules here
       "react/react-in-jsx-scope": "off", // Next.js doesn't require React to be in scope
-      "react/prop-types": "off", // Disable prop-types validation
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "off", // Allow any for flexibility
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }], // Warn on unused vars, ignore those starting with _
     },
   },
-]
+)

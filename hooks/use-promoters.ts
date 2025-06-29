@@ -1,47 +1,45 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { createClient } from "@/lib/supabase/client"
-import type { Promoter } from "@/lib/types"
+import { createPromoter, getPromoters, getPromoterById, updatePromoter, deletePromoter } from "@/app/actions/promoters"
 
-const supabase = createClient()
-
-// Fetch all promoters
-export function usePromoters(query?: string) {
-  return useQuery<Promoter[], Error>({
-    queryKey: ["promoters", query],
+// Query hook for fetching all promoters
+export function usePromoters() {
+  return useQuery({
+    queryKey: ["promoters"],
     queryFn: async () => {
-      let dbQuery = supabase.from("promoters").select("*")
-
-      if (query) {
-        dbQuery = dbQuery.or(`name.ilike.%${query}%,email.ilike.%${query}%,company_name.ilike.%${query}%`)
+      const response = await getPromoters()
+      if (!response.success) {
+        throw new Error(response.message)
       }
-
-      const { data, error } = await dbQuery
-      if (error) throw error
-      return data as Promoter[]
+      return response.data
     },
   })
 }
 
-// Fetch a single promoter by ID
+// Query hook for fetching a single promoter by ID
 export function usePromoter(id: string) {
-  return useQuery<Promoter, Error>({
-    queryKey: ["promoter", id],
+  return useQuery({
+    queryKey: ["promoters", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("promoters").select("*").eq("id", id).single()
-      if (error) throw error
-      return data as Promoter
+      const response = await getPromoterById(id)
+      if (!response.success) {
+        throw new Error(response.message)
+      }
+      return response.data
     },
+    enabled: !!id, // Only run query if id is available
   })
 }
 
-// Create a new promoter
+// Mutation hook for creating a promoter
 export function useCreatePromoterMutation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (newPromoter: Omit<Promoter, "id" | "created_at" | "updated_at">) => {
-      const { data, error } = await supabase.from("promoters").insert([newPromoter]).select().single()
-      if (error) throw error
-      return { success: true, message: "Promoter created successfully!", data: data as Promoter }
+    mutationFn: async (formData: FormData) => {
+      const response = await createPromoter(null, formData)
+      if (!response.success) {
+        throw new Error(response.message)
+      }
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promoters"] })
@@ -49,31 +47,34 @@ export function useCreatePromoterMutation() {
   })
 }
 
-// Update an existing promoter
+// Mutation hook for updating a promoter
 export function useUpdatePromoterMutation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (updatedPromoter: Partial<Promoter> & { id: string }) => {
-      const { id, ...updates } = updatedPromoter
-      const { data, error } = await supabase.from("promoters").update(updates).eq("id", id).select().single()
-      if (error) throw error
-      return { success: true, message: "Promoter updated successfully!", data: data as Promoter }
+    mutationFn: async ({ id, formData }: { id: string; formData: FormData }) => {
+      const response = await updatePromoter(id, null, formData)
+      if (!response.success) {
+        throw new Error(response.message)
+      }
+      return response.data
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["promoter", variables.id] })
+      queryClient.invalidateQueries({ queryKey: ["promoters", variables.id] })
       queryClient.invalidateQueries({ queryKey: ["promoters"] })
     },
   })
 }
 
-// Delete a promoter
+// Mutation hook for deleting a promoter
 export function useDeletePromoterMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("promoters").delete().eq("id", id)
-      if (error) throw error
-      return { success: true, message: "Promoter deleted successfully!" }
+      const response = await deletePromoter(id)
+      if (!response.success) {
+        throw new Error(response.message)
+      }
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promoters"] })

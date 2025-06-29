@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 
-export default function SupabaseListener() {
+export function SupabaseListener() {
   const router = useRouter()
   const supabase = createClient()
 

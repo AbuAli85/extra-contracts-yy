@@ -1,140 +1,212 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import type { z } from "zod"
+import { cookies } from "next/headers"
+
 import { createClient } from "@/lib/supabase/server"
-import type { promoterProfileSchema } from "@/lib/promoter-profile-schema"
-import { devLog } from "@/lib/dev-log"
+import { promoterProfileSchema } from "@/lib/promoter-profile-schema"
 import type { Promoter } from "@/lib/types"
+import { uploadImage } from "@/lib/supabase/storage"
 
-export async function createPromoter(values: z.infer<typeof promoterProfileSchema>) {
-  const supabase = createClient()
+interface ServerActionResponse<T = any> {
+  success: boolean
+  message: string
+  data?: T | null
+  errors?: Record<string, string[]> | null
+}
 
-  const {
-    nameEn,
-    nameAr,
-    email,
-    phone,
-    address,
-    city,
-    country,
-    zipCode,
-    contactPerson,
-    contactPersonEmail,
-    contactPersonPhone,
-    website,
-    logoUrl,
-  } = values
+export async function createPromoter(
+  prevState: ServerActionResponse | null,
+  formData: FormData,
+): Promise<ServerActionResponse<Promoter>> {
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
+
+  const rawData = Object.fromEntries(formData.entries())
+
+  const parsed = promoterProfileSchema.safeParse(rawData)
+
+  if (!parsed.success) {
+    const errors = parsed.error.flatten().fieldErrors
+    console.error("Validation errors:", errors)
+    return {
+      success: false,
+      message: "Validation failed. Please check your inputs.",
+      errors,
+    }
+  }
+
+  let profile_picture_url: string | null = null
+  const imageFile = formData.get("profile_picture_url") as File | null
+
+  if (imageFile && imageFile.size > 0) {
+    const uploadResult = await uploadImage(supabase, imageFile, "promoter_logos")
+    if (uploadResult.success && uploadResult.data) {
+      profile_picture_url = uploadResult.data.publicUrl
+    } else {
+      return {
+        success: false,
+        message: uploadResult.message || "Failed to upload profile picture.",
+      }
+    }
+  }
 
   const { data, error } = await supabase
     .from("promoters")
-    .insert({
-      name_en: nameEn,
-      name_ar: nameAr,
-      email,
-      phone,
-      address,
-      city,
-      country,
-      zip_code: zipCode,
-      contact_person: contactPerson,
-      contact_person_email: contactPersonEmail,
-      contact_person_phone: contactPersonPhone,
-      website,
-      logo_url: logoUrl,
-    })
+    .insert([{ ...parsed.data, profile_picture_url }])
     .select()
     .single()
 
   if (error) {
-    devLog("Error creating promoter:", error)
-    throw new Error(`Failed to create promoter: ${error.message}`)
+    console.error("Error creating promoter:", error)
+    return {
+      success: false,
+      message: `Failed to create promoter: ${error.message}`,
+    }
   }
 
   revalidatePath("/manage-promoters")
-  return data
+  revalidatePath("/generate-contract")
+  return {
+    success: true,
+    message: "Promoter created successfully!",
+    data,
+  }
 }
 
-export async function updatePromoter(id: string, values: z.infer<typeof promoterProfileSchema>) {
-  const supabase = createClient()
+export async function getPromoters(): Promise<ServerActionResponse<Promoter[]>> {
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
 
-  const {
-    nameEn,
-    nameAr,
-    email,
-    phone,
-    address,
-    city,
-    country,
-    zipCode,
-    contactPerson,
-    contactPersonEmail,
-    contactPersonPhone,
-    website,
-    logoUrl,
-  } = values
+  const { data, error } = await supabase.from("promoters").select("*").order("name", { ascending: true })
+
+  if (error) {
+    console.error("Error fetching promoters:", error)
+    return {
+      success: false,
+      message: `Failed to fetch promoters: ${error.message}`,
+    }
+  }
+
+  return {
+    success: true,
+    message: "Promoters fetched successfully.",
+    data: data as Promoter[],
+  }
+}
+
+export async function getPromoterById(id: string): Promise<ServerActionResponse<Promoter>> {
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
+
+  const { data, error } = await supabase.from("promoters").select("*").eq("id", id).single()
+
+  if (error) {
+    console.error(`Error fetching promoter with ID ${id}:`, error)
+    return {
+      success: false,
+      message: `Failed to fetch promoter: ${error.message}`,
+    }
+  }
+
+  if (!data) {
+    return {
+      success: false,
+      message: "Promoter not found.",
+      data: null,
+    }
+  }
+
+  return {
+    success: true,
+    message: "Promoter fetched successfully.",
+    data: data as Promoter,
+  }
+}
+
+export async function updatePromoter(
+  id: string,
+  prevState: ServerActionResponse | null,
+  formData: FormData,
+): Promise<ServerActionResponse<Promoter>> {
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
+
+  const rawData = Object.fromEntries(formData.entries())
+
+  const parsed = promoterProfileSchema.safeParse(rawData)
+
+  if (!parsed.success) {
+    const errors = parsed.error.flatten().fieldErrors
+    console.error("Validation errors:", errors)
+    return {
+      success: false,
+      message: "Validation failed. Please check your inputs.",
+      errors,
+    }
+  }
+
+  let profile_picture_url: string | null = parsed.data.profile_picture_url || null
+  const imageFile = formData.get("profile_picture_url") as File | null
+
+  if (imageFile && imageFile.size > 0) {
+    const uploadResult = await uploadImage(supabase, imageFile, "promoter_logos")
+    if (uploadResult.success && uploadResult.data) {
+      profile_picture_url = uploadResult.data.publicUrl
+    } else {
+      return {
+        success: false,
+        message: uploadResult.message || "Failed to upload profile picture.",
+      }
+    }
+  } else if (formData.get("profile_picture_url_removed") === "true") {
+    // Handle case where user explicitly removed the image
+    profile_picture_url = null
+  }
 
   const { data, error } = await supabase
     .from("promoters")
-    .update({
-      name_en: nameEn,
-      name_ar: nameAr,
-      email,
-      phone,
-      address,
-      city,
-      country,
-      zip_code: zipCode,
-      contact_person: contactPerson,
-      contact_person_email: contactPersonEmail,
-      contact_person_phone: contactPersonPhone,
-      website,
-      logo_url: logoUrl,
-      updated_at: new Date().toISOString(),
-    })
+    .update({ ...parsed.data, profile_picture_url })
     .eq("id", id)
     .select()
     .single()
 
   if (error) {
-    devLog("Error updating promoter:", error)
-    throw new Error(`Failed to update promoter: ${error.message}`)
+    console.error(`Error updating promoter with ID ${id}:`, error)
+    return {
+      success: false,
+      message: `Failed to update promoter: ${error.message}`,
+    }
   }
 
+  revalidatePath(`/manage-promoters/${id}/edit`)
   revalidatePath("/manage-promoters")
-  revalidatePath(`/manage-promoters/${id}`)
-  return data
+  revalidatePath("/generate-contract")
+  return {
+    success: true,
+    message: "Promoter updated successfully!",
+    data,
+  }
 }
 
-export async function deletePromoter(id: string) {
-  const supabase = createClient()
+export async function deletePromoter(id: string): Promise<ServerActionResponse> {
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
 
   const { error } = await supabase.from("promoters").delete().eq("id", id)
 
   if (error) {
-    devLog("Error deleting promoter:", error)
-    throw new Error(`Failed to delete promoter: ${error.message}`)
+    console.error(`Error deleting promoter with ID ${id}:`, error)
+    return {
+      success: false,
+      message: `Failed to delete promoter: ${error.message}`,
+    }
   }
 
   revalidatePath("/manage-promoters")
-}
-
-export async function updatePromoterStatus(promoterId: string, newStatus: Promoter["status"]) {
-  const supabase = createClient()
-
-  const { data, error } = await supabase
-    .from("promoters")
-    .update({ status: newStatus, updated_at: new Date().toISOString() })
-    .eq("id", promoterId)
-    .select()
-    .single()
-
-  if (error) {
-    devLog("Error updating promoter status:", error)
-    throw new Error(`Failed to update promoter status: ${error.message}`)
+  revalidatePath("/generate-contract")
+  return {
+    success: true,
+    message: "Promoter deleted successfully!",
   }
-
-  revalidatePath("/manage-promoters")
-  revalidatePath(`/manage-promoters/${promoterId}`)
-  return data
 }
