@@ -4,31 +4,32 @@ import { nanoid } from "nanoid"
 
 export async function POST(request: NextRequest) {
   try {
+    const body = await request.json()
+    const { party_a, party_b, contract_type, description, retry_id } = body
+
+    // Validate required fields
+    if (!party_a || !party_b || !contract_type) {
+      return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 })
+    }
+
     const supabase = createClient()
 
-    // Get the current user
+    // Get current user
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const body = await request.json()
-    const { party_a, party_b, contract_type, description, retry_id } = body
-
-    // Validate required fields
-    if (!party_a || !party_b || !contract_type) {
-      return NextResponse.json({ error: "Missing required fields: party_a, party_b, contract_type" }, { status: 400 })
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 
     // Generate contract number
-    const contractNumber = `CTR-${Date.now()}-${nanoid(6)}`
+    const contractNumber = `CT-${Date.now()}-${nanoid(6)}`
 
     // Create contract record
     const contractData = {
+      id: nanoid(),
       contract_number: contractNumber,
       party_a,
       party_b,
@@ -47,30 +48,27 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (insertError) {
-      console.error("Database insert error:", insertError)
-      return NextResponse.json({ error: "Failed to create contract" }, { status: 500 })
+      console.error("Error inserting contract:", insertError)
+      return NextResponse.json({ success: false, error: "Failed to create contract" }, { status: 500 })
     }
 
     // Send to Make.com webhook for processing
-    if (process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL) {
+    if (process.env.MAKE_WEBHOOK_URL) {
       try {
-        const webhookPayload = {
-          contract_id: contract.id,
-          contract_number: contractNumber,
-          party_a,
-          party_b,
-          contract_type,
-          description,
-          user_id: user.id,
-          callback_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/generate-contract`,
-        }
-
-        const webhookResponse = await fetch(process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL, {
+        const webhookResponse = await fetch(process.env.MAKE_WEBHOOK_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(webhookPayload),
+          body: JSON.stringify({
+            contract_id: contract.id,
+            contract_number: contractNumber,
+            party_a,
+            party_b,
+            contract_type,
+            description,
+            user_id: user.id,
+          }),
         })
 
         if (!webhookResponse.ok) {
@@ -78,13 +76,20 @@ export async function POST(request: NextRequest) {
           // Update contract status to failed
           await supabase
             .from("contracts")
-            .update({ status: "failed", updated_at: new Date().toISOString() })
+            .update({
+              status: "failed",
+              error_message: "Webhook processing failed",
+              updated_at: new Date().toISOString(),
+            })
             .eq("id", contract.id)
         } else {
           // Update contract status to queued
           await supabase
             .from("contracts")
-            .update({ status: "queued", updated_at: new Date().toISOString() })
+            .update({
+              status: "queued",
+              updated_at: new Date().toISOString(),
+            })
             .eq("id", contract.id)
         }
       } catch (webhookError) {
@@ -92,7 +97,11 @@ export async function POST(request: NextRequest) {
         // Update contract status to failed
         await supabase
           .from("contracts")
-          .update({ status: "failed", updated_at: new Date().toISOString() })
+          .update({
+            status: "failed",
+            error_message: "Webhook connection failed",
+            updated_at: new Date().toISOString(),
+          })
           .eq("id", contract.id)
       }
     }
@@ -103,23 +112,23 @@ export async function POST(request: NextRequest) {
       message: "Contract generation initiated successfully",
     })
   } catch (error) {
-    console.error("API error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("API Error:", error)
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = createClient()
     const body = await request.json()
     const { contract_id, status, pdf_url, error_message } = body
 
-    // Validate required fields
     if (!contract_id || !status) {
-      return NextResponse.json({ error: "Missing required fields: contract_id, status" }, { status: 400 })
+      return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 })
     }
 
-    // Update contract in database
+    const supabase = createClient()
+
+    // Update contract status
     const updateData: any = {
       status,
       updated_at: new Date().toISOString(),
@@ -133,25 +142,20 @@ export async function PUT(request: NextRequest) {
       updateData.error_message = error_message
     }
 
-    const { data: contract, error: updateError } = await supabase
-      .from("contracts")
-      .update(updateData)
-      .eq("id", contract_id)
-      .select()
-      .single()
+    const { data, error } = await supabase.from("contracts").update(updateData).eq("id", contract_id).select().single()
 
-    if (updateError) {
-      console.error("Database update error:", updateError)
-      return NextResponse.json({ error: "Failed to update contract" }, { status: 500 })
+    if (error) {
+      console.error("Error updating contract:", error)
+      return NextResponse.json({ success: false, error: "Failed to update contract" }, { status: 500 })
     }
 
     return NextResponse.json({
       success: true,
-      contract,
+      contract: data,
       message: "Contract updated successfully",
     })
   } catch (error) {
-    console.error("API error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("API Error:", error)
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
   }
 }
