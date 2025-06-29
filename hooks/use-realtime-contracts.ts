@@ -3,34 +3,59 @@
 import { useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useContractsStore } from "@/lib/stores/contracts-store"
+import type { Contract } from "@/lib/stores/contracts-store"
 
-export function useRealtimeContracts() {
-  const { updateContract, fetchContracts } = useContractsStore()
+export function useRealtimeContracts(userId?: string) {
+  const { setContracts, addContract, updateContract } = useContractsStore()
 
   useEffect(() => {
+    if (!userId) return
+
     const supabase = createClient()
 
-    // Subscribe to contract changes
+    // Initial fetch
+    const fetchContracts = async () => {
+      const { data, error } = await supabase
+        .from("contracts")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+
+      if (error) {
+        console.error("Error fetching contracts:", error)
+        return
+      }
+
+      setContracts(data || [])
+    }
+
+    fetchContracts()
+
+    // Set up real-time subscription
     const channel = supabase
       .channel("contracts-changes")
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "contracts",
+          filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          console.log("Contract change received:", payload)
-
-          if (payload.eventType === "INSERT") {
-            // Refresh all contracts when a new one is inserted
-            fetchContracts()
-          } else if (payload.eventType === "UPDATE") {
-            // Update specific contract
-            const updatedContract = payload.new as any
-            updateContract(updatedContract.id, updatedContract)
-          }
+          addContract(payload.new as Contract)
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "contracts",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          updateContract(payload.new.id, payload.new as Partial<Contract>)
         },
       )
       .subscribe()
@@ -38,5 +63,5 @@ export function useRealtimeContracts() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [updateContract, fetchContracts])
+  }, [userId, setContracts, addContract, updateContract])
 }
