@@ -1,9 +1,14 @@
-import createNextIntlPlugin from "next-intl/plugin"
+import createNextIntlPlugin from 'next-intl/plugin';
 
-const withNextIntl = createNextIntlPlugin()
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
+  swcMinify: true,
+  experimental: {
+    serverComponentsExternalPackages: ['@supabase/supabase-js']
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -11,17 +16,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**.supabase.co",
-      },
-    ],
     unoptimized: true,
   },
-  experimental: {
-    serverComponentsExternalPackages: ["@supabase/supabase-js"],
-  },
-}
+};
 
-export default withNextIntl(nextConfig)
+export default withNextIntl(nextConfig);

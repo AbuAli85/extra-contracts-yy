@@ -1,0 +1,45 @@
+{
+  "common": {
+    "title": "Generador de Contratos Bilingüe",
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "success": "Éxito",
+    "generate": "Generar",
+    "download": "Descargar",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver"
+  },
+  "contracts": {
+    "title": "Contratos",
+    "number": "Número de Contrato",
+    "status": "Estado",
+    "action": "Acción",
+    "createdAt": "Creado En",
+    "updatedAt": "Actualizado En",
+    "pending": "Pendiente",
+    "queued": "En Cola",
+    "processing": "Procesando",
+    "completed": "Completado",
+    "failed": "Fallido",
+    "generateNew": "Generar Nuevo Contrato",
+    "contractDetails": "Detalles del Contrato",
+    "partyA": "Parte A",
+    "partyB": "Parte B",
+    "contractType": "Tipo de Contrato",
+    "description": "Descripción",
+    "totalContracts": "Total de Contratos",
+    "pendingContracts": "Contratos Pendientes",
+    "completedContracts": "Contratos Completados",
+    "failedContracts": "Contratos Fallidos"
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "overview": "Resumen",
+    "recentActivity": "Actividad Reciente",
+    "statistics": "Estadísticas"
+  }
+}
