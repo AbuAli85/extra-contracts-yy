@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 
 import { getContractById } from "@/app/actions/contracts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,6 +16,9 @@ interface ContractDetailsPageProps {
 }
 
 export default async function ContractDetailsPage({ params }: ContractDetailsPageProps) {
+  // Redirect to the default locale version if accessed directly without locale
+  redirect("/en/contracts")
+
   const t = await getTranslations("ContractDetailsPage")
   const { data: contract, error } = await getContractById(params.id)
 

@@ -1,17 +1,9 @@
-import { Skeleton } from "@/components/ui/skeleton"
+import { redirect } from "next/navigation"
 
-export default function Loading() {
-  return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
-      <div className="flex items-center justify-between mb-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-10 w-32" />
-      </div>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-[200px] w-full rounded-lg" />
-        ))}
-      </div>
-    </div>
-  )
+// This page is intentionally left blank or can be used for non-i18n specific logic
+// The actual content is in app/[locale]/contracts/loading.tsx
+export default function ContractsLoading() {
+  // Redirect to the default locale version if accessed directly without locale
+  redirect("/en/contracts")
+  return null
 }

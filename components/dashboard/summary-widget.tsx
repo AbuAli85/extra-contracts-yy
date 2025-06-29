@@ -1,19 +1,21 @@
-import type React from "react"
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useTranslations } from "next-intl"
 
 interface SummaryWidgetProps {
   title: string
   value: number | string
   description: string
-  icon?: React.ElementType
 }
 
-export function SummaryWidget({ title, value, description, icon: Icon }: SummaryWidgetProps) {
+export function SummaryWidget({ title, value, description }: SummaryWidgetProps) {
+  const t = useTranslations("SummaryWidget")
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+        {/* Icon can be added here if needed */}
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>

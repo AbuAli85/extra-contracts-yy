@@ -1,108 +1,138 @@
 "use client"
 
+import { cn } from "@/lib/utils"
+
 import React, { useState, useCallback } from "react"
-import Image from "next/image"
-import { useDropzone } from "react-dropzone"
-import { UploadCloud, XCircle } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Camera, XCircle, Loader2 } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
+import { useTranslations } from "next-intl"
 
 interface ImageUploadFieldProps {
-  id: string
-  name: string
-  label?: string
-  placeholder?: string
-  existingImageUrl?: string | null
-  onFileChange?: (file: File | null) => void
+  label: string
+  value?: string | null // Current image URL
+  onChange: (file: File | null) => void // Callback for file change
+  onClear?: () => void // Callback for clearing the image
+  previewSize?: "sm" | "md" | "lg"
+  disabled?: boolean
+  isLoading?: boolean
 }
 
 export function ImageUploadField({
-  id,
-  name,
   label,
-  placeholder,
-  existingImageUrl,
-  onFileChange,
+  value,
+  onChange,
+  onClear,
+  previewSize = "md",
+  disabled,
+  isLoading,
 }: ImageUploadFieldProps) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(value || null)
+  const { toast } = useToast()
   const t = useTranslations("ImageUploadField")
-  const [preview, setPreview] = useState<string | null>(existingImageUrl || null)
-  const [file, setFile] = useState<File | null>(null)
 
   React.useEffect(() => {
-    setPreview(existingImageUrl || null)
-  }, [existingImageUrl])
+    setPreviewUrl(value || null)
+  }, [value])
 
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      if (acceptedFiles.length > 0) {
-        const selectedFile = acceptedFiles[0]
-        setFile(selectedFile)
-        setPreview(URL.createObjectURL(selectedFile))
-        onFileChange?.(selectedFile)
+  const handleFileChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0]
+      if (file) {
+        if (!file.type.startsWith("image/")) {
+          toast({
+            title: t("invalidFileType"),
+            description: t("onlyImagesAllowed"),
+            variant: "destructive",
+          })
+          return
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          // 5MB limit
+          toast({
+            title: t("fileTooLarge"),
+            description: t("maxSizeExceeded"),
+            variant: "destructive",
+          })
+          return
+        }
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setPreviewUrl(reader.result as string)
+        }
+        reader.readAsDataURL(file)
+        onChange(file)
+      } else {
+        setPreviewUrl(null)
+        onChange(null)
       }
     },
-    [onFileChange],
+    [onChange, toast, t],
   )
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "image/*": [".jpeg", ".png", ".jpg", ".gif", ".webp"],
-    },
-    multiple: false,
-  })
+  const handleClear = useCallback(() => {
+    setPreviewUrl(null)
+    onChange(null)
+    if (onClear) {
+      onClear()
+    }
+    // Clear the input field value to allow re-uploading the same file
+    const input = document.getElementById(`file-upload-${label}`) as HTMLInputElement
+    if (input) {
+      input.value = ""
+    }
+  }, [onChange, onClear, label])
 
-  const handleRemoveImage = () => {
-    setFile(null)
-    setPreview(null)
-    onFileChange?.(null)
+  const sizeClasses = {
+    sm: "h-16 w-16 text-lg",
+    md: "h-24 w-24 text-xl",
+    lg: "h-32 w-32 text-2xl",
   }
 
   return (
-    <div className="space-y-2">
-      {label && <Label htmlFor={id}>{label}</Label>}
-      <div
-        {...getRootProps()}
-        className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-md cursor-pointer transition-colors
-          ${isDragActive ? "border-primary bg-primary/10" : "border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600"}`}
-      >
-        <input id={id} name={name} {...getInputProps()} />
-        {preview ? (
-          <div className="relative w-32 h-32 mb-4">
-            <Image
-              src={preview || "/placeholder.svg"}
-              alt="Preview"
-              layout="fill"
-              objectFit="contain"
-              className="rounded-md"
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-background"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleRemoveImage()
-              }}
-            >
-              <XCircle className="h-5 w-5 text-destructive" />
-              <span className="sr-only">{t("removeImage")}</span>
-            </Button>
-          </div>
-        ) : (
-          <>
-            <UploadCloud className="h-10 w-10 text-muted-foreground mb-3" />
-            <p className="text-sm text-muted-foreground text-center">
-              {isDragActive ? t("dropHere") : placeholder || t("dragAndDrop")}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">{t("orClickToSelect")}</p>
-          </>
+    <div className="flex items-center gap-4">
+      <Label htmlFor={`file-upload-${label}`} className="sr-only">
+        {label}
+      </Label>
+      <div className="relative">
+        <Avatar className={cn("border", sizeClasses[previewSize])}>
+          {isLoading ? (
+            <div className="flex h-full w-full items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <>
+              <AvatarImage src={previewUrl || undefined} alt={label} />
+              <AvatarFallback className="text-muted-foreground">
+                <Camera className="h-1/2 w-1/2" />
+              </AvatarFallback>
+            </>
+          )}
+        </Avatar>
+        {previewUrl && !disabled && !isLoading && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-background"
+            onClick={handleClear}
+            aria-label={t("clearImage")}
+          >
+            <XCircle className="h-5 w-5 text-destructive" />
+          </Button>
         )}
       </div>
-      {/* Hidden input to signal if image was removed when initialData was present */}
-      {existingImageUrl && preview === null && <input type="hidden" name={`${name}_removed`} value="true" />}
+      <Input
+        id={`file-upload-${label}`}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="max-w-xs cursor-pointer"
+        disabled={disabled || isLoading}
+      />
     </div>
   )
 }

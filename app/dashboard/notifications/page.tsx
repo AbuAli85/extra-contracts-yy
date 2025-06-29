@@ -1,27 +1,58 @@
-import { getTranslations } from "next-intl/server"
+"use client"
 
-import { getNotifications } from "@/lib/dashboard-data"
-import { NotificationSystem } from "@/components/dashboard/notification-system"
+import { useTranslations } from "next-intl"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { NotificationSystem } from "@/components/dashboard/notification-system"
+import { useQuery } from "@tanstack/react-query"
+import { getNotifications } from "@/lib/dashboard-data"
+import { Loader2 } from "lucide-react"
 
-export default async function NotificationsPage() {
-  const t = await getTranslations("DashboardNotificationsPage")
-  const { data: notifications, error } = await getNotifications()
+export default function DashboardNotificationsPage() {
+  const t = useTranslations("DashboardNotificationsPage")
 
-  if (error) {
-    console.error("Error fetching notifications:", error)
-    return <div className="text-red-500">{t("errorLoadingNotifications")}</div>
+  const {
+    data: notificationsData,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: getNotifications,
+  })
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="sr-only">{t("loadingNotifications")}</span>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center text-red-500">
+        {t("errorLoading")}: {error?.message || t("unknownError")}
+      </div>
+    )
+  }
+
+  if (!notificationsData?.success || !notificationsData.data) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center text-red-500">
+        {t("errorFetchingData")}: {notificationsData?.message || t("unknownError")}
+      </div>
+    )
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
-      <h1 className="text-3xl font-bold mb-6">{t("notifications")}</h1>
+    <div className="p-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t("yourNotifications")}</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <NotificationSystem notifications={notifications || []} />
+          <NotificationSystem notifications={notificationsData.data} />
         </CardContent>
       </Card>
     </div>

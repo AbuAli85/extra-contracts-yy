@@ -1,83 +1,88 @@
-import type React from "react"
 import { render, screen, fireEvent } from "@testing-library/react"
 import { ContractStatusFilter } from "./contract-status-filter"
-import { NextIntlClientProvider } from "next-intl/client"
-import messages from "@/messages/en.json" // Adjust path as necessary
-import jest from "jest" // Import jest to fix the undeclared variable error
+import { NextIntlClientProvider } from "next-intl"
+import messages from "@/messages/en.json" // Import your English messages file
+import jest from "jest" // Declare the jest variable
 
 // Mock next-intl useTranslations
 jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key, // Simple mock that returns the key
+  useTranslations: jest.fn((namespace: string) => {
+    const translations: { [key: string]: { [key: string]: string } } = {
+      ContractStatusFilter: {
+        filterByStatus: "Filter by Status",
+        all: "All",
+        draft: "Draft",
+        pendingReview: "Pending Review",
+        active: "Active",
+        completed: "Completed",
+        terminated: "Terminated",
+      },
+    }
+    return (key: string) => translations[namespace]?.[key] || key
+  }),
 }))
 
-const renderWithProviders = (ui: React.ReactElement, { locale = "en" } = {}) => {
-  return render(
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      {ui}
-    </NextIntlClientProvider>,
-  )
-}
-
 describe("ContractStatusFilter", () => {
-  const mockOnFilterChange = jest.fn()
-  const statuses = ["Draft", "Pending Review", "Active", "Completed", "Archived", "Terminated"]
+  it('renders the dropdown menu with default "Filter by Status" text', () => {
+    const mockOnSelectStatus = jest.fn()
+    render(
+      <NextIntlClientProvider messages={messages}>
+        <ContractStatusFilter onSelectStatus={mockOnSelectStatus} />
+      </NextIntlClientProvider>,
+    )
 
-  beforeEach(() => {
-    jest.clearAllMocks()
+    expect(screen.getByRole("button", { name: /Filter by Status/i })).toBeInTheDocument()
   })
 
-  it("renders all status options", () => {
-    renderWithProviders(
-      <ContractStatusFilter selectedStatus="All" onFilterChange={mockOnFilterChange} statuses={statuses} />,
+  it("displays all status options when opened", async () => {
+    const mockOnSelectStatus = jest.fn()
+    render(
+      <NextIntlClientProvider messages={messages}>
+        <ContractStatusFilter onSelectStatus={mockOnSelectStatus} />
+      </NextIntlClientProvider>,
     )
+
+    fireEvent.click(screen.getByRole("button", { name: /Filter by Status/i }))
 
     expect(screen.getByText("All")).toBeInTheDocument()
-    statuses.forEach((status) => {
-      expect(screen.getByText(status)).toBeInTheDocument()
-    })
+    expect(screen.getByText("Draft")).toBeInTheDocument()
+    expect(screen.getByText("Pending Review")).toBeInTheDocument()
+    expect(screen.getByText("Active")).toBeInTheDocument()
+    expect(screen.getByText("Completed")).toBeInTheDocument()
+    expect(screen.getByText("Terminated")).toBeInTheDocument()
   })
 
-  it("displays the currently selected status", () => {
-    renderWithProviders(
-      <ContractStatusFilter selectedStatus="Active" onFilterChange={mockOnFilterChange} statuses={statuses} />,
+  it("calls onSelectStatus with the correct value when an option is clicked", () => {
+    const mockOnSelectStatus = jest.fn()
+    render(
+      <NextIntlClientProvider messages={messages}>
+        <ContractStatusFilter onSelectStatus={mockOnSelectStatus} />
+      </NextIntlClientProvider>,
     )
 
-    const selectTrigger = screen.getByRole("combobox")
-    expect(selectTrigger).toHaveTextContent("Active")
+    fireEvent.click(screen.getByRole("button", { name: /Filter by Status/i }))
+    fireEvent.click(screen.getByText("Active"))
+
+    expect(mockOnSelectStatus).toHaveBeenCalledWith("Active")
   })
 
-  it("calls onFilterChange when a new status is selected", () => {
-    renderWithProviders(
-      <ContractStatusFilter selectedStatus="All" onFilterChange={mockOnFilterChange} statuses={statuses} />,
+  it("updates the button text to the selected status", () => {
+    const mockOnSelectStatus = jest.fn()
+    const { rerender } = render(
+      <NextIntlClientProvider messages={messages}>
+        <ContractStatusFilter onSelectStatus={mockOnSelectStatus} />
+      </NextIntlClientProvider>,
     )
 
-    fireEvent.mouseDown(screen.getByRole("combobox")) // Open the select
-    fireEvent.click(screen.getByText("Completed")) // Click on a new status
+    fireEvent.click(screen.getByRole("button", { name: /Filter by Status/i }))
+    fireEvent.click(screen.getByText("Active"))
 
-    expect(mockOnFilterChange).toHaveBeenCalledWith("Completed")
-  })
-
-  it("handles 'All' status selection", () => {
-    renderWithProviders(
-      <ContractStatusFilter selectedStatus="Active" onFilterChange={mockOnFilterChange} statuses={statuses} />,
+    rerender(
+      <NextIntlClientProvider messages={messages}>
+        <ContractStatusFilter onSelectStatus={mockOnSelectStatus} selectedStatus="Active" />
+      </NextIntlClientProvider>,
     )
 
-    fireEvent.mouseDown(screen.getByRole("combobox"))
-    fireEvent.click(screen.getByText("All"))
-
-    expect(mockOnFilterChange).toHaveBeenCalledWith("All")
-  })
-
-  it("is disabled when disabled prop is true", () => {
-    renderWithProviders(
-      <ContractStatusFilter
-        selectedStatus="All"
-        onFilterChange={mockOnFilterChange}
-        statuses={statuses}
-        disabled={true}
-      />,
-    )
-
-    expect(screen.getByRole("combobox")).toBeDisabled()
+    expect(screen.getByRole("button", { name: /Active/i })).toBeInTheDocument()
   })
 })

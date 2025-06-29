@@ -1,25 +1,20 @@
-import { getTranslations } from "next-intl/server"
-import { Link } from "@/navigation" // Named import
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+"use client"
 
-export default async function NotFound() {
-  const t = await getTranslations("NotFoundPage")
+import { useTranslations } from "next-intl"
+import { Link } from "@/navigation"
+import { Button } from "@/components/ui/button"
+
+export default function NotFoundPage() {
+  const t = useTranslations("NotFoundPage")
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center p-4">
-      <Card className="w-full max-w-md text-center">
-        <CardHeader>
-          <CardTitle className="text-5xl font-bold text-primary">{t("title")}</CardTitle>
-          <CardDescription className="text-xl text-muted-foreground">{t("description")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">{t("message")}</p>
-          <Button asChild>
-            <Link href="/">{t("goHome")}</Link>
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-4 text-center">
+      <h1 className="mb-4 text-6xl font-bold text-primary">404</h1>
+      <h2 className="mb-4 text-3xl font-semibold">{t("title")}</h2>
+      <p className="mb-8 text-lg text-muted-foreground">{t("message")}</p>
+      <Button asChild>
+        <Link href="/">{t("goHome")}</Link>
+      </Button>
     </div>
   )
 }

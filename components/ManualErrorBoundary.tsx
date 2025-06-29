@@ -1,31 +1,34 @@
 "use client"
 
-import React from "react"
+import { Component, type ErrorInfo, type ReactNode } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { Button } from "./ui/button"
 
-interface ManualErrorBoundaryProps {
-  children: React.ReactNode
+interface ErrorBoundaryProps {
+  children: ReactNode
+  fallback?: ReactNode
 }
 
-interface ManualErrorBoundaryState {
+interface ErrorBoundaryState {
   hasError: boolean
   error: Error | null
-  errorInfo: React.ErrorInfo | null
+  errorInfo: ErrorInfo | null
 }
 
-export class ManualErrorBoundary extends React.Component<ManualErrorBoundaryProps, ManualErrorBoundaryState> {
-  constructor(props: ManualErrorBoundaryProps) {
+export class ManualErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props)
     this.state = { hasError: false, error: null, errorInfo: null }
   }
 
-  static getDerivedStateFromError(error: Error): ManualErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     // Update state so the next render will show the fallback UI.
     return { hasError: true, error, errorInfo: null }
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // You can also log the error to an error reporting service
-    console.error("ErrorBoundary caught an error:", error, errorInfo)
+    console.error("Uncaught error:", error, errorInfo)
     this.setState({ errorInfo })
   }
 
@@ -33,28 +36,28 @@ export class ManualErrorBoundary extends React.Component<ManualErrorBoundaryProp
     if (this.state.hasError) {
       // You can render any custom fallback UI
       return (
-        <div className="flex min-h-[calc(100vh-64px)] items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-lg border bg-background p-8 text-center shadow-lg">
-            <h2 className="mb-4 text-2xl font-bold text-destructive">Something went wrong!</h2>
-            <p className="text-muted-foreground">We apologize for the inconvenience. Please try again later.</p>
-            {this.state.error && (
-              <details className="mt-4 text-sm text-left text-muted-foreground">
-                <summary className="cursor-pointer">Error Details</summary>
-                <pre className="mt-2 whitespace-pre-wrap break-all rounded-md bg-muted p-4 text-xs">
-                  {this.state.error.toString()}
-                  <br />
-                  {this.state.errorInfo?.componentStack}
-                </pre>
-              </details>
-            )}
-            <button
-              className="mt-6 inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-              onClick={() => this.setState({ hasError: false, error: null, errorInfo: null })}
-            >
-              Try again
-            </button>
+        this.props.fallback || (
+          <div className="flex min-h-[80vh] items-center justify-center p-4">
+            <Card className="w-full max-w-md text-center">
+              <CardHeader>
+                <CardTitle className="text-destructive">Something went wrong.</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-lg">We're sorry, but an unexpected error occurred.</p>
+                {this.state.error && <p className="text-sm text-muted-foreground">Error: {this.state.error.message}</p>}
+                {this.state.errorInfo && (
+                  <details className="mt-4 whitespace-pre-wrap text-left text-xs text-muted-foreground">
+                    <summary>Error Details</summary>
+                    {this.state.errorInfo.componentStack}
+                  </details>
+                )}
+                <Button onClick={() => this.setState({ hasError: false, error: null, errorInfo: null })}>
+                  Try again
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-        </div>
+        )
       )
     }
 

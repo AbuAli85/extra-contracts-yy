@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { useTranslations } from "next-intl"
+import { redirect } from "next/navigation"
 
 export default function Error({
   error,
@@ -18,6 +19,9 @@ export default function Error({
     // Log the error to an error reporting service
     console.error(error)
   }, [error])
+
+  // Redirect to the default locale version if accessed directly without locale
+  redirect("/en/manage-promoters")
 
   return (
     <div className="flex min-h-[calc(100vh-64px)] items-center justify-center p-4">

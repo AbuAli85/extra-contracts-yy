@@ -20,6 +20,8 @@ const dateOptionalNullableSchema = z
   .nullable()
 
 export const promoterProfileSchema = z.object({
+  // Corrected named export
+  id: z.string().uuid().optional(),
   name: z.string().min(1, "Promoter name is required.").trim(),
   name_en: z.string().min(1, "Name (English) is required.").trim(),
   name_ar: z.string().min(1, "Name (Arabic) is required.").trim(),
@@ -36,36 +38,43 @@ export const promoterProfileSchema = z.object({
   existing_passport_url: z.string().optional().nullable(),
   id_card_expiry_date: dateOptionalNullableSchema,
   passport_expiry_date: dateOptionalNullableSchema,
-  email: z.string().email("Invalid email address.").min(1, "Email is required.").trim(),
+  email: z.string().email("Invalid email address.").min(1, "Email is required.").trim().or(z.literal("")),
   phone: z
     .string()
     .optional()
-    .transform((e) => (e === "" ? undefined : e)),
+    .transform((e) => (e === "" ? undefined : e))
+    .or(z.literal("")),
   company_name: z.string().min(1, "Company name is required.").trim(),
   company_address: z
     .string()
     .optional()
-    .transform((e) => (e === "" ? undefined : e)),
+    .transform((e) => (e === "" ? undefined : e))
+    .or(z.literal("")),
   city: z
     .string()
     .optional()
-    .transform((e) => (e === "" ? undefined : e)),
+    .transform((e) => (e === "" ? undefined : e))
+    .or(z.literal("")),
   state: z
     .string()
     .optional()
-    .transform((e) => (e === "" ? undefined : e)),
+    .transform((e) => (e === "" ? undefined : e))
+    .or(z.literal("")),
   zip_code: z
     .string()
     .optional()
-    .transform((e) => (e === "" ? undefined : e)),
+    .transform((e) => (e === "" ? undefined : e))
+    .or(z.literal("")),
   country: z
     .string()
     .optional()
-    .transform((e) => (e === "" ? undefined : e)),
+    .transform((e) => (e === "" ? undefined : e))
+    .or(z.literal("")),
   bio: z
     .string()
     .optional()
-    .transform((e) => (e === "" ? undefined : e)),
+    .transform((e) => (e === "" ? undefined : e))
+    .or(z.literal("")),
   website: z
     .string()
     .url("Invalid URL format.")
@@ -78,11 +87,13 @@ export const promoterProfileSchema = z.object({
     .optional()
     .transform((e) => (e === "" ? null : e)),
   profile_picture_url: z
-    .string()
-    .url("Invalid URL format.")
+    .union([z.string().url("Invalid URL format."), z.instanceof(File)])
     .nullable()
     .optional()
-    .transform((e) => (e === "" ? null : e)),
+    .transform((e) => (e === "" ? null : e))
+    .or(z.literal("")),
+  created_at: z.string().datetime().optional(),
+  updated_at: z.string().datetime().optional(),
 })
 
 export type PromoterProfileFormData = z.infer<typeof promoterProfileSchema>

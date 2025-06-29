@@ -1,6 +1,11 @@
+"use client"
+
 import { Skeleton } from "@/components/ui/skeleton"
+import { Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export default function Loading() {
+  const t = useTranslations("Loading")
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header Skeleton */}
@@ -23,9 +28,9 @@ export default function Loading() {
 
       {/* Main Content Skeleton */}
       <main className="flex-1 container mx-auto py-8 px-4 md:px-6">
-        <div className="flex items-center justify-between mb-6">
-          <Skeleton className="h-10 w-64" /> {/* Page Title */}
-          <Skeleton className="h-10 w-32" /> {/* Action Button */}
+        <div className="flex items-center justify-center">
+          <Loader2 className="h-10 w-10 animate-spin" />
+          <span className="sr-only">{t("loadingApp")}</span>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (

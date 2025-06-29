@@ -1,59 +1,54 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { format } from "date-fns"
-import { useTranslations } from "next-intl"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import type { AuditLog } from "@/lib/dashboard-types"
+import { useTranslations } from "next-intl"
+import { format } from "date-fns"
 
 interface AuditLogsProps {
   logs: AuditLog[]
 }
 
 export function AuditLogs({ logs }: AuditLogsProps) {
-  const t = useTranslations("DashboardAuditLogs")
+  const t = useTranslations("AuditLogs")
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("auditLogs")}</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[300px] rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("timestamp")}</TableHead>
-                <TableHead>{t("user")}</TableHead>
-                <TableHead>{t("action")}</TableHead>
-                <TableHead>{t("target")}</TableHead>
-                <TableHead>{t("details")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {logs.length === 0 ? (
+        {logs.length === 0 ? (
+          <p className="text-muted-foreground">{t("noLogs")}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                    {t("noAuditLogs")}
-                  </TableCell>
+                  <TableHead>{t("timestamp")}</TableHead>
+                  <TableHead>{t("user")}</TableHead>
+                  <TableHead>{t("action")}</TableHead>
+                  <TableHead>{t("target")}</TableHead>
+                  <TableHead>{t("details")}</TableHead>
                 </TableRow>
-              ) : (
-                logs.map((log) => (
+              </TableHeader>
+              <TableBody>
+                {logs.map((log) => (
                   <TableRow key={log.id}>
-                    <TableCell className="font-medium">
+                    <TableCell className="whitespace-nowrap text-sm">
                       {format(new Date(log.timestamp), "MMM dd, yyyy HH:mm")}
                     </TableCell>
-                    <TableCell>{log.user}</TableCell>
-                    <TableCell>{log.action}</TableCell>
-                    <TableCell>{log.target}</TableCell>
-                    <TableCell className="text-muted-foreground">{log.details}</TableCell>
+                    <TableCell className="whitespace-nowrap text-sm">{log.user}</TableCell>
+                    <TableCell className="whitespace-nowrap text-sm">{log.action}</TableCell>
+                    <TableCell className="whitespace-nowrap text-sm">{log.target}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{log.details}</TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </ScrollArea>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

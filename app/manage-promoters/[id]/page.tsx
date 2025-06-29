@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import Image from "next/image"
 
 import { getPromoterById } from "@/app/actions/promoters"
@@ -16,6 +16,9 @@ interface PromoterDetailsPageProps {
 }
 
 export default async function PromoterDetailsPage({ params }: PromoterDetailsPageProps) {
+  // Redirect to the default locale version if accessed directly without locale
+  redirect("/en/manage-promoters")
+
   const t = await getTranslations("PromoterDetailsPage")
   const { data: promoter, error } = await getPromoterById(params.id)
 

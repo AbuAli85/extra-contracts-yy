@@ -3,7 +3,7 @@ import type { Contract, Party, Promoter } from "./types"
 
 const supabase = createClient()
 
-export async function getContracts(query?: string, status?: string): Promise<Contract[]> {
+export async function getContractsData(query?: string, status?: string): Promise<Contract[]> {
   let dbQuery = supabase
     .from("contracts")
     .select(`

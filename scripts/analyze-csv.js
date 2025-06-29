@@ -70,6 +70,13 @@ function analyzeCsv(filePath) {
           console.log(`  Average Value: ${col.numericCount > 0 ? (col.sum / col.numericCount).toFixed(2) : "N/A"}`)
         }
       }
+
+      console.log("\nCSV analysis complete.")
+      console.log("Number of rows:", results.length)
+      if (results.length > 0) {
+        console.log("Headers:", Object.keys(results[0]))
+        console.log("First 5 rows:", results.slice(0, 5))
+      }
     })
     .on("error", (error) => {
       console.error("Error reading CSV:", error.message)

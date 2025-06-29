@@ -1,7 +1,10 @@
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { redirect } from "next/navigation"
 
-export default function Loading() {
+export default function ManagePartiesLoading() {
+  // Redirect to the default locale version if accessed directly without locale
+  redirect("/en/manage-parties")
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <div className="flex items-center justify-between mb-6">
