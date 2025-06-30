@@ -17,7 +17,7 @@ export default function DashboardAuditPage() {
     error,
   } = useQuery({
     queryKey: ["auditLogs"],
-    queryFn: getAuditLogs,
+    queryFn: () => getAuditLogs(),
   })
 
   if (isLoading) {

@@ -1,5 +1,6 @@
 export interface DashboardAnalytics {
   totalContracts: number
+  activeContracts: number
   pendingContracts: number
   completedContracts: number
   failedContracts: number
@@ -7,6 +8,8 @@ export interface DashboardAnalytics {
   contractsLastMonth: number
   averageProcessingTime: number
   successRate: number
+  contractTrends: ChartData[]
+  statusDistribution: ChartData[]
 }
 
 export interface PendingReview {

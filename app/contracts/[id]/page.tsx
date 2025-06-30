@@ -20,10 +20,10 @@ export default async function ContractDetailsPage({ params }: ContractDetailsPag
   redirect("/en/contracts")
 
   const t = await getTranslations("ContractDetailsPage")
-  const { data: contract, error } = await getContractById(params.id)
+  const contract = await getContractById(params.id)
 
-  if (error || !contract) {
-    console.error("Error fetching contract:", error)
+  if (!contract) {
+    console.error("Contract not found:", params.id)
     notFound()
   }
 
@@ -32,14 +32,14 @@ export default async function ContractDetailsPage({ params }: ContractDetailsPag
       <Card>
         <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
           <div className="space-y-1">
-            <CardTitle className="text-2xl font-bold">{contract.contract_name}</CardTitle>
+            <CardTitle className="text-2xl font-bold">{contract!.contract_name}</CardTitle>
             <p className="text-muted-foreground">
-              {t("contractId")}: {contract.contract_id}
+              {t("contractId")}: {contract!.id}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">{contract.status}</Badge>
-            <Badge variant="outline">{contract.contract_type}</Badge>
+            <Badge variant="secondary">{contract!.status}</Badge>
+            <Badge variant="outline">{contract!.contract_type}</Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -47,32 +47,32 @@ export default async function ContractDetailsPage({ params }: ContractDetailsPag
             <div>
               <h3 className="font-semibold text-lg mb-2">{t("partiesInvolved")}</h3>
               <p>
-                <span className="font-medium">{t("partyA")}:</span> {contract.parties_a?.name || "N/A"}
+                <span className="font-medium">{t("partyA")}:</span> {contract!.party_a_name || "N/A"}
               </p>
               <p>
-                <span className="font-medium">{t("partyB")}:</span> {contract.parties_b?.name || "N/A"}
+                <span className="font-medium">{t("partyB")}:</span> {contract!.party_b_name || "N/A"}
               </p>
               <p>
-                <span className="font-medium">{t("promoter")}:</span> {contract.promoters?.name || "N/A"}
+                <span className="font-medium">{t("promoter")}:</span> {contract!.promoter_name || "N/A"}
               </p>
             </div>
             <div>
               <h3 className="font-semibold text-lg mb-2">{t("keyDates")}</h3>
               <p>
                 <span className="font-medium">{t("effectiveDate")}:</span>{" "}
-                {contract.effective_date ? new Date(contract.effective_date).toLocaleDateString() : "N/A"}
+                {contract!.start_date ? new Date(contract!.start_date as string).toLocaleDateString() : "N/A"}
               </p>
               <p>
                 <span className="font-medium">{t("terminationDate")}:</span>{" "}
-                {contract.termination_date ? new Date(contract.termination_date).toLocaleDateString() : "N/A"}
+                {contract!.end_date ? new Date(contract!.end_date as string).toLocaleDateString() : "N/A"}
               </p>
               <p>
                 <span className="font-medium">{t("createdAt")}:</span>{" "}
-                {new Date(contract.created_at).toLocaleDateString()}
+                {new Date(contract!.created_at).toLocaleDateString()}
               </p>
               <p>
                 <span className="font-medium">{t("lastUpdated")}:</span>{" "}
-                {new Date(contract.updated_at).toLocaleDateString()}
+                {new Date(contract!.updated_at).toLocaleDateString()}
               </p>
             </div>
           </div>
@@ -83,10 +83,10 @@ export default async function ContractDetailsPage({ params }: ContractDetailsPag
             <h3 className="font-semibold text-lg mb-2">{t("financialDetails")}</h3>
             <p>
               <span className="font-medium">{t("contractValue")}:</span>{" "}
-              {contract.contract_value ? `$${contract.contract_value.toLocaleString()}` : "N/A"}
+              {contract!.contract_value !== null && contract!.contract_value !== undefined ? `$${contract!.contract_value.toLocaleString()}` : "N/A"}
             </p>
             <p>
-              <span className="font-medium">{t("paymentTerms")}:</span> {contract.payment_terms || "N/A"}
+              <span className="font-medium">{t("paymentTerms")}:</span> {contract!.notes || "N/A"}
             </p>
           </div>
 
@@ -98,13 +98,13 @@ export default async function ContractDetailsPage({ params }: ContractDetailsPag
               <div>
                 <h4 className="font-semibold text-md mb-1">{t("englishVersion")}</h4>
                 <div className="prose prose-sm max-w-none text-muted-foreground">
-                  <p>{contract.content_english || t("noContentAvailable")}</p>
+                  <p>{contract!.content_english || t("noContentAvailable")}</p>
                 </div>
               </div>
               <div>
                 <h4 className="font-semibold text-md mb-1">{t("spanishVersion")}</h4>
                 <div className="prose prose-sm max-w-none text-muted-foreground">
-                  <p>{contract.content_spanish || t("noContentAvailable")}</p>
+                  <p>{contract!.content_spanish || t("noContentAvailable")}</p>
                 </div>
               </div>
             </div>
@@ -114,7 +114,7 @@ export default async function ContractDetailsPage({ params }: ContractDetailsPag
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" asChild>
-              <Link href={`/edit-contract/${contract.id}`}>
+              <Link href={`/edit-contract/${contract!.id}`}>
                 <Edit className="mr-2 h-4 w-4" />
                 {t("editContract")}
               </Link>
