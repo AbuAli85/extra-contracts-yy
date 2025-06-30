@@ -7,10 +7,9 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 if (!supabaseUrl || !supabaseServiceRoleKey) {
-  console.error(
+  throw new Error(
     "Supabase URL and Service Role Key must be defined in environment variables for server-side operations.",
   )
-  // In a real application, you might throw an error or handle this more gracefully
 }
 
 export const supabaseAdmin = createClient<Database>(supabaseUrl || "", supabaseServiceRoleKey || "", {
