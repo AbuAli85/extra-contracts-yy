@@ -204,12 +204,68 @@ export const createMockError = (message: string, details?: string) => ({
 export const resetSupabaseMocks = () => {
   jest.clearAllMocks()
   
-  // Set default implementations
-  mockSupabaseClient.from().single.mockResolvedValue(createMockResponse(mockContracts[0]))
-  mockSupabaseClient.from().select().mockResolvedValue(createMockResponse(mockContracts))
-  mockSupabaseClient.from().insert().mockResolvedValue(createMockResponse(mockContracts[0]))
-  mockSupabaseClient.from().update().mockResolvedValue(createMockResponse(mockContracts[0]))
-  mockSupabaseClient.from().delete().mockResolvedValue(createMockResponse(null))
+  // Create a proper query builder mock that can be chained
+  const createQueryBuilder = () => {
+    const queryBuilder = {
+      select: jest.fn().mockReturnThis(),
+      insert: jest.fn().mockReturnThis(),
+      update: jest.fn().mockReturnThis(),
+      delete: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      neq: jest.fn().mockReturnThis(),
+      gt: jest.fn().mockReturnThis(),
+      gte: jest.fn().mockReturnThis(),
+      lt: jest.fn().mockReturnThis(),
+      lte: jest.fn().mockReturnThis(),
+      like: jest.fn().mockReturnThis(),
+      ilike: jest.fn().mockReturnThis(),
+      is: jest.fn().mockReturnThis(),
+      in: jest.fn().mockReturnThis(),
+      contains: jest.fn().mockReturnThis(),
+      containedBy: jest.fn().mockReturnThis(),
+      rangeGt: jest.fn().mockReturnThis(),
+      rangeGte: jest.fn().mockReturnThis(),
+      rangeLt: jest.fn().mockReturnThis(),
+      rangeLte: jest.fn().mockReturnThis(),
+      rangeAdjacent: jest.fn().mockReturnThis(),
+      overlaps: jest.fn().mockReturnThis(),
+      textSearch: jest.fn().mockReturnThis(),
+      match: jest.fn().mockReturnThis(),
+      not: jest.fn().mockReturnThis(),
+      or: jest.fn().mockReturnThis(),
+      filter: jest.fn().mockReturnThis(),
+      order: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      range: jest.fn().mockReturnThis(),
+      abortSignal: jest.fn().mockReturnThis(),
+      single: jest.fn(),
+      maybeSingle: jest.fn(),
+      csv: jest.fn(),
+      geojson: jest.fn(),
+      explain: jest.fn(),
+      rollback: jest.fn(),
+      returns: jest.fn(),
+    }
+    
+    // Set up default resolved values for terminal methods
+    queryBuilder.single.mockResolvedValue(createMockResponse(mockContracts[0]))
+    queryBuilder.maybeSingle.mockResolvedValue(createMockResponse(mockContracts[0]))
+    
+    // For chained methods like select().eq().single(), we need to ensure they return a promise
+    queryBuilder.select.mockImplementation(() => {
+      const chainedBuilder = { ...queryBuilder }
+      // The final result should return data when awaited
+      chainedBuilder.then = (onResolve: any) => {
+        return Promise.resolve(createMockResponse(mockContracts)).then(onResolve)
+      }
+      return chainedBuilder
+    })
+    
+    return queryBuilder
+  }
+  
+  // Reset the from method to return a new query builder each time
+  mockSupabaseClient.from.mockImplementation(() => createQueryBuilder())
 }
 
 // Setup specific mock scenarios
