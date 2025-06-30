@@ -8,54 +8,75 @@ import { ContractsList } from "@/components/contracts-list"
 import { ContractsDashboardWidget } from "@/components/contracts-dashboard-widget"
 import { useContractsStore } from "@/lib/stores/contracts-store"
 import { useRealtimeContracts } from "@/hooks/use-realtime-contracts"
+import { LoadingState } from "@/components/ui/loading-spinner"
+import { ErrorBoundary } from "@/components/error-boundary"
 
 export default function HomePage() {
   const t = useTranslations("dashboard")
-  const { fetchContracts } = useContractsStore()
+  const { fetchContracts, loading, error, clearError } = useContractsStore()
 
   // Set up real-time subscriptions
-  useRealtimeContracts()
+  const { reconnect } = useRealtimeContracts()
 
   useEffect(() => {
     fetchContracts()
   }, [fetchContracts])
 
+  const handleRetry = () => {
+    clearError()
+    fetchContracts()
+  }
+
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground">Generate and manage bilingual contracts with real-time processing</p>
-      </div>
+    <ErrorBoundary>
+      <div className="container mx-auto py-8 px-4">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground">Generate and manage bilingual contracts with real-time processing</p>
+        </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="overview">{t("overview")}</TabsTrigger>
-          <TabsTrigger value="contracts">Contracts</TabsTrigger>
-        </TabsList>
+        <LoadingState
+          loading={loading}
+          error={error}
+          onRetry={handleRetry}
+          loadingText="Loading dashboard data..."
+          errorTitle="Failed to load dashboard"
+        >
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="overview">{t("overview")}</TabsTrigger>
+              <TabsTrigger value="contracts">Contracts</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight mb-4">{t("statistics")}</h2>
-            <ContractsDashboardWidget />
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("recentActivity")}</CardTitle>
-              <CardDescription>Latest contract generation activity</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <p>Recent activity will appear here</p>
+            <TabsContent value="overview" className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight mb-4">{t("statistics")}</h2>
+                <ErrorBoundary isolate>
+                  <ContractsDashboardWidget />
+                </ErrorBoundary>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="contracts">
-          <ContractsList />
-        </TabsContent>
-      </Tabs>
-    </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("recentActivity")}</CardTitle>
+                  <CardDescription>Latest contract generation activity</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Recent activity will appear here</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="contracts">
+              <ErrorBoundary isolate>
+                <ContractsList />
+              </ErrorBoundary>
+            </TabsContent>
+          </Tabs>
+        </LoadingState>
+      </div>
+    </ErrorBoundary>
   )
 }

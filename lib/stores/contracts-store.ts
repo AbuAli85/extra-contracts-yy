@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import { createClient } from "@/lib/supabase/client"
+import { withRetry, logError, getErrorMessage } from "@/lib/error-handler"
 
 interface Contract {
   id: string
@@ -18,6 +19,7 @@ interface Contract {
 interface ContractsStore {
   contracts: Contract[]
   loading: boolean
+  error: string | null
   statistics: {
     total: number
     pending: number
@@ -30,11 +32,13 @@ interface ContractsStore {
   ) => Promise<void>
   retryContract: (contractId: string) => Promise<void>
   updateStatistics: () => Promise<void>
+  clearError: () => void
 }
 
 export const useContractsStore = create<ContractsStore>((set, get) => ({
   contracts: [],
   loading: false,
+  error: null,
   statistics: {
     total: 0,
     pending: 0,
@@ -42,81 +46,102 @@ export const useContractsStore = create<ContractsStore>((set, get) => ({
     failed: 0,
   },
 
+  clearError: () => set({ error: null }),
+
   fetchContracts: async () => {
-    set({ loading: true })
+    set({ loading: true, error: null })
     try {
-      const supabase = createClient()
-      const { data, error } = await supabase.from("contracts").select("*").order("created_at", { ascending: false })
+      await withRetry(async () => {
+        const supabase = createClient()
+        const { data, error } = await supabase.from("contracts").select("*").order("created_at", { ascending: false })
 
-      if (error) throw error
+        if (error) throw error
 
-      set({ contracts: data || [] })
-      get().updateStatistics()
+        set({ contracts: data || [] })
+        get().updateStatistics()
+      }, 3, 1000)
     } catch (error) {
-      console.error("Error fetching contracts:", error)
+      const errorMessage = getErrorMessage(error)
+      logError(error, { context: "fetchContracts" })
+      set({ error: errorMessage })
     } finally {
       set({ loading: false })
     }
   },
 
   generateContract: async (contractData) => {
+    set({ error: null })
     try {
-      const response = await fetch("/api/generate-contract", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(contractData),
-      })
+      await withRetry(async () => {
+        const response = await fetch("/api/generate-contract", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(contractData),
+        })
 
-      if (!response.ok) {
-        throw new Error("Failed to generate contract")
-      }
+        if (!response.ok) {
+          const errorData = await response.text()
+          throw new Error(errorData || "Failed to generate contract")
+        }
+      }, 2, 2000)
 
       // Refresh contracts list
       get().fetchContracts()
     } catch (error) {
-      console.error("Error generating contract:", error)
+      const errorMessage = getErrorMessage(error)
+      logError(error, { context: "generateContract", contractData })
+      set({ error: errorMessage })
       throw error
     }
   },
 
   retryContract: async (contractId) => {
+    set({ error: null })
     try {
-      const supabase = createClient()
+      await withRetry(async () => {
+        const supabase = createClient()
 
-      // Update status to generating
-      const { error } = await supabase.from("contracts").update({ status: "generating" }).eq("id", contractId)
+        // Update status to generating
+        const { error } = await supabase.from("contracts").update({ status: "generating" }).eq("id", contractId)
 
-      if (error) throw error
+        if (error) throw error
 
-      // Get contract data for retry
-      const { data: contract } = await supabase.from("contracts").select("*").eq("id", contractId).single()
+        // Get contract data for retry
+        const { data: contract } = await supabase.from("contracts").select("*").eq("id", contractId).single()
 
-      if (contract && process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL) {
-        // Send to Make.com webhook for reprocessing
-        await fetch(process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            contractId: contract.id,
-            contractNumber: contract.contract_number,
-            contract_name: contract.contract_name,
-            party_a: contract.party_a,
-            party_b: contract.party_b,
-            contract_type: contract.contract_type,
-            terms: contract.terms,
-            retry: true,
-          }),
-        })
-      }
+        if (contract && process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL) {
+          // Send to Make.com webhook for reprocessing
+          const response = await fetch(process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              contractId: contract.id,
+              contractNumber: contract.contract_number,
+              contract_name: contract.contract_name,
+              party_a: contract.party_a,
+              party_b: contract.party_b,
+              contract_type: contract.contract_type,
+              terms: contract.terms,
+              retry: true,
+            }),
+          })
+
+          if (!response.ok) {
+            throw new Error("Failed to send retry request to webhook")
+          }
+        }
+      }, 3, 2000)
 
       // Refresh contracts list
       get().fetchContracts()
     } catch (error) {
-      console.error("Error retrying contract:", error)
+      const errorMessage = getErrorMessage(error)
+      logError(error, { context: "retryContract", contractId })
+      set({ error: errorMessage })
       throw error
     }
   },
