@@ -75,7 +75,7 @@ export interface User {
 // Supabase client
 const getSupabaseClient = () => createClientComponentClient<Database>()
 
-// Dashboard Analytics
+// getDashboardAnalytics
 export async function getDashboardAnalytics(): Promise<DashboardAnalytics> {
   try {
     const supabase = getSupabaseClient()
@@ -129,6 +129,7 @@ export async function getDashboardAnalytics(): Promise<DashboardAnalytics> {
   }
 }
 
+// getPendingReviews
 export async function getPendingReviews(): Promise<PendingReview[]> {
   try {
     const supabase = getSupabaseClient()
@@ -152,6 +153,7 @@ export async function getPendingReviews(): Promise<PendingReview[]> {
   }
 }
 
+// getAdminActions
 export async function getAdminActions(): Promise<AdminAction[]> {
   // Replace with real DB calls if you have an admin_actions table
   return [
@@ -167,6 +169,7 @@ export async function getAdminActions(): Promise<AdminAction[]> {
   ]
 }
 
+// getAuditLogs
 export async function getAuditLogs(): Promise<AuditLog[]> {
   // Replace with real DB calls if you have an audit_logs table
   return [
@@ -182,6 +185,7 @@ export async function getAuditLogs(): Promise<AuditLog[]> {
   ]
 }
 
+// getNotifications
 export async function getNotifications(): Promise<Notification[]> {
   // Replace with real DB calls if you have a notifications table
   return [
@@ -197,6 +201,7 @@ export async function getNotifications(): Promise<Notification[]> {
   ]
 }
 
+// getUsers
 export async function getUsers(): Promise<User[]> {
   try {
     const supabase = getSupabaseClient()
