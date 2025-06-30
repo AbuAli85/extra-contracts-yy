@@ -48,6 +48,14 @@ This is a Next.js application designed to generate bilingual contracts, manage p
         \`\`\`env
 NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+```
+
+4.  **Run the development server**:
+    ```bash
+    pnpm dev
+    # or
+    npm run dev
+    ```
 
 
 ### Dashboard data modules
@@ -56,3 +64,4 @@ Client components should import helpers from `lib/dashboard-data.client.ts`.
 Server components use `lib/dashboard-data.server.ts`.
 This explicit separation replaces the former dynamic helper. The deprecated
 `lib/client-data.ts` file has been removed.
+You're now ready to start building!
