@@ -1,6 +1,12 @@
 export interface Contract {
   id: string
   contract_name: string
+  contract_type: string
+  start_date?: string
+  end_date?: string
+  contract_value?: number
+  content_english: string
+  content_spanish: string
   status: ContractStatus
   created_at: string
   updated_at: string
@@ -8,6 +14,9 @@ export interface Contract {
   party_a_id?: string
   party_b_id?: string
   promoter_id?: string
+  party_a_name?: string
+  party_b_name?: string
+  promoter_name?: string
   contract_data?: any
 }
 
