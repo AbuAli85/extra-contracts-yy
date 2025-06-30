@@ -99,11 +99,11 @@ describe('useContractsStore', () => {
     const { result } = renderHook(() => useContractsStore())
     
     const mockContracts = [
-      { id: '1', status: 'completed' },
-      { id: '2', status: 'pending' },
-      { id: '3', status: 'generating' },
-      { id: '4', status: 'failed' },
-      { id: '5', status: 'completed' },
+      { id: '1', status: 'completed', contract_number: '1', contract_name: 'Test 1', party_a: 'A', party_b: 'B', contract_type: 'test', terms: 'terms', created_at: '', updated_at: '' },
+      { id: '2', status: 'pending', contract_number: '2', contract_name: 'Test 2', party_a: 'A', party_b: 'B', contract_type: 'test', terms: 'terms', created_at: '', updated_at: '' },
+      { id: '3', status: 'generating', contract_number: '3', contract_name: 'Test 3', party_a: 'A', party_b: 'B', contract_type: 'test', terms: 'terms', created_at: '', updated_at: '' },
+      { id: '4', status: 'failed', contract_number: '4', contract_name: 'Test 4', party_a: 'A', party_b: 'B', contract_type: 'test', terms: 'terms', created_at: '', updated_at: '' },
+      { id: '5', status: 'completed', contract_number: '5', contract_name: 'Test 5', party_a: 'A', party_b: 'B', contract_type: 'test', terms: 'terms', created_at: '', updated_at: '' },
     ]
     
     act(() => {

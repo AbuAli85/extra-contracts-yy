@@ -78,56 +78,29 @@ export const promoterSchema = promoterBaseSchema
   .merge(promoterDatesSchema)
   .merge(promoterDocumentsSchema)
   .merge(promoterContactSchema)
-  .superRefine((data, ctx) => {
-    // Validate contract expiry is in the future
-    if (data.contract_valid_until && data.contract_valid_until < new Date()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Contract expiry date must be in the future",
-        path: ["contract_valid_until"],
-      })
-    }
 
-    // Validate ID card expiry is in the future
-    if (data.id_card_expiry_date && data.id_card_expiry_date < new Date()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "ID card expiry date must be in the future",
-        path: ["id_card_expiry_date"],
-      })
-    }
-
-    // Validate passport expiry is in the future
-    if (data.passport_expiry_date && data.passport_expiry_date < new Date()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Passport expiry date must be in the future",
-        path: ["passport_expiry_date"],
-      })
-    }
-
-    // Validate that at least one identification document is provided
-    if (!data.id_card_image && !data.existing_id_card_url && !data.passport_image && !data.existing_passport_url) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "At least one identification document (ID card or passport) is required",
-        path: ["id_card_image"],
-      })
-    }
+export const promoterCreateSchema = promoterBaseSchema
+  .merge(promoterDatesSchema)
+  .merge(promoterContactSchema)
+  .extend({
+    id_card_image: fileSchema,
+    passport_image: fileSchema,
+    profile_picture: urlOrFileSchema,
+  })
+  .omit({
+    id: true,
+    created_at: true,
+    updated_at: true,
   })
 
-export const promoterCreateSchema = promoterSchema.omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
-  existing_id_card_url: true,
-  existing_passport_url: true,
-  existing_profile_picture_url: true,
-})
-
-export const promoterUpdateSchema = promoterSchema.partial().extend({
-  id: z.string().uuid(),
-})
+export const promoterUpdateSchema = promoterBaseSchema
+  .merge(promoterDatesSchema)
+  .merge(promoterDocumentsSchema)
+  .merge(promoterContactSchema)
+  .partial()
+  .extend({
+    id: z.string().uuid(),
+  })
 
 export const promoterSearchSchema = z.object({
   query: z.string().optional(),
