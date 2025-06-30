@@ -227,3 +227,13 @@ export async function getUsers(): Promise<User[]> {
     return []
   }
 }
+
+// --- Explicit named export block ---
+export {
+  getDashboardAnalytics,
+  getPendingReviews,
+  getAdminActions,
+  getAuditLogs,
+  getNotifications,
+  getUsers
+};
