@@ -23,7 +23,7 @@ export default function ManagePartiesPage() {
 
   const filteredParties = useMemo(() => {
     if (!parties) return []
-    return parties.filter((party) => party.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    return parties.filter((party: Party) => party.name.toLowerCase().includes(searchTerm.toLowerCase()))
   }, [parties, searchTerm])
 
   const handleEdit = (party: Party) => {
@@ -76,7 +76,7 @@ export default function ManagePartiesPage() {
                 <DialogHeader>
                   <DialogTitle>{editingParty ? t("editParty") : t("addParty")}</DialogTitle>
                 </DialogHeader>
-                <PartyForm party={editingParty} onFormSuccess={() => setIsFormOpen(false)} />
+                <PartyForm party={editingParty || undefined} onFormSuccess={() => setIsFormOpen(false)} />
               </DialogContent>
             </Dialog>
           </div>
@@ -97,12 +97,12 @@ export default function ManagePartiesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredParties.map((party) => (
+                  {filteredParties.map((party: Party) => (
                     <TableRow key={party.id}>
                       <TableCell className="font-medium">{party.name}</TableCell>
                       <TableCell>{party.type}</TableCell>
-                      <TableCell>{party.contact_email}</TableCell>
-                      <TableCell>{party.contact_phone}</TableCell>
+                      <TableCell>{party.email}</TableCell>
+                      <TableCell>{party.phone}</TableCell>
                       <TableCell className="flex justify-end gap-2">
                         <Button variant="outline" size="sm" onClick={() => handleEdit(party)}>
                           {t("edit")}

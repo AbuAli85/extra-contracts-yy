@@ -23,7 +23,7 @@ export default function ManagePromotersPage() {
 
   const filteredPromoters = useMemo(() => {
     if (!promoters) return []
-    return promoters.filter((promoter) => promoter.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    return promoters.filter((promoter: Promoter) => promoter.name.toLowerCase().includes(searchTerm.toLowerCase()))
   }, [promoters, searchTerm])
 
   const handleEdit = (promoter: Promoter) => {
@@ -76,7 +76,7 @@ export default function ManagePromotersPage() {
                 <DialogHeader>
                   <DialogTitle>{editingPromoter ? t("editPromoter") : t("addPromoter")}</DialogTitle>
                 </DialogHeader>
-                <PromoterForm promoter={editingPromoter} onFormSuccess={() => setIsFormOpen(false)} />
+                <PromoterForm promoter={editingPromoter || undefined} onFormSuccess={() => setIsFormOpen(false)} />
               </DialogContent>
             </Dialog>
           </div>
@@ -96,11 +96,11 @@ export default function ManagePromotersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredPromoters.map((promoter) => (
+                  {filteredPromoters.map((promoter: Promoter) => (
                     <TableRow key={promoter.id}>
                       <TableCell className="font-medium">{promoter.name}</TableCell>
-                      <TableCell>{promoter.contact_email}</TableCell>
-                      <TableCell>{promoter.contact_phone}</TableCell>
+                      <TableCell>{promoter.email}</TableCell>
+                      <TableCell>{promoter.phone}</TableCell>
                       <TableCell className="flex justify-end gap-2">
                         <Button variant="outline" size="sm" onClick={() => handleEdit(promoter)}>
                           {t("edit")}

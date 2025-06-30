@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useContracts } from "@/hooks/use-contracts"
+import type { Contract } from "@/lib/types"
 import { useTranslations } from "next-intl"
 import { format } from "date-fns"
 import { Badge } from "@/components/ui/badge"
@@ -22,7 +23,7 @@ export default function ContractDetailPage() {
 
   useEffect(() => {
     if (contracts) {
-      const foundContract = contracts.find((c) => c.id === contractId)
+      const foundContract = contracts.find((c: Contract) => c.id === contractId)
       setContract(foundContract)
     }
   }, [contracts, contractId])

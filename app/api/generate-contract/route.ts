@@ -1,13 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { cookies } from "next/headers"
 import { nanoid } from "nanoid"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const cookieStore = cookies()
-    const supabase = createClient(cookieStore)
+    const supabase = createClient()
 
     // Generate unique contract number
     const contractNumber = `CNT-${nanoid(8).toUpperCase()}`
@@ -18,11 +16,12 @@ export async function POST(request: NextRequest) {
       .insert({
         contract_number: contractNumber,
         contract_name: body.contract_name,
-        party_a: body.party_a,
-        party_b: body.party_b,
+        party_a_id: body.party_a_id,
+        party_b_id: body.party_b_id,
         contract_type: body.contract_type,
-        terms: body.terms,
-        status: "generating",
+        content_english: body.content_english,
+        content_spanish: body.content_spanish,
+        status: "processing",
       })
       .select()
       .single()
@@ -63,8 +62,8 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
     const { contractId, status, pdfUrl } = body
-    const cookieStore = cookies()
-    const supabase = createClient(cookieStore)
+    
+    const supabase = createClient()
 
     // Update contract status
     const { error } = await supabase

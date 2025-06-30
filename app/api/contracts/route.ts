@@ -1,13 +1,11 @@
 import { createClient } from "@/lib/supabase/server"
-import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const contractId = searchParams.get("id")
 
-  const cookieStore = cookies()
-  const supabase = createClient(cookieStore)
+  const supabase = createClient()
 
   if (contractId) {
     // Fetch a single contract
@@ -58,8 +56,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const cookieStore = cookies()
-  const supabase = createClient(cookieStore)
+  
+  const supabase = createClient()
 
   const {
     data: { user },
@@ -96,8 +94,8 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Contract ID is required" }, { status: 400 })
   }
 
-  const cookieStore = cookies()
-  const supabase = createClient(cookieStore)
+  
+  const supabase = createClient()
 
   const {
     data: { user },
@@ -137,8 +135,8 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Contract ID is required" }, { status: 400 })
   }
 
-  const cookieStore = cookies()
-  const supabase = createClient(cookieStore)
+  
+  const supabase = createClient()
 
   const {
     data: { user },
