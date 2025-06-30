@@ -12,7 +12,7 @@ interface SummaryWidgetProps {
 export default function SummaryWidget({ data, isLoading = false }: SummaryWidgetProps) {
   const Icon = data.icon
   return (
-    <Card className="shadow-sm hover:shadow-md transition-shadow">
+    <Card className="shadow-sm transition-shadow hover:shadow-md">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         {isLoading ? (
           <Skeleton className="h-4 w-3/4" />
@@ -30,14 +30,19 @@ export default function SummaryWidget({ data, isLoading = false }: SummaryWidget
       <CardContent>
         {isLoading ? (
           <>
-            <Skeleton className="h-8 w-1/2 mb-1" />
+            <Skeleton className="mb-1 h-8 w-1/2" />
             <Skeleton className="h-3 w-1/3" />
           </>
         ) : (
           <>
             <div className="text-3xl font-bold">{data.value}</div>
             {data.comparison && (
-              <p className={cn("text-xs", data.color ? data.color.replace("text-", "text-") : "text-muted-foreground")}>
+              <p
+                className={cn(
+                  "text-xs",
+                  data.color ? data.color.replace("text-", "text-") : "text-muted-foreground",
+                )}
+              >
                 {data.comparison}
               </p>
             )}

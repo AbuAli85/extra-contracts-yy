@@ -1,9 +1,17 @@
-import GenerateContractForm from "@/components/generate-contract-form"
+// File: app/generate-contract/page.tsx
+"use client"
+
+import ContractGeneratorForm from "../../components/ContractGeneratorForm"
 
 export default function GenerateContractPage() {
+  const handleFormSubmit = (data: any) => {
+    /* … */
+  }
+
   return (
-    <div className="min-h-screen bg-background py-8 sm:py-12">
-      <GenerateContractForm />
+    <div className="container py-8">
+      <h1 className="mb-6 text-3xl font-bold">Create New Contract</h1>
+      <ContractGeneratorForm onFormSubmit={handleFormSubmit} />
     </div>
   )
 }

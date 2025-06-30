@@ -5,7 +5,14 @@ import { Check, ChevronsUpDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 interface ComboboxFieldProps {
@@ -42,12 +49,14 @@ export default function ComboboxField({
           className={cn(
             "w-full justify-between",
             !field.value && "text-muted-foreground",
-            disabled && "bg-muted/50 cursor-not-allowed opacity-50",
+            disabled && "cursor-not-allowed bg-muted/50 opacity-50",
           )}
           disabled={disabled}
           ref={field.ref}
         >
-          {field.value ? options.find((option) => option.value === field.value)?.label : placeholder}
+          {field.value
+            ? options.find((option) => option.value === field.value)?.label
+            : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -67,7 +76,12 @@ export default function ComboboxField({
                       setOpen(false)
                     }}
                   >
-                    <Check className={cn("mr-2 h-4 w-4", field.value === option.value ? "opacity-100" : "opacity-0")} />
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        field.value === option.value ? "opacity-100" : "opacity-0",
+                      )}
+                    />
                     {option.label}
                   </CommandItem>
                 ))}

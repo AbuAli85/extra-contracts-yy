@@ -91,7 +91,9 @@ describe("GenerateContractForm", () => {
     expect(await screen.findByText("Please select a Promoter.")).toBeInTheDocument()
     expect(await screen.findByText("Contract start date is required.")).toBeInTheDocument()
     expect(await screen.findByText("Contract end date is required.")).toBeInTheDocument()
-    expect(await screen.findByText("Please enter a valid email address for notifications.")).toBeInTheDocument()
+    expect(
+      await screen.findByText("Please enter a valid email address for notifications."),
+    ).toBeInTheDocument()
     expect(global.fetch).not.toHaveBeenCalled()
   })
 

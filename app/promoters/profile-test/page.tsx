@@ -37,7 +37,7 @@ export default function PromoterProfileTestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-8 sm:py-12 px-4">
+    <div className="min-h-screen bg-background px-4 py-8 sm:py-12">
       <PromoterProfileForm
         // promoterToEdit={samplePromoterToEdit} // Uncomment to test edit mode
         onFormSubmitSuccess={handleFormSubmit}

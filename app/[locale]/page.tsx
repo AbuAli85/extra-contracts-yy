@@ -1,22 +1,29 @@
-// app/[locale]/page.tsx (Example - assuming your homepage is at the root)
 "use client"
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileTextIcon, FilePlus2Icon, History, UsersIcon, BuildingIcon, ExternalLinkIcon } from "lucide-react"
-import AuthStatus from "@/components/auth-status" // Assuming this component exists
+import {
+  FileTextIcon,
+  FilePlus2Icon,
+  History,
+  UsersIcon,
+  BuildingIcon,
+  ExternalLinkIcon,
+} from "lucide-react"
+import AuthStatus from "@/components/auth-status"
 import { motion } from "framer-motion"
+import type { Variants } from "framer-motion"
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
     transition: {
-      delay: i * 0.1,
+      delay: i * 0.2,
       duration: 0.5,
-      ease: "easeOut",
+      ease: [0.42, 0, 0.58, 1], // ← valid
     },
   }),
 }
@@ -73,16 +80,18 @@ export default function HomePage({ params }: { params: { locale: string } }) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-center mb-12"
+        className="mb-12 text-center"
       >
-        <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4">Bilingual Contract Management</h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Streamline your contract creation and management process with our intuitive platform. Choose an action below
-          to get started.
+        <h1 className="mb-4 font-heading text-4xl font-bold md:text-5xl">
+          Bilingual Contract Management
+        </h1>
+        <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+          Streamline your contract creation and management process with our intuitive platform.
+          Choose an action below to get started.
         </p>
       </motion.div>
       <AuthStatus /> {/* Assuming this shows login/logout status */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl mt-8">
+      <div className="mt-8 grid w-full max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {actions.map((action, index) => (
           <motion.div
             key={action.title}
@@ -90,31 +99,48 @@ export default function HomePage({ params }: { params: { locale: string } }) {
             initial="hidden"
             animate="visible"
             variants={cardVariants}
-            whileHover={{ y: -5, boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)" }} // Tailwind shadow
+            whileHover={{
+              y: -5,
+              boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+            }} // Tailwind shadow
             className="h-full"
           >
-            <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-card-hover">
+            <Card className="flex h-full flex-col transition-all duration-300 hover:shadow-card-hover">
               <CardHeader className="pb-4">
-                <div className="flex items-center gap-x-3 mb-2">
+                <div className="mb-2 flex items-center gap-x-3">
                   {" "}
                   {/* RTL: gap-x-3 */}
                   <action.icon className="h-8 w-8 text-primary" />
-                  <CardTitle className="text-xl font-semibold font-heading">{action.title}</CardTitle>
+                  <CardTitle className="font-heading text-xl font-semibold">
+                    {action.title}
+                  </CardTitle>
                 </div>
-                <CardDescription className="text-sm text-muted-foreground min-h-[40px]">
+                <CardDescription className="min-h-[40px] text-sm text-muted-foreground">
                   {action.description}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-grow flex items-end">
+              <CardContent className="flex flex-grow items-end">
                 {action.hrefExternal ? (
-                  <a href={action.hrefExternal} target="_blank" rel="noopener noreferrer" className="w-full">
-                    <Button variant={action.variant} className="w-full h-12 text-base font-semibold">
+                  <a
+                    href={action.hrefExternal}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full"
+                  >
+                    <Button
+                      variant={action.variant}
+                      className="h-12 w-full text-base font-semibold"
+                    >
                       {action.title}
                       <ExternalLinkIcon className="ms-2 h-4 w-4" /> {/* RTL: me-2 */}
                     </Button>
                   </a>
                 ) : (
-                  <Button asChild variant={action.variant} className="w-full h-12 text-base font-semibold">
+                  <Button
+                    asChild
+                    variant={action.variant}
+                    className="h-12 w-full text-base font-semibold"
+                  >
                     <Link href={`/${params.locale}${action.href}`}>{action.title}</Link>
                   </Button>
                 )}

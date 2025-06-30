@@ -2,7 +2,12 @@
 
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Check, ChevronDown } from "lucide-react"
 
 // Assuming you have flag SVGs or components. For simplicity, using text.
@@ -33,7 +38,7 @@ export function LanguageSwitcher() {
           {" "}
           {/* RTL: gap-x-1.5 */}
           <span className="text-sm">{currentLocale.flag}</span>
-          <span className="hidden sm:inline text-sm font-medium">{currentLocale.label}</span>
+          <span className="hidden text-sm font-medium sm:inline">{currentLocale.label}</span>
           <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
@@ -42,7 +47,7 @@ export function LanguageSwitcher() {
           <DropdownMenuItem
             key={locale.value}
             onClick={() => onSelectLocale(locale.value)}
-            className="flex items-center justify-between cursor-pointer"
+            className="flex cursor-pointer items-center justify-between"
           >
             <span className="flex items-center gap-x-2">
               {" "}

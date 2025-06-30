@@ -114,7 +114,13 @@ export function DatePickerWithManualInput({
         </PopoverTrigger>
       </div>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar mode="single" selected={date} onSelect={handleDateSelect} initialFocus disabled={isDateDisabled} />
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={handleDateSelect}
+          initialFocus
+          disabled={isDateDisabled}
+        />
       </PopoverContent>
     </Popover>
   )

@@ -42,8 +42,20 @@ export const summaryWidgetsData: SummaryWidgetData[] = [
     trend: "+10",
     color: "text-orange-500",
   },
-  { title: "Total Promoters", titleAr: "إجمالي المروجين", value: 250, icon: Users, color: "text-purple-500" },
-  { title: "Total Companies", titleAr: "إجمالي الشركات", value: 150, icon: Building, color: "text-teal-500" },
+  {
+    title: "Total Promoters",
+    titleAr: "إجمالي المروجين",
+    value: 250,
+    icon: Users,
+    color: "text-purple-500",
+  },
+  {
+    title: "Total Companies",
+    titleAr: "إجمالي الشركات",
+    value: 150,
+    icon: Building,
+    color: "text-teal-500",
+  },
 ]
 
 export const contractReportsData: ContractReportItem[] = [

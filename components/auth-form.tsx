@@ -86,12 +86,17 @@ export default function AuthForm() {
               required
             />
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Button onClick={handleSignIn} className="w-full" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign In
             </Button>
-            <Button onClick={handleSignUp} variant="outline" className="w-full" disabled={isSubmitting}>
+            <Button
+              onClick={handleSignUp}
+              variant="outline"
+              className="w-full"
+              disabled={isSubmitting}
+            >
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign Up
             </Button>

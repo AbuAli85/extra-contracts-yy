@@ -82,8 +82,7 @@ export default function ImageUploadField({
     <div className="space-y-2">
       {/* Label will be rendered by FormLabel in the parent FormField */}
       <div
-        className={`relative group w-full h-48 border-2 border-dashed rounded-lg flex flex-col justify-center items-center transition-colors
-                  ${disabled ? "bg-muted/50 cursor-not-allowed opacity-50" : "border-muted-foreground/30 hover:border-primary cursor-pointer"}`}
+        className={`group relative flex h-48 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${disabled ? "cursor-not-allowed bg-muted/50 opacity-50" : "cursor-pointer border-muted-foreground/30 hover:border-primary"}`}
         onClick={triggerFileInput}
         onKeyDown={(e) => {
           if ((e.key === "Enter" || e.key === " ") && !disabled) triggerFileInput()
@@ -115,7 +114,7 @@ export default function ImageUploadField({
                 type="button"
                 variant="destructive"
                 size="icon"
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                className="absolute right-2 top-2 z-10 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation()
                   handleRemoveImage()
@@ -128,7 +127,7 @@ export default function ImageUploadField({
           </>
         ) : (
           <div className="text-center text-muted-foreground">
-            <UploadCloudIcon className="mx-auto h-10 w-10 mb-2" />
+            <UploadCloudIcon className="mx-auto mb-2 h-10 w-10" />
             <p className="text-sm">Click or drag file to upload</p>
             <p className="text-xs">PNG, JPG, WEBP up to 5MB</p>
           </div>
@@ -147,8 +146,8 @@ export default function ImageUploadField({
         />
       </div>
       {fileName && field.value instanceof File && (
-        <div className="text-xs text-muted-foreground flex items-center">
-          <FileIcon className="h-3 w-3 mr-1 flex-shrink-0" />
+        <div className="flex items-center text-xs text-muted-foreground">
+          <FileIcon className="mr-1 h-3 w-3 flex-shrink-0" />
           <span>{fileName}</span>
         </div>
       )}

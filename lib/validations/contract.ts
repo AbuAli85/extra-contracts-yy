@@ -16,7 +16,13 @@ const dateSchemaDdMmYyyy = z
   .transform((value) => parse(value, "dd-MM-yyyy", new Date())) // Transform to Date object for internal use
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "application/pdf"]
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+]
 
 const fileSchemaOptional = createOptionalFileSchema(
   MAX_FILE_SIZE,

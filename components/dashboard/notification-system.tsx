@@ -62,7 +62,11 @@ export default function NotificationSystem() {
       )
     } catch (error: any) {
       console.error("Error fetching notifications:", error)
-      toast({ title: "Error Fetching Notifications", description: error.message, variant: "destructive" })
+      toast({
+        title: "Error Fetching Notifications",
+        description: error.message,
+        variant: "destructive",
+      })
       setNotifications([])
     } finally {
       setLoading(false)
@@ -78,30 +82,31 @@ export default function NotificationSystem() {
         { event: "INSERT", schema: "public", table: "notifications" },
         (payload) => {
           const newNotif = payload.new as NotificationRow
-        devLog("New notification received:", newNotif)
-        toast({ title: "New Notification", description: newNotif.message })
-        setNotifications((prev) =>
-          [
-            {
-              id: newNotif.id,
-              type: newNotif.type as NotificationItem["type"],
-              message: newNotif.message,
-              timestamp: newNotif.created_at,
-              user_email: newNotif.user_email,
-              related_contract_id: newNotif.related_contract_id,
-              isRead: newNotif.is_read,
-              context: newNotif.related_contract_id
-                ? `Contract ID: ${newNotif.related_contract_id}`
-                : newNotif.related_entity_id
-                  ? `${newNotif.related_entity_type || "Entity"} ID: ${newNotif.related_entity_id}`
-                  : newNotif.user_email
-                    ? `User: ${newNotif.user_email}`
-                    : undefined,
-            },
-            ...prev,
-          ].slice(0, 20),
-        )
-      })
+          devLog("New notification received:", newNotif)
+          toast({ title: "New Notification", description: newNotif.message })
+          setNotifications((prev) =>
+            [
+              {
+                id: newNotif.id,
+                type: newNotif.type as NotificationItem["type"],
+                message: newNotif.message,
+                timestamp: newNotif.created_at,
+                user_email: newNotif.user_email,
+                related_contract_id: newNotif.related_contract_id,
+                isRead: newNotif.is_read,
+                context: newNotif.related_contract_id
+                  ? `Contract ID: ${newNotif.related_contract_id}`
+                  : newNotif.related_entity_id
+                    ? `${newNotif.related_entity_type || "Entity"} ID: ${newNotif.related_entity_id}`
+                    : newNotif.user_email
+                      ? `User: ${newNotif.user_email}`
+                      : undefined,
+              },
+              ...prev,
+            ].slice(0, 20),
+          )
+        },
+      )
       .subscribe()
     return () => {
       supabase.removeChannel(channel)
@@ -112,17 +117,21 @@ export default function NotificationSystem() {
     <Card>
       <CardHeader>
         <CardTitle>Notifications / الإشعارات</CardTitle>
-        <CardDescription>Recent system alerts and updates. / أحدث تنبيهات وتحديثات النظام.</CardDescription>
+        <CardDescription>
+          Recent system alerts and updates. / أحدث تنبيهات وتحديثات النظام.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[300px]">
           {loading && (
-            <div className="flex justify-center items-center h-full">
+            <div className="flex h-full items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           )}
           {!loading && notifications.length === 0 && (
-            <p className="text-center text-muted-foreground py-8">No new notifications. / لا توجد إشعارات جديدة.</p>
+            <p className="py-8 text-center text-muted-foreground">
+              No new notifications. / لا توجد إشعارات جديدة.
+            </p>
           )}
           {!loading && notifications.length > 0 && (
             <div className="space-y-3">
@@ -131,9 +140,11 @@ export default function NotificationSystem() {
                 return (
                   <div
                     key={notif.id}
-                    className={`flex items-start gap-3 p-2.5 border rounded-md hover:bg-muted/50 ${!notif.isRead ? "bg-primary/5 dark:bg-primary/10 border-primary/20" : ""}`}
+                    className={`flex items-start gap-3 rounded-md border p-2.5 hover:bg-muted/50 ${!notif.isRead ? "border-primary/20 bg-primary/5 dark:bg-primary/10" : ""}`}
                   >
-                    <IconComponent className={`h-5 w-5 mt-0.5 shrink-0 ${getIconColor(notif.type)}`} />
+                    <IconComponent
+                      className={`mt-0.5 h-5 w-5 shrink-0 ${getIconColor(notif.type)}`}
+                    />
                     <div>
                       <p className="text-sm">{notif.message}</p>
                       <p className="text-xs text-muted-foreground">
@@ -147,7 +158,7 @@ export default function NotificationSystem() {
             </div>
           )}
         </ScrollArea>
-        <Button variant="outline" className="w-full mt-4" disabled>
+        <Button variant="outline" className="mt-4 w-full" disabled>
           View All Notifications (Not Implemented)
         </Button>
       </CardContent>

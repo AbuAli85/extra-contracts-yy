@@ -17,9 +17,9 @@ export default async function ContractPage({ params: { id, locale } }: Props) {
 
   const promoterName =
     contract.promoter_name_en ||
-      (locale === "ar"
-        ? contract.promoter_name_ar || contract.promoter_name_en
-        : contract.promoter_name_en || contract.promoter_name_ar) ||
+    (locale === "ar"
+      ? contract.promoter_name_ar || contract.promoter_name_en
+      : contract.promoter_name_en || contract.promoter_name_ar) ||
     "N/A"
 
   return (

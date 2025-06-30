@@ -10,14 +10,16 @@ export default function AnalyticsPage() {
           <CardHeader>
             <CardTitle>Analytics Dashboard / لوحة تحكم التحليلات</CardTitle>
             <CardDescription>
-              Detailed insights and trends for your contracts and operations. / رؤى واتجاهات مفصلة لعقودك وعملياتك.
+              Detailed insights and trends for your contracts and operations. / رؤى واتجاهات مفصلة
+              لعقودك وعملياتك.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Advanced analytics charts and reports will be displayed here. This section can include:
+              Advanced analytics charts and reports will be displayed here. This section can
+              include:
             </p>
-            <ul className="list-disc list-inside mt-2 text-muted-foreground">
+            <ul className="mt-2 list-inside list-disc text-muted-foreground">
               <li>Contract value distribution</li>
               <li>Promoter performance metrics</li>
               <li>Client engagement analysis</li>

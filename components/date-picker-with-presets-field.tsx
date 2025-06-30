@@ -50,18 +50,22 @@ export default function DatePickerWithPresetsField({
           className={cn(
             "w-full justify-start text-left font-normal", // Ensure justify-start for icon alignment
             !field.value && "text-muted-foreground",
-            disabled && "bg-muted/50 cursor-not-allowed opacity-50",
+            disabled && "cursor-not-allowed bg-muted/50 opacity-50",
           )}
           disabled={disabled}
           ref={field.ref} // Pass ref to the trigger
         >
-          {field.value ? format(new Date(field.value), "PPP") : <span>{placeholder || "Pick a date"}</span>}
+          {field.value ? (
+            format(new Date(field.value), "PPP")
+          ) : (
+            <span>{placeholder || "Pick a date"}</span>
+          )}
           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
       {!disabled && (
         <PopoverContent className="w-auto p-0" align="start">
-          <div className="grid grid-cols-3 gap-2 p-2 border-b">
+          <div className="grid grid-cols-3 gap-2 border-b p-2">
             {presets.map(({ label: presetLabel, date }) => (
               <Button
                 key={presetLabel}
@@ -69,7 +73,7 @@ export default function DatePickerWithPresetsField({
                 variant="ghost"
                 size="sm"
                 onClick={() => field.onChange(date)}
-                className="text-xs h-7"
+                className="h-7 text-xs"
               >
                 {presetLabel}
               </Button>

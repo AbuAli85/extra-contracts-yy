@@ -2,55 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Variables layer: light mode CSS variables */
+/* Base layer: variables, resets, global styles */
 @layer base {
+  /* Light mode CSS variables */
   :root {
     --background: 0 0% 100%; /* Light mode background */
     --foreground: 240 10% 3.9%; /* Light mode text */
     /* add other light mode CSS variables here */
   }
-}
 
-/* Variables layer: dark mode CSS variables via media query */
-@layer base {
+  /* Dark mode CSS variables */
   @media (prefers-color-scheme: dark) {
     :root {
       --background: 240 10% 3.9%; /* Dark mode background */
-      --foreground: 0 0% 98%;    /* Dark mode text */
+      --foreground: 0 0% 98%; /* Dark mode text */
       /* add other dark mode CSS variables here */
     }
   }
-}
 
-/* Global element styles */
-@layer base {
+  /* Global resets and element styles */
   html {
     @apply antialiased;
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
-  /* Form input states */
+
+  /* Form input styling */
   .form-input {
     @apply block w-full rounded-md border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
   }
   .form-input[aria-invalid="true"] {
-    @apply ring-destructive ring-2;
+    @apply ring-2 ring-destructive;
   }
   .form-input.success {
-    @apply ring-success ring-2;
+    @apply ring-2 ring-success;
+  }
+
+  /* Override: force the hidden form wrapper visible */
+  .max-w-4xl[style] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }
 
 /* Typography layer: heading styles */
 @layer typography {
-  h1 { @apply font-heading font-semibold tracking-tight text-3xl md:text-4xl; }
-  h2 { @apply font-heading font-semibold tracking-tight text-2xl md:text-3xl; }
-  h3 { @apply font-heading font-semibold tracking-tight text-xl md:text-2xl; }
-  h4 { @apply font-heading font-semibold tracking-tight text-lg; }
-  h5 { @apply font-heading font-semibold tracking-tight text-base; }
-  h6 { @apply font-heading font-semibold tracking-tight text-base; }
+  h1 {
+    @apply font-heading text-3xl font-semibold tracking-tight md:text-4xl;
+  }
+  h2 {
+    @apply font-heading text-2xl font-semibold tracking-tight md:text-3xl;
+  }
+  h3 {
+    @apply font-heading text-xl font-semibold tracking-tight md:text-2xl;
+  }
+  h4 {
+    @apply font-heading text-lg font-semibold tracking-tight;
+  }
+  h5 {
+    @apply font-heading text-base font-semibold tracking-tight;
+  }
+  h6 {
+    @apply font-heading text-base font-semibold tracking-tight;
+  }
 }
 
 /* Utilities layer: custom scrollbar styling */

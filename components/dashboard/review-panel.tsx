@@ -27,7 +27,9 @@ export default function ReviewPanel() {
       // Example: Fetch contracts with status 'Pending Approval'
       const { data, error } = await supabase
         .from("contracts") // Or a dedicated 'review_items' table
-        .select("id, contract_id, promoter_name_en, first_party_name_en, second_party_name_en, created_at, user_id") // Adjust fields
+        .select(
+          "id, contract_id, promoter_name_en, first_party_name_en, second_party_name_en, created_at, user_id",
+        ) // Adjust fields
         .eq("status", "Pending Approval") // This status needs to exist in your contracts table
         .order("created_at", { ascending: false })
         .limit(10)
@@ -49,7 +51,11 @@ export default function ReviewPanel() {
       setReviewItems(formattedItems)
     } catch (error: any) {
       console.error("Error fetching review items:", error)
-      toast({ title: "Error Fetching Review Items", description: error.message, variant: "destructive" })
+      toast({
+        title: "Error Fetching Review Items",
+        description: error.message,
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
@@ -64,7 +70,10 @@ export default function ReviewPanel() {
         { event: "*", schema: "public", table: "contracts", filter: "status=eq.Pending Approval" },
         (payload) => {
           devLog("Review items change:", payload)
-          toast({ title: "New Item for Review", description: "An item has been submitted for review." })
+          toast({
+            title: "New Item for Review",
+            description: "An item has been submitted for review.",
+          })
           fetchReviewItems()
         },
       )
@@ -87,29 +96,32 @@ export default function ReviewPanel() {
       <CardHeader>
         <CardTitle>Items for Review / عناصر للمراجعة</CardTitle>
         <CardDescription>
-          Contracts and documents awaiting your approval or feedback. / العقود والمستندات التي تنتظر موافقتك أو
-          ملاحظاتك.
+          Contracts and documents awaiting your approval or feedback. / العقود والمستندات التي تنتظر
+          موافقتك أو ملاحظاتك.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[350px]">
           {loading && (
-            <div className="flex justify-center items-center h-full">
+            <div className="flex h-full items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           )}
           {!loading && reviewItems.length === 0 && (
-            <p className="text-center text-muted-foreground py-8">
+            <p className="py-8 text-center text-muted-foreground">
               No items currently need review. / لا توجد عناصر تحتاج إلى مراجعة حاليًا.
             </p>
           )}
           {!loading && reviewItems.length > 0 && (
             <div className="space-y-4">
               {reviewItems.map((item) => (
-                <div key={item.id} className="p-3 border rounded-md hover:bg-muted/50 transition-colors">
+                <div
+                  key={item.id}
+                  className="rounded-md border p-3 transition-colors hover:bg-muted/50"
+                >
                   <div className="flex items-start justify-between">
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="mb-1 flex items-center gap-2">
                         <Badge variant="secondary">Pending Approval</Badge>
                         <h4 className="font-semibold">{item.title}</h4>
                       </div>
@@ -119,18 +131,32 @@ export default function ReviewPanel() {
                     </div>
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={item.avatar || placeholderAvatar} alt={item.submitter} />
-                      <AvatarFallback>{item.submitter?.substring(0, 1).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback>
+                        {item.submitter?.substring(0, 1).toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
                   </div>
                   <div className="mt-3 flex justify-end gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleAction(item.id, "approve")}>
-                      <ThumbsUp className="h-4 w-4 mr-1" /> Approve
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAction(item.id, "approve")}
+                    >
+                      <ThumbsUp className="mr-1 h-4 w-4" /> Approve
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleAction(item.id, "reject")}>
-                      <ThumbsDown className="h-4 w-4 mr-1" /> Reject
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAction(item.id, "reject")}
+                    >
+                      <ThumbsDown className="mr-1 h-4 w-4" /> Reject
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleAction(item.id, "comment")}>
-                      <MessageSquare className="h-4 w-4 mr-1" /> Comment
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleAction(item.id, "comment")}
+                    >
+                      <MessageSquare className="mr-1 h-4 w-4" /> Comment
                     </Button>
                   </div>
                 </div>

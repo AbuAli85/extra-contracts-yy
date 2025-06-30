@@ -1,14 +1,14 @@
-'use server'
+"use server"
 
-import { createServerComponentClient } from '@/lib/supabaseServer'
-import type { Database } from '@/types/supabase'
+import { createServerComponentClient } from "@/lib/supabaseServer"
+import type { Database } from "@/types/supabase"
 
-export type ContractInsert = Database['public']['Tables']['contracts']['Insert']
+export type ContractInsert = Database["public"]["Tables"]["contracts"]["Insert"]
 
 export async function createContract(newContract: ContractInsert) {
   const supabase = createServerComponentClient()
   const { data, error } = await supabase
-    .from('contracts')
+    .from("contracts")
     .insert(newContract)
     .select(
       `id,
@@ -23,17 +23,17 @@ export async function createContract(newContract: ContractInsert) {
        promoter_id,
        parties!contracts_employer_id_fkey (id, name_en, name_ar),
        parties!contracts_client_id_fkey (id, name_en, name_ar),
-       promoters (id, name_en, name_ar)`
+       promoters (id, name_en, name_ar)`,
     )
     .single()
 
   if (error) throw new Error(error.message)
-  if (!data) throw new Error('Contract creation failed, no data returned.')
+  if (!data) throw new Error("Contract creation failed, no data returned.")
   return data
 }
 
 export async function deleteContract(contractId: string) {
   const supabase = createServerComponentClient()
-  const { error } = await supabase.from('contracts').delete().eq('id', contractId)
+  const { error } = await supabase.from("contracts").delete().eq("id", contractId)
   if (error) throw new Error(error.message)
 }

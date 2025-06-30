@@ -31,7 +31,6 @@ describe("usePromoters", () => {
   })
 
   it("shows toast when unauthenticated", async () => {
-
     const queryClient = new QueryClient()
 
     const TestComponent = () => {
@@ -53,12 +52,9 @@ describe("usePromoters", () => {
   })
 
   it("shows toast without redirect for other errors", async () => {
-
     fromMock.mockReturnValue({
       select: jest.fn().mockReturnThis(),
-      order: jest.fn(() =>
-        Promise.resolve({ data: null, error: { message: "DB Error" } }),
-      ),
+      order: jest.fn(() => Promise.resolve({ data: null, error: { message: "DB Error" } })),
     })
 
     const queryClient = new QueryClient()

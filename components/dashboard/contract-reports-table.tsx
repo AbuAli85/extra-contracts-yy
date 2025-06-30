@@ -1,11 +1,24 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { DatePickerWithRange } from "@/components/date-picker-with-range"
 import { Badge } from "@/components/ui/badge"
 import { Download, Search, ArrowUpDown, Loader2 } from "lucide-react"
@@ -42,7 +55,9 @@ export default function ContractReportsTable() {
     try {
       const { data, error } = await supabase
         .from("contracts_view")
-        .select("id, contract_id, promoter_name, employer_name, client_name, start_date, end_date, status")
+        .select(
+          "id, contract_id, promoter_name, employer_name, client_name, start_date, end_date, status",
+        )
         .order(sortKey || "start_date", { ascending: sortDirection === "asc" })
 
       if (error) throw error
@@ -50,7 +65,11 @@ export default function ContractReportsTable() {
       setContracts(data as ContractReportItem[])
     } catch (error: any) {
       console.error("Error fetching contracts:", error)
-      toast({ title: "Error Fetching Contracts", description: error.message, variant: "destructive" })
+      toast({
+        title: "Error Fetching Contracts",
+        description: error.message,
+        variant: "destructive",
+      })
       setContracts([]) // Clear contracts on error
     } finally {
       setLoading(false)
@@ -66,7 +85,10 @@ export default function ContractReportsTable() {
     // So, we subscribe to `contracts`, `promoters`, and `parties`.
     const handleTableChange = (payload: any, tableName: string) => {
       devLog(`${tableName} table change for view:`, payload)
-      toast({ title: "Contract Data Updated", description: `Refreshing contract list due to changes in ${tableName}.` })
+      toast({
+        title: "Contract Data Updated",
+        description: `Refreshing contract list due to changes in ${tableName}.`,
+      })
       fetchContracts() // Refetch data from the view
     }
 
@@ -140,7 +162,15 @@ export default function ContractReportsTable() {
   }
 
   const handleExportCSV = () => {
-    const headers = ["Contract ID", "Promoter", "Employer", "Client", "Start Date", "End Date", "Status"]
+    const headers = [
+      "Contract ID",
+      "Promoter",
+      "Employer",
+      "Client",
+      "Start Date",
+      "End Date",
+      "Status",
+    ]
     const rows = filteredData.map((item) =>
       [
         item.contract_id,
@@ -161,7 +191,15 @@ export default function ContractReportsTable() {
     document.body.removeChild(link)
   }
 
-  const SortableHeader = ({ tKey, label, labelAr }: { tKey: SortKey; label: string; labelAr: string }) => (
+  const SortableHeader = ({
+    tKey,
+    label,
+    labelAr,
+  }: {
+    tKey: SortKey
+    label: string
+    labelAr: string
+  }) => (
     <TableHead onClick={() => handleSort(tKey)} className="cursor-pointer hover:bg-muted/50">
       <div className="flex items-center">
         {label} / {labelAr}
@@ -173,27 +211,31 @@ export default function ContractReportsTable() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div>
             <CardTitle>Contract Reports / تقارير العقود</CardTitle>
             <CardDescription>Detailed list of contracts. / قائمة مفصلة بالعقود.</CardDescription>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleExportCSV} disabled={loading || filteredData.length === 0}>
+            <Button
+              variant="outline"
+              onClick={handleExportCSV}
+              disabled={loading || filteredData.length === 0}
+            >
               <Download className="mr-2 h-4 w-4" /> Export CSV
             </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col md:flex-row gap-4 mb-6 p-4 border rounded-md bg-muted/50">
+        <div className="mb-6 flex flex-col gap-4 rounded-md border bg-muted/50 p-4 md:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by ID, Promoter, Company..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 w-full"
+              className="w-full pl-8"
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -209,7 +251,11 @@ export default function ContractReportsTable() {
               <SelectItem value="Draft">Draft</SelectItem>
             </SelectContent>
           </Select>
-          <DatePickerWithRange date={dateRange} onDateChange={setDateRange} className="w-full md:w-auto" />
+          <DatePickerWithRange
+            date={dateRange}
+            onDateChange={setDateRange}
+            className="w-full md:w-auto"
+          />
         </div>
 
         <div className="overflow-x-auto">
@@ -240,10 +286,14 @@ export default function ContractReportsTable() {
                     <TableCell>{item.employer_name}</TableCell>
                     <TableCell>{item.client_name}</TableCell>
                     <TableCell>
-                      {isValid(parseISO(item.start_date)) ? format(parseISO(item.start_date), "MMM d, yyyy") : "N/A"}
+                      {isValid(parseISO(item.start_date))
+                        ? format(parseISO(item.start_date), "MMM d, yyyy")
+                        : "N/A"}
                     </TableCell>
                     <TableCell>
-                      {isValid(parseISO(item.end_date)) ? format(parseISO(item.end_date), "MMM d, yyyy") : "N/A"}
+                      {isValid(parseISO(item.end_date))
+                        ? format(parseISO(item.end_date), "MMM d, yyyy")
+                        : "N/A"}
                     </TableCell>
                     <TableCell>
                       <Badge className={getStatusBadgeClass(item.status)}>{item.status}</Badge>

@@ -41,11 +41,11 @@ export default function AuthStatus() {
   }
 
   if (loading) {
-    return <div className="h-10 w-24 bg-muted/50 animate-pulse rounded-md" />
+    return <div className="h-10 w-24 animate-pulse rounded-md bg-muted/50" />
   }
 
   return (
-    <div className="flex items-center gap-4 p-4 border-b">
+    <div className="flex items-center gap-4 border-b p-4">
       {user ? (
         <>
           <div className="flex items-center gap-2">

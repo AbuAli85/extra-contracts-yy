@@ -21,7 +21,14 @@ import {
 import { format, parseISO, isPast } from "date-fns"
 import { getDocumentStatus } from "@/lib/document-status"
 import { Separator } from "@/components/ui/separator"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import LifecycleStatusIndicator from "@/components/lifecycle-status-indicator"
 
 interface PromoterDetails extends Promoter {
@@ -121,23 +128,29 @@ export default function PromoterDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-slate-100 dark:bg-slate-950">
+      <div className="flex min-h-screen items-center justify-center bg-slate-100 dark:bg-slate-950">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="ml-3 text-lg text-slate-700 dark:text-slate-300">Loading promoter details...</p>
+        <p className="ml-3 text-lg text-slate-700 dark:text-slate-300">
+          Loading promoter details...
+        </p>
       </div>
     )
   }
 
   if (error || !promoterDetails) {
     return (
-      <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
-        <Card className="w-full max-w-md text-center bg-card shadow-xl">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-4 dark:bg-slate-950">
+        <Card className="w-full max-w-md bg-card text-center shadow-xl">
           <CardHeader>
             <CardTitle className="text-2xl text-destructive">Error</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-card-foreground/80">{error || "Could not load promoter details."}</p>
-            <Button variant="outline" onClick={() => router.push("/manage-promoters")} className="mt-6">
+            <Button
+              variant="outline"
+              onClick={() => router.push("/manage-promoters")}
+              className="mt-6"
+            >
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back to Promoter List
             </Button>
@@ -151,9 +164,9 @@ export default function PromoterDetailPage() {
   const passportStatus = getDocumentStatus(promoterDetails.passport_expiry_date)
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 py-8 sm:py-12 px-4 md:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="min-h-screen bg-slate-100 px-4 py-8 dark:bg-slate-950 sm:py-12 md:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <Button
               variant="ghost"
@@ -164,7 +177,9 @@ export default function PromoterDetailPage() {
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back to Promoter List
             </Button>
-            <h1 className="text-3xl font-bold mt-2 text-slate-800 dark:text-slate-100">{promoterDetails.name_en}</h1>
+            <h1 className="mt-2 text-3xl font-bold text-slate-800 dark:text-slate-100">
+              {promoterDetails.name_en}
+            </h1>
             <p className="text-muted-foreground" dir="rtl">
               {promoterDetails.name_ar}
             </p>
@@ -177,10 +192,10 @@ export default function PromoterDetailPage() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
           {/* Promoter Info & Documents Column */}
-          <div className="lg:col-span-1 space-y-6 lg:space-y-8">
-            <Card className="shadow-sm bg-card">
+          <div className="space-y-6 lg:col-span-1 lg:space-y-8">
+            <Card className="bg-card shadow-sm">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <UserCircle2Icon className="h-5 w-5 text-primary" />
@@ -191,12 +206,16 @@ export default function PromoterDetailPage() {
                 <DetailItem label="ID Card Number" value={promoterDetails.id_card_number} />
                 <DetailItem
                   label="Created At"
-                  value={promoterDetails.created_at ? format(parseISO(promoterDetails.created_at), "PPP") : "N/A"}
+                  value={
+                    promoterDetails.created_at
+                      ? format(parseISO(promoterDetails.created_at), "PPP")
+                      : "N/A"
+                  }
                 />
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm bg-card">
+            <Card className="bg-card shadow-sm">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <FileTextIcon className="h-5 w-5 text-primary" />
@@ -205,20 +224,22 @@ export default function PromoterDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h4 className="text-sm font-medium mb-1">ID Card</h4>
+                  <h4 className="mb-1 text-sm font-medium">ID Card</h4>
                   <div className="flex items-center gap-2">
                     <idCardStatus.Icon className={`h-4 w-4 ${idCardStatus.colorClass}`} />
-                    <span className={`text-xs ${idCardStatus.colorClass}`}>{idCardStatus.text}</span>
+                    <span className={`text-xs ${idCardStatus.colorClass}`}>
+                      {idCardStatus.text}
+                    </span>
                   </div>
                   {idCardStatus.tooltip && (
-                    <p className="text-xs text-muted-foreground mt-0.5">{idCardStatus.tooltip}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{idCardStatus.tooltip}</p>
                   )}
                   {promoterDetails.id_card_url && (
                     <a
                       href={promoterDetails.id_card_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary hover:underline flex items-center gap-1 text-xs mt-1"
+                      className="mt-1 flex items-center gap-1 text-xs text-primary hover:underline"
                     >
                       View Document <ExternalLinkIcon className="h-3 w-3" />
                     </a>
@@ -226,20 +247,22 @@ export default function PromoterDetailPage() {
                 </div>
                 <Separator />
                 <div>
-                  <h4 className="text-sm font-medium mb-1">Passport</h4>
+                  <h4 className="mb-1 text-sm font-medium">Passport</h4>
                   <div className="flex items-center gap-2">
                     <passportStatus.Icon className={`h-4 w-4 ${passportStatus.colorClass}`} />
-                    <span className={`text-xs ${passportStatus.colorClass}`}>{passportStatus.text}</span>
+                    <span className={`text-xs ${passportStatus.colorClass}`}>
+                      {passportStatus.text}
+                    </span>
                   </div>
                   {passportStatus.tooltip && (
-                    <p className="text-xs text-muted-foreground mt-0.5">{passportStatus.tooltip}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{passportStatus.tooltip}</p>
                   )}
                   {promoterDetails.passport_url && (
                     <a
                       href={promoterDetails.passport_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary hover:underline flex items-center gap-1 text-xs mt-1"
+                      className="mt-1 flex items-center gap-1 text-xs text-primary hover:underline"
                     >
                       View Document <ExternalLinkIcon className="h-3 w-3" />
                     </a>
@@ -250,8 +273,8 @@ export default function PromoterDetailPage() {
           </div>
 
           {/* Contracts Column */}
-          <div className="lg:col-span-2 space-y-6 lg:space-y-8">
-            <Card className="shadow-sm bg-card">
+          <div className="space-y-6 lg:col-span-2 lg:space-y-8">
+            <Card className="bg-card shadow-sm">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <BriefcaseIcon className="h-5 w-5 text-primary" />
@@ -291,9 +314,13 @@ export default function PromoterDetailPage() {
                             </TableCell>
                             <TableCell>
                               <div className="text-xs">
-                                <span className="font-medium">{contract.first_party?.name_en || "N/A"}</span>
+                                <span className="font-medium">
+                                  {contract.first_party?.name_en || "N/A"}
+                                </span>
                                 <span className="text-muted-foreground"> vs </span>
-                                <span className="font-medium">{contract.second_party?.name_en || "N/A"}</span>
+                                <span className="font-medium">
+                                  {contract.second_party?.name_en || "N/A"}
+                                </span>
                               </div>
                             </TableCell>
                             <TableCell className="text-xs">
@@ -302,7 +329,11 @@ export default function PromoterDetailPage() {
                             </TableCell>
                             <TableCell className="text-right">
                               {contract.google_doc_url ? (
-                                <a href={contract.google_doc_url} target="_blank" rel="noopener noreferrer">
+                                <a
+                                  href={contract.google_doc_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
                                   <Button variant="ghost" size="icon" className="h-7 w-7">
                                     <ExternalLinkIcon className="h-4 w-4 text-primary" />
                                   </Button>
@@ -317,7 +348,7 @@ export default function PromoterDetailPage() {
                     </Table>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">
+                  <p className="py-4 text-center text-sm text-muted-foreground">
                     No contracts associated with this promoter.
                   </p>
                 )}

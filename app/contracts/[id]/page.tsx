@@ -98,7 +98,7 @@ function SectionCard({
   className?: string
 }) {
   return (
-    <Card className={`shadow-sm hover:shadow-md transition-shadow duration-300 ${className}`}>
+    <Card className={`shadow-sm transition-shadow duration-300 hover:shadow-md ${className}`}>
       <CardHeader className="pb-4">
         <div className="flex items-center gap-3">
           <Icon className="h-5 w-5 text-primary" />
@@ -115,14 +115,15 @@ export default async function ContractDetailPage({ params }: { params: { id: str
 
   if (!contract) {
     return (
-      <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
-        <Card className="w-full max-w-lg text-center bg-card shadow-xl">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-4 dark:bg-slate-950">
+        <Card className="w-full max-w-lg bg-card text-center shadow-xl">
           <CardHeader>
             <CardTitle className="text-2xl text-destructive">Contract Not Found</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-card-foreground/80">
-              The contract with ID <span className="font-mono text-primary">{params.id}</span> could not be found.
+              The contract with ID <span className="font-mono text-primary">{params.id}</span> could
+              not be found.
             </p>
             <Button asChild variant="outline" className="mt-6 inline-block">
               <Link href="/contracts">
@@ -141,20 +142,25 @@ export default async function ContractDetailPage({ params }: { params: { id: str
   const promoter = contract.promoter
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 py-8 sm:py-12 px-4 md:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="min-h-screen bg-slate-100 px-4 py-8 dark:bg-slate-950 sm:py-12 md:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-          <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-            <Link href="/contracts">
-              <ArrowLeftIcon className="mr-2 h-4 w-4" />
-              Back to Contracts
-            </Link>
-          </Button>
-            <h1 className="text-3xl font-bold mt-2">Contract Overview</h1>
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Link href="/contracts">
+                <ArrowLeftIcon className="mr-2 h-4 w-4" />
+                Back to Contracts
+              </Link>
+            </Button>
+            <h1 className="mt-2 text-3xl font-bold">Contract Overview</h1>
             <p className="text-muted-foreground">
               Reference ID:{" "}
-              <span className="font-mono text-xs text-primary bg-primary/10 px-1.5 py-0.5 rounded-sm">
+              <span className="rounded-sm bg-primary/10 px-1.5 py-0.5 font-mono text-xs text-primary">
                 {contract.id}
               </span>
             </p>
@@ -167,18 +173,18 @@ export default async function ContractDetailPage({ params }: { params: { id: str
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
           {/* Main Content Column */}
-          <div className="lg:col-span-2 space-y-6 lg:space-y-8">
+          <div className="space-y-6 lg:col-span-2 lg:space-y-8">
             <SectionCard title="Parties Involved" icon={Building2}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                <div className="space-y-3 p-4 border rounded-md bg-background/50">
+              <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
+                <div className="space-y-3 rounded-md border bg-background/50 p-4">
                   <h4 className="font-medium text-card-foreground">First Party</h4>
                   <DetailItem label="Name (EN)" value={firstParty?.name_en} />
                   <DetailItem label="Name (AR)" value={firstParty?.name_ar} isRtl />
                   <DetailItem label="CRN" value={firstParty?.crn} />
                 </div>
-                <div className="space-y-3 p-4 border rounded-md bg-background/50">
+                <div className="space-y-3 rounded-md border bg-background/50 p-4">
                   <h4 className="font-medium text-card-foreground">Second Party</h4>
                   <DetailItem label="Name (EN)" value={secondParty?.name_en} />
                   <DetailItem label="Name (AR)" value={secondParty?.name_ar} isRtl />
@@ -188,7 +194,7 @@ export default async function ContractDetailPage({ params }: { params: { id: str
             </SectionCard>
 
             <SectionCard title="Promoter Details" icon={UserCircle2}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
                 <DetailItem label="Name (EN)" value={promoter?.name_en} />
                 <DetailItem label="Name (AR)" value={promoter?.name_ar} isRtl />
                 <DetailItem label="ID Card Number" value={promoter?.id_card_number} />
@@ -200,7 +206,7 @@ export default async function ContractDetailPage({ params }: { params: { id: str
                         href={promoter.id_card_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary hover:underline flex items-center gap-1 text-sm"
+                        className="flex items-center gap-1 text-sm text-primary hover:underline"
                       >
                         View Document <ExternalLinkIcon className="h-3.5 w-3.5" />
                       </a>
@@ -217,7 +223,7 @@ export default async function ContractDetailPage({ params }: { params: { id: str
                         href={promoter.passport_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary hover:underline flex items-center gap-1 text-sm"
+                        className="flex items-center gap-1 text-sm text-primary hover:underline"
                       >
                         View Document <ExternalLinkIcon className="h-3.5 w-3.5" />
                       </a>
@@ -231,7 +237,7 @@ export default async function ContractDetailPage({ params }: { params: { id: str
           </div>
 
           {/* Sidebar Column */}
-          <div className="lg:col-span-1 space-y-6 lg:space-y-8">
+          <div className="space-y-6 lg:col-span-1 lg:space-y-8">
             <SectionCard title="Contract Status & Dates" icon={CalendarDays}>
               <div className="space-y-4">
                 <DetailItem
@@ -280,7 +286,9 @@ export default async function ContractDetailPage({ params }: { params: { id: str
                 <DetailItem
                   label="Created At"
                   value={
-                    contract.created_at ? format(parseISO(contract.created_at), "MMMM d, yyyy 'at' h:mm a") : "Not set"
+                    contract.created_at
+                      ? format(parseISO(contract.created_at), "MMMM d, yyyy 'at' h:mm a")
+                      : "Not set"
                   }
                 />
               </div>
@@ -290,7 +298,7 @@ export default async function ContractDetailPage({ params }: { params: { id: str
               <SectionCard
                 title="Error Information"
                 icon={AlertTriangleIcon}
-                className="bg-destructive/10 border-destructive/30"
+                className="border-destructive/30 bg-destructive/10"
               >
                 <DetailItem
                   label="Details"

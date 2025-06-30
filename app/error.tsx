@@ -3,9 +3,11 @@
 export default function ErrorPage({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error)
   return (
-    <div className="p-4 space-y-2">
+    <div className="space-y-2 p-4">
       <h2 className="font-semibold">Something went wrong!</h2>
-      <button onClick={() => reset()} className="underline text-sm">Try again</button>
+      <button onClick={() => reset()} className="text-sm underline">
+        Try again
+      </button>
     </div>
   )
 }

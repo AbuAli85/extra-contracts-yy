@@ -80,9 +80,12 @@ async function analyzeScenarioLogs() {
     }
 
     // Average duration
-    const validDurations = parsedData.filter((e) => typeof e.duration === "number" && !isNaN(e.duration))
+    const validDurations = parsedData.filter(
+      (e) => typeof e.duration === "number" && !isNaN(e.duration),
+    )
     const totalDuration = validDurations.reduce((sum, e) => sum + e.duration, 0)
-    const averageDuration = validDurations.length > 0 ? (totalDuration / validDurations.length).toFixed(2) : "N/A"
+    const averageDuration =
+      validDurations.length > 0 ? (totalDuration / validDurations.length).toFixed(2) : "N/A"
     console.log(`\nAverage Duration: ${averageDuration} (units depend on source, likely ms or s)`)
 
     // Type counts
@@ -155,9 +158,13 @@ async function analyzeScenarioLogs() {
       }
 
       // Duration statistics for errors
-      const errorDurations = errorLogs.map((log) => log.duration).filter((d) => typeof d === "number" && !isNaN(d))
+      const errorDurations = errorLogs
+        .map((log) => log.duration)
+        .filter((d) => typeof d === "number" && !isNaN(d))
       if (errorDurations.length > 0) {
-        const avgErrorDuration = (errorDurations.reduce((sum, d) => sum + d, 0) / errorDurations.length).toFixed(2)
+        const avgErrorDuration = (
+          errorDurations.reduce((sum, d) => sum + d, 0) / errorDurations.length
+        ).toFixed(2)
         const minErrorDuration = Math.min(...errorDurations)
         const maxErrorDuration = Math.max(...errorDurations)
         console.log("\nDuration of Error Logs:")
@@ -173,7 +180,9 @@ async function analyzeScenarioLogs() {
         .map((log) => log.operations)
         .filter((op) => typeof op === "number" && !isNaN(op))
       if (errorOperations.length > 0) {
-        const avgErrorOps = (errorOperations.reduce((sum, op) => sum + op, 0) / errorOperations.length).toFixed(2)
+        const avgErrorOps = (
+          errorOperations.reduce((sum, op) => sum + op, 0) / errorOperations.length
+        ).toFixed(2)
         const minErrorOps = Math.min(...errorOperations)
         const maxErrorOps = Math.max(...errorOperations)
         console.log("\nOperations in Error Logs:")
@@ -185,9 +194,13 @@ async function analyzeScenarioLogs() {
       }
 
       // Transfer statistics for errors
-      const errorTransfers = errorLogs.map((log) => log.transfer).filter((t) => typeof t === "number" && !isNaN(t))
+      const errorTransfers = errorLogs
+        .map((log) => log.transfer)
+        .filter((t) => typeof t === "number" && !isNaN(t))
       if (errorTransfers.length > 0) {
-        const avgErrorTransfer = (errorTransfers.reduce((sum, t) => sum + t, 0) / errorTransfers.length).toFixed(2)
+        const avgErrorTransfer = (
+          errorTransfers.reduce((sum, t) => sum + t, 0) / errorTransfers.length
+        ).toFixed(2)
         const minErrorTransfer = Math.min(...errorTransfers)
         const maxErrorTransfer = Math.max(...errorTransfers)
         console.log("\nData Transferred in Error Logs (KB):")

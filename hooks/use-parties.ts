@@ -4,10 +4,16 @@ import type { Database } from "@/types/supabase" // Assuming generated Supabase 
 import { useToast } from "@/hooks/use-toast"
 
 // Define the structure of a Party based on your select query
-export type Party = Pick<Database["public"]["Tables"]["parties"]["Row"], "id" | "name_en" | "name_ar" | "crn" | "type">
+export type Party = Pick<
+  Database["public"]["Tables"]["parties"]["Row"],
+  "id" | "name_en" | "name_ar" | "crn" | "type"
+>
 
 const fetchParties = async (partyType?: "Employer" | "Client"): Promise<Party[]> => {
-  let query = supabase.from("parties").select("id, name_en, name_ar, crn, type").order("name_en", { ascending: true })
+  let query = supabase
+    .from("parties")
+    .select("id, name_en, name_ar, crn, type")
+    .order("name_en", { ascending: true })
 
   if (partyType) {
     query = query.eq("type", partyType)

@@ -6,7 +6,14 @@ import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import type { Party } from "@/lib/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { EditIcon, PlusCircleIcon, ArrowLeftIcon, BuildingIcon, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
@@ -51,7 +58,7 @@ export default function ManagePartiesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
         <p className="ml-3 text-lg">Loading parties...</p>
       </div>
@@ -60,8 +67,8 @@ export default function ManagePartiesPage() {
 
   if (showForm) {
     return (
-      <div className="min-h-screen bg-background py-8 sm:py-12 px-4">
-        <div className="max-w-2xl mx-auto">
+      <div className="min-h-screen bg-background px-4 py-8 sm:py-12">
+        <div className="mx-auto max-w-2xl">
           <Button variant="outline" onClick={handleFormClose} className="mb-4">
             <ArrowLeftIcon className="mr-2 h-4 w-4" />
             Back to Party List
@@ -73,9 +80,9 @@ export default function ManagePartiesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-8 sm:py-12 px-4">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+    <div className="min-h-screen bg-background px-4 py-8 sm:py-12">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold">Manage Parties</h1>
           <Button onClick={handleAddNew}>
             <PlusCircleIcon className="mr-2 h-5 w-5" />
@@ -84,7 +91,7 @@ export default function ManagePartiesPage() {
         </div>
 
         {parties.length === 0 ? (
-          <Card className="text-center py-10">
+          <Card className="py-10 text-center">
             <CardHeader>
               <BuildingIcon className="mx-auto h-12 w-12 text-muted-foreground" />
               <CardTitle>No Parties Found</CardTitle>

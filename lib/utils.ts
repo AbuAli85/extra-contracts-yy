@@ -29,9 +29,7 @@ export function createOptionalFileSchema(
     .refine(
       (file) =>
         !file ||
-        (isBrowser
-          ? file instanceof File && file.size <= maxFileSize
-          : file.size <= maxFileSize),
+        (isBrowser ? file instanceof File && file.size <= maxFileSize : file.size <= maxFileSize),
       sizeMessage,
     )
     .refine(

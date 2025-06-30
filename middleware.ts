@@ -7,7 +7,9 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Check if the pathname already has a locale prefix
-  const pathnameHasLocale = locales.some((locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`)
+  const pathnameHasLocale = locales.some(
+    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
+  )
 
   if (pathnameHasLocale) {
     return NextResponse.next()

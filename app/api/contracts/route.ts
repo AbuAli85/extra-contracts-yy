@@ -8,7 +8,10 @@ import type { Database } from "@/types/supabase"
 import { format } from "date-fns"
 
 // Placeholder for your PDF generation logic (e.g., calling Google Docs API via Make.com)
-async function generateBilingualPdf(contractData: BilingualPdfData, contractId: string): Promise<string | null> {
+async function generateBilingualPdf(
+  contractData: BilingualPdfData,
+  contractId: string,
+): Promise<string | null> {
   const supabaseAdmin = getSupabaseAdmin() // Get client instance
   const makeWebhookUrl = process.env.MAKE_WEBHOOK_URL
   if (!makeWebhookUrl) {
@@ -47,10 +50,12 @@ async function generateBilingualPdf(contractData: BilingualPdfData, contractId: 
     }
 
     const filePath = `contract_pdfs/${contractId}/${Date.now()}.pdf`
-    const { error: uploadError } = await supabaseAdmin.storage.from("contracts").upload(filePath, pdfBlob, {
-      contentType: "application/pdf",
-      upsert: false,
-    })
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from("contracts")
+      .upload(filePath, pdfBlob, {
+        contentType: "application/pdf",
+        upsert: false,
+      })
 
     if (uploadError) {
       console.error("Supabase storage upload error:", uploadError)
@@ -73,13 +78,16 @@ export async function POST(request: NextRequest) {
     const validation = contractGeneratorSchema.safeParse(body)
 
     if (!validation.success) {
-      return NextResponse.json({ message: "Invalid input", errors: validation.error.format() }, { status: 400 })
+      return NextResponse.json(
+        { message: "Invalid input", errors: validation.error.format() },
+        { status: 400 },
+      )
     }
 
     const { data: validatedData } = validation
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     const contractToInsert: Database["public"]["Tables"]["contracts"]["Insert"] = {
       first_party_id: validatedData.first_party_id,
@@ -101,7 +109,10 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error("Supabase insert error:", insertError)
-      return NextResponse.json({ message: "Failed to create contract", error: insertError.message }, { status: 500 })
+      return NextResponse.json(
+        { message: "Failed to create contract", error: insertError.message },
+        { status: 500 },
+      )
     }
     if (!newContract) {
       return NextResponse.json(
@@ -111,9 +122,21 @@ export async function POST(request: NextRequest) {
     }
 
     const [party1, party2, promoterDetails] = await Promise.all([
-      supabase.from("parties").select("name_en, name_ar").eq("id", newContract.first_party_id).single(),
-      supabase.from("parties").select("name_en, name_ar").eq("id", newContract.second_party_id).single(),
-      supabase.from("promoters").select("name_en, name_ar").eq("id", newContract.promoter_id).single(),
+      supabase
+        .from("parties")
+        .select("name_en, name_ar")
+        .eq("id", newContract.first_party_id)
+        .single(),
+      supabase
+        .from("parties")
+        .select("name_en, name_ar")
+        .eq("id", newContract.second_party_id)
+        .single(),
+      supabase
+        .from("promoters")
+        .select("name_en, name_ar")
+        .eq("id", newContract.promoter_id)
+        .single(),
     ])
 
     const pdfData: BilingualPdfData = {
@@ -123,8 +146,8 @@ export async function POST(request: NextRequest) {
       second_party_name_ar: party2.data?.name_ar,
       promoter_name_en: promoterDetails.data?.name_en,
       promoter_name_ar: promoterDetails.data?.name_ar,
-      contract_start_date: newContract.contract_start_date,
-      contract_end_date: newContract.contract_end_date,
+      contract_start_date: newContract.contract_start_date ?? null,
+      contract_end_date: newContract.contract_end_date ?? null,
       job_title: newContract.job_title,
       email: newContract.email,
     }
@@ -153,6 +176,9 @@ export async function POST(request: NextRequest) {
     )
   } catch (error: any) {
     console.error("API Route Error:", error)
-    return NextResponse.json({ message: "Internal server error", error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { message: "Internal server error", error: error.message },
+      { status: 500 },
+    )
   }
 }

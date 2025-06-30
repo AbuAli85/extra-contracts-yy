@@ -30,13 +30,13 @@ export function MobileNav({ navItems, locale }: MobileNavProps) {
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="ps-6 pe-0 pt-8 w-full max-w-xs">
+      <SheetContent side="left" className="w-full max-w-xs pe-0 ps-6 pt-8">
         {" "}
         {/* RTL: pe-6 ps-0 */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <Link
             href={`/${locale}`}
-            className="text-xl font-bold font-heading text-primary"
+            className="font-heading text-xl font-bold text-primary"
             onClick={() => setIsOpen(false)}
           >
             ContractGen
@@ -54,7 +54,7 @@ export function MobileNav({ navItems, locale }: MobileNavProps) {
             <Link
               key={item.title}
               href={`/${locale}${item.href === "/" ? "" : item.href}`}
-              className="py-2 text-lg font-medium text-foreground/80 hover:text-primary transition-colors"
+              className="py-2 text-lg font-medium text-foreground/80 transition-colors hover:text-primary"
               onClick={() => setIsOpen(false)}
             >
               {item.title}

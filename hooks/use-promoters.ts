@@ -42,14 +42,10 @@ export const usePromoters = () => {
   useEffect(() => {
     const channel = supabase
       .channel("public-promoters-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "promoters" },
-        (payload) => {
-          devLog("Realtime promoter change received!", payload)
-          queryClient.invalidateQueries({ queryKey })
-        },
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, (payload) => {
+        devLog("Realtime promoter change received!", payload)
+        queryClient.invalidateQueries({ queryKey })
+      })
       .subscribe((status, err) => {
         if (status === "CHANNEL_ERROR") {
           const message = err?.message ?? "Unknown channel error"

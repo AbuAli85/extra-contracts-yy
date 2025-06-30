@@ -60,7 +60,9 @@ export default function SettingsPage() {
                 <CardDescription>Manage third-party integrations.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground">Integration settings (e.g., Make.com webhook URL) will be here.</p>
+                <p className="text-muted-foreground">
+                  Integration settings (e.g., Make.com webhook URL) will be here.
+                </p>
                 <Button>Save Changes</Button>
               </CardContent>
             </Card>

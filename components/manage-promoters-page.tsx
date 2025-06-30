@@ -8,7 +8,14 @@ import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import type { Promoter } from "@/lib/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import {
   EditIcon,
   PlusCircleIcon,
@@ -37,7 +44,12 @@ const getDocumentStatus = (
   tooltip?: string
 } => {
   if (!expiryDate) {
-    return { text: "No Date", Icon: AlertTriangleIcon, colorClass: "text-slate-500", tooltip: "Expiry date not set" }
+    return {
+      text: "No Date",
+      Icon: AlertTriangleIcon,
+      colorClass: "text-slate-500",
+      tooltip: "Expiry date not set",
+    }
   }
   const date = parseISO(expiryDate)
   const today = new Date()
@@ -76,10 +88,17 @@ export default function ManagePromotersPage() {
 
   async function fetchPromotersWithContractCount() {
     setIsLoading(true)
-    const { data: promotersData, error: promotersError } = await supabase.from("promoters").select("*").order("name_en")
+    const { data: promotersData, error: promotersError } = await supabase
+      .from("promoters")
+      .select("*")
+      .order("name_en")
 
     if (promotersError) {
-      toast({ title: "Error fetching promoters", description: promotersError.message, variant: "destructive" })
+      toast({
+        title: "Error fetching promoters",
+        description: promotersError.message,
+        variant: "destructive",
+      })
       setPromoters([])
       setIsLoading(false)
       return
@@ -112,7 +131,10 @@ export default function ManagePromotersPage() {
     const promotersWithCounts = promotersData.map((promoter) => {
       const activeContracts = contractsData
         ? contractsData.filter(
-            (c) => c.promoter_id === promoter.id && c.contract_end_date && c.contract_end_date >= todayStr,
+            (c) =>
+              c.promoter_id === promoter.id &&
+              c.contract_end_date &&
+              c.contract_end_date >= todayStr,
           ).length
         : 0
       return { ...promoter, active_contracts_count: activeContracts }
@@ -126,19 +148,15 @@ export default function ManagePromotersPage() {
     fetchPromotersWithContractCount()
     const promotersChannel = supabase
       .channel("public:promoters:manage")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "promoters" },
-        () => fetchPromotersWithContractCount(),
+      .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, () =>
+        fetchPromotersWithContractCount(),
       )
       .subscribe()
 
     const contractsChannel = supabase
       .channel("public:contracts:manage")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "contracts" },
-        () => fetchPromotersWithContractCount(),
+      .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, () =>
+        fetchPromotersWithContractCount(),
       )
       .subscribe()
 
@@ -166,7 +184,7 @@ export default function ManagePromotersPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-slate-50 dark:bg-slate-950">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
         <p className="ml-3 text-lg text-slate-700 dark:text-slate-300">Loading promoters...</p>
       </div>
@@ -175,8 +193,8 @@ export default function ManagePromotersPage() {
 
   if (showForm) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 sm:py-12 px-4">
-        <div className="max-w-3xl mx-auto">
+      <div className="min-h-screen bg-slate-50 px-4 py-8 dark:bg-slate-950 sm:py-12">
+        <div className="mx-auto max-w-3xl">
           <Button variant="outline" onClick={handleFormClose} className="mb-6">
             <ArrowLeftIcon className="mr-2 h-4 w-4" />
             Back to Promoter List
@@ -188,17 +206,22 @@ export default function ManagePromotersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 sm:py-12 px-4">
-      <div className="max-w-screen-lg mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Manage Promoters</h1>
+    <div className="min-h-screen bg-slate-50 px-4 py-8 dark:bg-slate-950 sm:py-12">
+      <div className="mx-auto max-w-screen-lg">
+        <div className="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+            Manage Promoters
+          </h1>
           <div className="flex gap-2">
             <Link href="/" passHref>
               <Button variant="outline">
                 <ArrowLeftIcon className="mr-2 h-4 w-4" /> Back to Home
               </Button>
             </Link>
-            <Button onClick={handleAddNew} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button
+              onClick={handleAddNew}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
               <PlusCircleIcon className="mr-2 h-5 w-5" />
               Add New Promoter
             </Button>
@@ -206,22 +229,25 @@ export default function ManagePromotersPage() {
         </div>
 
         {promoters.length === 0 ? (
-          <Card className="text-center py-12 shadow-md bg-card">
+          <Card className="bg-card py-12 text-center shadow-md">
             <CardHeader>
-              <UserIcon className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+              <UserIcon className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
               <CardTitle className="text-2xl">No Promoters Found</CardTitle>
             </CardHeader>
             <CardContent>
               <CardDescription className="text-lg">
-                Get started by adding your first promoter. Click the "Add New Promoter" button above.
+                Get started by adding your first promoter. Click the "Add New Promoter" button
+                above.
               </CardDescription>
             </CardContent>
           </Card>
         ) : (
-          <Card className="shadow-lg bg-card">
+          <Card className="bg-card shadow-lg">
             <CardHeader className="border-b">
               <CardTitle className="text-xl">Promoter Directory</CardTitle>
-              <CardDescription>View, add, or edit promoter details, documents, and contract status.</CardDescription>
+              <CardDescription>
+                View, add, or edit promoter details, documents, and contract status.
+              </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
@@ -231,16 +257,16 @@ export default function ManagePromotersPage() {
                       <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider">
                         Promoter
                       </TableHead>
-                      <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-center">
+                      <TableHead className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">
                         ID Card Status
                       </TableHead>
-                      <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-center">
+                      <TableHead className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">
                         Passport Status
                       </TableHead>
-                      <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-center">
+                      <TableHead className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">
                         Active Contracts
                       </TableHead>
-                      <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-right">
+                      <TableHead className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider">
                         Actions
                       </TableHead>
                     </TableRow>
@@ -250,7 +276,10 @@ export default function ManagePromotersPage() {
                       const idCardStatus = getDocumentStatus(promoter.id_card_expiry_date)
                       const passportStatus = getDocumentStatus(promoter.passport_expiry_date)
                       return (
-                        <TableRow key={promoter.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <TableRow
+                          key={promoter.id}
+                          className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                        >
                           <TableCell className="px-4 py-3">
                             <div className="font-medium">{promoter.name_en}</div>
                             <div className="text-sm text-muted-foreground" dir="rtl">
@@ -265,8 +294,12 @@ export default function ManagePromotersPage() {
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <div className="flex flex-col items-center">
-                                    <idCardStatus.Icon className={`h-5 w-5 ${idCardStatus.colorClass}`} />
-                                    <span className={`text-xs mt-1 ${idCardStatus.colorClass}`}>{idCardStatus.text}</span>
+                                    <idCardStatus.Icon
+                                      className={`h-5 w-5 ${idCardStatus.colorClass}`}
+                                    />
+                                    <span className={`mt-1 text-xs ${idCardStatus.colorClass}`}>
+                                      {idCardStatus.text}
+                                    </span>
                                     {promoter.id_card_url && (
                                       <a
                                         href={promoter.id_card_url}
@@ -291,8 +324,12 @@ export default function ManagePromotersPage() {
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <div className="flex flex-col items-center">
-                                    <passportStatus.Icon className={`h-5 w-5 ${passportStatus.colorClass}`} />
-                                    <span className={`text-xs mt-1 ${passportStatus.colorClass}`}>{passportStatus.text}</span>
+                                    <passportStatus.Icon
+                                      className={`h-5 w-5 ${passportStatus.colorClass}`}
+                                    />
+                                    <span className={`mt-1 text-xs ${passportStatus.colorClass}`}>
+                                      {passportStatus.text}
+                                    </span>
                                     {promoter.passport_url && (
                                       <a
                                         href={promoter.passport_url}
@@ -314,11 +351,13 @@ export default function ManagePromotersPage() {
                           </TableCell>
                           <TableCell className="px-4 py-3 text-center">
                             <Badge
-                              variant={(promoter.active_contracts_count || 0) > 0 ? "default" : "secondary"}
+                              variant={
+                                (promoter.active_contracts_count || 0) > 0 ? "default" : "secondary"
+                              }
                               className={
                                 (promoter.active_contracts_count || 0) > 0
-                                  ? "bg-green-100 text-green-700 border-green-300"
-                                  : "bg-slate-100 text-slate-600 border-slate-300"
+                                  ? "border-green-300 bg-green-100 text-green-700"
+                                  : "border-slate-300 bg-slate-100 text-slate-600"
                               }
                             >
                               <BriefcaseIcon className="mr-1.5 h-3.5 w-3.5" />
@@ -326,8 +365,12 @@ export default function ManagePromotersPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="px-4 py-3 text-right">
-                            <div className="flex gap-2 justify-end">
-                              <Link href={`/manage-promoters/${promoter.id}`} passHref legacyBehavior>
+                            <div className="flex justify-end gap-2">
+                              <Link
+                                href={`/manage-promoters/${promoter.id}`}
+                                passHref
+                                legacyBehavior
+                              >
                                 <Button variant="outline" size="sm" className="text-xs">
                                   <EyeIcon className="mr-1 h-3.5 w-3.5" /> View
                                 </Button>

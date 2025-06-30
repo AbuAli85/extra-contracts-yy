@@ -4,15 +4,8 @@ import { Label } from "@/components/ui/label"
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  promoterProfileSchema,
-  type PromoterProfileFormData,
-} from "@/lib/promoter-profile-schema"
-import {
-  sampleEmployers,
-  sampleClients,
-  promoterStatuses,
-} from "@/lib/fixtures/promoter-profile"
+import { promoterProfileSchema, type PromoterProfileFormData } from "@/lib/promoter-profile-schema"
+import { sampleEmployers, sampleClients, promoterStatuses } from "@/lib/fixtures/promoter-profile"
 import type { PromoterProfile } from "@/lib/types" // Assuming PromoterProfile is defined in lib/types.ts
 import { useToast } from "@/hooks/use-toast"
 
@@ -22,8 +15,21 @@ import { Textarea } from "@/components/ui/textarea"
 import { devLog } from "@/lib/dev-log"
 import { Switch } from "@/components/ui/switch"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import ImageUploadField from "@/components/image-upload-field"
 import DatePickerWithPresetsField from "@/components/date-picker-with-presets-field"
 import { Loader2 } from "lucide-react"
@@ -34,10 +40,7 @@ interface PromoterProfileFormProps {
   onFormSubmitSuccess?: (data: PromoterProfileFormData) => void // Callback for successful submission
 }
 
-type SubmissionData = Omit<
-  PromoterProfileFormData,
-  "id_card_image" | "passport_image"
-> & {
+type SubmissionData = Omit<PromoterProfileFormData, "id_card_image" | "passport_image"> & {
   id_card_url: string | null
   passport_url: string | null
   contract_valid_until: string | null
@@ -45,7 +48,10 @@ type SubmissionData = Omit<
   passport_expiry_date: string | null
 }
 
-export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSuccess }: PromoterProfileFormProps) {
+export default function PromoterProfileForm({
+  promoterToEdit,
+  onFormSubmitSuccess,
+}: PromoterProfileFormProps) {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isEditMode = !!promoterToEdit
@@ -91,7 +97,9 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
         passport_image: null,
         existing_id_card_url: promoterToEdit.id_card_url || null,
         existing_passport_url: promoterToEdit.passport_url || null,
-        id_card_expiry_date: promoterToEdit.id_card_expiry_date ? parseISO(promoterToEdit.id_card_expiry_date) : null,
+        id_card_expiry_date: promoterToEdit.id_card_expiry_date
+          ? parseISO(promoterToEdit.id_card_expiry_date)
+          : null,
         passport_expiry_date: promoterToEdit.passport_expiry_date
           ? parseISO(promoterToEdit.passport_expiry_date)
           : null,
@@ -161,9 +169,9 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
   const formDisabled = !isEditable || isSubmitting
 
   return (
-    <Card className="w-full max-w-4xl mx-auto shadow-xl">
+    <Card className="mx-auto w-full max-w-4xl shadow-xl">
       <CardHeader className="border-b">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <CardTitle className="text-2xl font-bold">
               {isEditMode ? "Edit Promoter Profile" : "Add New Promoter"}
@@ -190,7 +198,7 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
       <CardContent className="p-6 sm:p-8">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
+            <div className="grid gap-x-8 gap-y-6 md:grid-cols-2">
               {/* Column 1 */}
               <div className="space-y-6">
                 <FormField
@@ -244,7 +252,11 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Employer Agency</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""} disabled={formDisabled}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                        disabled={formDisabled}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select employer agency" />
@@ -268,7 +280,11 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Currently Outsourced To (Client)</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""} disabled={formDisabled}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                        disabled={formDisabled}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select client company" />
@@ -341,7 +357,11 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
                     <FormItem>
                       <FormLabel>Work Location</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., City Mall, Main Branch" {...field} disabled={formDisabled} />
+                        <Input
+                          placeholder="e.g., City Mall, Main Branch"
+                          {...field}
+                          disabled={formDisabled}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -353,7 +373,11 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value} disabled={formDisabled}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={formDisabled}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select status" />
@@ -437,7 +461,11 @@ export default function PromoterProfileForm({ promoterToEdit, onFormSubmitSucces
             />
 
             <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={formDisabled || isSubmitting} className="min-w-[150px]">
+              <Button
+                type="submit"
+                disabled={formDisabled || isSubmitting}
+                className="min-w-[150px]"
+              >
                 {isSubmitting ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : isEditMode ? (

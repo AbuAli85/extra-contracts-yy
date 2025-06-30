@@ -1,6 +1,6 @@
 # Bilingual Contract Generator
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+_Automatically synced with your [v0.dev](https://v0.dev) deployments_
 
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/abuali85s-projects/v0-fork-of-v0-dev-form-component)
 [![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/zVc3ijHfuT4)
@@ -24,7 +24,9 @@ Install dependencies before running any scripts:
 
 \`\`\`bash
 pnpm install
+
 # or
+
 npm install
 \`\`\`
 
@@ -48,10 +50,11 @@ If `next lint` reports "not found," install Next.js:
 
 \`\`\`bash
 pnpm add next
+
 # or
+
 npm install next
 \`\`\`
-
 
 ## Environment Variables
 
@@ -66,21 +69,20 @@ others should remain server-side. Important keys include:
 - `MAKE_WEBHOOK_URL`
 - `MAKE_WEBHOOK_SECRET`
 
-| Variable | Purpose | Scope |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Base URL of your Supabase project | client |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key used by the browser | client |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key for Supabase admin operations | server |
-| `NEXT_PUBLIC_MAKE_WEBHOOK_URL` | Public URL for Make.com form submissions; used to generate `public/index.html` | client |
-| `MAKE_WEBHOOK_URL` | Make.com endpoint for generating PDFs | server |
-| `MAKE_WEBHOOK_SECRET` | Optional secret for Make.com, not referenced yet | server |
-| `GOOGLE_CREDENTIALS_JSON` | Google service account credentials | server |
-| `GOOGLE_DOCS_TEMPLATE_ID` | ID of the Google Docs template contract | server |
-| `SMTP_HOST` | SMTP server host for sending PDF emails | server |
-| `SMTP_PORT` | SMTP server port | server |
-| `SMTP_USER` | Username or email for SMTP authentication | server |
-| `SMTP_PASS` | Password for SMTP authentication | server |
-
+| Variable                        | Purpose                                                                        | Scope  |
+| ------------------------------- | ------------------------------------------------------------------------------ | ------ |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Base URL of your Supabase project                                              | client |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key used by the browser                                          | client |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Service role key for Supabase admin operations                                 | server |
+| `NEXT_PUBLIC_MAKE_WEBHOOK_URL`  | Public URL for Make.com form submissions; used to generate `public/index.html` | client |
+| `MAKE_WEBHOOK_URL`              | Make.com endpoint for generating PDFs                                          | server |
+| `MAKE_WEBHOOK_SECRET`           | Optional secret for Make.com, not referenced yet                               | server |
+| `GOOGLE_CREDENTIALS_JSON`       | Google service account credentials                                             | server |
+| `GOOGLE_DOCS_TEMPLATE_ID`       | ID of the Google Docs template contract                                        | server |
+| `SMTP_HOST`                     | SMTP server host for sending PDF emails                                        | server |
+| `SMTP_PORT`                     | SMTP server port                                                               | server |
+| `SMTP_USER`                     | Username or email for SMTP authentication                                      | server |
+| `SMTP_PASS`                     | Password for SMTP authentication                                               | server |
 
 Continue building your app on:
 

@@ -11,7 +11,12 @@ export const getDocumentStatus = (
   tooltip?: string
 } => {
   if (!expiryDate) {
-    return { text: "No Date", Icon: AlertTriangleIcon, colorClass: "text-slate-500", tooltip: "Expiry date not set" }
+    return {
+      text: "No Date",
+      Icon: AlertTriangleIcon,
+      colorClass: "text-slate-500",
+      tooltip: "Expiry date not set",
+    }
   }
   const date = parseISO(expiryDate)
   const today = new Date()

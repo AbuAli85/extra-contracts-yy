@@ -4,7 +4,17 @@
 // will query the base `contracts` table, which is what we want for aggregated chart data.
 // The real-time subscription on `contracts` table will trigger refetch of these RPCs.
 import { useEffect, useState } from "react"
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from "recharts"
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+  Cell,
+} from "recharts"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
   ChartContainer,
@@ -51,7 +61,11 @@ const chartConfig = {
   Pending: { label: "Pending", labelAr: "قيد الانتظار", color: "hsl(var(--chart-3))" }, // Assuming Pending is a status
   Expired: { label: "Expired", labelAr: "منتهي الصلاحية", color: "hsl(var(--chart-2))" },
   Draft: { label: "Draft", labelAr: "مسودة", color: "hsl(var(--chart-4))" },
-  "Soon-to-Expire": { label: "Soon to Expire", labelAr: "قريب الانتهاء", color: "hsl(var(--chart-5))" }, // Added
+  "Soon-to-Expire": {
+    label: "Soon to Expire",
+    labelAr: "قريب الانتهاء",
+    color: "hsl(var(--chart-5))",
+  }, // Added
 } satisfies Record<string, { label: string; labelAr: string; color: string }>
 
 export default function ChartsSection() {
@@ -63,7 +77,9 @@ export default function ChartsSection() {
   const fetchChartData = async () => {
     setLoading(true)
     try {
-      const { data: statusResult, error: statusError } = await supabase.rpc("get_contract_status_counts")
+      const { data: statusResult, error: statusError } = await supabase.rpc(
+        "get_contract_status_counts",
+      )
       if (statusError) throw statusError
       setStatusData(
         statusResult.map((s: any) => ({
@@ -72,17 +88,23 @@ export default function ChartsSection() {
         })),
       )
 
-      const { data: monthlyResult, error: monthlyError } = await supabase.rpc("get_monthly_contract_revenue")
+      const { data: monthlyResult, error: monthlyError } = await supabase.rpc(
+        "get_monthly_contract_revenue",
+      )
       if (monthlyError) throw monthlyError
       setMonthlyData(
         monthlyResult.map((m: any) => ({
           ...m,
           monthAr: MONTH_MAP[m.month as keyof typeof MONTH_MAP] || m.month,
-        }))
+        })),
       )
     } catch (error: any) {
       console.error("Error fetching chart data:", error)
-      toast({ title: "Error Fetching Chart Data", description: error.message, variant: "destructive" })
+      toast({
+        title: "Error Fetching Chart Data",
+        description: error.message,
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
@@ -94,7 +116,10 @@ export default function ChartsSection() {
     const contractsChartChannel = supabase
       .channel("public:contracts:charts")
       .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, () => {
-        toast({ title: "Chart Data Updating...", description: "Real-time contract changes detected." })
+        toast({
+          title: "Chart Data Updating...",
+          description: "Real-time contract changes detected.",
+        })
         fetchChartData()
       })
       .subscribe()
@@ -148,14 +173,22 @@ export default function ChartsSection() {
                   tickLine={false}
                   axisLine={false}
                   width={100} // Adjusted width for potentially longer labels
-                  tickFormatter={(value) => chartConfig[value as keyof typeof chartConfig]?.label || value}
+                  tickFormatter={(value) =>
+                    chartConfig[value as keyof typeof chartConfig]?.label || value
+                  }
                 />
-                <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" hideLabel />} />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="dot" hideLabel />}
+                />
                 <Bar dataKey="count" radius={5}>
                   {statusData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={chartConfig[entry.name as keyof typeof chartConfig]?.color || chartConfig.Draft.color}
+                      fill={
+                        chartConfig[entry.name as keyof typeof chartConfig]?.color ||
+                        chartConfig.Draft.color
+                      }
                     />
                   ))}
                 </Bar>
@@ -169,7 +202,8 @@ export default function ChartsSection() {
         <CardHeader>
           <CardTitle>Monthly Contracts & Revenue / العقود والإيرادات الشهرية</CardTitle>
           <CardDescription>
-            Track contract volume and revenue generation over time. / تتبع حجم العقود وتوليد الإيرادات بمرور الوقت.
+            Track contract volume and revenue generation over time. / تتبع حجم العقود وتوليد
+            الإيرادات بمرور الوقت.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -179,9 +213,7 @@ export default function ChartsSection() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="month"
-                  tickFormatter={(value) =>
-                    MONTH_MAP[value as keyof typeof MONTH_MAP] || value
-                  }
+                  tickFormatter={(value) => MONTH_MAP[value as keyof typeof MONTH_MAP] || value}
                 />
                 <YAxis yAxisId="left" stroke="var(--color-contracts)" />
                 <YAxis yAxisId="right" orientation="right" stroke="var(--color-revenue)" />

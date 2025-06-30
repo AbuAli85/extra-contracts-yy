@@ -45,24 +45,32 @@ export default function ClientLayout({
 
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
-      <head>{/* Include font links if not handled by next/font automatically for all weights */}</head>
-      <body className={cn("min-h-screen bg-background font-sans antialiased", fontInter.variable, fontLexend.variable)}>
+      <head>
+        {/* Include font links if not handled by next/font automatically for all weights */}
+      </head>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          fontInter.variable,
+          fontLexend.variable,
+        )}
+      >
         <Providers>
           <div className="relative flex min-h-screen flex-col">
             {/* HEADER */}
-            <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-subtle-b">
+            <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 shadow-subtle-b backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <div className="container flex h-16 items-center justify-between">
                 {" "}
                 {/* Increased height to 64px (h-16) */}
-                <Link href={`/${locale}`} className="text-2xl font-bold font-heading text-primary">
+                <Link href={`/${locale}`} className="font-heading text-2xl font-bold text-primary">
                   ContractGen
                 </Link>
-                <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+                <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
                   {navItems.map((item) => (
                     <Link
                       key={item.title}
                       href={`/${locale}${item.href === "/" ? "" : item.href}`}
-                      className="text-foreground/70 transition-colors hover:text-foreground hover:underline underline-offset-4"
+                      className="text-foreground/70 underline-offset-4 transition-colors hover:text-foreground hover:underline"
                     >
                       {item.title}
                     </Link>
@@ -94,17 +102,32 @@ export default function ClientLayout({
                 </div>
                 <div className="flex items-center space-x-3">
                   <Button variant="ghost" size="icon" asChild>
-                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                    <a
+                      href="https://twitter.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Twitter"
+                    >
                       <Twitter className="h-5 w-5 text-muted-foreground hover:text-foreground" />
                     </a>
                   </Button>
                   <Button variant="ghost" size="icon" asChild>
-                    <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <a
+                      href="https://github.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="GitHub"
+                    >
                       <Github className="h-5 w-5 text-muted-foreground hover:text-foreground" />
                     </a>
                   </Button>
                   <Button variant="ghost" size="icon" asChild>
-                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <a
+                      href="https://linkedin.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="LinkedIn"
+                    >
                       <Linkedin className="h-5 w-5 text-muted-foreground hover:text-foreground" />
                     </a>
                   </Button>

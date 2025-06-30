@@ -31,14 +31,16 @@ export type ContractInsert = Database["public"]["Tables"]["contracts"]["Insert"]
 const fetchContracts = async (): Promise<ContractWithRelations[]> => {
   const { data, error } = await supabase
     .from("contracts")
-    .select(`
+    .select(
+      `
       *,
       promoter_name_en:promoter_id(name_en),
       promoter_name_ar:promoter_id(name_ar),
       parties!contracts_employer_id_fkey(id,name_en,name_ar),
       parties!contracts_client_id_fkey(id,name_en,name_ar),
       promoters(id,name_en,name_ar)
-    `)
+    `,
+    )
     .order("created_at", { ascending: false })
 
   if (error) {

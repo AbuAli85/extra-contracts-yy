@@ -7,7 +7,10 @@ interface LifecycleStatusIndicatorProps {
   endDate: string | Date
 }
 
-export default function LifecycleStatusIndicator({ startDate, endDate }: LifecycleStatusIndicatorProps) {
+export default function LifecycleStatusIndicator({
+  startDate,
+  endDate,
+}: LifecycleStatusIndicatorProps) {
   const now = new Date()
   const start = new Date(startDate)
   const end = new Date(endDate)
@@ -35,7 +38,10 @@ export default function LifecycleStatusIndicator({ startDate, endDate }: Lifecyc
   }
 
   return (
-    <Badge variant="outline" className={`flex items-center gap-1.5 px-2 py-1 text-xs font-medium ${badgeClass}`}>
+    <Badge
+      variant="outline"
+      className={`flex items-center gap-1.5 px-2 py-1 text-xs font-medium ${badgeClass}`}
+    >
       <Icon className="h-3.5 w-3.5" />
       {status}
     </Badge>

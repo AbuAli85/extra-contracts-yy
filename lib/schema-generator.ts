@@ -7,7 +7,10 @@ export const contractGeneratorSchema = z
     promoter_id: z.string().uuid("Please select the promoter."),
     contract_start_date: z.date({ required_error: "Contract start date is required." }),
     contract_end_date: z.date({ required_error: "Contract end date is required." }),
-    email: z.string().email("Please enter a valid email address for notifications.").min(1, "Email is required."),
+    email: z
+      .string()
+      .email("Please enter a valid email address for notifications.")
+      .min(1, "Email is required."),
     job_title: z.string().optional(),
     work_location: z.string().optional(),
   })

@@ -41,9 +41,18 @@ export default function DashboardPage() {
           { count: totalCompaniesCount, error: partiesError },
         ] = await Promise.all([
           supabase.from("contracts").select("id", { count: "exact", head: true }),
-          supabase.from("contracts").select("id", { count: "exact", head: true }).eq("status", "Active"),
-          supabase.from("contracts").select("id", { count: "exact", head: true }).eq("status", "Expired"),
-          supabase.from("contracts").select("id", { count: "exact", head: true }).eq("status", "Soon-to-Expire"),
+          supabase
+            .from("contracts")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "Active"),
+          supabase
+            .from("contracts")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "Expired"),
+          supabase
+            .from("contracts")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "Soon-to-Expire"),
           supabase.from("promoters").select("id", { count: "exact", head: true }),
           supabase.from("parties").select("id", { count: "exact", head: true }),
         ])
@@ -92,12 +101,16 @@ export default function DashboardPage() {
     // Assuming promoter and party counts also need to be real-time
     const promotersChannel = supabase
       .channel("public:promoters:kpis")
-      .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, () => fetchInitialStats())
+      .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, () =>
+        fetchInitialStats(),
+      )
       .subscribe()
 
     const partiesChannel = supabase
       .channel("public:parties:kpis")
-      .on("postgres_changes", { event: "*", schema: "public", table: "parties" }, () => fetchInitialStats())
+      .on("postgres_changes", { event: "*", schema: "public", table: "parties" }, () =>
+        fetchInitialStats(),
+      )
       .subscribe()
 
     return () => {
@@ -165,10 +178,10 @@ export default function DashboardPage() {
         <ContractReportsTable />
 
         <section className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-8">
+          <div className="space-y-8 lg:col-span-2">
             <ReviewPanel />
           </div>
-          <div className="lg:col-span-1 space-y-8">
+          <div className="space-y-8 lg:col-span-1">
             <NotificationSystem />
             <AdminTools />
           </div>

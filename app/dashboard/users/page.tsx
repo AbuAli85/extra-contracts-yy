@@ -9,7 +9,7 @@ export default function UsersPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <CardHeader className="p-0">
             <CardTitle>User Management / إدارة المستخدمين</CardTitle>
             <CardDescription>
@@ -22,7 +22,9 @@ export default function UsersPage() {
         </div>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-muted-foreground">User table and management tools will be displayed here.</p>
+            <p className="text-muted-foreground">
+              User table and management tools will be displayed here.
+            </p>
             {/* Placeholder for user table, search, filters, etc. */}
           </CardContent>
         </Card>

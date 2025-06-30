@@ -6,7 +6,14 @@ import Link from "next/link"
 import { useContracts, useDeleteContractMutation } from "@/hooks/use-contracts"
 import type { Contract } from "@/types/custom"
 import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   DropdownMenu,
@@ -27,9 +34,24 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { format, parseISO } from "date-fns"
-import { Loader2, Eye, Trash2, Download, MoreHorizontal, Filter, ArrowUpDown, Search } from "lucide-react"
+import {
+  Loader2,
+  Eye,
+  Trash2,
+  Download,
+  MoreHorizontal,
+  Filter,
+  ArrowUpDown,
+  Search,
+} from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import DashboardLayout from "@/components/dashboard/dashboard-layout" // Assuming this is your main layout
 import { FileTextIcon } from "@radix-ui/react-icons"
@@ -73,11 +95,13 @@ export default function ContractsDashboardPage() {
         contract.parties_contracts_employer_id_fkey?.name_ar ||
         ""
       const secondParty =
-        contract.parties_contracts_client_id_fkey?.name_en || contract.parties_contracts_client_id_fkey?.name_ar || ""
+        contract.parties_contracts_client_id_fkey?.name_en ||
+        contract.parties_contracts_client_id_fkey?.name_ar ||
+        ""
       const promoterName =
-          (locale === "ar"
-            ? contract.promoter_name_ar || contract.promoter_name_en
-            : contract.promoter_name_en || contract.promoter_name_ar) || ""
+        (locale === "ar"
+          ? contract.promoter_name_ar || contract.promoter_name_en
+          : contract.promoter_name_en || contract.promoter_name_ar) || ""
 
       const matchesSearch =
         !searchTerm ||
@@ -149,18 +173,18 @@ export default function ContractsDashboardPage() {
   const renderSortIcon = (column: keyof Contract | "status") => {
     if (sortColumn === column) {
       return sortDirection === "asc" ? (
-        <ArrowUpDown className="ml-2 h-4 w-4 inline transform rotate-180" />
+        <ArrowUpDown className="ml-2 inline h-4 w-4 rotate-180 transform" />
       ) : (
-        <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+        <ArrowUpDown className="ml-2 inline h-4 w-4" />
       )
     }
-    return <ArrowUpDown className="ml-2 h-4 w-4 inline opacity-50" />
+    return <ArrowUpDown className="ml-2 inline h-4 w-4 opacity-50" />
   }
 
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-[calc(100vh-150px)]">
+        <div className="flex h-[calc(100vh-150px)] items-center justify-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
           <p className="ml-4 text-lg">Loading contracts...</p>
         </div>
@@ -188,25 +212,27 @@ export default function ContractsDashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-4 md:p-6 space-y-6">
+      <div className="space-y-6 p-4 md:p-6">
         <Card>
           <CardHeader>
             <CardTitle>Contracts Dashboard</CardTitle>
-            <CardDescription>View, manage, and track all your contracts in real-time.</CardDescription>
+            <CardDescription>
+              View, manage, and track all your contracts in real-time.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-col md:flex-row gap-4 items-center">
-              <div className="relative flex-grow w-full md:w-auto">
+            <div className="flex flex-col items-center gap-4 md:flex-row">
+              <div className="relative w-full flex-grow md:w-auto">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
                   placeholder="Search by ID, parties, promoter, job title..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 w-full"
+                  className="w-full pl-8"
                 />
               </div>
-              <div className="flex items-center gap-2 w-full md:w-auto">
+              <div className="flex w-full items-center gap-2 md:w-auto">
                 <Filter className="h-5 w-5 text-muted-foreground" />
                 <Select
                   value={statusFilter}
@@ -232,9 +258,11 @@ export default function ContractsDashboardPage() {
             </div>
 
             {filteredAndSortedContracts.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="py-12 text-center">
                 <FileTextIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No contracts found</h3>
+                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+                  No contracts found
+                </h3>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   {searchTerm || statusFilter !== "all"
                     ? "Try adjusting your search or filters."
@@ -259,10 +287,16 @@ export default function ContractsDashboardPage() {
                       <TableHead>First Party</TableHead>
                       <TableHead>Second Party</TableHead>
                       <TableHead>Promoter</TableHead>
-                      <TableHead className="cursor-pointer" onClick={() => handleSort("contract_valid_from")}>
+                      <TableHead
+                        className="cursor-pointer"
+                        onClick={() => handleSort("contract_valid_from")}
+                      >
                         Start Date {renderSortIcon("contract_valid_from")}
                       </TableHead>
-                      <TableHead className="cursor-pointer" onClick={() => handleSort("contract_valid_until")}>
+                      <TableHead
+                        className="cursor-pointer"
+                        onClick={() => handleSort("contract_valid_until")}
+                      >
                         End Date {renderSortIcon("contract_valid_until")}
                       </TableHead>
                       <TableHead className="cursor-pointer" onClick={() => handleSort("status")}>
@@ -275,13 +309,15 @@ export default function ContractsDashboardPage() {
                   <TableBody>
                     {filteredAndSortedContracts.map((contract) => {
                       const contractStatus = getContractStatus(contract)
-                        const promoterName =
-                          (locale === "ar"
-                            ? contract.promoter_name_ar || contract.promoter_name_en
-                            : contract.promoter_name_en || contract.promoter_name_ar) || ""
+                      const promoterName =
+                        (locale === "ar"
+                          ? contract.promoter_name_ar || contract.promoter_name_en
+                          : contract.promoter_name_en || contract.promoter_name_ar) || ""
                       return (
                         <TableRow key={contract.id}>
-                          <TableCell className="font-mono text-xs">{contract.id.substring(0, 8)}...</TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {contract.id.substring(0, 8)}...
+                          </TableCell>
                           <TableCell>
                             {contract.parties_contracts_employer_id_fkey?.name_en ||
                               contract.parties_contracts_employer_id_fkey?.name_ar ||
@@ -305,11 +341,7 @@ export default function ContractsDashboardPage() {
                           </TableCell>
                           <TableCell>
                             <span
-                              className={`px-2 py-1 text-xs font-semibold rounded-full
-                                ${contractStatus === "Active" ? "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100" : ""}
-                                ${contractStatus === "Expired" ? "bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100" : ""}
-                                ${contractStatus === "Upcoming" ? "bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-blue-100" : ""}
-                                ${contractStatus === "Unknown" ? "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-100" : ""}`}
+                              className={`rounded-full px-2 py-1 text-xs font-semibold ${contractStatus === "Active" ? "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100" : ""} ${contractStatus === "Expired" ? "bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100" : ""} ${contractStatus === "Upcoming" ? "bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-blue-100" : ""} ${contractStatus === "Unknown" ? "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-100" : ""}`}
                             >
                               {contractStatus}
                             </span>
@@ -322,7 +354,7 @@ export default function ContractsDashboardPage() {
                                 rel="noopener noreferrer"
                                 className="text-primary hover:underline"
                               >
-                                <Download className="h-5 w-5 inline" />
+                                <Download className="inline h-5 w-5" />
                               </a>
                             ) : (
                               "N/A"
@@ -338,14 +370,18 @@ export default function ContractsDashboardPage() {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <Link href={`/[locale]/contracts/${contract.id}`} passHref locale={false}>
+                                <Link
+                                  href={`/[locale]/contracts/${contract.id}`}
+                                  passHref
+                                  locale={false}
+                                >
                                   <DropdownMenuItem>
                                     <Eye className="mr-2 h-4 w-4" /> View Details
                                   </DropdownMenuItem>
                                 </Link>
                                 <DropdownMenuItem
                                   onClick={() => handleDeleteClick(contract)}
-                                  className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-700/20"
+                                  className="text-red-600 focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-700/20"
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" /> Delete
                                 </DropdownMenuItem>
@@ -379,7 +415,9 @@ export default function ContractsDashboardPage() {
               disabled={deleteContractMutation.isPending}
               className="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
             >
-              {deleteContractMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteContractMutation.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

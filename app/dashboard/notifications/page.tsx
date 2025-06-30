@@ -7,7 +7,8 @@ export default function NotificationsPage() {
     <DashboardLayout>
       <div className="space-y-6">
         <h1 className="text-2xl font-semibold">All Notifications / جميع الإشعارات</h1>
-        <NotificationSystem /> {/* Can be enhanced for a full page view with more filters/actions */}
+        <NotificationSystem />{" "}
+        {/* Can be enhanced for a full page view with more filters/actions */}
       </div>
     </DashboardLayout>
   )

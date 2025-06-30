@@ -1,7 +1,14 @@
 "use client"
 import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
 import { Search, Loader2, ArrowUpDown } from "lucide-react"
@@ -11,7 +18,14 @@ import type { AuditLogItem, AuditLogRow } from "@/lib/dashboard-types"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
 
-type AuditSortKey = keyof AuditLogItem | "user" | "action" | "ipAddress" | "timestamp" | "details" | null
+type AuditSortKey =
+  | keyof AuditLogItem
+  | "user"
+  | "action"
+  | "ipAddress"
+  | "timestamp"
+  | "details"
+  | null
 
 export default function AuditLogs() {
   const [logs, setLogs] = useState<AuditLogItem[]>([])
@@ -43,7 +57,11 @@ export default function AuditLogs() {
       )
     } catch (error: any) {
       console.error("Error fetching audit logs:", error)
-      toast({ title: "Error Fetching Audit Logs", description: error.message, variant: "destructive" })
+      toast({
+        title: "Error Fetching Audit Logs",
+        description: error.message,
+        variant: "destructive",
+      })
       setLogs([])
     } finally {
       setLoading(false)
@@ -62,28 +80,29 @@ export default function AuditLogs() {
         { event: "INSERT", schema: "public", table: "audit_logs" },
         (payload) => {
           const newLog = payload.new as AuditLogRow
-        devLog("New audit log received:", newLog)
-        toast({
-          title: "New Audit Log Entry",
-          description: `${newLog.user_email || "System"} performed action: ${newLog.action}`,
-        })
-        setLogs(
-          (prev) =>
-            [
-              {
-                id: newLog.id,
-                user: newLog.user_email || "System",
-                action: newLog.action,
-                ipAddress: newLog.ip_address || "N/A",
-                timestamp: newLog.timestamp,
-                details: newLog.details,
-              },
-              ...prev,
-            ]
-              .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()) // Ensure sort order is maintained
-              .slice(0, 100), // Keep list size manageable
-        )
-      })
+          devLog("New audit log received:", newLog)
+          toast({
+            title: "New Audit Log Entry",
+            description: `${newLog.user_email || "System"} performed action: ${newLog.action}`,
+          })
+          setLogs(
+            (prev) =>
+              [
+                {
+                  id: newLog.id,
+                  user: newLog.user_email || "System",
+                  action: newLog.action,
+                  ipAddress: newLog.ip_address || "N/A",
+                  timestamp: newLog.timestamp,
+                  details: newLog.details,
+                },
+                ...prev,
+              ]
+                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()) // Ensure sort order is maintained
+                .slice(0, 100), // Keep list size manageable
+          )
+        },
+      )
       .subscribe()
     return () => {
       supabase.removeChannel(channel)
@@ -115,7 +134,15 @@ export default function AuditLogs() {
     }
   }
 
-  const SortableHeader = ({ tKey, label, labelAr }: { tKey: AuditSortKey; label: string; labelAr: string }) => (
+  const SortableHeader = ({
+    tKey,
+    label,
+    labelAr,
+  }: {
+    tKey: AuditSortKey
+    label: string
+    labelAr: string
+  }) => (
     <TableHead onClick={() => handleSort(tKey)} className="cursor-pointer hover:bg-muted/50">
       <div className="flex items-center">
         {label} / {labelAr}
@@ -139,10 +166,10 @@ export default function AuditLogs() {
             placeholder="Search logs by user, action, IP, or details..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8 w-full"
+            className="w-full pl-8"
           />
         </div>
-        <ScrollArea className="h-[400px] border rounded-md">
+        <ScrollArea className="h-[400px] rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -175,8 +202,10 @@ export default function AuditLogs() {
                     <TableCell>{log.user}</TableCell>
                     <TableCell>{log.action}</TableCell>
                     <TableCell>{log.ipAddress}</TableCell>
-                    <TableCell className="text-xs max-w-xs truncate">
-                      {typeof log.details === "object" ? JSON.stringify(log.details) : log.details || "N/A"}
+                    <TableCell className="max-w-xs truncate text-xs">
+                      {typeof log.details === "object"
+                        ? JSON.stringify(log.details)
+                        : log.details || "N/A"}
                     </TableCell>
                   </TableRow>
                 ))}

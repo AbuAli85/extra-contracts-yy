@@ -4,7 +4,14 @@ import type React from "react"
 import { supabase } from "@/lib/supabase"
 import type { ContractRecord } from "@/lib/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -37,7 +44,13 @@ import ContractSearchInput from "@/components/contract-search-input"
 import LifecycleStatusIndicator from "@/components/lifecycle-status-indicator" // New import
 
 // Re-using the Generation Status Badge from previous version
-function GenerationStatusBadge({ status, errorDetails }: { status: string | null; errorDetails?: string | null }) {
+function GenerationStatusBadge({
+  status,
+  errorDetails,
+}: {
+  status: string | null
+  errorDetails?: string | null
+}) {
   let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "outline"
   let IconComponent: React.ElementType = HelpCircleIcon
   let statusText = status || "Unknown"
@@ -74,7 +87,10 @@ function GenerationStatusBadge({ status, errorDetails }: { status: string | null
   }
 
   const badgeContent = (
-    <Badge variant={badgeVariant} className={`flex items-center gap-1 text-xs px-1.5 py-0.5 ${className}`}>
+    <Badge
+      variant={badgeVariant}
+      className={`flex items-center gap-1 px-1.5 py-0.5 text-xs ${className}`}
+    >
       <IconComponent className="h-3 w-3" />
       <span>{statusText}</span>
     </Badge>
@@ -85,8 +101,8 @@ function GenerationStatusBadge({ status, errorDetails }: { status: string | null
       <TooltipProvider>
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>{badgeContent}</TooltipTrigger>
-          <TooltipContent className="max-w-xs break-words bg-destructive text-destructive-foreground p-2 rounded-md shadow-lg">
-            <p className="font-semibold text-sm mb-1">Error Details:</p>
+          <TooltipContent className="max-w-xs break-words rounded-md bg-destructive p-2 text-destructive-foreground shadow-lg">
+            <p className="mb-1 text-sm font-semibold">Error Details:</p>
             <p className="text-xs">{errorDetails}</p>
           </TooltipContent>
         </Tooltip>
@@ -163,7 +179,7 @@ export default async function ContractsListPage({
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen p-4">
+      <div className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md text-center">
           <CardHeader>
             <CardTitle className="text-destructive">Error</CardTitle>
@@ -182,12 +198,14 @@ export default async function ContractsListPage({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 sm:py-12 px-4">
-      <div className="max-w-screen-xl mx-auto">
+    <div className="min-h-screen bg-slate-50 px-4 py-8 dark:bg-slate-900 sm:py-12">
+      <div className="mx-auto max-w-screen-xl">
         {" "}
         {/* Wider max-width */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Contract Management</h1>
+        <div className="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+            Contract Management
+          </h1>
           <Button asChild variant="outline" className="w-full sm:w-auto">
             <Link href="/">
               <ArrowLeftIcon className="mr-2 h-4 w-4" /> Back to Home
@@ -195,35 +213,61 @@ export default async function ContractsListPage({
           </Button>
         </div>
         {/* Summary Cards - Refined Style */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {[
-            { title: "Total Contracts", value: summaryStats.total, Icon: FileTextIcon, color: "text-blue-500" },
-            { title: "Active", value: summaryStats.active, Icon: CheckCircle2Icon, color: "text-green-500" },
-            { title: "Upcoming", value: summaryStats.upcoming, Icon: ClockIcon, color: "text-sky-500" },
-            { title: "Expired", value: summaryStats.expired, Icon: ArchiveIcon, color: "text-orange-500" },
+            {
+              title: "Total Contracts",
+              value: summaryStats.total,
+              Icon: FileTextIcon,
+              color: "text-blue-500",
+            },
+            {
+              title: "Active",
+              value: summaryStats.active,
+              Icon: CheckCircle2Icon,
+              color: "text-green-500",
+            },
+            {
+              title: "Upcoming",
+              value: summaryStats.upcoming,
+              Icon: ClockIcon,
+              color: "text-sky-500",
+            },
+            {
+              title: "Expired",
+              value: summaryStats.expired,
+              Icon: ArchiveIcon,
+              color: "text-orange-500",
+            },
             // { title: "Generation Errors", value: summaryStats.errors, Icon: XCircleIcon, color: "text-red-500" }, // Can add this too
           ].map((stat) => (
-            <Card key={stat.title} className="shadow-sm hover:shadow-md transition-shadow">
+            <Card key={stat.title} className="shadow-sm transition-shadow hover:shadow-md">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-300">{stat.title}</CardTitle>
+                <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                  {stat.title}
+                </CardTitle>
                 <stat.Icon className={`h-5 w-5 ${stat.color}`} />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">{stat.value}</div>
+                <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+                  {stat.value}
+                </div>
               </CardContent>
             </Card>
           ))}
         </div>
         <Card className="shadow-lg">
           <CardHeader className="border-b border-slate-200 dark:border-slate-700">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
               <div>
-                <CardTitle className="text-xl text-slate-800 dark:text-slate-100">Contracts Log</CardTitle>
+                <CardTitle className="text-xl text-slate-800 dark:text-slate-100">
+                  Contracts Log
+                </CardTitle>
                 <CardDescription className="text-slate-500 dark:text-slate-400">
                   Manage and monitor all contract information.
                 </CardDescription>
               </div>
-              <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+              <div className="flex w-full flex-col items-center gap-3 sm:flex-row md:w-auto">
                 <ContractSearchInput />
                 <ContractStatusFilter />
               </div>
@@ -251,7 +295,7 @@ export default async function ContractsListPage({
                     <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       Generation Status
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">
+                    <TableHead className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       Actions
                     </TableHead>
                   </TableRow>
@@ -259,7 +303,10 @@ export default async function ContractsListPage({
                 <TableBody className="divide-y divide-slate-200 dark:divide-slate-700">
                   {contracts.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="h-32 text-center text-slate-500 dark:text-slate-400">
+                      <TableCell
+                        colSpan={6}
+                        className="h-32 text-center text-slate-500 dark:text-slate-400"
+                      >
                         No contracts found. Try adjusting your search or filters.
                       </TableCell>
                     </TableRow>
@@ -267,9 +314,9 @@ export default async function ContractsListPage({
                     contracts.map((contract) => (
                       <TableRow
                         key={contract.id}
-                        className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
+                        className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
                       >
-                        <TableCell className="px-4 py-3 whitespace-nowrap">
+                        <TableCell className="whitespace-nowrap px-4 py-3">
                           {contract.contract_start_date && contract.contract_end_date ? (
                             <LifecycleStatusIndicator
                               startDate={contract.contract_start_date}
@@ -300,12 +347,20 @@ export default async function ContractsListPage({
                             : "N/A"}
                         </TableCell>
                         <TableCell className="px-4 py-3">
-                          <GenerationStatusBadge status={contract.status} errorDetails={contract.error_details} />
+                          <GenerationStatusBadge
+                            status={contract.status}
+                            errorDetails={contract.error_details}
+                          />
                         </TableCell>
                         <TableCell className="px-4 py-3 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button aria-haspopup="true" size="icon" variant="ghost" className="h-8 w-8">
+                              <Button
+                                aria-haspopup="true"
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8"
+                              >
                                 <MoreHorizontal className="h-4 w-4" />
                                 <span className="sr-only">Toggle menu</span>
                               </Button>
@@ -328,7 +383,11 @@ export default async function ContractsListPage({
                                 </DropdownMenuItem>
                               </Link>
                               {contract.google_doc_url && (
-                                <a href={contract.google_doc_url} target="_blank" rel="noopener noreferrer">
+                                <a
+                                  href={contract.google_doc_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
                                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                     <ExternalLinkIcon className="mr-2 h-4 w-4" /> View Document
                                   </DropdownMenuItem>
@@ -349,30 +408,20 @@ export default async function ContractsListPage({
             </div>
             {/* Pagination Controls - Refined Style */}
             {count && count > ITEMS_PER_PAGE && (
-              <div className="flex items-center justify-between gap-4 px-4 py-3 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between gap-4 border-t border-slate-200 px-4 py-3 dark:border-slate-700">
                 <span className="text-sm text-slate-600 dark:text-slate-400">
                   Showing {Math.min(ITEMS_PER_PAGE * (currentPage - 1) + 1, count)}-
                   {Math.min(ITEMS_PER_PAGE * currentPage, count)} of {count} contracts
                 </span>
                 <div className="flex items-center space-x-2">
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    disabled={currentPage <= 1}
-                  >
+                  <Button asChild variant="outline" size="sm" disabled={currentPage <= 1}>
                     <Link
                       href={`/contracts?page=${currentPage - 1}${generationStatusFilter ? `&status=${generationStatusFilter}` : ""}${searchQuery ? `&q=${searchQuery}` : ""}`}
                     >
                       Previous
                     </Link>
                   </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    disabled={currentPage >= totalPages}
-                  >
+                  <Button asChild variant="outline" size="sm" disabled={currentPage >= totalPages}>
                     <Link
                       href={`/contracts?page=${currentPage + 1}${generationStatusFilter ? `&status=${generationStatusFilter}` : ""}${searchQuery ? `&q=${searchQuery}` : ""}`}
                     >

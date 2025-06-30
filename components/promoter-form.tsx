@@ -2,19 +2,29 @@
 import { useState, useEffect } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  promoterProfileSchema,
-  type PromoterProfileFormData,
-} from "@/lib/promoter-profile-schema"
+import { promoterProfileSchema, type PromoterProfileFormData } from "@/lib/promoter-profile-schema"
 import { promoterStatusesList } from "@/types/custom"
 import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Form, FormControl, FormField, FormItem, FormLabel as ShadcnFormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel as ShadcnFormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Loader2, Edit3Icon, LockIcon, FileWarningIcon as WarningIcon } from "lucide-react"
 import type { Promoter } from "@/lib/types"
@@ -97,9 +107,15 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
   const idCardExpiryDate = useWatch({ control: form.control, name: "id_card_expiry_date" })
   const notifyIdDays = useWatch({ control: form.control, name: "notify_days_before_id_expiry" })
   const passportExpiryDate = useWatch({ control: form.control, name: "passport_expiry_date" })
-  const notifyPassportDays = useWatch({ control: form.control, name: "notify_days_before_passport_expiry" })
+  const notifyPassportDays = useWatch({
+    control: form.control,
+    name: "notify_days_before_passport_expiry",
+  })
   const contractValidUntil = useWatch({ control: form.control, name: "contract_valid_until" })
-  const notifyContractDays = useWatch({ control: form.control, name: "notify_days_before_contract_expiry" })
+  const notifyContractDays = useWatch({
+    control: form.control,
+    name: "notify_days_before_contract_expiry",
+  })
 
   const idCardAlert = getExpiryAlert(idCardExpiryDate, notifyIdDays, "ID Card")
   const passportAlert = getExpiryAlert(passportExpiryDate, notifyPassportDays, "Passport")
@@ -115,7 +131,9 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         passport_image: null,
         existing_id_card_url: promoterToEdit.id_card_url || null,
         existing_passport_url: promoterToEdit.passport_url || null,
-        id_card_expiry_date: promoterToEdit.id_card_expiry_date ? parseISO(promoterToEdit.id_card_expiry_date) : null,
+        id_card_expiry_date: promoterToEdit.id_card_expiry_date
+          ? parseISO(promoterToEdit.id_card_expiry_date)
+          : null,
         passport_expiry_date: promoterToEdit.passport_expiry_date
           ? parseISO(promoterToEdit.passport_expiry_date)
           : null,
@@ -170,7 +188,11 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
 
   async function onSubmit(values: PromoterProfileFormData) {
     if (!isEditable) {
-      toast({ title: "Form Locked", description: "Enable 'Editable Mode' to make changes.", variant: "default" })
+      toast({
+        title: "Form Locked",
+        description: "Enable 'Editable Mode' to make changes.",
+        variant: "default",
+      })
       return
     }
     setIsSubmitting(true)
@@ -195,14 +217,20 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         id_card_number: values.id_card_number,
         id_card_url: idCardUrlResult,
         passport_url: passportUrlResult,
-        id_card_expiry_date: values.id_card_expiry_date ? format(values.id_card_expiry_date, "yyyy-MM-dd") : null,
-        passport_expiry_date: values.passport_expiry_date ? format(values.passport_expiry_date, "yyyy-MM-dd") : null,
+        id_card_expiry_date: values.id_card_expiry_date
+          ? format(values.id_card_expiry_date, "yyyy-MM-dd")
+          : null,
+        passport_expiry_date: values.passport_expiry_date
+          ? format(values.passport_expiry_date, "yyyy-MM-dd")
+          : null,
         employer_id: values.employer_id,
         outsourced_to_id: values.outsourced_to_id,
         job_title: values.job_title,
         work_location: values.work_location,
         status: values.status,
-        contract_valid_until: values.contract_valid_until ? format(values.contract_valid_until, "yyyy-MM-dd") : null,
+        contract_valid_until: values.contract_valid_until
+          ? format(values.contract_valid_until, "yyyy-MM-dd")
+          : null,
         notify_days_before_id_expiry: values.notify_days_before_id_expiry,
         notify_days_before_passport_expiry: values.notify_days_before_passport_expiry,
         notify_days_before_contract_expiry: values.notify_days_before_contract_expiry,
@@ -210,7 +238,11 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
       }
 
       if (promoterToEdit?.id) {
-        const { error } = await supabase.from("promoters").update(promoterData).eq("id", promoterToEdit.id).select()
+        const { error } = await supabase
+          .from("promoters")
+          .update(promoterData)
+          .eq("id", promoterToEdit.id)
+          .select()
         if (error) throw error
         toast({ title: "Success!", description: "Promoter updated successfully." })
       } else {
@@ -228,13 +260,15 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
 
   const formActuallyDisabled = !isEditable || isSubmitting
 
-  const sectionClasses = "space-y-6 p-5 border rounded-lg shadow-sm bg-card-foreground/5 dark:bg-card-foreground/5"
-  const sectionHeaderClasses = "text-xl font-semibold text-foreground border-b border-border pb-3 mb-6"
+  const sectionClasses =
+    "space-y-6 p-5 border rounded-lg shadow-sm bg-card-foreground/5 dark:bg-card-foreground/5"
+  const sectionHeaderClasses =
+    "text-xl font-semibold text-foreground border-b border-border pb-3 mb-6"
 
   return (
-    <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 bg-card text-card-foreground shadow-xl rounded-lg">
-      <div className="flex justify-between items-center mb-6 pb-4 border-b border-border">
-        <h1 className="text-2xl sm:text-3xl font-bold">
+    <div className="mx-auto max-w-3xl rounded-lg bg-card p-4 text-card-foreground shadow-xl sm:p-6 lg:p-8">
+      <div className="mb-6 flex items-center justify-between border-b border-border pb-4">
+        <h1 className="text-2xl font-bold sm:text-3xl">
           {promoterToEdit ? "Edit Promoter / تعديل المروج" : "Add New Promoter / إضافة مروج جديد"}
         </h1>
         <div className="flex items-center space-x-3">
@@ -250,7 +284,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
             aria-label="Toggle editable mode"
             className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted-foreground/30"
           />
-          <Label htmlFor="editable-mode" className="text-sm font-medium select-none cursor-pointer">
+          <Label htmlFor="editable-mode" className="cursor-pointer select-none text-sm font-medium">
             {isEditable ? "Editable Mode / وضع التعديل" : "Locked / مقفل"}
           </Label>
         </div>
@@ -261,7 +295,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
           {/* Personal Information Section */}
           <div className={sectionClasses}>
             <h2 className={sectionHeaderClasses}>Personal Information / المعلومات الشخصية</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="name_en"
@@ -269,7 +303,11 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                   <FormItem>
                     <ShadcnFormLabel>Name (English)</ShadcnFormLabel>
                     <FormControl>
-                      <Input placeholder="Promoter Name (EN)" {...field} disabled={formActuallyDisabled} />
+                      <Input
+                        placeholder="Promoter Name (EN)"
+                        {...field}
+                        disabled={formActuallyDisabled}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -313,7 +351,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
           {/* Employment Details Section */}
           <div className={sectionClasses}>
             <h2 className={sectionHeaderClasses}>Employment Details / تفاصيل التوظيف</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="employer_id"
@@ -361,7 +399,11 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                   <FormItem>
                     <ShadcnFormLabel>Job Title / المسمى الوظيفي</ShadcnFormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Sales Promoter" {...field} disabled={formActuallyDisabled} />
+                      <Input
+                        placeholder="e.g., Sales Promoter"
+                        {...field}
+                        disabled={formActuallyDisabled}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -374,7 +416,11 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                   <FormItem>
                     <ShadcnFormLabel>Work Location / موقع العمل</ShadcnFormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Main Branch, Riyadh" {...field} disabled={formActuallyDisabled} />
+                      <Input
+                        placeholder="e.g., Main Branch, Riyadh"
+                        {...field}
+                        disabled={formActuallyDisabled}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -386,7 +432,11 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                 render={({ field }) => (
                   <FormItem>
                     <ShadcnFormLabel>Status / الحالة</ShadcnFormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={formActuallyDisabled}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={formActuallyDisabled}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select status" />
@@ -418,8 +468,14 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                       />
                     </FormControl>
                     {contractAlert && !form.formState.errors.contract_valid_until && (
-                      <p className={cn("text-xs font-medium mt-1.5 flex items-center", contractAlert.className)}>
-                        <WarningIcon className="h-3.5 w-3.5 mr-1.5 shrink-0" /> {contractAlert.message}
+                      <p
+                        className={cn(
+                          "mt-1.5 flex items-center text-xs font-medium",
+                          contractAlert.className,
+                        )}
+                      >
+                        <WarningIcon className="mr-1.5 h-3.5 w-3.5 shrink-0" />{" "}
+                        {contractAlert.message}
                       </p>
                     )}
                     <FormMessage />
@@ -432,13 +488,15 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
           {/* Documents Section */}
           <div className={sectionClasses}>
             <h2 className={sectionHeaderClasses}>Documents / المستندات</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="id_card_image"
                 render={({ field }) => (
                   <FormItem>
-                    <ShadcnFormLabel htmlFor={field.name}>ID Card Image / صورة البطاقة</ShadcnFormLabel>
+                    <ShadcnFormLabel htmlFor={field.name}>
+                      ID Card Image / صورة البطاقة
+                    </ShadcnFormLabel>
                     <FormControl>
                       <ImageUploadField
                         id={field.name}
@@ -468,8 +526,14 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                       />
                     </FormControl>
                     {idCardAlert && !form.formState.errors.id_card_expiry_date && (
-                      <p className={cn("text-xs font-medium mt-1.5 flex items-center", idCardAlert.className)}>
-                        <WarningIcon className="h-3.5 w-3.5 mr-1.5 shrink-0" /> {idCardAlert.message}
+                      <p
+                        className={cn(
+                          "mt-1.5 flex items-center text-xs font-medium",
+                          idCardAlert.className,
+                        )}
+                      >
+                        <WarningIcon className="mr-1.5 h-3.5 w-3.5 shrink-0" />{" "}
+                        {idCardAlert.message}
                       </p>
                     )}
                     <FormMessage />
@@ -481,7 +545,9 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                 name="passport_image"
                 render={({ field }) => (
                   <FormItem>
-                    <ShadcnFormLabel htmlFor={field.name}>Passport Image / صورة الجواز</ShadcnFormLabel>
+                    <ShadcnFormLabel htmlFor={field.name}>
+                      Passport Image / صورة الجواز
+                    </ShadcnFormLabel>
                     <FormControl>
                       <ImageUploadField
                         id={field.name}
@@ -511,8 +577,14 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                       />
                     </FormControl>
                     {passportAlert && !form.formState.errors.passport_expiry_date && (
-                      <p className={cn("text-xs font-medium mt-1.5 flex items-center", passportAlert.className)}>
-                        <WarningIcon className="h-3.5 w-3.5 mr-1.5 shrink-0" /> {passportAlert.message}
+                      <p
+                        className={cn(
+                          "mt-1.5 flex items-center text-xs font-medium",
+                          passportAlert.className,
+                        )}
+                      >
+                        <WarningIcon className="mr-1.5 h-3.5 w-3.5 shrink-0" />{" "}
+                        {passportAlert.message}
                       </p>
                     )}
                     <FormMessage />
@@ -525,13 +597,15 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
           {/* Notification Settings Section */}
           <div className={sectionClasses}>
             <h2 className={sectionHeaderClasses}>Notification Settings / إعدادات الإشعارات</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-8">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-3">
               <FormField
                 control={form.control}
                 name="notify_days_before_id_expiry"
                 render={({ field }) => (
                   <FormItem>
-                    <ShadcnFormLabel>ID Expiry Alert (Days) / تنبيه انتهاء البطاقة (أيام)</ShadcnFormLabel>
+                    <ShadcnFormLabel>
+                      ID Expiry Alert (Days) / تنبيه انتهاء البطاقة (أيام)
+                    </ShadcnFormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -539,7 +613,9 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                         {...field}
                         value={field.value ?? ""}
                         onChange={(e) =>
-                          field.onChange(e.target.value === "" ? null : Number.parseInt(e.target.value, 10))
+                          field.onChange(
+                            e.target.value === "" ? null : Number.parseInt(e.target.value, 10),
+                          )
                         }
                         disabled={formActuallyDisabled}
                       />
@@ -553,7 +629,9 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                 name="notify_days_before_passport_expiry"
                 render={({ field }) => (
                   <FormItem>
-                    <ShadcnFormLabel>Passport Expiry Alert (Days) / تنبيه انتهاء الجواز (أيام)</ShadcnFormLabel>
+                    <ShadcnFormLabel>
+                      Passport Expiry Alert (Days) / تنبيه انتهاء الجواز (أيام)
+                    </ShadcnFormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -561,7 +639,9 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                         {...field}
                         value={field.value ?? ""}
                         onChange={(e) =>
-                          field.onChange(e.target.value === "" ? null : Number.parseInt(e.target.value, 10))
+                          field.onChange(
+                            e.target.value === "" ? null : Number.parseInt(e.target.value, 10),
+                          )
                         }
                         disabled={formActuallyDisabled}
                       />
@@ -575,7 +655,9 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                 name="notify_days_before_contract_expiry"
                 render={({ field }) => (
                   <FormItem>
-                    <ShadcnFormLabel>Contract Expiry Alert (Days) / تنبيه انتهاء العقد (أيام)</ShadcnFormLabel>
+                    <ShadcnFormLabel>
+                      Contract Expiry Alert (Days) / تنبيه انتهاء العقد (أيام)
+                    </ShadcnFormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -583,7 +665,9 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                         {...field}
                         value={field.value ?? ""}
                         onChange={(e) =>
-                          field.onChange(e.target.value === "" ? null : Number.parseInt(e.target.value, 10))
+                          field.onChange(
+                            e.target.value === "" ? null : Number.parseInt(e.target.value, 10),
+                          )
                         }
                         disabled={formActuallyDisabled}
                       />

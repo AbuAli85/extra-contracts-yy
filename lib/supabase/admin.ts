@@ -13,7 +13,7 @@ export function getSupabaseAdmin(): SupabaseClient<Database> {
 
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     throw new Error(
-      'Supabase credentials are missing. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.',
+      "Supabase credentials are missing. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.",
     )
   }
 

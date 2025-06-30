@@ -13,7 +13,10 @@ export default function AdminTools() {
   const handleBulkImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      toast({ title: "File Selected", description: `Selected file: ${file.name}. Upload logic not implemented.` })
+      toast({
+        title: "File Selected",
+        description: `Selected file: ${file.name}. Upload logic not implemented.`,
+      })
       // Placeholder for actual CSV upload and processing logic
       // e.g., using Supabase Edge Functions or a server-side API route
     }
@@ -25,26 +28,40 @@ export default function AdminTools() {
       labelAr: "إدارة المستخدمين",
       icon: Users,
       action: () =>
-        toast({ title: "Manage Users", description: "Navigate to user management page (not implemented)." }),
+        toast({
+          title: "Manage Users",
+          description: "Navigate to user management page (not implemented).",
+        }),
     },
     {
       label: "System Settings",
       labelAr: "إعدادات النظام",
       icon: Settings,
-      action: () => toast({ title: "System Settings", description: "Navigate to settings page (not implemented)." }),
+      action: () =>
+        toast({
+          title: "System Settings",
+          description: "Navigate to settings page (not implemented).",
+        }),
     },
     {
       label: "Database Backup",
       labelAr: "نسخ احتياطي لقاعدة البيانات",
       icon: DatabaseZap,
-      action: () => toast({ title: "Database Backup", description: "Trigger database backup (not implemented)." }),
+      action: () =>
+        toast({
+          title: "Database Backup",
+          description: "Trigger database backup (not implemented).",
+        }),
     },
     {
       label: "Email Templates",
       labelAr: "قوالب البريد الإلكتروني",
       icon: Mail,
       action: () =>
-        toast({ title: "Email Templates", description: "Navigate to email template editor (not implemented)." }),
+        toast({
+          title: "Email Templates",
+          description: "Navigate to email template editor (not implemented).",
+        }),
     },
   ]
 
@@ -52,7 +69,9 @@ export default function AdminTools() {
     <Card>
       <CardHeader>
         <CardTitle>Admin Tools / أدوات المسؤول</CardTitle>
-        <CardDescription>Quick access to administrative functions. / وصول سريع إلى الوظائف الإدارية.</CardDescription>
+        <CardDescription>
+          Quick access to administrative functions. / وصول سريع إلى الوظائف الإدارية.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {adminActions.map((tool) => (
@@ -60,25 +79,36 @@ export default function AdminTools() {
             key={tool.label}
             variant="outline"
             onClick={tool.action}
-            className="w-full justify-start text-left p-4"
+            className="w-full justify-start p-4 text-left"
           >
-            <tool.icon className="h-5 w-5 mr-3" />
+            <tool.icon className="mr-3 h-5 w-5" />
             <div>
               <p>{tool.label}</p>
               <p className="text-xs text-muted-foreground">{tool.labelAr}</p>
             </div>
           </Button>
         ))}
-        <div className="space-y-2 p-4 border rounded-md">
-          <label htmlFor="bulk-import-input" className="font-semibold flex items-center gap-2 cursor-pointer">
+        <div className="space-y-2 rounded-md border p-4">
+          <label
+            htmlFor="bulk-import-input"
+            className="flex cursor-pointer items-center gap-2 font-semibold"
+          >
             <FileSpreadsheet className="h-5 w-5" />
             <div>
               <p>Bulk Contract Import</p>
               <p className="text-xs text-muted-foreground">استيراد جماعي للعقود</p>
             </div>
           </label>
-          <Input id="bulk-import-input" type="file" accept=".csv" onChange={handleBulkImport} className="mt-1" />
-          <p className="text-xs text-muted-foreground mt-1">Upload a CSV file to import multiple contracts.</p>
+          <Input
+            id="bulk-import-input"
+            type="file"
+            accept=".csv"
+            onChange={handleBulkImport}
+            className="mt-1"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Upload a CSV file to import multiple contracts.
+          </p>
         </div>
       </CardContent>
     </Card>

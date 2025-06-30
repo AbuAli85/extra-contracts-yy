@@ -32,8 +32,7 @@ export interface Promoter {
 
 export interface PromoterProfile extends Promoter {}
 
-export interface ContractRecord<Extra extends Record<string, unknown> = {}>
-  extends Extra {
+export interface ContractRecord<Extra extends Record<string, unknown> = {}> extends Extra {
   id: string
   created_at?: string | null
   first_party_name_en?: string | null

@@ -1,15 +1,12 @@
-'use client'
+"use client"
 
-import React from 'react'
+import React from "react"
 
 interface State {
-  hasError: boolean;
+  hasError: boolean
 }
 
-export class ManualErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  State
-> {
+export class ManualErrorBoundary extends React.Component<{ children: React.ReactNode }, State> {
   constructor(props: { children: React.ReactNode }) {
     super(props)
     this.state = { hasError: false }
@@ -20,21 +17,18 @@ export class ManualErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("ManualErrorBoundary caught an error:", error, errorInfo);
+    console.error("ManualErrorBoundary caught an error:", error, errorInfo)
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-4 border border-red-500">
-            <h2 className="font-semibold text-red-700">An Error Occurred</h2>
-            <p>This part of the application has crashed.</p>
-            <button
-                onClick={() => this.setState({ hasError: false })}
-                className="underline text-sm"
-            >
-                Try to reload this component
-            </button>
+        <div className="border border-red-500 p-4">
+          <h2 className="font-semibold text-red-700">An Error Occurred</h2>
+          <p>This part of the application has crashed.</p>
+          <button onClick={() => this.setState({ hasError: false })} className="text-sm underline">
+            Try to reload this component
+          </button>
         </div>
       )
     }
