@@ -1,15 +1,11 @@
-"use client"
+"use client";
 
-import { createSharedPathnamesNavigation } from "next-intl/navigation"
-import { usePathname, useRouter } from "next/navigation" // Explicitly import from next/navigation for client components
+import { createNavigation } from "next-intl/navigation";
 
-export const locales = ["en", "es"] as const
-export const localePrefix = "always" // Default to "always" for explicit paths
+export const locales = ["en", "ar"] as const;
+export const localePrefix = "always";
 
-export const { Link, redirect } = createSharedPathnamesNavigation({
+export const { Link, redirect, usePathname, useRouter } = createNavigation({
   locales,
   localePrefix,
-})
-
-// Re-export usePathname and useRouter from next/navigation for client components
-export { usePathname, useRouter }
+});

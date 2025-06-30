@@ -1,5 +1,5 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { Database } from '@/lib/database.types'
+import type { Database } from './database.types'
 
 export interface DashboardAnalytics {
   totalContracts: number
@@ -228,11 +228,3 @@ export async function getUsers(): Promise<User[]> {
   }
 }
 
-export {
-  getDashboardAnalytics,
-  getPendingReviews,
-  getAdminActions,
-  getAuditLogs,
-  getNotifications,
-  getUsers
-};
