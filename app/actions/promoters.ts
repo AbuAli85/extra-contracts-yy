@@ -3,71 +3,94 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import type { Promoter } from "@/lib/types"
+import type { ServerActionResponse } from "@/lib/dashboard-types"
 
-export async function getPromoters(): Promise<Promoter[]> {
+export async function getPromoters(): Promise<ServerActionResponse<Promoter[]>> {
   const supabase = await createClient()
 
   const { data, error } = await supabase.from("promoters").select("*").order("created_at", { ascending: false })
 
   if (error) {
     console.error("Error fetching promoters:", error)
-    return []
+    return { success: false, message: `Failed to fetch promoters: ${error.message}` }
   }
 
-  return data || []
+  return { success: true, message: "Promoters fetched successfully", data: data || [] }
 }
 
-export async function getPromoterById(id: string): Promise<Promoter | null> {
+export async function getPromoterById(id: string): Promise<ServerActionResponse<Promoter>> {
   const supabase = await createClient()
 
   const { data, error } = await supabase.from("promoters").select("*").eq("id", id).single()
 
   if (error) {
     console.error("Error fetching promoter:", error)
-    return null
+    return { success: false, message: `Failed to fetch promoter: ${error.message}` }
   }
 
-  return data
+  if (!data) {
+    return { success: false, message: "Promoter not found" }
+  }
+
+  return { success: true, message: "Promoter fetched successfully", data }
 }
 
-export async function createPromoter(promoterData: Partial<Promoter>) {
+export async function createPromoter(
+  _prevState: unknown,
+  promoterData: FormData | Partial<Promoter>,
+): Promise<ServerActionResponse<Promoter>> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase.from("promoters").insert(promoterData).select().single()
+  const values =
+    promoterData instanceof FormData
+      ? Object.fromEntries(promoterData.entries())
+      : promoterData
+
+  const { data, error } = await supabase.from("promoters").insert(values).select().single()
 
   if (error) {
     console.error("Error creating promoter:", error)
-    throw new Error("Failed to create promoter")
+    return { success: false, message: `Failed to create promoter: ${error.message}` }
   }
 
   revalidatePath("/manage-promoters")
-  return data
+  return { success: true, message: "Promoter created successfully", data: data as Promoter }
 }
 
-export async function updatePromoter(id: string, promoterData: Partial<Promoter>) {
+export async function updatePromoter(
+  id: string,
+  _prevState: unknown,
+  promoterData: FormData | Partial<Promoter>,
+): Promise<ServerActionResponse<Promoter>> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase.from("promoters").update(promoterData).eq("id", id).select().single()
+  const values =
+    promoterData instanceof FormData
+      ? Object.fromEntries(promoterData.entries())
+      : promoterData
+
+  const { data, error } = await supabase.from("promoters").update(values).eq("id", id).select().single()
 
   if (error) {
     console.error("Error updating promoter:", error)
-    throw new Error("Failed to update promoter")
+    return { success: false, message: `Failed to update promoter: ${error.message}` }
   }
 
   revalidatePath("/manage-promoters")
   revalidatePath(`/manage-promoters/${id}`)
-  return data
+  return { success: true, message: "Promoter updated successfully", data: data as Promoter }
 }
 
-export async function deletePromoter(id: string) {
+export async function deletePromoter(id: string): Promise<ServerActionResponse<null>> {
   const supabase = await createClient()
 
   const { error } = await supabase.from("promoters").delete().eq("id", id)
 
   if (error) {
     console.error("Error deleting promoter:", error)
-    throw new Error("Failed to delete promoter")
+    return { success: false, message: `Failed to delete promoter: ${error.message}` }
   }
 
   revalidatePath("/manage-promoters")
+  return { success: true, message: "Promoter deleted successfully", data: null }
 }

@@ -20,12 +20,14 @@ export default async function ContractDetailsPage({ params }: ContractDetailsPag
   redirect("/en/contracts")
 
   const t = await getTranslations("ContractDetailsPage")
-  const { data: contract, error } = await getContractById(params.id)
+  const result = await getContractById(params.id)
 
-  if (error || !contract) {
-    console.error("Error fetching contract:", error)
+  if (!result.success || !result.data) {
+    console.error("Error fetching contract:", result.message)
     notFound()
   }
+
+  const contract = result.data
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">

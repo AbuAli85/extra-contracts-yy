@@ -20,12 +20,14 @@ export default async function PromoterDetailsPage({ params }: PromoterDetailsPag
   redirect("/en/manage-promoters")
 
   const t = await getTranslations("PromoterDetailsPage")
-  const { data: promoter, error } = await getPromoterById(params.id)
+  const result = await getPromoterById(params.id)
 
-  if (error || !promoter) {
-    console.error("Error fetching promoter:", error)
+  if (!result.success || !result.data) {
+    console.error("Error fetching promoter:", result.message)
     notFound()
   }
+
+  const promoter = result.data
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">

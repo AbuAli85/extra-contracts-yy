@@ -1,4 +1,5 @@
 import type { Contract, Party, Promoter } from "./types"
+import type { ServerActionResponse } from "./dashboard-types"
 // Only import the browser client statically
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 
@@ -21,7 +22,10 @@ async function getSupabaseClient() {
   }
 }
 
-export async function getContractsData(query?: string, status?: string): Promise<Contract[]> {
+export async function getContractsData(
+  query?: string,
+  status?: string,
+): Promise<ServerActionResponse<Contract[]>> {
   const supabase = await getSupabaseClient()
   
   // Rest of the function remains the same
@@ -57,20 +61,21 @@ export async function getContractsData(query?: string, status?: string): Promise
 
   if (error) {
     console.error("Error fetching contracts:", error)
-    return []
+    return { success: false, message: `Failed to fetch contracts: ${error.message}` }
   }
 
-  // Flatten the data to match the Contract type
-  return data.map((contract: any) => ({
+  const contracts = (data || []).map((contract: any) => ({
     ...contract,
     party_a_name: contract.parties_contracts_party_a_id_fkey?.name || "N/A",
     party_b_name: contract.parties_contracts_party_b_id_fkey?.name || "N/A",
     promoter_name: contract.promoters?.name || "N/A",
   })) as Contract[]
+
+  return { success: true, message: "Contracts fetched successfully", data: contracts }
 }
 
 // Update all other functions to use await getSupabaseClient()
-export async function getContractById(id: string): Promise<Contract | null> {
+export async function getContractById(id: string): Promise<ServerActionResponse<Contract>> {
   const supabase = await getSupabaseClient()
   
   // Rest of the function remains the same
@@ -97,23 +102,24 @@ export async function getContractById(id: string): Promise<Contract | null> {
 
   if (error) {
     console.error("Error fetching contract:", error)
-    return null
+    return { success: false, message: `Failed to fetch contract: ${error.message}` }
   }
 
   if (!data) {
-    return null
+    return { success: false, message: "Contract not found" }
   }
 
-  // Flatten the data to match the Contract type
-  return {
+  const contract = {
     ...data,
     party_a_name: (data as any).parties_contracts_party_a_id_fkey?.name || "N/A",
     party_b_name: (data as any).parties_contracts_party_b_id_fkey?.name || "N/A",
     promoter_name: (data as any).promoters?.name || "N/A",
   } as Contract
+
+  return { success: true, message: "Contract fetched successfully", data: contract }
 }
 
-export async function getParties(): Promise<Party[]> {
+export async function getParties(): Promise<ServerActionResponse<Party[]>> {
   const supabase = await getSupabaseClient()
   
   // Rest of the function remains the same
@@ -121,12 +127,12 @@ export async function getParties(): Promise<Party[]> {
 
   if (error) {
     console.error("Error fetching parties:", error)
-    return []
+    return { success: false, message: `Failed to fetch parties: ${error.message}` }
   }
-  return data as Party[]
+  return { success: true, message: "Parties fetched successfully", data: data as Party[] }
 }
 
-export async function getPartyById(id: string): Promise<Party | null> {
+export async function getPartyById(id: string): Promise<ServerActionResponse<Party>> {
   const supabase = await getSupabaseClient()
   
   // Rest of the function remains the same
@@ -134,12 +140,15 @@ export async function getPartyById(id: string): Promise<Party | null> {
 
   if (error) {
     console.error("Error fetching party:", error)
-    return null
+    return { success: false, message: `Failed to fetch party: ${error.message}` }
   }
-  return data as Party
+  if (!data) {
+    return { success: false, message: "Party not found" }
+  }
+  return { success: true, message: "Party fetched successfully", data: data as Party }
 }
 
-export async function getPromoters(): Promise<Promoter[]> {
+export async function getPromoters(): Promise<ServerActionResponse<Promoter[]>> {
   const supabase = await getSupabaseClient()
   
   // Rest of the function remains the same
@@ -147,12 +156,12 @@ export async function getPromoters(): Promise<Promoter[]> {
 
   if (error) {
     console.error("Error fetching promoters:", error)
-    return []
+    return { success: false, message: `Failed to fetch promoters: ${error.message}` }
   }
-  return data as Promoter[]
+  return { success: true, message: "Promoters fetched successfully", data: data as Promoter[] }
 }
 
-export async function getPromoterById(id: string): Promise<Promoter | null> {
+export async function getPromoterById(id: string): Promise<ServerActionResponse<Promoter>> {
   const supabase = await getSupabaseClient()
   
   // Rest of the function remains the same
@@ -160,7 +169,10 @@ export async function getPromoterById(id: string): Promise<Promoter | null> {
 
   if (error) {
     console.error("Error fetching promoter:", error)
-    return null
+    return { success: false, message: `Failed to fetch promoter: ${error.message}` }
   }
-  return data as Promoter
+  if (!data) {
+    return { success: false, message: "Promoter not found" }
+  }
+  return { success: true, message: "Promoter fetched successfully", data: data as Promoter }
 }
