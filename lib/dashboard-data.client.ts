@@ -1,6 +1,7 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import type { Database } from '@/lib/database.types'
 
+// Types
 export interface DashboardAnalytics {
   totalContracts: number
   activeContracts: number
@@ -71,8 +72,10 @@ export interface User {
   is_active: boolean
 }
 
+// Supabase client
 const getSupabaseClient = () => createClientComponentClient<Database>()
 
+// Dashboard Analytics
 export async function getDashboardAnalytics(): Promise<DashboardAnalytics> {
   try {
     const supabase = getSupabaseClient()
