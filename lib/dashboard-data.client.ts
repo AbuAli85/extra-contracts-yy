@@ -1,7 +1,6 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import type { Database } from '@/lib/database.types'
 
-// Types for dashboard data
 export interface DashboardAnalytics {
   totalContracts: number
   activeContracts: number
@@ -72,29 +71,18 @@ export interface User {
   is_active: boolean
 }
 
-// Initialize Supabase client
-const getSupabaseClient = () => {
-  return createClientComponentClient<Database>()
-}
+const getSupabaseClient = () => createClientComponentClient<Database>()
 
-// Dashboard Analytics
 export async function getDashboardAnalytics(): Promise<DashboardAnalytics> {
   try {
     const supabase = getSupabaseClient()
-    
-    // Get contract counts by status
     const { data: contracts, error } = await supabase
       .from('contracts')
       .select('status, contract_value, created_at')
-    
-    if (error) {
-      console.error('Error fetching contracts for analytics:', error)
-      throw error
-    }
+    if (error) throw error
 
     const now = new Date()
     const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
-    
     const totalContracts = contracts?.length || 0
     const contractsByStatus = {
       draft: contracts?.filter(c => c.status === 'draft').length || 0,
@@ -103,17 +91,9 @@ export async function getDashboardAnalytics(): Promise<DashboardAnalytics> {
       completed: contracts?.filter(c => c.status === 'completed').length || 0,
       cancelled: contracts?.filter(c => c.status === 'cancelled').length || 0,
     }
-    
-    const revenueTotal = contracts?.reduce((sum, contract) => {
-      return sum + (contract.contract_value || 0)
-    }, 0) || 0
-    
+    const revenueTotal = contracts?.reduce((sum, contract) => sum + (contract.contract_value || 0), 0) || 0
     const averageContractValue = totalContracts > 0 ? revenueTotal / totalContracts : 0
-    
-    const monthlyContracts = contracts?.filter(c => 
-      new Date(c.created_at) >= lastMonth
-    ).length || 0
-    
+    const monthlyContracts = contracts?.filter(c => new Date(c.created_at) >= lastMonth).length || 0
     const monthlyGrowth = totalContracts > 0 ? (monthlyContracts / totalContracts) * 100 : 0
 
     return {
@@ -126,9 +106,7 @@ export async function getDashboardAnalytics(): Promise<DashboardAnalytics> {
       averageContractValue,
       contractsByStatus
     }
-  } catch (error) {
-    console.error('Error in getDashboardAnalytics:', error)
-    // Return default values to prevent deployment failure
+  } catch {
     return {
       totalContracts: 0,
       activeContracts: 0,
@@ -148,127 +126,83 @@ export async function getDashboardAnalytics(): Promise<DashboardAnalytics> {
   }
 }
 
-// Pending Reviews
 export async function getPendingReviews(): Promise<PendingReview[]> {
   try {
     const supabase = getSupabaseClient()
-    
     const { data, error } = await supabase
       .from('contracts')
-      .select(`
-        id,
-        title,
-        contract_type,
-        created_at,
-        contract_value,
-        parties!inner(name),
-        promoters(name)
-      `)
+      .select('id, title, contract_type, created_at, contract_value')
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(10)
-    
-    if (error) {
-      console.error('Error fetching pending reviews:', error)
-      return []
-    }
-
+    if (error) return []
     return data?.map(contract => ({
       id: contract.id,
       title: contract.title || `Contract ${contract.id}`,
       contract_type: contract.contract_type || 'Unknown',
       created_at: contract.created_at,
-      party_a_name: contract.parties?.[0]?.name,
-      party_b_name: contract.parties?.[1]?.name,
       contract_value: contract.contract_value,
       priority: contract.contract_value && contract.contract_value > 10000 ? 'high' : 'medium'
     })) || []
-  } catch (error) {
-    console.error('Error in getPendingReviews:', error)
+  } catch {
     return []
   }
 }
 
-// Admin Actions
 export async function getAdminActions(): Promise<AdminAction[]> {
-  try {
-    // For now, return mock data since we don't have an admin_actions table
-    // This can be replaced with actual database queries when the table exists
-    return [
-      {
-        id: '1',
-        action_type: 'CONTRACT_CREATED',
-        description: 'New contract created',
-        user_id: 'system',
-        user_name: 'System',
-        timestamp: new Date().toISOString(),
-        metadata: { contract_id: 'example' }
-      }
-    ]
-  } catch (error) {
-    console.error('Error in getAdminActions:', error)
-    return []
-  }
+  // Replace with real DB calls if you have an admin_actions table
+  return [
+    {
+      id: '1',
+      action_type: 'CONTRACT_CREATED',
+      description: 'New contract created',
+      user_id: 'system',
+      user_name: 'System',
+      timestamp: new Date().toISOString(),
+      metadata: { contract_id: 'example' }
+    }
+  ]
 }
 
-// Audit Logs
 export async function getAuditLogs(): Promise<AuditLog[]> {
-  try {
-    // For now, return mock data since we don't have an audit_logs table
-    // This can be replaced with actual database queries when the table exists
-    return [
-      {
-        id: '1',
-        table_name: 'contracts',
-        operation: 'INSERT',
-        new_values: { status: 'draft' },
-        user_id: 'system',
-        user_name: 'System',
-        timestamp: new Date().toISOString()
-      }
-    ]
-  } catch (error) {
-    console.error('Error in getAuditLogs:', error)
-    return []
-  }
+  // Replace with real DB calls if you have an audit_logs table
+  return [
+    {
+      id: '1',
+      table_name: 'contracts',
+      operation: 'INSERT',
+      new_values: { status: 'draft' },
+      user_id: 'system',
+      user_name: 'System',
+      timestamp: new Date().toISOString()
+    }
+  ]
 }
 
-// Notifications
 export async function getNotifications(): Promise<Notification[]> {
-  try {
-    // For now, return mock data since we don't have a notifications table
-    // This can be replaced with actual database queries when the table exists
-    return [
-      {
-        id: '1',
-        user_id: 'current-user',
-        title: 'Welcome',
-        message: 'Welcome to the contract management system',
-        type: 'info',
-        read: false,
-        created_at: new Date().toISOString()
-      }
-    ]
-  } catch (error) {
-    console.error('Error in getNotifications:', error)
-    return []
-  }
+  // Replace with real DB calls if you have a notifications table
+  return [
+    {
+      id: '1',
+      user_id: 'current-user',
+      title: 'Welcome',
+      message: 'Welcome to the contract management system',
+      type: 'info',
+      read: false,
+      created_at: new Date().toISOString()
+    }
+  ]
 }
 
-// Users
 export async function getUsers(): Promise<User[]> {
   try {
     const supabase = getSupabaseClient()
-    
-    // Try to get users from auth.users (if accessible) or from a users table
+    // Try to get users from a 'profiles' table or similar
     const { data, error } = await supabase
-      .from('profiles') // Assuming you have a profiles table
+      .from('profiles')
       .select('*')
       .limit(20)
-    
     if (error) {
-      console.error('Error fetching users:', error)
-      // Return mock data to prevent deployment failure
       return [
         {
           id: 'mock-user-1',
@@ -281,7 +215,6 @@ export async function getUsers(): Promise<User[]> {
         }
       ]
     }
-
     return data?.map(profile => ({
       id: profile.id || 'unknown',
       email: profile.email || 'unknown@example.com',
@@ -291,8 +224,7 @@ export async function getUsers(): Promise<User[]> {
       created_at: profile.created_at || new Date().toISOString(),
       is_active: profile.is_active !== false
     })) || []
-  } catch (error) {
-    console.error('Error in getUsers:', error)
+  } catch {
     return []
   }
 }
