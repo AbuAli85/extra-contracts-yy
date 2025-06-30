@@ -4,8 +4,16 @@ import { useTranslations } from "next-intl"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ContractReportsTable } from "@/components/dashboard/contract-reports-table"
 import { useQuery } from "@tanstack/react-query"
-import { getContractsData } from "@/lib/data"
 import { Loader2 } from "lucide-react"
+import type { Contract } from "@/lib/types"
+
+async function fetchContracts(): Promise<Contract[]> {
+  const response = await fetch('/api/contracts')
+  if (!response.ok) {
+    throw new Error('Failed to fetch contracts')
+  }
+  return response.json()
+}
 
 export default function DashboardContractsPage() {
   const t = useTranslations("DashboardContractsPage")
@@ -17,7 +25,7 @@ export default function DashboardContractsPage() {
     error,
   } = useQuery({
     queryKey: ["contracts"],
-    queryFn: getContractsData,
+    queryFn: fetchContracts,
   })
 
   if (isLoading) {
@@ -37,10 +45,10 @@ export default function DashboardContractsPage() {
     )
   }
 
-  if (!contractsData?.success || !contractsData.data) {
+  if (!contractsData) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center text-red-500">
-        {t("errorFetchingData")}: {contractsData?.message || t("unknownError")}
+        {t("errorFetchingData")}: {t("unknownError")}
       </div>
     )
   }
@@ -52,7 +60,7 @@ export default function DashboardContractsPage() {
           <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <ContractReportsTable contracts={contractsData.data} />
+          <ContractReportsTable contracts={contractsData} />
         </CardContent>
       </Card>
     </div>
