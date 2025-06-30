@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
-import type { Promoter } from "@/lib/types"
+import type { Promoter, PromoterInsert, PromoterUpdate } from "@/lib/types"
 
 export async function getPromoters(): Promise<Promoter[]> {
   const supabase = await createClient()
@@ -30,7 +30,7 @@ export async function getPromoterById(id: string): Promise<Promoter | null> {
   return data
 }
 
-export async function createPromoter(promoterData: Partial<Promoter>) {
+export async function createPromoter(promoterData: PromoterInsert) {
   const supabase = await createClient()
 
   const { data, error } = await supabase.from("promoters").insert(promoterData).select().single()
@@ -44,7 +44,7 @@ export async function createPromoter(promoterData: Partial<Promoter>) {
   return data
 }
 
-export async function updatePromoter(id: string, promoterData: Partial<Promoter>) {
+export async function updatePromoter(id: string, promoterData: PromoterUpdate) {
   const supabase = await createClient()
 
   const { data, error } = await supabase.from("promoters").update(promoterData).eq("id", id).select().single()

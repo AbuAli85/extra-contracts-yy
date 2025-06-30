@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
-import type { Contract } from "@/lib/types"
+import type { Contract, ContractInsert, ContractUpdate } from "@/lib/types"
 
 export async function getContracts(): Promise<Contract[]> {
   const supabase = await createClient()
@@ -30,7 +30,7 @@ export async function getContractById(id: string): Promise<Contract | null> {
   return data
 }
 
-export async function createContract(contractData: Partial<Contract>) {
+export async function createContract(contractData: ContractInsert) {
   const supabase = await createClient()
 
   const { data, error } = await supabase.from("contracts").insert(contractData).select().single()
@@ -44,7 +44,7 @@ export async function createContract(contractData: Partial<Contract>) {
   return data
 }
 
-export async function updateContract(id: string, contractData: Partial<Contract>) {
+export async function updateContract(id: string, contractData: ContractUpdate) {
   const supabase = await createClient()
 
   const { data, error } = await supabase.from("contracts").update(contractData).eq("id", id).select().single()

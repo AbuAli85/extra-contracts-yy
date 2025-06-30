@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
-import type { Party } from "@/lib/types"
+import type { Party, PartyInsert, PartyUpdate } from "@/lib/types"
 
 export async function getParties(): Promise<Party[]> {
   const supabase = await createClient()
@@ -30,7 +30,7 @@ export async function getPartyById(id: string): Promise<Party | null> {
   return data
 }
 
-export async function createParty(partyData: Partial<Party>) {
+export async function createParty(partyData: PartyInsert) {
   const supabase = await createClient()
 
   const { data, error } = await supabase.from("parties").insert(partyData).select().single()
@@ -44,7 +44,7 @@ export async function createParty(partyData: Partial<Party>) {
   return data
 }
 
-export async function updateParty(id: string, partyData: Partial<Party>) {
+export async function updateParty(id: string, partyData: PartyUpdate) {
   const supabase = await createClient()
 
   const { data, error } = await supabase.from("parties").update(partyData).eq("id", id).select().single()
