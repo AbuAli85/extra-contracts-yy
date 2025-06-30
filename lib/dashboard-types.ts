@@ -7,6 +7,10 @@ export interface DashboardAnalytics {
   contractsLastMonth: number
   averageProcessingTime: number
   successRate: number
+  // Add missing properties for analytics page
+  activeContracts: number
+  contractTrends: ContractTrend[]
+  statusDistribution: ContractStatusDistribution[]
 }
 
 export interface PendingReview {
@@ -66,6 +70,18 @@ export interface AuditLog extends AdminAction {
   details: string
   resource_type: string
   resource_id: string
+}
+
+export interface ContractTrend {
+  month: string
+  newContracts: number
+  completedContracts: number
+}
+
+export interface ContractStatusDistribution {
+  name: string
+  count: number
+  color?: string
 }
 
 export interface ServerActionResponse<T = any> {
