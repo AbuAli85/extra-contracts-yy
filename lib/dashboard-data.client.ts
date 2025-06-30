@@ -197,7 +197,6 @@ export async function getNotifications(): Promise<Notification[]> {
 export async function getUsers(): Promise<User[]> {
   try {
     const supabase = getSupabaseClient()
-    // Try to get users from a 'profiles' table or similar
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
