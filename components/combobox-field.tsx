@@ -29,7 +29,7 @@ interface ComboboxFieldProps {
   disabled?: boolean
 }
 
-export default function ComboboxField({
+export function ComboboxField({
   field,
   options,
   placeholder = "Select an option...",

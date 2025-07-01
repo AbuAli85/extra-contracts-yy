@@ -31,7 +31,7 @@ import type { Promoter } from "@/lib/types"
 import { format, parseISO, differenceInDays, isPast, isValid } from "date-fns"
 import ImageUploadField from "@/components/image-upload-field"
 import DatePickerWithPresetsField from "@/components/date-picker-with-presets-field"
-import ComboboxField from "@/components/combobox-field" // New import
+import { ComboboxField } from "@/components/combobox-field"
 import { cn } from "@/lib/utils"
 
 const BUCKET_NAME = "promoter-documents"

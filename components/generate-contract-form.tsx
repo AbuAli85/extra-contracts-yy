@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
 import { DatePickerWithManualInput } from "./date-picker-with-manual-input"
-import ComboboxField from "@/components/combobox-field"
+import { ComboboxField } from "@/components/combobox-field"
 import { useToast } from "@/hooks/use-toast"
 import type { Database } from "@/types/supabase"
 import {
