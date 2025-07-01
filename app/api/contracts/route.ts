@@ -75,11 +75,25 @@ export async function POST(request: NextRequest) {
   const supabaseAdmin = getSupabaseAdmin() // Service role client
   try {
     const body = await request.json()
-    const validation = contractGeneratorSchema.safeParse(body)
+    console.log("Received contract data:", JSON.stringify(body, null, 2))
+    
+    // Convert date strings to Date objects if needed
+    const processedBody = {
+      ...body,
+      contract_start_date: body.contract_start_date ? new Date(body.contract_start_date) : undefined,
+      contract_end_date: body.contract_end_date ? new Date(body.contract_end_date) : undefined,
+    }
+    
+    const validation = contractGeneratorSchema.safeParse(processedBody)
 
     if (!validation.success) {
+      console.error("Validation failed:", validation.error.format())
       return NextResponse.json(
-        { message: "Invalid input", errors: validation.error.format() },
+        { 
+          message: "Invalid input", 
+          errors: validation.error.format(),
+          receivedData: body 
+        },
         { status: 400 },
       )
     }
