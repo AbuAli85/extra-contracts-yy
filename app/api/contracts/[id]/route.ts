@@ -7,21 +7,21 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const supabaseAdmin = getSupabaseAdmin()
   const { id } = params
 
-  // 1) parse & validate
+  // 1) Parse & validate
   const body = await request.json()
   const parsed = contractGeneratorSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ message: "Invalid input", errors: parsed.error.format() }, { status: 400 })
   }
 
-  // 2) build update payload (same date format!)
+  // 2) Build update payload (format dates)
   const dataToUpdate = {
     ...parsed.data,
     contract_start_date: format(parsed.data.contract_start_date, "yyyy-MM-dd"),
-    contract_end_date:   format(parsed.data.contract_end_date,   "yyyy-MM-dd"),
+    contract_end_date: format(parsed.data.contract_end_date, "yyyy-MM-dd"),
   }
 
-  // 3) perform the update as service-role (bypass RLS)
+  // 3) Perform the update as service-role (bypass RLS)
   const { data: updated, error } = await supabaseAdmin
     .from("contracts")
     .update(dataToUpdate)

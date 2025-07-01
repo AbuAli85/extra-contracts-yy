@@ -19,15 +19,28 @@ async function generateBilingualPdf(
     return null
   }
 
+  // Send all relevant fields to Make.com
   const payloadForMake = {
     contract_id: contractId,
-    first_party_name: contractData.first_party_name_en,
-    second_party_name: contractData.second_party_name_en,
-    promoter_name: contractData.promoter_name_en,
+    first_party_name_en: contractData.first_party_name_en,
+    first_party_name_ar: contractData.first_party_name_ar,
+    first_party_crn: contractData.first_party_crn,
+    second_party_name_en: contractData.second_party_name_en,
+    second_party_name_ar: contractData.second_party_name_ar,
+    second_party_crn: contractData.second_party_crn,
+    promoter_name_en: contractData.promoter_name_en,
+    promoter_name_ar: contractData.promoter_name_ar,
+    job_title: contractData.job_title || "",
+    work_location: contractData.work_location || "",
+    email: contractData.email,
     start_date: contractData.contract_start_date,
     end_date: contractData.contract_end_date,
-    job_title: contractData.job_title || "",
-    email: contractData.email,
+    contract_number: contractData.contract_number,
+    id_card_number: contractData.id_card_number,
+    promoter_id_card_url: contractData.promoter_id_card_url,
+    promoter_passport_url: contractData.promoter_passport_url,
+    pdf_url: contractData.pdf_url,
+    // Add more fields as needed
   }
 
   try {
@@ -120,6 +133,7 @@ export async function POST(request: NextRequest) {
       // Add job_title, work_location, etc. if present
       job_title: body.job_title,
       work_location: body.work_location,
+      pdf_url: body.pdf_url,
     }
     console.log("Contract to insert:", JSON.stringify(contractToInsert, null, 2))
 
@@ -147,17 +161,17 @@ export async function POST(request: NextRequest) {
     const [party1, party2, promoterDetails] = await Promise.all([
       supabase
         .from("parties")
-        .select("name_en, name_ar")
+        .select("name_en, name_ar, crn")
         .eq("id", newContract.first_party_id)
         .single(),
       supabase
         .from("parties")
-        .select("name_en, name_ar")
+        .select("name_en, name_ar, crn")
         .eq("id", newContract.second_party_id)
         .single(),
       supabase
         .from("promoters")
-        .select("name_en, name_ar")
+        .select("name_en, name_ar, id_card_number, id_card_url, passport_url")
         .eq("id", newContract.promoter_id)
         .single(),
     ])
@@ -166,14 +180,22 @@ export async function POST(request: NextRequest) {
     const pdfData: BilingualPdfData = {
       first_party_name_en: party1.data?.name_en,
       first_party_name_ar: party1.data?.name_ar,
+      first_party_crn: party1.data?.crn,
       second_party_name_en: party2.data?.name_en,
       second_party_name_ar: party2.data?.name_ar,
+      second_party_crn: party2.data?.crn,
       promoter_name_en: promoterDetails.data?.name_en,
       promoter_name_ar: promoterDetails.data?.name_ar,
+      id_card_number: promoterDetails.data?.id_card_number,
+      promoter_id_card_url: promoterDetails.data?.id_card_url,
+      promoter_passport_url: promoterDetails.data?.passport_url,
+      job_title: newContract.job_title,
+      work_location: newContract.work_location,
+      email: newContract.email,
       contract_start_date: newContract.contract_start_date ?? null,
       contract_end_date: newContract.contract_end_date ?? null,
-      job_title: newContract.job_title,
-      email: newContract.email,
+      contract_number: newContract.contract_number,
+      pdf_url: newContract.pdf_url,
     }
 
     const pdfUrl = await generateBilingualPdf(pdfData, newContract.id)
