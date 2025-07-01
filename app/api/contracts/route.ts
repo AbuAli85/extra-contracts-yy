@@ -73,80 +73,43 @@ async function generateBilingualPdf(
 export async function POST(request: NextRequest) {
   try {
     console.log("=== CONTRACT API ROUTE START ===")
-    
     const supabase = createServerComponentClient()
-    console.log("✓ Supabase client created")
-    
     let supabaseAdmin
     try {
-      supabaseAdmin = getSupabaseAdmin() // Service role client
-      console.log("✓ Supabase admin client created")
+      supabaseAdmin = getSupabaseAdmin()
     } catch (adminError) {
       console.error("✗ Supabase admin client error:", adminError)
       return NextResponse.json(
-        { 
-          message: "Server configuration error", 
-          error: "Failed to initialize Supabase admin client",
-          details: adminError instanceof Error ? adminError.message : String(adminError)
-        },
+        { message: "Server configuration error", error: "Failed to initialize Supabase admin client", details: adminError instanceof Error ? adminError.message : String(adminError) },
         { status: 500 },
       )
     }
-    
     const body = await request.json()
     console.log("Received contract data:", JSON.stringify(body, null, 2))
-    
-    // Convert date strings to Date objects (JSON serialization converts Date objects to strings)
-    const processedBody = {
-      ...body,
-      contract_start_date: body.contract_start_date ? new Date(body.contract_start_date) : null,
-      contract_end_date: body.contract_end_date ? new Date(body.contract_end_date) : null,
-    }
-    console.log("Processed body:", JSON.stringify(processedBody, null, 2))
-    
-    const validation = contractGeneratorSchema.safeParse(processedBody)
 
-    if (!validation.success) {
-      console.error("Validation failed:", validation.error.format())
-      return NextResponse.json(
-        { 
-          message: "Invalid input", 
-          errors: validation.error.format(),
-          receivedData: body 
-        },
-        { status: 400 },
-      )
-    }
-    console.log("✓ Validation passed")
-
-    const { data: validatedData } = validation
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    console.log("✓ User authenticated:", user?.id)
-
+    // Flatten the nested payload
     const contractToInsert: Database["public"]["Tables"]["contracts"]["Insert"] = {
-      first_party_id: validatedData.first_party_id,
-      second_party_id: validatedData.second_party_id,
-      promoter_id: validatedData.promoter_id,
-      contract_start_date: format(validatedData.contract_start_date, "yyyy-MM-dd"),
-      contract_end_date: format(validatedData.contract_end_date, "yyyy-MM-dd"),
-      email: validatedData.email,
-      job_title: validatedData.job_title,
-      work_location: validatedData.work_location,
-      user_id: user?.id,
-      // Auto-filled fields
-      first_party_name_en: validatedData.first_party_name_en,
-      first_party_name_ar: validatedData.first_party_name_ar,
-      first_party_crn: validatedData.first_party_crn,
-      second_party_name_en: validatedData.second_party_name_en,
-      second_party_name_ar: validatedData.second_party_name_ar,
-      second_party_crn: validatedData.second_party_crn,
-      promoter_name_en: validatedData.promoter_name_en,
-      promoter_name_ar: validatedData.promoter_name_ar,
-      id_card_number: validatedData.id_card_number,
-      promoter_id_card_url: validatedData.promoter_id_card_url,
-      promoter_passport_url: validatedData.promoter_passport_url,
+      contract_number: body.contract_number,
+      contract_start_date: body.contract_start_date,
+      contract_end_date: body.contract_end_date,
+      first_party_id: body.first_party?.id,
+      first_party_name_en: body.first_party?.name_en,
+      first_party_name_ar: body.first_party?.name_ar,
+      first_party_crn: body.first_party?.crn,
+      second_party_id: body.second_party?.id,
+      second_party_name_en: body.second_party?.name_en,
+      second_party_name_ar: body.second_party?.name_ar,
+      second_party_crn: body.second_party?.crn,
+      promoter_id: body.promoter?.id,
+      promoter_name_en: body.promoter?.name_en,
+      promoter_name_ar: body.promoter?.name_ar,
+      id_card_number: body.promoter?.id_card_number,
+      promoter_id_card_url: body.promoter?.id_card_url,
+      promoter_passport_url: body.promoter?.passport_url,
+      email: body.email,
+      // Add job_title, work_location, etc. if present
+      job_title: body.job_title,
+      work_location: body.work_location,
     }
     console.log("Contract to insert:", JSON.stringify(contractToInsert, null, 2))
 
@@ -230,25 +193,8 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("=== CONTRACT API ROUTE ERROR ===")
     console.error("API Route Error:", error)
-    
-    // Check if it's a Supabase admin client error
-    if (error.message?.includes("Supabase credentials are missing")) {
-      return NextResponse.json(
-        { 
-          message: "Server configuration error", 
-          error: "Supabase service role key is not configured. Please check your environment variables.",
-          details: error.message 
-        },
-        { status: 500 },
-      )
-    }
-    
     return NextResponse.json(
-      { 
-        message: "Internal server error", 
-        error: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      },
+      { message: "Internal server error", error: error.message, stack: process.env.NODE_ENV === 'development' ? error.stack : undefined },
       { status: 500 },
     )
   }
