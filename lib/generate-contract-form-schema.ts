@@ -2,17 +2,30 @@ import { z } from "zod"
 
 export const formSchema = z
   .object({
-    promoterId: z.string().uuid(),
-    firstPartyId: z.string().uuid(),
-    secondPartyId: z.string().uuid(),
-    startDate: z.date(),
-    endDate: z.date(),
-    refNumber: z.string(),
-    jobTitle: z.string().optional(),
-    workLocation: z.string().optional(),
-    email: z.string().email(),
+    contractName: z.string().min(1, "Contract name is required"),
+    contractType: z.string().min(1, "Contract type is required"),
+    partyA: z.string().uuid("Please select a valid party"),
+    partyB: z.string().uuid("Please select a valid party"),
+    promoter: z.string().uuid("Please select a valid promoter"),
+    effectiveDate: z.date().optional(),
+    terminationDate: z.date().optional(),
+    contractValue: z.number().optional(),
+    paymentTerms: z.string().optional(),
+    contentEnglish: z.string().optional(),
+    contentSpanish: z.string().optional(),
   })
-  .refine((d) => d.endDate > d.startDate, {
-    path: ["endDate"],
-    message: "End date must be after start date",
+  .refine((d) => {
+    if (d.effectiveDate && d.terminationDate) {
+      return d.terminationDate > d.effectiveDate
+    }
+    return true
+  }, {
+    path: ["terminationDate"],
+    message: "Termination date must be after effective date",
   })
+
+// Export the schema with the expected name
+export const generateContractFormSchema = formSchema
+
+// Export the type
+export type GenerateContractFormValues = z.infer<typeof formSchema>
