@@ -54,29 +54,12 @@
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-<<<<<<< HEAD
     "cmdk": "^0.2.1",
     "date-fns": "^3.3.1",
     "dotenv": "^16.4.5",
     "embla-carousel-react": "^8.0.0",
     "framer-motion": "^11.0.8",
     "input-otp": "^1.1.0",
-=======
-    "cmdk": "latest",
-    "cripts": "latest",
-    "date-fns": "latest",
-    "dotenv": "latest",
-    "embla-carousel-react": "latest",
-    "est-db": "latest",
-    "est.config": "latest",
-    "est.setup": "latest",
-    "ext.config": "latest",
-    "framer-motion": "latest",
-    "fs": "latest",
-    "ib": "latest",
-    "iddleware": "latest",
-    "input-otp": "latest",
->>>>>>> 5f231437854761982afdc354cc5940adf9e1eb3e
     "lucide-react": "^0.454.0",
     "next": "^14.2.16",
     "next-intl": "^3.5.4",
@@ -89,7 +72,6 @@
     "recharts": "^2.12.0",
     "sonner": "^1.4.0",
     "tailwind-merge": "^2.5.5",
-    "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
     "use-debounce": "^10.0.0",
     "vaul": "^0.9.0",
@@ -106,13 +88,8 @@
     "jest": "^29.7.0",
     "postcss": "^8.5.0",
     "prettier-plugin-tailwindcss": "^0.6.13",
-<<<<<<< HEAD
     "tailwindcss": "^3.4.17",
     "ts-jest": "^29.1.2",
     "typescript": "^5.4.3"
-=======
-    "ts-jest": "^29",
-    "typescript": "^5"
->>>>>>> 5f231437854761982afdc354cc5940adf9e1eb3e
   }
 }
