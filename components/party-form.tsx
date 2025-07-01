@@ -51,7 +51,7 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
         crn: "",
       })
     }
-  }, [partyToEdit, form])
+  }, [partyToEdit, reset])
 
   async function onSubmit(values: PartyFormData) {
     setIsSubmitting(true)

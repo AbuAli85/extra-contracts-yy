@@ -125,6 +125,13 @@ export interface Database {
           id_card_number: string
           id_card_url?: string | null
           passport_url?: string | null
+          status?: string | null
+          id_card_expiry_date?: string | null
+          passport_expiry_date?: string | null
+          notify_days_before_id_expiry?: number | null
+          notify_days_before_passport_expiry?: number | null
+          notes?: string | null
+          created_at?: string | null
           // ... other fields
         }
         Insert: {
@@ -134,6 +141,13 @@ export interface Database {
           id_card_number: string
           id_card_url?: string | null
           passport_url?: string | null
+          status?: string | null
+          id_card_expiry_date?: string | null
+          passport_expiry_date?: string | null
+          notify_days_before_id_expiry?: number | null
+          notify_days_before_passport_expiry?: number | null
+          notes?: string | null
+          created_at?: string | null
           // ... other fields
         }
         Update: {
@@ -143,6 +157,13 @@ export interface Database {
           id_card_number?: string
           id_card_url?: string | null
           passport_url?: string | null
+          status?: string | null
+          id_card_expiry_date?: string | null
+          passport_expiry_date?: string | null
+          notify_days_before_id_expiry?: number | null
+          notify_days_before_passport_expiry?: number | null
+          notes?: string | null
+          created_at?: string | null
           // ... other fields
         }
         Relationships: []

@@ -90,15 +90,9 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
       existing_passport_url: null,
       id_card_expiry_date: null,
       passport_expiry_date: null,
-      employer_id: null,
-      outsourced_to_id: null,
-      job_title: "",
-      work_location: "",
       status: "active",
-      contract_valid_until: null,
       notify_days_before_id_expiry: 30,
       notify_days_before_passport_expiry: 90,
-      notify_days_before_contract_expiry: 30,
       notes: "",
     },
   })
@@ -111,15 +105,9 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
     control: form.control,
     name: "notify_days_before_passport_expiry",
   })
-  const contractValidUntil = useWatch({ control: form.control, name: "contract_valid_until" })
-  const notifyContractDays = useWatch({
-    control: form.control,
-    name: "notify_days_before_contract_expiry",
-  })
 
   const idCardAlert = getExpiryAlert(idCardExpiryDate, notifyIdDays, "ID Card")
   const passportAlert = getExpiryAlert(passportExpiryDate, notifyPassportDays, "Passport")
-  const contractAlert = getExpiryAlert(contractValidUntil, notifyContractDays, "Contract")
 
   useEffect(() => {
     if (promoterToEdit) {
@@ -137,17 +125,9 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         passport_expiry_date: promoterToEdit.passport_expiry_date
           ? parseISO(promoterToEdit.passport_expiry_date)
           : null,
-        employer_id: promoterToEdit.employer_id || null,
-        outsourced_to_id: promoterToEdit.outsourced_to_id || null,
-        job_title: promoterToEdit.job_title || "",
-        work_location: promoterToEdit.work_location || "",
         status: promoterToEdit.status || "active",
-        contract_valid_until: promoterToEdit.contract_valid_until
-          ? parseISO(promoterToEdit.contract_valid_until)
-          : null,
         notify_days_before_id_expiry: promoterToEdit.notify_days_before_id_expiry ?? 30,
         notify_days_before_passport_expiry: promoterToEdit.notify_days_before_passport_expiry ?? 90,
-        notify_days_before_contract_expiry: promoterToEdit.notify_days_before_contract_expiry ?? 30,
         notes: promoterToEdit.notes || "",
       })
     } else {
@@ -156,7 +136,6 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         status: "active",
         notify_days_before_id_expiry: 30,
         notify_days_before_passport_expiry: 90,
-        notify_days_before_contract_expiry: 30,
       })
     }
   }, [promoterToEdit, form])
@@ -223,17 +202,9 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         passport_expiry_date: values.passport_expiry_date
           ? format(values.passport_expiry_date, "yyyy-MM-dd")
           : null,
-        employer_id: values.employer_id,
-        outsourced_to_id: values.outsourced_to_id,
-        job_title: values.job_title,
-        work_location: values.work_location,
         status: values.status,
-        contract_valid_until: values.contract_valid_until
-          ? format(values.contract_valid_until, "yyyy-MM-dd")
-          : null,
         notify_days_before_id_expiry: values.notify_days_before_id_expiry,
         notify_days_before_passport_expiry: values.notify_days_before_passport_expiry,
-        notify_days_before_contract_expiry: values.notify_days_before_contract_expiry,
         notes: values.notes,
       }
 
@@ -354,80 +325,6 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
             <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2">
               <FormField
                 control={form.control}
-                name="employer_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <ShadcnFormLabel>Employer / جهة العمل</ShadcnFormLabel>
-                    <FormControl>
-                      <ComboboxField
-                        field={field}
-                        options={[]}
-                        placeholder="Select employer agency"
-                        searchPlaceholder="Search employers..."
-                        emptyStateMessage="No employer found."
-                        disabled={formActuallyDisabled}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="outsourced_to_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <ShadcnFormLabel>Outsourced To (Client) / العميل الحالي</ShadcnFormLabel>
-                    <FormControl>
-                      <ComboboxField
-                        field={field}
-                        options={[]}
-                        placeholder="Select client company"
-                        searchPlaceholder="Search clients..."
-                        emptyStateMessage="No client found."
-                        disabled={formActuallyDisabled}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="job_title"
-                render={({ field }) => (
-                  <FormItem>
-                    <ShadcnFormLabel>Job Title / المسمى الوظيفي</ShadcnFormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., Sales Promoter"
-                        {...field}
-                        disabled={formActuallyDisabled}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="work_location"
-                render={({ field }) => (
-                  <FormItem>
-                    <ShadcnFormLabel>Work Location / موقع العمل</ShadcnFormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., Main Branch, Riyadh"
-                        {...field}
-                        disabled={formActuallyDisabled}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
@@ -450,34 +347,6 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="contract_valid_until"
-                render={({ field }) => (
-                  <FormItem>
-                    <ShadcnFormLabel>Contract Valid Until / صلاحية العقد حتى</ShadcnFormLabel>
-                    <FormControl>
-                      <DatePickerWithPresetsField
-                        field={field}
-                        placeholder="Select contract end date"
-                        disabled={formActuallyDisabled}
-                      />
-                    </FormControl>
-                    {contractAlert && !form.formState.errors.contract_valid_until && (
-                      <p
-                        className={cn(
-                          "mt-1.5 flex items-center text-xs font-medium",
-                          contractAlert.className,
-                        )}
-                      >
-                        <WarningIcon className="mr-1.5 h-3.5 w-3.5 shrink-0" />{" "}
-                        {contractAlert.message}
-                      </p>
-                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -636,32 +505,6 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                       <Input
                         type="number"
                         placeholder="e.g., 90"
-                        {...field}
-                        value={field.value ?? ""}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value === "" ? null : Number.parseInt(e.target.value, 10),
-                          )
-                        }
-                        disabled={formActuallyDisabled}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="notify_days_before_contract_expiry"
-                render={({ field }) => (
-                  <FormItem>
-                    <ShadcnFormLabel>
-                      Contract Expiry Alert (Days) / تنبيه انتهاء العقد (أيام)
-                    </ShadcnFormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="e.g., 30"
                         {...field}
                         value={field.value ?? ""}
                         onChange={(e) =>

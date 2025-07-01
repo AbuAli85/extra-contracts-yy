@@ -42,12 +42,17 @@ export default function ManagePromotersPage() {
 
   async function fetchPromotersWithContractCount() {
     if (isMountedRef.current) setIsLoading(true)
+    
+    console.log("Fetching promoters...")
     const { data: promotersData, error: promotersError } = await supabase
       .from("promoters")
       .select("*")
       .order("name_en")
 
+    console.log("Promoters fetch result:", { promotersData, promotersError })
+
     if (promotersError) {
+      console.error("Error fetching promoters:", promotersError)
       toast({
         title: "Error fetching promoters",
         description: promotersError.message,
@@ -61,12 +66,15 @@ export default function ManagePromotersPage() {
     }
 
     if (!promotersData || promotersData.length === 0) {
+      console.log("No promoters found in database")
       if (isMountedRef.current) {
         setPromoters([])
         setIsLoading(false)
       }
       return
     }
+
+    console.log(`Found ${promotersData.length} promoters:`, promotersData)
 
     // Fetch active contract counts for each promoter
     const promoterIds = promotersData.map((p) => p.id)
@@ -76,6 +84,7 @@ export default function ManagePromotersPage() {
       .in("promoter_id", promoterIds)
 
     if (contractsError) {
+      console.error("Error fetching contract data:", contractsError)
       toast({
         title: "Error fetching contract data",
         description: contractsError.message,
@@ -98,6 +107,8 @@ export default function ManagePromotersPage() {
       return { ...promoter, active_contracts_count: activeContracts }
     })
 
+    console.log("Promoters with counts:", promotersWithCounts)
+
     if (isMountedRef.current) {
       setPromoters(promotersWithCounts)
       setIsLoading(false)
@@ -107,6 +118,18 @@ export default function ManagePromotersPage() {
   useEffect(() => {
     let isMounted = true
     isMountedRef.current = true
+    
+    // Test Supabase connection
+    const testConnection = async () => {
+      console.log("Testing Supabase connection...")
+      console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL)
+      console.log("Supabase Anon Key exists:", !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+      
+      const { data, error } = await supabase.from("promoters").select("count", { count: "exact", head: true })
+      console.log("Connection test result:", { data, error })
+    }
+    
+    testConnection()
     fetchPromotersWithContractCount()
     const promotersChannel = supabase
       .channel("public:promoters:manage")
