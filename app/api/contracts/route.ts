@@ -83,7 +83,7 @@ async function generateBilingualPdf(
 export async function POST(request: NextRequest) {
   try {
     console.log("=== CONTRACT API ROUTE START ===")
-    const supabase = createServerComponentClient()
+    const supabase = await createServerComponentClient()
     let supabaseAdmin
     try {
       supabaseAdmin = getSupabaseAdmin()
@@ -180,19 +180,25 @@ export async function POST(request: NextRequest) {
     console.log("✓ PDF generation completed:", pdfUrl ? "Success" : "Failed")
 
     let finalContractData = newContract
-    if (pdfUrl) {
+    if (pdfUrl && pdfUrl !== "accepted" && pdfUrl !== "success") {
+      // Only update if we have a real PDF URL, not just success indicators
       const { data: updatedContractWithPdf, error: updateError } = await supabase
         .from("contracts")
-        .update({ pdf_url: pdfUrl }) // Ensure this is pdf_url
+        .update({ pdf_url: pdfUrl })
         .eq("id", newContract.id)
         .select()
         .single()
 
       if (updateError) {
         console.error("Supabase update error (pdf_url):", updateError)
+        // Don't fail the entire request if PDF URL update fails
+        // The contract was created successfully, just without PDF URL
       } else if (updatedContractWithPdf) {
         finalContractData = updatedContractWithPdf
+        console.log("✓ PDF URL updated successfully")
       }
+    } else if (pdfUrl === "accepted" || pdfUrl === "success") {
+      console.log("✓ Make.com webhook accepted - PDF will be generated asynchronously")
     }
 
     console.log("=== CONTRACT API ROUTE SUCCESS ===")
