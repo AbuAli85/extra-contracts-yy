@@ -39,17 +39,24 @@ export const usePromoters = () => {
     },
   })
 
+  // --- Realtime subscription ---
   useEffect(() => {
     const channel = supabase
       .channel("public-promoters-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, (payload) => {
         devLog("Realtime promoter change received!", payload)
-        queryClient.invalidateQueries({ queryKey })
+        queryClient.invalidateQueries({ queryKey: queryKey })
       })
       .subscribe((status, err) => {
+        if (status === "SUBSCRIBED") {
+          devLog("Subscribed to promoters channel!")
+        }
         if (status === "CHANNEL_ERROR") {
           const message = err?.message ?? "Unknown channel error"
           console.error(`Promoters channel error (${status}):`, message)
+        }
+        if (status === "TIMED_OUT") {
+          console.warn(`Subscription timed out (${status})`)
         }
       })
 
