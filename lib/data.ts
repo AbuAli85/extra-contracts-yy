@@ -7,7 +7,7 @@ export const getContract = async (contractId: string): Promise<ContractWithRelat
     return null
   }
 
-  const supabase = createServerComponentClient()
+  const supabase = await createServerComponentClient()
 
   const { data, error } = await supabase
     .from("contracts")

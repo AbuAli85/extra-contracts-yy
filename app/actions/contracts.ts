@@ -6,7 +6,7 @@ import type { Database } from "@/types/supabase"
 export type ContractInsert = Database["public"]["Tables"]["contracts"]["Insert"]
 
 export async function createContract(newContract: ContractInsert) {
-  const supabase = createServerComponentClient()
+  const supabase = await createServerComponentClient()
   const { data, error } = await supabase
     .from("contracts")
     .insert(newContract)
@@ -33,13 +33,13 @@ export async function createContract(newContract: ContractInsert) {
 }
 
 export async function deleteContract(contractId: string) {
-  const supabase = createServerComponentClient()
+  const supabase = await createServerComponentClient()
   const { error } = await supabase.from("contracts").delete().eq("id", contractId)
   if (error) throw new Error(error.message)
 }
 
 export async function updateContract(contractId: string, updatedContract: Partial<ContractInsert>) {
-  const supabase = createServerComponentClient()
+  const supabase = await createServerComponentClient()
   const { data, error } = await supabase
     .from("contracts")
     .update(updatedContract)

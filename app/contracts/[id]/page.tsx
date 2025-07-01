@@ -33,7 +33,7 @@ type ContractDetail = ContractRecord<{
 }>
 
 async function getContractDetails(id: string): Promise<ContractDetail | null> {
-  const supabase = createServerComponentClient()
+  const supabase = await createServerComponentClient()
   const { data, error } = await supabase
     .from("contracts")
     .select(
