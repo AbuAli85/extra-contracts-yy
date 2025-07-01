@@ -72,18 +72,37 @@ async function generateBilingualPdf(
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("=== CONTRACT API ROUTE START ===")
+    
     const supabase = createServerComponentClient()
-    const supabaseAdmin = getSupabaseAdmin() // Service role client
+    console.log("✓ Supabase client created")
+    
+    let supabaseAdmin
+    try {
+      supabaseAdmin = getSupabaseAdmin() // Service role client
+      console.log("✓ Supabase admin client created")
+    } catch (adminError) {
+      console.error("✗ Supabase admin client error:", adminError)
+      return NextResponse.json(
+        { 
+          message: "Server configuration error", 
+          error: "Failed to initialize Supabase admin client",
+          details: adminError instanceof Error ? adminError.message : String(adminError)
+        },
+        { status: 500 },
+      )
+    }
     
     const body = await request.json()
     console.log("Received contract data:", JSON.stringify(body, null, 2))
     
-    // Convert date strings to Date objects if needed
+    // Convert date strings to Date objects (JSON serialization converts Date objects to strings)
     const processedBody = {
       ...body,
       contract_start_date: body.contract_start_date ? new Date(body.contract_start_date) : null,
       contract_end_date: body.contract_end_date ? new Date(body.contract_end_date) : null,
     }
+    console.log("Processed body:", JSON.stringify(processedBody, null, 2))
     
     const validation = contractGeneratorSchema.safeParse(processedBody)
 
@@ -98,23 +117,26 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       )
     }
+    console.log("✓ Validation passed")
 
     const { data: validatedData } = validation
     const {
       data: { user },
     } = await supabase.auth.getUser()
+    console.log("✓ User authenticated:", user?.id)
 
     const contractToInsert: Database["public"]["Tables"]["contracts"]["Insert"] = {
       first_party_id: validatedData.first_party_id,
       second_party_id: validatedData.second_party_id,
       promoter_id: validatedData.promoter_id,
-      contract_start_date: validatedData.contract_start_date ? format(validatedData.contract_start_date, "yyyy-MM-dd") : null,
-      contract_end_date: validatedData.contract_end_date ? format(validatedData.contract_end_date, "yyyy-MM-dd") : null,
+      contract_start_date: format(validatedData.contract_start_date, "yyyy-MM-dd"),
+      contract_end_date: format(validatedData.contract_end_date, "yyyy-MM-dd"),
       email: validatedData.email,
       job_title: validatedData.job_title,
       work_location: validatedData.work_location,
       user_id: user?.id,
     }
+    console.log("Contract to insert:", JSON.stringify(contractToInsert, null, 2))
 
     const { data: newContract, error: insertError } = await supabase
       .from("contracts")
@@ -135,6 +157,7 @@ export async function POST(request: NextRequest) {
         { status: 500 },
       )
     }
+    console.log("✓ Contract created:", newContract.id)
 
     const [party1, party2, promoterDetails] = await Promise.all([
       supabase
@@ -153,6 +176,7 @@ export async function POST(request: NextRequest) {
         .eq("id", newContract.promoter_id)
         .single(),
     ])
+    console.log("✓ Party and promoter details fetched")
 
     const pdfData: BilingualPdfData = {
       first_party_name_en: party1.data?.name_en,
@@ -168,6 +192,7 @@ export async function POST(request: NextRequest) {
     }
 
     const pdfUrl = await generateBilingualPdf(pdfData, newContract.id)
+    console.log("✓ PDF generation completed:", pdfUrl ? "Success" : "Failed")
 
     let finalContractData = newContract
     if (pdfUrl) {
@@ -185,11 +210,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    console.log("=== CONTRACT API ROUTE SUCCESS ===")
     return NextResponse.json(
       { message: "Contract created successfully!", contract: finalContractData },
       { status: 201 },
     )
   } catch (error: any) {
+    console.error("=== CONTRACT API ROUTE ERROR ===")
     console.error("API Route Error:", error)
     
     // Check if it's a Supabase admin client error
