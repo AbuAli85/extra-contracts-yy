@@ -20,7 +20,7 @@ const fetchPromoters = async (): Promise<Promoter[]> => {
   return data || []
 }
 
-export const usePromoters = () => {
+export const usePromoters = (enableRealtime: boolean = true) => {
   const queryClient = useQueryClient()
   const queryKey = useMemo(() => ["promoters"], [])
   const { toast } = useToast()
@@ -41,11 +41,19 @@ export const usePromoters = () => {
 
   // --- Realtime subscription ---
   useEffect(() => {
+    if (!enableRealtime) {
+      console.log("Realtime disabled for promoters")
+      return
+    }
+
     let retryCount = 0
     const maxRetries = 3
     let retryTimeout: NodeJS.Timeout
+    let isSubscribed = false
 
     const setupSubscription = () => {
+      if (isSubscribed) return
+
       const channel = supabase
         .channel("public-promoters-realtime")
         .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, (payload) => {
@@ -56,6 +64,7 @@ export const usePromoters = () => {
           if (status === "SUBSCRIBED") {
             devLog("Subscribed to promoters channel!")
             retryCount = 0 // Reset retry count on successful connection
+            isSubscribed = true
           }
           if (status === "CHANNEL_ERROR") {
             const message = err?.message ?? "Unknown channel error"
@@ -67,10 +76,12 @@ export const usePromoters = () => {
               console.log(`Retrying promoters subscription (${retryCount}/${maxRetries})...`)
               retryTimeout = setTimeout(() => {
                 supabase.removeChannel(channel)
+                isSubscribed = false
                 setupSubscription()
               }, 2000 * retryCount) // Exponential backoff
             } else {
               console.error("Max retries exceeded for promoters subscription")
+              // Don't show toast for realtime errors as they're not critical
             }
           }
           if (status === "TIMED_OUT") {
@@ -82,10 +93,12 @@ export const usePromoters = () => {
               console.log(`Retrying promoters subscription after timeout (${retryCount}/${maxRetries})...`)
               retryTimeout = setTimeout(() => {
                 supabase.removeChannel(channel)
+                isSubscribed = false
                 setupSubscription()
               }, 2000 * retryCount) // Exponential backoff
             } else {
               console.error("Max retries exceeded for promoters subscription after timeout")
+              // Don't show toast for realtime errors as they're not critical
             }
           }
         })
@@ -99,9 +112,10 @@ export const usePromoters = () => {
       if (retryTimeout) {
         clearTimeout(retryTimeout)
       }
+      isSubscribed = false
       supabase.removeChannel(channel)
     }
-  }, [queryClient, queryKey])
+  }, [queryClient, queryKey, enableRealtime])
 
   return { ...queryResult, errorMessage: queryResult.error?.message }
 }

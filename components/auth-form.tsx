@@ -19,41 +19,104 @@ export default function AuthForm() {
   const router = useRouter()
   const { toast } = useToast()
 
+  const validateForm = () => {
+    if (!email.trim()) {
+      toast({ title: "Missing Email", description: "Email is required.", variant: "destructive" })
+      return false
+    }
+    if (!password.trim()) {
+      toast({ title: "Missing Password", description: "Password is required.", variant: "destructive" })
+      return false
+    }
+    if (password.length < 6) {
+      toast({ title: "Password Too Short", description: "Password must be at least 6 characters.", variant: "destructive" })
+      return false
+    }
+    if (!email.includes('@')) {
+      toast({ title: "Invalid Email", description: "Please enter a valid email address.", variant: "destructive" })
+      return false
+    }
+    return true
+  }
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-
-    if (error) {
-      toast({ title: "Sign In Error", description: error.message, variant: "destructive" })
-    } else {
-      toast({ title: "Success!", description: "You are now signed in." })
-      router.push("/generate-contract") // Redirect to contract generation form
-      router.refresh() // Refresh server components
+    
+    if (!validateForm()) {
+      return
     }
-    setIsSubmitting(false)
+
+    setIsSubmitting(true)
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ 
+        email: email.trim(), 
+        password: password.trim() 
+      })
+
+      if (error) {
+        console.error("Sign in error:", error)
+        toast({ 
+          title: "Sign In Error", 
+          description: error.message, 
+          variant: "destructive" 
+        })
+      } else {
+        toast({ title: "Success!", description: "You are now signed in." })
+        router.push("/generate-contract")
+        router.refresh()
+      }
+    } catch (error) {
+      console.error("Unexpected error during sign in:", error)
+      toast({ 
+        title: "Unexpected Error", 
+        description: "An unexpected error occurred. Please try again.", 
+        variant: "destructive" 
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.signUp({ email, password })
-
-    if (error) {
-      toast({ title: "Sign Up Error", description: error.message, variant: "destructive" })
-    } else if (user) {
-      toast({
-        title: "Success!",
-        description: "Signed up successfully. Please check your email to confirm your account.",
-      })
-      // Optional: You might want to sign them in automatically or redirect
-      router.push("/generate-contract") // Redirect to contract generation form after sign up
-      router.refresh()
+    
+    if (!validateForm()) {
+      return
     }
-    setIsSubmitting(false)
+
+    setIsSubmitting(true)
+    
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.signUp({ 
+        email: email.trim(), 
+        password: password.trim() 
+      })
+
+      if (error) {
+        console.error("Sign up error:", error)
+        toast({ title: "Sign Up Error", description: error.message, variant: "destructive" })
+      } else if (user) {
+        toast({
+          title: "Success!",
+          description: "Signed up successfully. Please check your email to confirm your account.",
+        })
+        router.push("/generate-contract")
+        router.refresh()
+      }
+    } catch (error) {
+      console.error("Unexpected error during sign up:", error)
+      toast({ 
+        title: "Unexpected Error", 
+        description: "An unexpected error occurred. Please try again.", 
+        variant: "destructive" 
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -63,7 +126,7 @@ export default function AuthForm() {
         <CardDescription>Sign in or create an account to continue</CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSignIn}>
           <div>
             <Label htmlFor="email">Email</Label>
             <Input
@@ -73,6 +136,7 @@ export default function AuthForm() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -84,14 +148,17 @@ export default function AuthForm() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
+              disabled={isSubmitting}
+              minLength={6}
             />
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button onClick={handleSignIn} className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign In
             </Button>
             <Button
+              type="button"
               onClick={handleSignUp}
               variant="outline"
               className="w-full"

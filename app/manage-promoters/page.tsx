@@ -43,13 +43,10 @@ export default function ManagePromotersPage() {
   async function fetchPromotersWithContractCount() {
     if (isMountedRef.current) setIsLoading(true)
     
-    console.log("Fetching promoters...")
     const { data: promotersData, error: promotersError } = await supabase
       .from("promoters")
       .select("*")
       .order("name_en")
-
-    console.log("Promoters fetch result:", { promotersData, promotersError })
 
     if (promotersError) {
       console.error("Error fetching promoters:", promotersError)
@@ -66,15 +63,12 @@ export default function ManagePromotersPage() {
     }
 
     if (!promotersData || promotersData.length === 0) {
-      console.log("No promoters found in database")
       if (isMountedRef.current) {
         setPromoters([])
         setIsLoading(false)
       }
       return
     }
-
-    console.log(`Found ${promotersData.length} promoters:`, promotersData)
 
     // Fetch active contract counts for each promoter
     const promoterIds = promotersData.map((p) => p.id)
@@ -107,8 +101,6 @@ export default function ManagePromotersPage() {
       return { ...promoter, active_contracts_count: activeContracts }
     })
 
-    console.log("Promoters with counts:", promotersWithCounts)
-
     if (isMountedRef.current) {
       setPromoters(promotersWithCounts)
       setIsLoading(false)
@@ -119,31 +111,30 @@ export default function ManagePromotersPage() {
     let isMounted = true
     isMountedRef.current = true
     
-    // Test Supabase connection
-    const testConnection = async () => {
-      console.log("Testing Supabase connection...")
-      console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL)
-      console.log("Supabase Anon Key exists:", !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-      
-      const { data, error } = await supabase.from("promoters").select("count", { count: "exact", head: true })
-      console.log("Connection test result:", { data, error })
-    }
-    
-    testConnection()
     fetchPromotersWithContractCount()
+    
+    // Set up realtime subscriptions with error handling
     const promotersChannel = supabase
       .channel("public:promoters:manage")
       .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, () =>
         fetchPromotersWithContractCount(),
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.warn(`Promoters channel ${status}:`, err?.message || "Unknown error")
+        }
+      })
 
     const contractsChannel = supabase
       .channel("public:contracts:manage")
       .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, () =>
         fetchPromotersWithContractCount(),
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.warn(`Contracts channel ${status}:`, err?.message || "Unknown error")
+        }
+      })
 
     return () => {
       isMounted = false
