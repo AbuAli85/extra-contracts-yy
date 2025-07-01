@@ -9,9 +9,7 @@
     "start": "next start",
     "pretest": "pnpm install || true",
     "test": "jest"
-  
   },
-<<<<<<< HEAD
   "dependencies": {
     "@emotion/is-prop-valid": "^1.2.2",
     "@hookform/resolvers": "^3.3.4",
@@ -78,8 +76,6 @@
     "vaul": "^0.9.0",
     "zod": "^3.22.4"
   },
-=======
->>>>>>> 1be865fef4c8d66a949d689204dde50eb14cda03
   "devDependencies": {
     "@types/node": "^22",
     "@types/react": "^19",
