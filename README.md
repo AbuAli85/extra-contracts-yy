@@ -131,3 +131,30 @@ pnpm test
 Tests rely on the dependencies installed locally by `pnpm install` and will
 fail if they are missing. This command runs all unit tests defined in the
 repository.
+
+## Real-Time Data Usage
+
+This project includes reusable hooks for real-time updates from Supabase:
+
+- `useRealtimeContracts()` — real-time contract list
+- `useRealtimePromoters()` — real-time promoter list
+- `useRealtimeParties()` — real-time party list
+
+### Example Usage
+
+```tsx
+import { useRealtimeContracts } from "@/hooks/use-realtime-contracts"
+
+export default function ContractList() {
+  const contracts = useRealtimeContracts()
+  return (
+    <ul>
+      {contracts.map(contract => (
+        <li key={contract.id}>{contract.contract_number}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+You can use the same pattern for promoters and parties. All lists will update automatically when the database changes.
