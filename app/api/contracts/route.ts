@@ -71,17 +71,18 @@ async function generateBilingualPdf(
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = createServerComponentClient()
-  const supabaseAdmin = getSupabaseAdmin() // Service role client
   try {
+    const supabase = createServerComponentClient()
+    const supabaseAdmin = getSupabaseAdmin() // Service role client
+    
     const body = await request.json()
     console.log("Received contract data:", JSON.stringify(body, null, 2))
     
     // Convert date strings to Date objects if needed
     const processedBody = {
       ...body,
-      contract_start_date: body.contract_start_date ? new Date(body.contract_start_date) : undefined,
-      contract_end_date: body.contract_end_date ? new Date(body.contract_end_date) : undefined,
+      contract_start_date: body.contract_start_date ? new Date(body.contract_start_date) : null,
+      contract_end_date: body.contract_end_date ? new Date(body.contract_end_date) : null,
     }
     
     const validation = contractGeneratorSchema.safeParse(processedBody)
@@ -107,8 +108,8 @@ export async function POST(request: NextRequest) {
       first_party_id: validatedData.first_party_id,
       second_party_id: validatedData.second_party_id,
       promoter_id: validatedData.promoter_id,
-      contract_start_date: format(validatedData.contract_start_date, "yyyy-MM-dd"),
-      contract_end_date: format(validatedData.contract_end_date, "yyyy-MM-dd"),
+      contract_start_date: validatedData.contract_start_date ? format(validatedData.contract_start_date, "yyyy-MM-dd") : null,
+      contract_end_date: validatedData.contract_end_date ? format(validatedData.contract_end_date, "yyyy-MM-dd") : null,
       email: validatedData.email,
       job_title: validatedData.job_title,
       work_location: validatedData.work_location,
@@ -190,8 +191,25 @@ export async function POST(request: NextRequest) {
     )
   } catch (error: any) {
     console.error("API Route Error:", error)
+    
+    // Check if it's a Supabase admin client error
+    if (error.message?.includes("Supabase credentials are missing")) {
+      return NextResponse.json(
+        { 
+          message: "Server configuration error", 
+          error: "Supabase service role key is not configured. Please check your environment variables.",
+          details: error.message 
+        },
+        { status: 500 },
+      )
+    }
+    
     return NextResponse.json(
-      { message: "Internal server error", error: error.message },
+      { 
+        message: "Internal server error", 
+        error: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 },
     )
   }

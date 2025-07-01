@@ -5,8 +5,8 @@ export const contractGeneratorSchema = z
     first_party_id: z.string().uuid("Please select the first party."),
     second_party_id: z.string().uuid("Please select the second party."),
     promoter_id: z.string().uuid("Please select the promoter."),
-    contract_start_date: z.date({ required_error: "Contract start date is required." }),
-    contract_end_date: z.date({ required_error: "Contract end date is required." }),
+    contract_start_date: z.date({ required_error: "Contract start date is required." }).nullable(),
+    contract_end_date: z.date({ required_error: "Contract end date is required." }).nullable(),
     email: z
       .string()
       .email("Please enter a valid email address for notifications.")
@@ -14,7 +14,10 @@ export const contractGeneratorSchema = z
     job_title: z.string().optional(),
     work_location: z.string().optional(),
   })
-  .refine((data) => data.contract_end_date >= data.contract_start_date, {
+  .refine((data) => {
+    if (!data.contract_start_date || !data.contract_end_date) return true
+    return data.contract_end_date >= data.contract_start_date
+  }, {
     message: "Contract end date must be on or after the start date.",
     path: ["contract_end_date"],
   })
