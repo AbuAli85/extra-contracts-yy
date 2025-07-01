@@ -2,7 +2,6 @@ import "../globals.css"
 import type React from "react"
 
    export default function Layout({ children, params }: { children: React.ReactNode, params: { locale: string } }) {
-     // use params.locale directly
-   }
+  // You can use params.locale here if needed
   return <>{children}</>
 }
