@@ -1,86 +1,69 @@
 const { createClient } = require('@supabase/supabase-js')
+require('dotenv').config({ path: '.env.local' })
 
-const supabaseUrl = 'https://ekdjxzhujettocosgzql.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrZGp4emh1amV0dG9jb3NnenFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkzMTkxMDYsImV4cCI6MjA2NDg5NTEwNn0.6VGbocKFVLNX_MCIOwFtdEssMk6wd_UQ5yNT1CfV6BA'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+console.log('Supabase URL:', supabaseUrl ? 'Set' : 'Missing')
+console.log('Supabase Key:', supabaseAnonKey ? 'Set' : 'Missing')
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing environment variables')
+  process.exit(1)
+}
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-async function testDatabase() {
-  console.log('Testing database connection...')
+async function testConnection() {
+  console.log('\nTesting Supabase connection...')
   
   try {
-    // Test promoters table
-    console.log('\n1. Testing promoters table...')
-    const { data: promoters, error: promotersError } = await supabase
+    // Test basic connection by trying to read from promoters table
+    const { data, error } = await supabase
       .from('promoters')
       .select('*')
       .limit(5)
     
-    if (promotersError) {
-      console.error('Error fetching promoters:', promotersError)
-    } else {
-      console.log('Promoters found:', promoters?.length || 0)
-      if (promoters && promoters.length > 0) {
-        console.log('Sample promoter:', promoters[0])
-      }
-    }
-
-    // Test contracts table
-    console.log('\n2. Testing contracts table...')
-    const { data: contracts, error: contractsError } = await supabase
-      .from('contracts')
-      .select('*')
-      .limit(5)
-    
-    if (contractsError) {
-      console.error('Error fetching contracts:', contractsError)
-    } else {
-      console.log('Contracts found:', contracts?.length || 0)
-      if (contracts && contracts.length > 0) {
-        console.log('Sample contract:', contracts[0])
-      }
-    }
-
-    // Test parties table
-    console.log('\n3. Testing parties table...')
-    const { data: parties, error: partiesError } = await supabase
-      .from('parties')
-      .select('*')
-      .limit(5)
-    
-    if (partiesError) {
-      console.error('Error fetching parties:', partiesError)
-    } else {
-      console.log('Parties found:', parties?.length || 0)
-      if (parties && parties.length > 0) {
-        console.log('Sample party:', parties[0])
-      }
-    }
-
-    // Test table schema
-    console.log('\n4. Testing table schema...')
-    const { data: schema, error: schemaError } = await supabase
-      .rpc('get_table_schema', { table_name: 'promoters' })
-    
-    if (schemaError) {
-      console.log('Schema RPC not available, trying direct query...')
-      // Try a simple count query instead
-      const { count, error: countError } = await supabase
-        .from('promoters')
-        .select('*', { count: 'exact', head: true })
+    if (error) {
+      console.error('❌ Database connection failed:', error.message)
+      console.error('Error code:', error.code)
+      console.error('Error details:', error.details)
+      console.error('Error hint:', error.hint)
       
-      if (countError) {
-        console.error('Error getting count:', countError)
-      } else {
-        console.log('Total promoters in database:', count)
+      if (error.code === '42501') {
+        console.log('\n🔧 This looks like an RLS (Row Level Security) issue.')
+        console.log('You need to enable RLS and add policies to allow access.')
+        console.log('\nRun this SQL in your Supabase SQL editor:')
+        console.log(`
+-- Enable RLS on promoters table
+ALTER TABLE promoters ENABLE ROW LEVEL SECURITY;
+
+-- Allow anonymous read access (for testing)
+CREATE POLICY "Allow anonymous read access" ON promoters
+FOR SELECT USING (true);
+
+-- Allow authenticated users full access
+CREATE POLICY "Allow authenticated users full access" ON promoters
+FOR ALL USING (auth.role() = 'authenticated');
+        `)
       }
     } else {
-      console.log('Table schema:', schema)
+      console.log('✅ Database connection successful!')
+      console.log(`Found ${data?.length || 0} promoters in the database`)
+      
+      if (data && data.length > 0) {
+        console.log('\nSample promoters:')
+        data.forEach(promoter => {
+          console.log(`- ${promoter.name_en} (ID: ${promoter.id})`)
+        })
+      } else {
+        console.log('\nNo promoters found. You can add test data by running:')
+        console.log('node scripts/seed-promoters.js')
+      }
     }
-
-  } catch (error) {
-    console.error('Unexpected error:', error)
+  } catch (err) {
+    console.error('Unexpected error:', err)
   }
 }
 
-testDatabase()
+testConnection()
