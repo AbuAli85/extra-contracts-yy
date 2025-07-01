@@ -41,26 +41,64 @@ export const usePromoters = () => {
 
   // --- Realtime subscription ---
   useEffect(() => {
-    const channel = supabase
-      .channel("public-promoters-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, (payload) => {
-        devLog("Realtime promoter change received!", payload)
-        queryClient.invalidateQueries({ queryKey: queryKey })
-      })
-      .subscribe((status, err) => {
-        if (status === "SUBSCRIBED") {
-          devLog("Subscribed to promoters channel!")
-        }
-        if (status === "CHANNEL_ERROR") {
-          const message = err?.message ?? "Unknown channel error"
-          console.error(`Promoters channel error (${status}):`, message)
-        }
-        if (status === "TIMED_OUT") {
-          console.warn(`Subscription timed out (${status})`)
-        }
-      })
+    let retryCount = 0
+    const maxRetries = 3
+    let retryTimeout: NodeJS.Timeout
+
+    const setupSubscription = () => {
+      const channel = supabase
+        .channel("public-promoters-realtime")
+        .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, (payload) => {
+          devLog("Realtime promoter change received!", payload)
+          queryClient.invalidateQueries({ queryKey: queryKey })
+        })
+        .subscribe((status, err) => {
+          if (status === "SUBSCRIBED") {
+            devLog("Subscribed to promoters channel!")
+            retryCount = 0 // Reset retry count on successful connection
+          }
+          if (status === "CHANNEL_ERROR") {
+            const message = err?.message ?? "Unknown channel error"
+            console.error(`Promoters channel error (${status}):`, message)
+            
+            // Retry connection if we haven't exceeded max retries
+            if (retryCount < maxRetries) {
+              retryCount++
+              console.log(`Retrying promoters subscription (${retryCount}/${maxRetries})...`)
+              retryTimeout = setTimeout(() => {
+                supabase.removeChannel(channel)
+                setupSubscription()
+              }, 2000 * retryCount) // Exponential backoff
+            } else {
+              console.error("Max retries exceeded for promoters subscription")
+            }
+          }
+          if (status === "TIMED_OUT") {
+            console.warn(`Subscription timed out (${status})`)
+            
+            // Retry connection if we haven't exceeded max retries
+            if (retryCount < maxRetries) {
+              retryCount++
+              console.log(`Retrying promoters subscription after timeout (${retryCount}/${maxRetries})...`)
+              retryTimeout = setTimeout(() => {
+                supabase.removeChannel(channel)
+                setupSubscription()
+              }, 2000 * retryCount) // Exponential backoff
+            } else {
+              console.error("Max retries exceeded for promoters subscription after timeout")
+            }
+          }
+        })
+
+      return channel
+    }
+
+    const channel = setupSubscription()
 
     return () => {
+      if (retryTimeout) {
+        clearTimeout(retryTimeout)
+      }
       supabase.removeChannel(channel)
     }
   }, [queryClient, queryKey])
