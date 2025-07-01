@@ -94,6 +94,9 @@ export default function ContractGeneratorForm({
     },
   })
 
+  const [selectedEmployer, setSelectedEmployer] = useState<PartyType | null>(null)
+  const [selectedClient, setSelectedClient] = useState<PartyType | null>(null)
+
   // Build combobox options
   useEffect(() => {
     if (promoters) {
@@ -140,6 +143,43 @@ export default function ContractGeneratorForm({
     }
   }, [watchedPromoterId, promoters])
 
+  // When employer is selected, auto-fill fields
+  useEffect(() => {
+    if (form.watch('first_party_id') && employerParties) {
+      const party = employerParties.find(p => p.id === form.watch('first_party_id'))
+      setSelectedEmployer(party || null)
+      if (party) {
+        form.setValue('first_party_name_en', party.name_en)
+        form.setValue('first_party_name_ar', party.name_ar)
+        form.setValue('first_party_crn', party.crn)
+      }
+    }
+  }, [form.watch('first_party_id'), employerParties])
+
+  // When client is selected, auto-fill fields
+  useEffect(() => {
+    if (form.watch('second_party_id') && clientParties) {
+      const party = clientParties.find(p => p.id === form.watch('second_party_id'))
+      setSelectedClient(party || null)
+      if (party) {
+        form.setValue('second_party_name_en', party.name_en)
+        form.setValue('second_party_name_ar', party.name_ar)
+        form.setValue('second_party_crn', party.crn)
+      }
+    }
+  }, [form.watch('second_party_id'), clientParties])
+
+  // When promoter is selected, auto-fill fields
+  useEffect(() => {
+    if (selectedPromoter) {
+      form.setValue('promoter_name_en', selectedPromoter.name_en)
+      form.setValue('promoter_name_ar', selectedPromoter.name_ar)
+      form.setValue('id_card_number', selectedPromoter.id_card_number)
+      form.setValue('promoter_id_card_url', selectedPromoter.id_card_url || '')
+      form.setValue('promoter_passport_url', selectedPromoter.passport_url || '')
+    }
+  }, [selectedPromoter])
+
   // Surface load errors
   useEffect(() => {
     if (employerPartiesError)
@@ -174,6 +214,18 @@ export default function ContractGeneratorForm({
         email: values.email,
         job_title: values.job_title,
         work_location: values.work_location,
+        // Auto-filled fields
+        first_party_name_en: values.first_party_name_en,
+        first_party_name_ar: values.first_party_name_ar,
+        first_party_crn: values.first_party_crn,
+        second_party_name_en: values.second_party_name_en,
+        second_party_name_ar: values.second_party_name_ar,
+        second_party_crn: values.second_party_crn,
+        promoter_name_en: values.promoter_name_en,
+        promoter_name_ar: values.promoter_name_ar,
+        id_card_number: values.id_card_number,
+        promoter_id_card_url: values.promoter_id_card_url,
+        promoter_passport_url: values.promoter_passport_url,
       }
 
       // UPDATE
@@ -592,6 +644,19 @@ export default function ContractGeneratorForm({
             )}
           </Button>
         </motion.div>
+
+        {/* Add hidden fields to the form */}
+        <input type="hidden" {...form.register('first_party_name_en')} />
+        <input type="hidden" {...form.register('first_party_name_ar')} />
+        <input type="hidden" {...form.register('first_party_crn')} />
+        <input type="hidden" {...form.register('second_party_name_en')} />
+        <input type="hidden" {...form.register('second_party_name_ar')} />
+        <input type="hidden" {...form.register('second_party_crn')} />
+        <input type="hidden" {...form.register('promoter_name_en')} />
+        <input type="hidden" {...form.register('promoter_name_ar')} />
+        <input type="hidden" {...form.register('id_card_number')} />
+        <input type="hidden" {...form.register('promoter_id_card_url')} />
+        <input type="hidden" {...form.register('promoter_passport_url')} />
       </form>
     </Form>
   )

@@ -135,6 +135,18 @@ export async function POST(request: NextRequest) {
       job_title: validatedData.job_title,
       work_location: validatedData.work_location,
       user_id: user?.id,
+      // Auto-filled fields
+      first_party_name_en: validatedData.first_party_name_en,
+      first_party_name_ar: validatedData.first_party_name_ar,
+      first_party_crn: validatedData.first_party_crn,
+      second_party_name_en: validatedData.second_party_name_en,
+      second_party_name_ar: validatedData.second_party_name_ar,
+      second_party_crn: validatedData.second_party_crn,
+      promoter_name_en: validatedData.promoter_name_en,
+      promoter_name_ar: validatedData.promoter_name_ar,
+      id_card_number: validatedData.id_card_number,
+      promoter_id_card_url: validatedData.promoter_id_card_url,
+      promoter_passport_url: validatedData.promoter_passport_url,
     }
     console.log("Contract to insert:", JSON.stringify(contractToInsert, null, 2))
 
