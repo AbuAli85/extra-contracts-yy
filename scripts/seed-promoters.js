@@ -105,4 +105,4 @@ async function seedPromoters() {
 }
 
 // Run the seeding
-seedPromoters() 
+seedPromoters()

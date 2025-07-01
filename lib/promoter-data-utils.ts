@@ -234,4 +234,4 @@ export function validatePromoterData(promoter: PromoterCSVRow): { isValid: boole
     isValid: errors.length === 0,
     errors
   }
-} 
+}

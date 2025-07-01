@@ -60,6 +60,7 @@
     "date-fns": "latest",
     "dotenv": "latest",
     "embla-carousel-react": "latest",
+    "est-db": "latest",
     "est.config": "latest",
     "est.setup": "latest",
     "ext.config": "latest",

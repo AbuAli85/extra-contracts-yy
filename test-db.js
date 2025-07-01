@@ -83,4 +83,4 @@ async function testDatabase() {
   }
 }
 
-testDatabase() 
+testDatabase()

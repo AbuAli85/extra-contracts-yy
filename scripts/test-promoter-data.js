@@ -154,4 +154,4 @@ parsedData.forEach((promoter, index) => {
   console.log()
 })
 
-console.log('✅ Analysis complete!') 
+console.log('✅ Analysis complete!')
