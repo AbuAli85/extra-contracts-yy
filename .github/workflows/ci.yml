@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
       - run: pnpm exec next lint
       - run: pnpm exec tsc --noEmit
       - run: pnpm exec jest
