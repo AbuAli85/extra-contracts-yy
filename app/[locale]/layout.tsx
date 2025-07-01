@@ -9,4 +9,4 @@ export default function LocaleLayout({
   params: { locale: string }
 }) {
   return <>{children}</>
-} 
+}
