@@ -26,76 +26,56 @@ async function generateBilingualPdf(
     promoter_name: contractData.promoter_name_en,
     start_date: contractData.contract_start_date,
     end_date: contractData.contract_end_date,
-    job_title: contractData.job_title,
+    job_title: contractData.job_title || "",
     email: contractData.email,
   }
 
   try {
-    console.log("Triggering Make.com webhook with payload:", JSON.stringify(payloadForMake, null, 2))
+    console.log("Triggering Make.com webhook with payload:", payloadForMake)
     
-    const makeResponse = await fetch(makeWebhookUrl, {
+    const response = await fetch(makeWebhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payloadForMake),
     })
 
-    if (!makeResponse.ok) {
-      const errorBody = await makeResponse.text()
-      console.error(`Make.com webhook failed: ${makeResponse.status} - ${errorBody}`)
+    if (!response.ok) {
+      console.error(`Make.com webhook failed: ${response.status} ${response.statusText}`)
       return null
     }
 
-    // Make.com typically returns JSON, not a PDF blob
-    const responseText = await makeResponse.text()
+    const responseText = await response.text()
     console.log("Make.com response:", responseText)
-    
+
+    // Try to parse as JSON first
     let responseData
     try {
       responseData = JSON.parse(responseText)
     } catch (parseError) {
       console.error("Failed to parse Make.com response as JSON:", parseError)
+      // If it's not JSON, check if it's a simple success message
+      if (responseText.trim().toLowerCase() === "accepted") {
+        console.log("Make.com returned 'Accepted' - treating as success")
+        return "accepted" // Special case for simple acceptance
+      }
       return null
     }
 
-    // Check if Make.com returned a PDF URL in the response
-    const pdfUrl = responseData.pdf_url || responseData.url || responseData.download_url
+    // Extract PDF URL from JSON response
+    const pdfUrl = responseData.pdf_url || responseData.url || responseData.download_url || responseData.file_url
     
     if (pdfUrl) {
-      console.log("PDF URL received from Make.com:", pdfUrl)
+      console.log("✓ PDF URL extracted from Make.com response:", pdfUrl)
       return pdfUrl
+    } else if (responseData.success) {
+      console.log("✓ Make.com reported success but no PDF URL found")
+      return "success" // Special case for success without URL
+    } else {
+      console.error("Make.com response doesn't contain PDF URL or success status")
+      return null
     }
-
-    // If no PDF URL in response, check if Make.com uploaded to Supabase directly
-    if (responseData.success || responseData.ok) {
-      console.log("Make.com indicated success, checking for uploaded PDF...")
-      
-      // Try to find the PDF in Supabase storage
-      const filePath = `contract_pdfs/${contractId}/`
-      const { data: files, error: listError } = await supabaseAdmin.storage
-        .from("contracts")
-        .list(filePath)
-      
-      if (listError) {
-        console.error("Error listing files in storage:", listError)
-        return null
-      }
-      
-      if (files && files.length > 0) {
-        // Get the most recent PDF file
-        const pdfFile = files.find(file => file.name.endsWith('.pdf'))
-        if (pdfFile) {
-          const { data: publicUrlData } = supabaseAdmin.storage
-            .from("contracts")
-            .getPublicUrl(`${filePath}${pdfFile.name}`)
-          return publicUrlData?.publicUrl || null
-        }
-      }
-    }
-
-    console.error("No PDF URL found in Make.com response")
-    return null
   } catch (error) {
-    console.error("Error in PDF generation/upload process:", error)
+    console.error("Error calling Make.com webhook:", error)
     return null
   }
 }
