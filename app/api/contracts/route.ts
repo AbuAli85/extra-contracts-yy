@@ -31,6 +31,8 @@ async function generateBilingualPdf(
   }
 
   try {
+    console.log("Triggering Make.com webhook with payload:", JSON.stringify(payloadForMake, null, 2))
+    
     const makeResponse = await fetch(makeWebhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -43,27 +45,55 @@ async function generateBilingualPdf(
       return null
     }
 
-    const pdfBlob = await makeResponse.blob()
-    if (pdfBlob.type !== "application/pdf") {
-      console.error("Make.com did not return a PDF. Mimetype:", pdfBlob.type)
+    // Make.com typically returns JSON, not a PDF blob
+    const responseText = await makeResponse.text()
+    console.log("Make.com response:", responseText)
+    
+    let responseData
+    try {
+      responseData = JSON.parse(responseText)
+    } catch (parseError) {
+      console.error("Failed to parse Make.com response as JSON:", parseError)
       return null
     }
 
-    const filePath = `contract_pdfs/${contractId}/${Date.now()}.pdf`
-    const { error: uploadError } = await supabaseAdmin.storage
-      .from("contracts")
-      .upload(filePath, pdfBlob, {
-        contentType: "application/pdf",
-        upsert: false,
-      })
-
-    if (uploadError) {
-      console.error("Supabase storage upload error:", uploadError)
-      return null
+    // Check if Make.com returned a PDF URL in the response
+    const pdfUrl = responseData.pdf_url || responseData.url || responseData.download_url
+    
+    if (pdfUrl) {
+      console.log("PDF URL received from Make.com:", pdfUrl)
+      return pdfUrl
     }
 
-    const { data: publicUrlData } = supabaseAdmin.storage.from("contracts").getPublicUrl(filePath)
-    return publicUrlData?.publicUrl || null
+    // If no PDF URL in response, check if Make.com uploaded to Supabase directly
+    if (responseData.success || responseData.ok) {
+      console.log("Make.com indicated success, checking for uploaded PDF...")
+      
+      // Try to find the PDF in Supabase storage
+      const filePath = `contract_pdfs/${contractId}/`
+      const { data: files, error: listError } = await supabaseAdmin.storage
+        .from("contracts")
+        .list(filePath)
+      
+      if (listError) {
+        console.error("Error listing files in storage:", listError)
+        return null
+      }
+      
+      if (files && files.length > 0) {
+        // Get the most recent PDF file
+        const pdfFile = files.find(file => file.name.endsWith('.pdf'))
+        if (pdfFile) {
+          const { data: publicUrlData } = supabaseAdmin.storage
+            .from("contracts")
+            .getPublicUrl(`${filePath}${pdfFile.name}`)
+          return publicUrlData?.publicUrl || null
+        }
+      }
+    }
+
+    console.error("No PDF URL found in Make.com response")
+    return null
   } catch (error) {
     console.error("Error in PDF generation/upload process:", error)
     return null
