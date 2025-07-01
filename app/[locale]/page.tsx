@@ -73,7 +73,9 @@ const actions = [
   },
 ]
 
-export default function HomePage({ params }: { params: { locale: string } }) {
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  
   return (
     <div className="flex flex-col items-center">
       <motion.div
@@ -141,7 +143,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
                     variant={action.variant}
                     className="h-12 w-full text-base font-semibold"
                   >
-                    <Link href={`/${params.locale}${action.href}`}>{action.title}</Link>
+                    <Link href={`/${locale}${action.href}`}>{action.title}</Link>
                   </Button>
                 )}
               </CardContent>

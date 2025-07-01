@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeftIcon, Construction } from "lucide-react"
 
-export default function EditContractPage({ params }: { params: { id: string } }) {
+export default async function EditContractPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  
   return (
     <ManualErrorBoundary>
       <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4 dark:bg-slate-900">
@@ -15,7 +17,7 @@ export default function EditContractPage({ params }: { params: { id: string } })
               Edit Contract
             </CardTitle>
             <CardDescription className="text-slate-500 dark:text-slate-400">
-              Contract ID: <span className="font-mono">{params.id}</span>
+              Contract ID: <span className="font-mono">{id}</span>
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
@@ -24,7 +26,7 @@ export default function EditContractPage({ params }: { params: { id: string } })
               This page is under construction. Editing functionality will be implemented here.
             </p>
             <Button asChild variant="outline" className="mr-2 inline-block">
-              <Link href={`/contracts/${params.id}`}>
+              <Link href={`/contracts/${id}`}>
                 <ArrowLeftIcon className="mr-2 h-4 w-4" />
                 Back to Details
               </Link>

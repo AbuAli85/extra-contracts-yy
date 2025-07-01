@@ -2,13 +2,14 @@ import { getContract } from "@/lib/data"
 import { ManualErrorBoundary } from "@/components/ManualErrorBoundary"
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string
     locale: string
-  }
+  }>
 }
 
-export default async function ContractPage({ params: { id, locale } }: Props) {
+export default async function ContractPage({ params }: Props) {
+  const { id, locale } = await params
   const contract = await getContract(id)
 
   if (!contract) {

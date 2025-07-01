@@ -33,14 +33,14 @@ const navItems = [
   { title: "Manage Promoters", href: "/manage-promoters" },
 ]
 
-export default function ClientLayout({
+export default async function ClientLayout({
   children,
   params,
 }: {
   children: React.ReactNode
-  params: { locale: string }
+  params: Promise<{ locale: string }>
 }) {
-  const locale = params.locale || "en"
+  const { locale } = await params
   const dir = locale === "ar" ? "rtl" : "ltr"
 
   return (

@@ -110,8 +110,9 @@ function SectionCard({
   )
 }
 
-export default async function ContractDetailPage({ params }: { params: { id: string } }) {
-  const contract = await getContractDetails(params.id)
+export default async function ContractDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const contract = await getContractDetails(id)
 
   if (!contract) {
     return (
@@ -122,7 +123,7 @@ export default async function ContractDetailPage({ params }: { params: { id: str
           </CardHeader>
           <CardContent>
             <p className="text-card-foreground/80">
-              The contract with ID <span className="font-mono text-primary">{params.id}</span> could
+              The contract with ID <span className="font-mono text-primary">{id}</span> could
               not be found.
             </p>
             <Button asChild variant="outline" className="mt-6 inline-block">
