@@ -110,11 +110,11 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
     startTransition(async () => {
       try {
         let result
-        if (contract) {
+    if (contract) {
           result = await updateContract(contract.id, formData)
-        } else {
+    } else {
           result = await createContract(formData)
-        }
+    }
         setActionState(result)
       } catch (error) {
         setActionState({

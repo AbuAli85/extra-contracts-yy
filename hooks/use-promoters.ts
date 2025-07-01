@@ -54,21 +54,21 @@ export const usePromoters = (enableRealtime: boolean = true) => {
     const setupSubscription = () => {
       if (isSubscribed) return
 
-      const channel = supabase
-        .channel("public-promoters-realtime")
-        .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, (payload) => {
-          devLog("Realtime promoter change received!", payload)
+    const channel = supabase
+      .channel("public-promoters-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, (payload) => {
+        devLog("Realtime promoter change received!", payload)
           queryClient.invalidateQueries({ queryKey: queryKey })
-        })
-        .subscribe((status, err) => {
+      })
+      .subscribe((status, err) => {
           if (status === "SUBSCRIBED") {
             devLog("Subscribed to promoters channel!")
             retryCount = 0 // Reset retry count on successful connection
             isSubscribed = true
           }
-          if (status === "CHANNEL_ERROR") {
-            const message = err?.message ?? "Unknown channel error"
-            console.error(`Promoters channel error (${status}):`, message)
+        if (status === "CHANNEL_ERROR") {
+          const message = err?.message ?? "Unknown channel error"
+          console.error(`Promoters channel error (${status}):`, message)
             
             // Retry connection if we haven't exceeded max retries
             if (retryCount < maxRetries) {

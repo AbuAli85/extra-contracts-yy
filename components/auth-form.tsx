@@ -54,15 +54,15 @@ export default function AuthForm() {
         password: password.trim() 
       })
 
-      if (error) {
+    if (error) {
         console.error("Sign in error:", error)
         toast({ 
           title: "Sign In Error", 
           description: error.message, 
           variant: "destructive" 
         })
-      } else {
-        toast({ title: "Success!", description: "You are now signed in." })
+    } else {
+      toast({ title: "Success!", description: "You are now signed in." })
         router.push("/generate-contract")
         router.refresh()
       }
@@ -74,7 +74,7 @@ export default function AuthForm() {
         variant: "destructive" 
       })
     } finally {
-      setIsSubmitting(false)
+    setIsSubmitting(false)
     }
   }
 
@@ -88,25 +88,25 @@ export default function AuthForm() {
     setIsSubmitting(true)
     
     try {
-      const {
-        data: { user },
-        error,
+    const {
+      data: { user },
+      error,
       } = await supabase.auth.signUp({ 
         email: email.trim(), 
         password: password.trim() 
       })
 
-      if (error) {
+    if (error) {
         console.error("Sign up error:", error)
-        toast({ title: "Sign Up Error", description: error.message, variant: "destructive" })
-      } else if (user) {
-        toast({
-          title: "Success!",
-          description: "Signed up successfully. Please check your email to confirm your account.",
-        })
+      toast({ title: "Sign Up Error", description: error.message, variant: "destructive" })
+    } else if (user) {
+      toast({
+        title: "Success!",
+        description: "Signed up successfully. Please check your email to confirm your account.",
+      })
         router.push("/generate-contract")
-        router.refresh()
-      }
+      router.refresh()
+    }
     } catch (error) {
       console.error("Unexpected error during sign up:", error)
       toast({ 
@@ -115,7 +115,7 @@ export default function AuthForm() {
         variant: "destructive" 
       })
     } finally {
-      setIsSubmitting(false)
+    setIsSubmitting(false)
     }
   }
 

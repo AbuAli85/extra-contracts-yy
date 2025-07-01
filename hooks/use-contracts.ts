@@ -67,20 +67,20 @@ export const useContracts = () => {
     let retryTimeout: NodeJS.Timeout
 
     const setupSubscription = () => {
-      const channel = supabase
-        .channel("public-contracts-realtime")
-        .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, (payload) => {
-          devLog("Realtime contract change received!", payload)
-          queryClient.invalidateQueries({ queryKey: queryKey })
-        })
-        .subscribe((status, err) => {
-          if (status === "SUBSCRIBED") {
-            devLog("Subscribed to contracts channel!")
+    const channel = supabase
+      .channel("public-contracts-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, (payload) => {
+        devLog("Realtime contract change received!", payload)
+        queryClient.invalidateQueries({ queryKey: queryKey })
+      })
+      .subscribe((status, err) => {
+        if (status === "SUBSCRIBED") {
+          devLog("Subscribed to contracts channel!")
             retryCount = 0 // Reset retry count on successful connection
-          }
-          if (status === "CHANNEL_ERROR") {
-            const message = err?.message ?? "Unknown channel error"
-            console.error(`Contracts channel error (${status}):`, message)
+        }
+        if (status === "CHANNEL_ERROR") {
+          const message = err?.message ?? "Unknown channel error"
+          console.error(`Contracts channel error (${status}):`, message)
             
             // Retry connection if we haven't exceeded max retries
             if (retryCount < maxRetries) {
@@ -93,9 +93,9 @@ export const useContracts = () => {
             } else {
               console.error("Max retries exceeded for contracts subscription")
             }
-          }
-          if (status === "TIMED_OUT") {
-            console.warn(`Subscription timed out (${status})`)
+        }
+        if (status === "TIMED_OUT") {
+          console.warn(`Subscription timed out (${status})`)
             
             // Retry connection if we haven't exceeded max retries
             if (retryCount < maxRetries) {
@@ -108,8 +108,8 @@ export const useContracts = () => {
             } else {
               console.error("Max retries exceeded for contracts subscription after timeout")
             }
-          }
-        })
+        }
+      })
 
       return channel
     }
