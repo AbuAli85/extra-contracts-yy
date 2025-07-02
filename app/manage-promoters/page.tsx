@@ -27,7 +27,7 @@ import {
   EyeIcon,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { format } from "date-fns"
+import { format, parseISO } from "date-fns"
 import { getDocumentStatus } from "@/lib/document-status"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
