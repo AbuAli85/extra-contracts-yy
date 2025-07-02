@@ -31,6 +31,17 @@ export default function EditPromoterPage() {
     }
   );
 
+  const startDate = "2025-07-01";
+  const endDate = "2027-06-30";
+  const formattedStart = format(new Date(startDate), "dd-MM-yyyy");
+  const formattedEnd = format(new Date(endDate), "dd-MM-yyyy");
+
+  // English
+  const englishText = `From: ${formattedStart} To: ${formattedEnd}`;
+
+  // Arabic
+  const arabicText = `تاريخ الالتحاق: ${formattedStart} وحتى ${formattedEnd}`;
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4 dark:bg-slate-950">
       <Card className="w-full max-w-lg">
