@@ -6,30 +6,10 @@ import Link from "next/link"
 import { ArrowLeftIcon, Construction } from "lucide-react"
 import { useParams } from "next/navigation"
 import { format } from "date-fns";
-import fs from 'fs';
-import { drive } from '@googleapis/drive';
 
 export default function EditPromoterPage() {
   const params = useParams()
   const promoterId = params.id as string
-
-  // After creating the doc, export as PDF
-  const fileId = "your-google-doc-id";
-  const dest = fs.createWriteStream('/path/to/contract.pdf');
-  drive.files.export(
-    { fileId, mimeType: 'application/pdf' },
-    { responseType: 'stream' },
-    (err, res) => {
-      res.data
-        .on('end', () => {
-          console.log('Done downloading PDF.');
-        })
-        .on('error', err => {
-          console.error('Error downloading PDF.');
-        })
-        .pipe(dest);
-    }
-  );
 
   const startDate = "01-07-2025";
   const endDate = "30-06-2027";
