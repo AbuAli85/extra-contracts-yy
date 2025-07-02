@@ -43,4 +43,4 @@ export function ClientHeader({ locale }: ClientHeaderProps) {
       </div>
     </header>
   )
-} 
+}

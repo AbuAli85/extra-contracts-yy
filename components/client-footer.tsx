@@ -56,4 +56,4 @@ export function ClientFooter() {
       </div>
     </footer>
   )
-} 
+}

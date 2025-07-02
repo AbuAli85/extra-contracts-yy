@@ -25,11 +25,11 @@ The webhook has been enhanced with:
 
 Ensure these variables are set in your `.env.local` file:
 
-```env
+\`\`\`env
 # Make.com webhook configuration
 MAKE_WEBHOOK_URL=https://hook.make.com/your-webhook-url
 MAKE_WEBHOOK_SECRET=your-webhook-secret
-```
+\`\`\`
 
 ## Make.com Scenario Configuration
 
@@ -60,9 +60,9 @@ Configure your webhook to return one of these responses:
 
 Run the test script to verify your configuration:
 
-```bash
+\`\`\`bash
 node scripts/test-webhook-config.js
-```
+\`\`\`
 
 This script will:
 - Test the webhook URL connectivity
@@ -95,20 +95,20 @@ This script will:
 
 The application sends these headers with each webhook request:
 
-```
+\`\`\`
 Content-Type: application/json
 X-Webhook-Secret: [your-secret]
 User-Agent: Contract-Generator-App/1.0
 X-Trigger-Source: contract-generator
 X-Contract-ID: [contract-id]
 X-Timestamp: [iso-timestamp]
-```
+\`\`\`
 
 ## Payload Structure
 
 The webhook receives this JSON payload:
 
-```json
+\`\`\`json
 {
   "contract_id": "uuid",
   "first_party_name_en": "Client Company Name",
@@ -130,7 +130,7 @@ The webhook receives this JSON payload:
   "promoter_passport_url": "https://...",
   "pdf_url": "https://..."
 }
-```
+\`\`\`
 
 ## Monitoring and Logs
 
@@ -146,4 +146,4 @@ The webhook receives this JSON payload:
 3. **Implement** proper error handling in your Make.com scenario
 4. **Use** the test script to verify configuration changes
 5. **Keep** webhook secrets secure and rotate them regularly
-6. **Document** any custom logic in your Make.com scenario 
+6. **Document** any custom logic in your Make.com scenario

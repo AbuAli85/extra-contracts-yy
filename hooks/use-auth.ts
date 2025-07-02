@@ -42,4 +42,4 @@ export function useAuth() {
     isAuthenticated: mounted ? isAuthenticated : null,
     loading: mounted ? loading : true,
   }
-} 
+}

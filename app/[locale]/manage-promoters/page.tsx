@@ -84,7 +84,7 @@ export default function ManagePromotersPage() {
       // Continue with promoters data but without contract counts
     }
 
-    const todayStr = format(new Date(), "yyyy-MM-dd")
+    const todayStr = format(new Date(), "dd-MM-yyyy")
 
     const promotersWithCounts = promotersData
       .filter((promoter) => promoter.id) // Filter out promoters without IDs

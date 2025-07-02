@@ -15,4 +15,4 @@ export function useRealtimeParties() {
   useEffect(() => { fetchParties() }, [fetchParties])
 
   return parties
-} 
+}

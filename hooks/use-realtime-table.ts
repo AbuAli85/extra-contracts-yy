@@ -40,4 +40,4 @@ export function useRealtimeTable(table: string, onChange: (payload: any) => void
       }
     }
   }, [table, onChange, isAuthenticated])
-} 
+}

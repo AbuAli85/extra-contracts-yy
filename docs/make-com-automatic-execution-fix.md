@@ -28,7 +28,7 @@ The webhook is working (returns "Accepted"), but Make.com only executes the scen
 1. **In the Webhook trigger module**, click **"Show data structure"**
 2. **Click "Add"** to add a sample data structure
 3. **Use this sample data**:
-```json
+\`\`\`json
 {
   "contract_id": "test-123",
   "first_party_name_en": "Test Client",
@@ -50,7 +50,7 @@ The webhook is working (returns "Accepted"), but Make.com only executes the scen
   "promoter_passport_url": "https://example.com/passport.jpg",
   "pdf_url": "https://example.com/contract.pdf"
 }
-```
+\`\`\`
 
 ### 4. Test the Webhook Trigger
 
@@ -86,12 +86,12 @@ If the webhook trigger still doesn't work automatically, try this alternative:
 
 Try sending a simpler test payload to see if the issue is with the data structure:
 
-```json
+\`\`\`json
 {
   "test": "simple",
   "timestamp": "2024-01-01T00:00:00Z"
 }
-```
+\`\`\`
 
 ### 9. Enable Debug Mode
 
@@ -127,9 +127,9 @@ Ensure your webhook URL is in the correct format:
 After making changes:
 
 1. **Test the webhook** again:
-   ```bash
+   \`\`\`bash
    node scripts/test-webhook-config.js
-   ```
+   \`\`\`
 
 2. **Create a test contract** in your application
 
@@ -153,4 +153,4 @@ When working correctly:
 - ✅ Scenario executes immediately
 - ✅ No manual intervention required
 - ✅ Execution appears in Make.com history
-- ✅ PDF is generated and returned 
+- ✅ PDF is generated and returned

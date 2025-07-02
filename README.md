@@ -142,7 +142,7 @@ This project includes reusable hooks for real-time updates from Supabase:
 
 ### Example Usage
 
-```tsx
+\`\`\`tsx
 import { useRealtimeContracts } from "@/hooks/use-realtime-contracts"
 
 export default function ContractList() {
@@ -155,6 +155,6 @@ export default function ContractList() {
     </ul>
   )
 }
-```
+\`\`\`
 
 You can use the same pattern for promoters and parties. All lists will update automatically when the database changes.

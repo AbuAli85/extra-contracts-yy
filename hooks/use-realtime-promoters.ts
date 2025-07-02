@@ -15,4 +15,4 @@ export function useRealtimePromoters() {
   useEffect(() => { fetchPromoters() }, [fetchPromoters])
 
   return promoters
-} 
+}

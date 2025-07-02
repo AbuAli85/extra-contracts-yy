@@ -18,3 +18,6 @@ export default function RootLayout({
 }) {
   return <ClientLayout params={params}>{children}</ClientLayout>
 }
+
+
+import './globals.css'

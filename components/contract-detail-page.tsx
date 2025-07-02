@@ -31,4 +31,4 @@ const ContractDetailPage = ({ contract }) => {
   );
 };
 
-export default ContractDetailPage; 
+export default ContractDetailPage;

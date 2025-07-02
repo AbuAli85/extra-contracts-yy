@@ -141,4 +141,4 @@ monitorWebhook().then(() => {
   console.log('- Make.com Dashboard: https://www.make.com/en/');
   console.log('- Supabase Dashboard: https://supabase.com/dashboard');
   console.log('- Google Drive: https://drive.google.com/');
-}); 
+});

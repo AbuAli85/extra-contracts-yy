@@ -85,9 +85,9 @@ Please check which of these issues you're experiencing:
 ## Debugging Steps
 
 ### Step 1: Run Comprehensive Test
-```bash
+\`\`\`bash
 node scripts/debug-webhook-execution.js
-```
+\`\`\`
 
 ### Step 2: Check Make.com Execution History
 1. Go to your Make.com scenario
@@ -163,4 +163,4 @@ If you can't identify the specific issue:
 1. Share the results of the debug script
 2. Tell us which checklist items are failing
 3. Share any error messages from Make.com or your application
-4. Describe exactly what happens when you create a contract 
+4. Describe exactly what happens when you create a contract

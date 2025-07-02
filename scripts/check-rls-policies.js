@@ -115,4 +115,4 @@ FOR ALL USING (auth.role() = 'authenticated');
 }
 
 // Run the RLS check
-checkRLSPolicies() 
+checkRLSPolicies()

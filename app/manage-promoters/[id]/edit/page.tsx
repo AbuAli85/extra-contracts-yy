@@ -31,8 +31,8 @@ export default function EditPromoterPage() {
     }
   );
 
-  const startDate = "2025-07-01";
-  const endDate = "2027-06-30";
+  const startDate = "01-07-2025";
+  const endDate = "30-06-2027";
   const formattedStart = format(new Date(startDate), "dd-MM-yyyy");
   const formattedEnd = format(new Date(endDate), "dd-MM-yyyy");
 

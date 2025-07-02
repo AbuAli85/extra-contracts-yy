@@ -16,4 +16,4 @@ export function useRealtimeContracts() {
   useEffect(() => { fetchContracts() }, [fetchContracts])
 
   return contracts
-} 
+}

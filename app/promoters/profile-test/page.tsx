@@ -20,12 +20,12 @@ const samplePromoterToEdit: PromoterProfile = {
   job_title: "Senior Promoter",
   work_location: "Tech Park, Building A",
   status: "active",
-  contract_valid_until: "2025-12-31",
+  contract_valid_until: "31-12-2025",
   // Use simple placeholder images without query parameters
   id_card_url: placeholderSvg,
   passport_url: placeholderSvg,
-  id_card_expiry_date: "2026-06-15",
-  passport_expiry_date: "2028-03-20",
+  id_card_expiry_date: "16-05-2026",
+  passport_expiry_date: "20-03-2028",
   notes: "Excellent performance. Key contact for Tech Innovators project.",
   created_at: "2023-01-10T10:00:00Z",
 }

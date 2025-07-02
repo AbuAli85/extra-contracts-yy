@@ -155,4 +155,4 @@ export function HomePageContent({ locale }: HomePageContentProps) {
       </div>
     </div>
   )
-} 
+}

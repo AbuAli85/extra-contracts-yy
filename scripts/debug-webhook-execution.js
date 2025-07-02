@@ -248,4 +248,4 @@ async function runDebugTests() {
 }
 
 // Run the debug tests
-runDebugTests(); 
+runDebugTests();

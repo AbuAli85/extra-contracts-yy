@@ -146,4 +146,3 @@ async function seedPromoters() {
 
 // Run the seeding function
 seedPromoters()
- 
