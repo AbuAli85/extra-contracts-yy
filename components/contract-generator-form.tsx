@@ -176,7 +176,7 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
           name="partyA"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("partyALabel")}</FormLabel>
+              <FormLabel>Client (Party A)</FormLabel>
               <FormControl>
                 <ComboboxField
                   options={partyOptions}
@@ -197,7 +197,7 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
           name="partyB"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("partyBLabel")}</FormLabel>
+              <FormLabel>Employer (Party B)</FormLabel>
               <FormControl>
                 <ComboboxField
                   options={partyOptions}
