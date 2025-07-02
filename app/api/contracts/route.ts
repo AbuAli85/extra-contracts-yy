@@ -275,20 +275,28 @@ export async function POST(request: NextRequest) {
     let finalContractData = newContract
     if (pdfUrl && pdfUrl !== "accepted" && pdfUrl !== "success") {
       // Only update if we have a real PDF URL, not just success indicators
-      const { data: updatedContractWithPdf, error: updateError } = await supabase
-        .from("contracts")
-        .update({ pdf_url: pdfUrl })
-        .eq("id", newContract.id)
-        .select()
-        .single()
+      try {
+        const { data: updatedContractWithPdf, error: updateError } = await supabase
+          .from("contracts")
+          .update({ pdf_url: pdfUrl })
+          .eq("id", newContract.id)
+          .select()
+          .single()
 
-      if (updateError) {
-        console.error("Supabase update error (pdf_url):", updateError)
-        // Don't fail the entire request if PDF URL update fails
-        // The contract was created successfully, just without PDF URL
-      } else if (updatedContractWithPdf) {
-        finalContractData = updatedContractWithPdf
-        console.log("✓ PDF URL updated successfully")
+        if (updateError) {
+          console.error("Supabase update error (pdf_url):", updateError)
+          if (updateError.code === 'PGRST116') {
+            console.warn("⚠️ Contract not found during PDF URL update - it may have been deleted or modified")
+          }
+          // Don't fail the entire request if PDF URL update fails
+          // The contract was created successfully, just without PDF URL
+        } else if (updatedContractWithPdf) {
+          finalContractData = updatedContractWithPdf
+          console.log("✓ PDF URL updated successfully")
+        }
+      } catch (updateError) {
+        console.error("Unexpected error updating contract with PDF URL:", updateError)
+        // Continue with the original contract data
       }
     } else if (pdfUrl === "accepted" || pdfUrl === "success") {
       console.log("✓ Make.com webhook accepted - PDF will be generated asynchronously")
