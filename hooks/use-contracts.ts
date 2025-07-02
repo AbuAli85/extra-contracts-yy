@@ -45,7 +45,7 @@ const fetchContracts = async (): Promise<ContractWithRelations[]> => {
     .order("created_at", { ascending: false })
 
   if (error) {
-    console.error("Error fetching contracts:", error)
+    devLog("Error fetching contracts:", error)
     throw new Error(error.message)
   }
   return (data as ContractWithRelations[]) || []
@@ -197,7 +197,7 @@ export const useDeleteContractMutation = () => {
       // );
     },
     onError: (error) => {
-      console.error("Error deleting contract:", error)
+      devLog("Error deleting contract:", error)
       toast({
         title: "Error",
         description: `Failed to delete contract: ${error.message}`,

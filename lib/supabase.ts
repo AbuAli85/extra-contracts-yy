@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js"
 import type { Database } from "@/types/supabase"
+import { devLog } from "@/lib/dev-log"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -34,7 +35,7 @@ export const isAuthenticated = async (): Promise<boolean> => {
     const { data: { session } } = await supabase.auth.getSession()
     return !!session?.user
   } catch (error) {
-    console.error("Error checking authentication status:", error)
+    devLog("Error checking authentication status:", error)
     return false
   }
 }
@@ -44,12 +45,12 @@ export const getCurrentUser = async () => {
   try {
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error) {
-      console.error("Error getting current user:", error)
+      devLog("Error getting current user:", error)
       return null
     }
     return user
   } catch (error) {
-    console.error("Error getting current user:", error)
+    devLog("Error getting current user:", error)
     return null
   }
 }
@@ -60,21 +61,21 @@ export const handleRealtimeError = (error: any, tableName: string) => {
   
   // Check for specific error types
   if (message.includes("JWT") || message.includes("auth") || message.includes("permission")) {
-    console.warn(`Authentication error for ${tableName}:`, message)
+    devLog(`Authentication error for ${tableName}:`, message)
     return "AUTH_ERROR"
   }
   
   if (message.includes("timeout") || message.includes("TIMED_OUT")) {
-    console.warn(`Timeout error for ${tableName}:`, message)
+    devLog(`Timeout error for ${tableName}:`, message)
     return "TIMEOUT_ERROR"
   }
   
   if (message.includes("network") || message.includes("connection")) {
-    console.warn(`Network error for ${tableName}:`, message)
+    devLog(`Network error for ${tableName}:`, message)
     return "NETWORK_ERROR"
   }
   
-  console.error(`Unknown error for ${tableName}:`, message)
+  devLog(`Unknown error for ${tableName}:`, message)
   return "UNKNOWN_ERROR"
 }
 
@@ -85,7 +86,7 @@ export const createRealtimeChannel = (tableName: string, callback: (payload: any
       .channel(`public-${tableName}-realtime`)
       .on("postgres_changes", { event: "*", schema: "public", table: tableName }, callback)
   } catch (error) {
-    console.error(`Error creating realtime channel for ${tableName}:`, error)
+    devLog(`Error creating realtime channel for ${tableName}:`, error)
     return null
   }
 }
@@ -101,7 +102,7 @@ export const subscribeToChannel = (channel: any, onStatusChange?: (status: strin
       }
     })
   } catch (error) {
-    console.error("Error subscribing to channel:", error)
+    devLog("Error subscribing to channel:", error)
     return null
   }
 }

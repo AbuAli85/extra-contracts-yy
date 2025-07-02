@@ -13,9 +13,9 @@ const fetchPromoters = async (): Promise<Promoter[]> => {
     .order("name_en", { ascending: true })
 
   if (error) {
-    console.error("Error fetching promoters:", error)
+    devLog("Error fetching promoters:", error)
     // Log the complete error object for easier debugging
-    console.error(error)
+    devLog(error)
     throw new Error(error.message)
   }
   return data || []

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { devLog } from "@/lib/dev-log"
 import type { User } from "@supabase/supabase-js"
 
 export function useAuth() {
@@ -17,7 +18,7 @@ export function useAuth() {
         setUser(session?.user ?? null)
         setIsAuthenticated(!!session?.user)
       } catch (error) {
-        console.error("Error checking authentication status:", error)
+        devLog("Error checking authentication status:", error)
         setUser(null)
         setIsAuthenticated(false)
       } finally {
