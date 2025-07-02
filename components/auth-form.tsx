@@ -104,12 +104,23 @@ export default function AuthForm({ locale }: AuthFormProps) {
         console.error("Sign up error:", error)
       toast({ title: "Sign Up Error", description: error.message, variant: "destructive" })
     } else if (user) {
-      toast({
-        title: "Success!",
-        description: "Signed up successfully. Please check your email to confirm your account.",
+      // Insert into app_users table
+      const { error: appUserError } = await supabase.from("app_users").insert({
+        id: user.id,
+        email: user.email,
+        role: "viewer"
       })
+      if (appUserError) {
+        console.error("Error inserting into app_users:", appUserError)
+        toast({ title: "User DB Error", description: appUserError.message, variant: "destructive" })
+      } else {
+        toast({
+          title: "Success!",
+          description: "Signed up successfully. Please check your email to confirm your account.",
+        })
         router.push(locale ? `/${locale}/generate-contract` : "/generate-contract")
-      router.refresh()
+        router.refresh()
+      }
     }
     } catch (error) {
       console.error("Unexpected error during sign up:", error)
