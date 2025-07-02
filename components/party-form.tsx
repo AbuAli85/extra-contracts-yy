@@ -428,9 +428,9 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
           <Card>
             <CardHeader>
               <CardTitle>Additional Notes</CardTitle>
-              <FormDescription>
+              <p className="text-sm text-muted-foreground">
                 Any additional information or special requirements for this party.
-              </FormDescription>
+              </p>
             </CardHeader>
             <CardContent>
               <FormField
