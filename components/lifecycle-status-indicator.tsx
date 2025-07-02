@@ -1,3 +1,6 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, CalendarClock, AlertCircle, CalendarX2 } from "lucide-react"
 import { isFuture, isPast, isWithinInterval } from "date-fns"
@@ -11,7 +14,24 @@ export default function LifecycleStatusIndicator({
   startDate,
   endDate,
 }: LifecycleStatusIndicatorProps) {
-  const now = new Date()
+  const [mounted, setMounted] = useState(false)
+  const [now, setNow] = useState<Date | null>(null)
+
+  useEffect(() => {
+    setMounted(true)
+    setNow(new Date())
+  }, [])
+
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted || !now) {
+    return (
+      <Badge variant="outline" className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 border-gray-300">
+        <AlertCircle className="h-3.5 w-3.5" />
+        Loading...
+      </Badge>
+    )
+  }
+
   const start = new Date(startDate)
   const end = new Date(endDate)
 

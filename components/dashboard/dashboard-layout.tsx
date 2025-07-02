@@ -5,6 +5,7 @@ import type React from "react"
 import type { ReactNode } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useState, useEffect } from "react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -50,6 +51,13 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { theme, setTheme } = useTheme()
   const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
+  const [currentYear, setCurrentYear] = useState("")
+
+  useEffect(() => {
+    setMounted(true)
+    setCurrentYear(new Date().getFullYear().toString())
+  }, [])
 
   const NavLink = ({ item, isMobile = false }: { item: NavItem; isMobile?: boolean }) => (
     <Link
@@ -165,7 +173,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </header>
           <main className="flex-1 p-4 sm:px-6 sm:py-0 md:gap-8">{children}</main>
           <footer className="mt-auto border-t py-4 text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Contract Management System. All rights reserved.
+            © {mounted ? currentYear : "2024"} Contract Management System. All rights reserved.
           </footer>
         </div>
       </div>

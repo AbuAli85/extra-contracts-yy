@@ -6,8 +6,11 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+    
     const checkAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
@@ -35,7 +38,7 @@ export function useAuth() {
 
   return {
     user,
-    isAuthenticated,
-    loading,
+    isAuthenticated: mounted ? isAuthenticated : null,
+    loading: mounted ? loading : true,
   }
 } 

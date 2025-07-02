@@ -11,9 +11,12 @@ import { LogInIcon, LogOutIcon, UserCircle } from "lucide-react"
 export default function AuthStatus() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
+    setMounted(true)
+    
     const getSession = async () => {
       const {
         data: { session },
@@ -40,7 +43,8 @@ export default function AuthStatus() {
     router.refresh()
   }
 
-  if (loading) {
+  // Show loading state until component is mounted to prevent hydration mismatch
+  if (!mounted || loading) {
     return <div className="h-10 w-24 animate-pulse rounded-md bg-muted/50" />
   }
 

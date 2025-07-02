@@ -40,6 +40,7 @@ export default async function ClientLayout({
           fontInter.variable,
           fontLexend.variable,
         )}
+        suppressHydrationWarning
       >
         <ClientProviders>
           <div className="relative flex min-h-screen flex-col">
