@@ -251,7 +251,7 @@ export default function ContractsDashboardPage() {
                 </Select>
               </div>
               <Button asChild>
-                <Link href="/[locale]/generate-contract" locale={false}>
+                <Link href={`/${locale}/generate-contract`}>
                   Create New Contract
                 </Link>
               </Button>
@@ -270,7 +270,7 @@ export default function ContractsDashboardPage() {
                 </p>
                 {!(searchTerm || statusFilter !== "all") && (
                   <Button asChild className="mt-6">
-                    <Link href="/[locale]/generate-contract" locale={false}>
+                    <Link href={`/${locale}/generate-contract`}>
                       Create New Contract
                     </Link>
                   </Button>
@@ -371,9 +371,7 @@ export default function ContractsDashboardPage() {
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <Link
-                                  href={`/[locale]/contracts/${contract.id}`}
-                                  passHref
-                                  locale={false}
+                                  href={`/${locale}/contracts/${contract.id}`}
                                 >
                                   <DropdownMenuItem>
                                     <Eye className="mr-2 h-4 w-4" /> View Details
