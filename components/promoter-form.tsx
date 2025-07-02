@@ -132,13 +132,22 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
       })
     } else {
       reset({
-        ...form.formState.defaultValues,
+        name_en: "",
+        name_ar: "",
+        id_card_number: "",
+        id_card_image: null,
+        passport_image: null,
+        existing_id_card_url: null,
+        existing_passport_url: null,
+        id_card_expiry_date: null,
+        passport_expiry_date: null,
         status: "active",
         notify_days_before_id_expiry: 30,
         notify_days_before_passport_expiry: 90,
+        notes: "",
       })
     }
-  }, [promoterToEdit, form])
+  }, [promoterToEdit, reset])
 
   const uploadFile = async (
     file: File | null | undefined,
