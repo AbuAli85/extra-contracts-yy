@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase" // Initialized Supabase client
 import { createContract, deleteContract } from "@/app/actions/contracts"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/use-auth"
 import { devLog } from "@/lib/dev-log"
 import type { Database } from "@/types/supabase"
 import { useEffect } from "react"
@@ -53,65 +54,94 @@ const fetchContracts = async (): Promise<ContractWithRelations[]> => {
 export const useContracts = () => {
   const queryClient = useQueryClient()
   const queryKey = ["contracts"]
+  const { isAuthenticated } = useAuth()
 
   // --- Data fetching with React Query ---
   const queryResult = useQuery<ContractWithRelations[], Error>({
     queryKey: queryKey,
     queryFn: fetchContracts,
+    enabled: isAuthenticated !== null, // Only run query when we know auth status
   })
 
   // --- Realtime subscription ---
   useEffect(() => {
+    if (isAuthenticated === null) {
+      return
+    }
+
+    // Don't set up realtime if user is not authenticated
+    if (!isAuthenticated) {
+      devLog("User not authenticated, skipping realtime subscription for contracts")
+      return
+    }
+
     let retryCount = 0
     const maxRetries = 3
     let retryTimeout: NodeJS.Timeout
+    let channel: any = null
 
     const setupSubscription = () => {
-    const channel = supabase
-      .channel("public-contracts-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, (payload) => {
-        devLog("Realtime contract change received!", payload)
-        queryClient.invalidateQueries({ queryKey: queryKey })
-      })
-      .subscribe((status, err) => {
-        if (status === "SUBSCRIBED") {
-          devLog("Subscribed to contracts channel!")
-            retryCount = 0 // Reset retry count on successful connection
-        }
-        if (status === "CHANNEL_ERROR") {
-          const message = err?.message ?? "Unknown channel error"
-          console.error(`Contracts channel error (${status}):`, message)
-            
-            // Retry connection if we haven't exceeded max retries
-            if (retryCount < maxRetries) {
-              retryCount++
-              console.log(`Retrying contracts subscription (${retryCount}/${maxRetries})...`)
-              retryTimeout = setTimeout(() => {
-                supabase.removeChannel(channel)
-                setupSubscription()
-              }, 2000 * retryCount) // Exponential backoff
-            } else {
-              console.error("Max retries exceeded for contracts subscription")
+      try {
+        channel = supabase
+          .channel("public-contracts-realtime")
+          .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, (payload) => {
+            devLog("Realtime contract change received!", payload)
+            queryClient.invalidateQueries({ queryKey: queryKey })
+          })
+          .subscribe((status, err) => {
+            if (status === "SUBSCRIBED") {
+              devLog("Subscribed to contracts channel!")
+              retryCount = 0 // Reset retry count on successful connection
             }
-        }
-        if (status === "TIMED_OUT") {
-          console.warn(`Subscription timed out (${status})`)
-            
-            // Retry connection if we haven't exceeded max retries
-            if (retryCount < maxRetries) {
-              retryCount++
-              console.log(`Retrying contracts subscription after timeout (${retryCount}/${maxRetries})...`)
-              retryTimeout = setTimeout(() => {
-                supabase.removeChannel(channel)
-                setupSubscription()
-              }, 2000 * retryCount) // Exponential backoff
-            } else {
-              console.error("Max retries exceeded for contracts subscription after timeout")
+            if (status === "CHANNEL_ERROR") {
+              const message = err?.message ?? "Unknown channel error"
+              console.error(`Contracts channel error (${status}):`, message)
+              
+              // Check if it's an authentication error
+              if (message.includes("JWT") || message.includes("auth") || message.includes("permission")) {
+                console.warn("Authentication error detected for contracts, will retry after auth check")
+                // Don't retry immediately, let the auth state change handler deal with it
+                return
+              }
+                
+              // Retry connection if we haven't exceeded max retries
+              if (retryCount < maxRetries) {
+                retryCount++
+                console.log(`Retrying contracts subscription (${retryCount}/${maxRetries})...`)
+                retryTimeout = setTimeout(() => {
+                  if (channel) {
+                    supabase.removeChannel(channel)
+                  }
+                  setupSubscription()
+                }, 2000 * retryCount) // Exponential backoff
+              } else {
+                console.error("Max retries exceeded for contracts subscription")
+              }
             }
-        }
-      })
+            if (status === "TIMED_OUT") {
+              console.warn(`Subscription timed out (${status})`)
+                
+              // Retry connection if we haven't exceeded max retries
+              if (retryCount < maxRetries) {
+                retryCount++
+                console.log(`Retrying contracts subscription after timeout (${retryCount}/${maxRetries})...`)
+                retryTimeout = setTimeout(() => {
+                  if (channel) {
+                    supabase.removeChannel(channel)
+                  }
+                  setupSubscription()
+                }, 2000 * retryCount) // Exponential backoff
+              } else {
+                console.error("Max retries exceeded for contracts subscription after timeout")
+              }
+            }
+          })
 
-      return channel
+        return channel
+      } catch (error) {
+        console.error("Error setting up contracts subscription:", error)
+        return null
+      }
     }
 
     const channel = setupSubscription()
@@ -120,9 +150,11 @@ export const useContracts = () => {
       if (retryTimeout) {
         clearTimeout(retryTimeout)
       }
-      supabase.removeChannel(channel)
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
     }
-  }, [queryClient, queryKey])
+  }, [queryClient, queryKey, isAuthenticated])
 
   return queryResult
 }

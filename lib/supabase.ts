@@ -19,6 +19,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
   },
   global: {
     headers: {
@@ -26,3 +27,53 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     },
   },
 })
+
+// Utility function to check if user is authenticated
+export const isAuthenticated = async (): Promise<boolean> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    return !!session?.user
+  } catch (error) {
+    console.error("Error checking authentication status:", error)
+    return false
+  }
+}
+
+// Utility function to get current user
+export const getCurrentUser = async () => {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error) {
+      console.error("Error getting current user:", error)
+      return null
+    }
+    return user
+  } catch (error) {
+    console.error("Error getting current user:", error)
+    return null
+  }
+}
+
+// Utility function to handle realtime connection errors
+export const handleRealtimeError = (error: any, tableName: string) => {
+  const message = error?.message ?? "Unknown channel error"
+  
+  // Check for specific error types
+  if (message.includes("JWT") || message.includes("auth") || message.includes("permission")) {
+    console.warn(`Authentication error for ${tableName}:`, message)
+    return "AUTH_ERROR"
+  }
+  
+  if (message.includes("timeout") || message.includes("TIMED_OUT")) {
+    console.warn(`Timeout error for ${tableName}:`, message)
+    return "TIMEOUT_ERROR"
+  }
+  
+  if (message.includes("network") || message.includes("connection")) {
+    console.warn(`Network error for ${tableName}:`, message)
+    return "NETWORK_ERROR"
+  }
+  
+  console.error(`Unknown error for ${tableName}:`, message)
+  return "UNKNOWN_ERROR"
+}
