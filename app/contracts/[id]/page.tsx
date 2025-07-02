@@ -272,7 +272,7 @@ export default async function ContractDetailPage({ params }: { params: Promise<{
                   label="Start Date"
                   value={
                     contract.contract_start_date
-                      ? format(parseISO(contract.contract_start_date), "MMMM d, yyyy")
+                      ? format(parseISO(contract.contract_start_date), "dd-MM-yyyy")
                       : "Not set"
                   }
                 />
@@ -280,7 +280,7 @@ export default async function ContractDetailPage({ params }: { params: Promise<{
                   label="End Date"
                   value={
                     contract.contract_end_date
-                      ? format(parseISO(contract.contract_end_date), "MMMM d, yyyy")
+                      ? format(parseISO(contract.contract_end_date), "dd-MM-yyyy")
                       : "Not set"
                   }
                 />

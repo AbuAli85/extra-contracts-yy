@@ -177,8 +177,8 @@ export default function ContractReportsTable() {
         item.promoter_name,
         item.employer_name,
         item.client_name,
-        isValid(parseISO(item.start_date)) ? format(parseISO(item.start_date), "yyyy-MM-dd") : "",
-        isValid(parseISO(item.end_date)) ? format(parseISO(item.end_date), "yyyy-MM-dd") : "",
+        isValid(parseISO(item.start_date)) ? format(parseISO(item.start_date), "dd-MM-yyyy") : "",
+        isValid(parseISO(item.end_date)) ? format(parseISO(item.end_date), "dd-MM-yyyy") : "",
         item.status,
       ].join(","),
     )
@@ -287,12 +287,12 @@ export default function ContractReportsTable() {
                     <TableCell>{item.client_name}</TableCell>
                     <TableCell>
                       {isValid(parseISO(item.start_date))
-                        ? format(parseISO(item.start_date), "MMM d, yyyy")
+                        ? format(parseISO(item.start_date), "dd-MM-yyyy")
                         : "N/A"}
                     </TableCell>
                     <TableCell>
                       {isValid(parseISO(item.end_date))
-                        ? format(parseISO(item.end_date), "MMM d, yyyy")
+                        ? format(parseISO(item.end_date), "dd-MM-yyyy")
                         : "N/A"}
                     </TableCell>
                     <TableCell>

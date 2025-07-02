@@ -329,8 +329,9 @@ export default function PromoterDetailPage() {
                               </div>
                             </TableCell>
                             <TableCell className="text-xs">
-                              {format(parseISO(contract.contract_start_date), "dd MMM yy")} -{" "}
-                              {format(parseISO(contract.contract_end_date), "dd MMM yy")}
+                              {contract.contract_start_date && contract.contract_end_date
+                                ? `${format(parseISO(contract.contract_start_date), "dd-MM-yyyy")} - ${format(parseISO(contract.contract_end_date), "dd-MM-yyyy")}`
+                                : "N/A"}
                             </TableCell>
                             <TableCell className="text-right">
                               {contract.google_doc_url ? (
