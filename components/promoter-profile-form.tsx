@@ -106,7 +106,7 @@ export default function PromoterProfileForm({
         notes: promoterToEdit.notes || "",
       })
     }
-  }, [isEditMode, promoterToEdit, form])
+  }, [isEditMode, promoterToEdit, reset])
 
   async function onSubmit(values: PromoterProfileFormData) {
     setIsSubmitting(true)
