@@ -72,6 +72,11 @@ export default function PromoterDetailPage() {
   const router = useRouter()
   const promoterId = params.id as string
 
+  // Debug: Log if promoterId is undefined
+  if (!promoterId) {
+    console.warn("🔍 [Navigation Debug] promoterId is undefined in [id] page", { params })
+  }
+
   const [promoterDetails, setPromoterDetails] = useState<PromoterDetails | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -184,8 +189,11 @@ export default function PromoterDetailPage() {
               {promoterDetails.name_ar}
             </p>
           </div>
-          <Button asChild>
-            <Link href={`/manage-promoters/${promoterId}/edit`}>
+          <Button 
+            asChild
+            disabled={!promoterId}
+          >
+            <Link href={promoterId ? `/manage-promoters/${promoterId}/edit` : "#"}>
               <EditIcon className="mr-2 h-4 w-4" />
               Edit Promoter
             </Link>

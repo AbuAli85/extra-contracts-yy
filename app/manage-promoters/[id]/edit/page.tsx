@@ -10,6 +10,11 @@ export default function EditPromoterPage() {
   const params = useParams()
   const promoterId = params.id as string
 
+  // Debug: Log if promoterId is undefined
+  if (!promoterId) {
+    console.warn("🔍 [Navigation Debug] promoterId is undefined in edit page", { params })
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4 dark:bg-slate-950">
       <Card className="w-full max-w-lg">
@@ -26,8 +31,13 @@ export default function EditPromoterPage() {
           <p className="mb-6 text-slate-600 dark:text-slate-300">
             Editing functionality for promoters will be implemented here.
           </p>
-          <Button asChild variant="outline" className="mr-2">
-            <Link href={`/manage-promoters/${promoterId}`}>
+          <Button 
+            asChild 
+            variant="outline" 
+            className="mr-2"
+            disabled={!promoterId}
+          >
+            <Link href={promoterId ? `/manage-promoters/${promoterId}` : "#"}>
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back to Promoter Details
             </Link>
