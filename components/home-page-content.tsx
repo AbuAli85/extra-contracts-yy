@@ -78,6 +78,11 @@ interface HomePageContentProps {
 }
 
 export function HomePageContent({ locale }: HomePageContentProps) {
+  // Debug: Log if locale is undefined
+  if (!locale) {
+    console.warn("🔍 [Navigation Debug] locale is undefined in HomePageContent", { locale })
+  }
+  
   return (
     <div className="flex flex-col items-center">
       <motion.div
@@ -145,7 +150,7 @@ export function HomePageContent({ locale }: HomePageContentProps) {
                     variant={action.variant}
                     className="h-12 w-full text-base font-semibold"
                   >
-                    <Link href={`/${locale}${action.href}`}>{action.title}</Link>
+                    <Link href={locale ? `/${locale}${action.href}` : action.href}>{action.title}</Link>
                   </Button>
                 )}
               </CardContent>
