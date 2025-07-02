@@ -112,20 +112,33 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log("Received contract data:", JSON.stringify(body, null, 2))
 
+    // Validate required fields
+    const requiredIds = ['first_party_id', 'second_party_id', 'promoter_id']
+    const missingIds = requiredIds.filter(id => !body[id])
+    
+    if (missingIds.length > 0) {
+      console.error("Missing required IDs:", missingIds)
+      return NextResponse.json(
+        { message: "Missing required fields", error: `Missing required IDs: ${missingIds.join(', ')}` },
+        { status: 400 },
+      )
+    }
+
     // Flatten the nested payload
     const contractToInsert: Database["public"]["Tables"]["contracts"]["Insert"] = {
       contract_number: body.contract_number,
       contract_start_date: body.contract_start_date,
       contract_end_date: body.contract_end_date,
-      first_party_id: body.first_party?.id,
+      // Handle both nested and flat ID formats
+      first_party_id: body.first_party?.id || body.first_party_id,
       first_party_name_en: body.first_party?.name_en,
       first_party_name_ar: body.first_party?.name_ar,
       first_party_crn: body.first_party?.crn,
-      second_party_id: body.second_party?.id,
+      second_party_id: body.second_party?.id || body.second_party_id,
       second_party_name_en: body.second_party?.name_en,
       second_party_name_ar: body.second_party?.name_ar,
       second_party_crn: body.second_party?.crn,
-      promoter_id: body.promoter?.id,
+      promoter_id: body.promoter?.id || body.promoter_id,
       promoter_name_en: body.promoter?.name_en,
       promoter_name_ar: body.promoter?.name_ar,
       id_card_number: body.promoter?.id_card_number,
@@ -166,22 +179,29 @@ export async function POST(request: NextRequest) {
     console.log("Second party ID:", newContract.second_party_id)
     console.log("Promoter ID:", newContract.promoter_id)
 
+    // Only fetch data if IDs are present
     const [party1, party2, promoterDetails] = await Promise.all([
-      supabase
-        .from("parties")
-        .select("name_en, name_ar, crn")
-        .eq("id", newContract.first_party_id)
-        .single(),
-      supabase
-        .from("parties")
-        .select("name_en, name_ar, crn")
-        .eq("id", newContract.second_party_id)
-        .single(),
-      supabase
-        .from("promoters")
-        .select("name_en, name_ar, id_card_number, id_card_url, passport_url")
-        .eq("id", newContract.promoter_id)
-        .single(),
+      newContract.first_party_id ? 
+        supabase
+          .from("parties")
+          .select("name_en, name_ar, crn")
+          .eq("id", newContract.first_party_id)
+          .single() :
+        Promise.resolve({ data: null, error: null }),
+      newContract.second_party_id ?
+        supabase
+          .from("parties")
+          .select("name_en, name_ar, crn")
+          .eq("id", newContract.second_party_id)
+          .single() :
+        Promise.resolve({ data: null, error: null }),
+      newContract.promoter_id ?
+        supabase
+          .from("promoters")
+          .select("name_en, name_ar, id_card_number, id_card_url, passport_url")
+          .eq("id", newContract.promoter_id)
+          .single() :
+        Promise.resolve({ data: null, error: null }),
     ])
 
     // Log the results of each query
@@ -198,6 +218,17 @@ export async function POST(request: NextRequest) {
     }
     if (promoterDetails.error) {
       console.error("Error fetching promoter:", promoterDetails.error)
+    }
+
+    // Warn if IDs are missing
+    if (!newContract.first_party_id) {
+      console.warn("⚠️ First party ID is missing from contract")
+    }
+    if (!newContract.second_party_id) {
+      console.warn("⚠️ Second party ID is missing from contract")
+    }
+    if (!newContract.promoter_id) {
+      console.warn("⚠️ Promoter ID is missing from contract")
     }
 
     console.log("✓ Party and promoter details fetched")
