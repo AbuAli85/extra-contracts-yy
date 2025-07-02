@@ -82,7 +82,7 @@ export const useContracts = () => {
 
     const setupSubscription = () => {
       try {
-        channel = supabase
+        const newChannel = supabase
           .channel("public-contracts-realtime")
           .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, (payload) => {
             devLog("Realtime contract change received!", payload)
@@ -137,14 +137,14 @@ export const useContracts = () => {
             }
           })
 
-        return channel
+        return newChannel
       } catch (error) {
         devLog("Error setting up contracts subscription:", error)
         return null
       }
     }
 
-    const channel = setupSubscription()
+    channel = setupSubscription()
 
     return () => {
       if (retryTimeout) {
