@@ -50,6 +50,16 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
       type: "Employer",
       role: "",
       status: "Active",
+      cr_expiry_date: undefined,
+      tax_number: "",
+      license_number: "",
+      license_expiry_date: undefined,
+      contact_person: "",
+      contact_phone: "",
+      contact_email: "",
+      address_en: "",
+      address_ar: "",
+      notes: "",
     },
   })
 
@@ -81,6 +91,16 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
         type: "Employer",
         role: "",
         status: "Active",
+        cr_expiry_date: undefined,
+        tax_number: "",
+        license_number: "",
+        license_expiry_date: undefined,
+        contact_person: "",
+        contact_phone: "",
+        contact_email: "",
+        address_en: "",
+        address_ar: "",
+        notes: "",
       })
     }
   }, [partyToEdit, reset])
