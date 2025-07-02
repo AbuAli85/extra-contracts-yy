@@ -78,11 +78,6 @@ interface HomePageContentProps {
 }
 
 export function HomePageContent({ locale }: HomePageContentProps) {
-  // Debug: Log if locale is undefined
-  if (!locale) {
-    console.warn("🔍 [Navigation Debug] locale is undefined in HomePageContent", { locale })
-  }
-  
   return (
     <div className="flex flex-col items-center">
       <motion.div

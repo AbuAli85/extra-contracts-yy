@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet" // Assuming Sheet is available
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from "@/components/ui/sheet" // Assuming Sheet is available
 
 interface NavItem {
   title: string
@@ -31,11 +31,12 @@ export function MobileNav({ navItems, locale }: MobileNavProps) {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-full max-w-xs pe-0 ps-6 pt-8">
+        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
         {" "}
         {/* RTL: pe-6 ps-0 */}
         <div className="mb-8 flex items-center justify-between">
           <Link
-            href={`/${locale}`}
+            href={locale ? `/${locale}` : "/"}
             className="font-heading text-xl font-bold text-primary"
             onClick={() => setIsOpen(false)}
           >
@@ -53,7 +54,7 @@ export function MobileNav({ navItems, locale }: MobileNavProps) {
           {navItems.map((item) => (
             <Link
               key={item.title}
-              href={`/${locale}${item.href === "/" ? "" : item.href}`}
+              href={locale ? `/${locale}${item.href === "/" ? "" : item.href}` : item.href}
               className="py-2 text-lg font-medium text-foreground/80 transition-colors hover:text-primary"
               onClick={() => setIsOpen(false)}
             >

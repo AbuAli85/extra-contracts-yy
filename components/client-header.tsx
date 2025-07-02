@@ -17,11 +17,6 @@ interface ClientHeaderProps {
 }
 
 export function ClientHeader({ locale }: ClientHeaderProps) {
-  // Debug: Log if locale is undefined
-  if (!locale) {
-    console.warn("🔍 [Navigation Debug] locale is undefined in ClientHeader", { locale })
-  }
-  
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 shadow-subtle-b backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">

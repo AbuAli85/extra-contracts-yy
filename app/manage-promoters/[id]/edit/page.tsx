@@ -10,10 +10,7 @@ export default function EditPromoterPage() {
   const params = useParams()
   const promoterId = params.id as string
 
-  // Debug: Log if promoterId is undefined
-  if (!promoterId) {
-    console.warn("🔍 [Navigation Debug] promoterId is undefined in edit page", { params })
-  }
+
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4 dark:bg-slate-950">

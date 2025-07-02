@@ -1,7 +1,6 @@
 "use client"
 import { useEffect, useState, useRef } from "react"
 import type React from "react"
-import { debugNavigation } from "@/lib/dev-log"
 
 import PromoterForm from "@/components/promoter-form"
 import { Button } from "@/components/ui/button"
@@ -360,16 +359,9 @@ export default function ManagePromotersPage() {
                                 className="text-xs"
                                 disabled={!promoter.id}
                               >
-                                <Link 
-                                  href={promoter.id ? `/manage-promoters/${promoter.id}` : "#"}
-                                  onClick={() => {
-                                    debugNavigation("Link clicked", { 
-                                      promoterId: promoter.id, 
-                                      promoterName: promoter.name_en,
-                                      href: promoter.id ? `/manage-promoters/${promoter.id}` : "#"
-                                    })
-                                  }}
-                                >
+                                                              <Link 
+                                href={promoter.id ? `/manage-promoters/${promoter.id}` : "#"}
+                              >
                                   <EyeIcon className="mr-1 h-3.5 w-3.5" /> View
                                 </Link>
                               </Button>
