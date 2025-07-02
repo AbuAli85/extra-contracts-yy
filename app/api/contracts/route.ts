@@ -65,12 +65,14 @@ async function generateBilingualPdf(
     try {
       responseData = JSON.parse(responseText)
     } catch (parseError) {
-      console.error("Failed to parse Make.com response as JSON:", parseError)
       // If it's not JSON, check if it's a simple success message
       if (responseText.trim().toLowerCase() === "accepted") {
-        console.log("Make.com returned 'Accepted' - treating as success")
+        console.log("✓ Make.com returned 'Accepted' - treating as success")
         return "accepted" // Special case for simple acceptance
       }
+      // Only log as error if it's not a recognized success message
+      console.error("Failed to parse Make.com response as JSON and not a recognized success message:", parseError)
+      console.error("Response text was:", responseText)
       return null
     }
 
@@ -158,6 +160,12 @@ export async function POST(request: NextRequest) {
     }
     console.log("✓ Contract created:", newContract.id)
 
+    // Fetch party and promoter details with better error handling
+    console.log("Fetching party and promoter details...")
+    console.log("First party ID:", newContract.first_party_id)
+    console.log("Second party ID:", newContract.second_party_id)
+    console.log("Promoter ID:", newContract.promoter_id)
+
     const [party1, party2, promoterDetails] = await Promise.all([
       supabase
         .from("parties")
@@ -175,6 +183,23 @@ export async function POST(request: NextRequest) {
         .eq("id", newContract.promoter_id)
         .single(),
     ])
+
+    // Log the results of each query
+    console.log("Party 1 result:", { data: party1.data, error: party1.error })
+    console.log("Party 2 result:", { data: party2.data, error: party2.error })
+    console.log("Promoter result:", { data: promoterDetails.data, error: promoterDetails.error })
+
+    // Check for errors in data fetching
+    if (party1.error) {
+      console.error("Error fetching first party:", party1.error)
+    }
+    if (party2.error) {
+      console.error("Error fetching second party:", party2.error)
+    }
+    if (promoterDetails.error) {
+      console.error("Error fetching promoter:", promoterDetails.error)
+    }
+
     console.log("✓ Party and promoter details fetched")
 
     const pdfData: BilingualPdfData = {
@@ -196,6 +221,21 @@ export async function POST(request: NextRequest) {
       contract_end_date: newContract.contract_end_date ?? null,
       contract_number: newContract.contract_number,
       pdf_url: newContract.pdf_url,
+    }
+
+    console.log("PDF data prepared:", JSON.stringify(pdfData, null, 2))
+
+    // Validate that we have the required data for Make.com
+    const requiredFields = [
+      'first_party_name_en', 'first_party_name_ar', 'first_party_crn',
+      'second_party_name_en', 'second_party_name_ar', 'second_party_crn',
+      'promoter_name_en', 'promoter_name_ar', 'email', 'contract_number'
+    ]
+    
+    const missingFields = requiredFields.filter(field => !pdfData[field as keyof BilingualPdfData])
+    if (missingFields.length > 0) {
+      console.warn("⚠️ Missing required fields for Make.com webhook:", missingFields)
+      console.warn("This may cause issues with PDF generation")
     }
 
     const pdfUrl = await generateBilingualPdf(pdfData, newContract.id)
