@@ -7,13 +7,21 @@ import { devLog } from "@/lib/dev-log"
 // Define the structure of a Party based on your select query
 export type Party = Pick<
   Database["public"]["Tables"]["parties"]["Row"],
-  "id" | "name_en" | "name_ar" | "crn" | "type"
+  "id" | "name_en" | "name_ar" | "crn" | "type" | "role" | "cr_expiry_date" | 
+  "contact_person" | "contact_email" | "contact_phone" | "address_en" | "address_ar" |
+  "tax_number" | "license_number" | "license_expiry_date" | "status" | "notes" |
+  "created_at" | "updated_at"
 >
 
-const fetchParties = async (partyType?: "Employer" | "Client"): Promise<Party[]> => {
+const fetchParties = async (partyType?: "Employer" | "Client" | "Both"): Promise<Party[]> => {
   let query = supabase
     .from("parties")
-    .select("id, name_en, name_ar, crn, type")
+    .select(`
+      id, name_en, name_ar, crn, type, role, cr_expiry_date,
+      contact_person, contact_email, contact_phone, address_en, address_ar,
+      tax_number, license_number, license_expiry_date, status, notes,
+      created_at, updated_at
+    `)
     .order("name_en", { ascending: true })
 
   if (partyType) {
@@ -29,7 +37,7 @@ const fetchParties = async (partyType?: "Employer" | "Client"): Promise<Party[]>
   return data || []
 }
 
-export const useParties = (partyType?: "Employer" | "Client") => {
+export const useParties = (partyType?: "Employer" | "Client" | "Both") => {
   const { toast } = useToast()
   return useQuery<Party[], Error>({
     queryKey: ["parties", partyType || "all"], // Unique query key based on type

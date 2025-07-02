@@ -3,8 +3,21 @@ export interface Party {
   name_en: string
   name_ar: string
   crn: string
-  type?: string | null
+  type?: "Employer" | "Client" | "Both" | null
+  role?: string | null
+  cr_expiry_date?: string | null
+  contact_person?: string | null
+  contact_email?: string | null
+  contact_phone?: string | null
+  address_en?: string | null
+  address_ar?: string | null
+  tax_number?: string | null
+  license_number?: string | null
+  license_expiry_date?: string | null
+  status?: "Active" | "Inactive" | "Suspended" | null
+  notes?: string | null
   created_at?: string | null
+  updated_at?: string | null
 }
 
 export interface Promoter {
