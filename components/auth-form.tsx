@@ -12,7 +12,11 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 
-export default function AuthForm() {
+interface AuthFormProps {
+  locale?: string
+}
+
+export default function AuthForm({ locale }: AuthFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -63,7 +67,7 @@ export default function AuthForm() {
         })
     } else {
       toast({ title: "Success!", description: "You are now signed in." })
-        router.push("/generate-contract")
+        router.push(locale ? `/${locale}/generate-contract` : "/generate-contract")
         router.refresh()
       }
     } catch (error) {
@@ -104,7 +108,7 @@ export default function AuthForm() {
         title: "Success!",
         description: "Signed up successfully. Please check your email to confirm your account.",
       })
-        router.push("/generate-contract")
+        router.push(locale ? `/${locale}/generate-contract` : "/generate-contract")
       router.refresh()
     }
     } catch (error) {
