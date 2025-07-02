@@ -145,7 +145,7 @@ export function HomePageContent({ locale }: HomePageContentProps) {
                     variant={action.variant}
                     className="h-12 w-full text-base font-semibold"
                   >
-                    <Link href={locale ? `/${locale}${action.href}` : action.href}>{action.title}</Link>
+                    <Link href={action.href}>{action.title}</Link>
                   </Button>
                 )}
               </CardContent>
