@@ -86,17 +86,25 @@ export default function ManagePromotersPage() {
 
     const todayStr = format(new Date(), "yyyy-MM-dd")
 
-    const promotersWithCounts = promotersData.map((promoter) => {
-      const activeContracts = contractsData
-        ? contractsData.filter(
-            (c) =>
-              c.promoter_id === promoter.id &&
-              c.contract_end_date &&
-              c.contract_end_date >= todayStr,
-          ).length
-        : 0
-      return { ...promoter, active_contracts_count: activeContracts }
-    })
+    const promotersWithCounts = promotersData
+      .filter((promoter) => promoter.id) // Filter out promoters without IDs
+      .map((promoter) => {
+        const activeContracts = contractsData
+          ? contractsData.filter(
+              (c) =>
+                c.promoter_id === promoter.id &&
+                c.contract_end_date &&
+                c.contract_end_date >= todayStr,
+            ).length
+          : 0
+        return { ...promoter, active_contracts_count: activeContracts }
+      })
+
+    // Debug: Log any promoters without IDs
+    const promotersWithoutIds = promotersData.filter((promoter) => !promoter.id)
+    if (promotersWithoutIds.length > 0) {
+      console.warn("Found promoters without IDs:", promotersWithoutIds)
+    }
 
     if (isMountedRef.current) {
       setPromoters(promotersWithCounts)

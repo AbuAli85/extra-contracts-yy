@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState, useRef } from "react"
 import type React from "react"
+import { debugNavigation } from "@/lib/dev-log"
 
 import PromoterForm from "@/components/promoter-form"
 import { Button } from "@/components/ui/button"
@@ -89,17 +90,25 @@ export default function ManagePromotersPage() {
 
     const todayStr = format(new Date(), "yyyy-MM-dd")
 
-    const promotersWithCounts = promotersData.map((promoter) => {
-      const activeContracts = contractsData
-        ? contractsData.filter(
-            (c) =>
-              c.promoter_id === promoter.id &&
-              c.contract_end_date &&
-              c.contract_end_date >= todayStr,
-          ).length
-        : 0
-      return { ...promoter, active_contracts_count: activeContracts }
-    })
+    const promotersWithCounts = promotersData
+      .filter((promoter) => promoter.id) // Filter out promoters without IDs
+      .map((promoter) => {
+        const activeContracts = contractsData
+          ? contractsData.filter(
+              (c) =>
+                c.promoter_id === promoter.id &&
+                c.contract_end_date &&
+                c.contract_end_date >= todayStr,
+            ).length
+          : 0
+        return { ...promoter, active_contracts_count: activeContracts }
+      })
+
+    // Debug: Log any promoters without IDs
+    const promotersWithoutIds = promotersData.filter((promoter) => !promoter.id)
+    if (promotersWithoutIds.length > 0) {
+      console.warn("Found promoters without IDs:", promotersWithoutIds)
+    }
 
     if (isMountedRef.current) {
       setPromoters(promotersWithCounts)
@@ -351,7 +360,16 @@ export default function ManagePromotersPage() {
                                 className="text-xs"
                                 disabled={!promoter.id}
                               >
-                                <Link href={promoter.id ? `/manage-promoters/${promoter.id}` : "#"}>
+                                <Link 
+                                  href={promoter.id ? `/manage-promoters/${promoter.id}` : "#"}
+                                  onClick={() => {
+                                    debugNavigation("Link clicked", { 
+                                      promoterId: promoter.id, 
+                                      promoterName: promoter.name_en,
+                                      href: promoter.id ? `/manage-promoters/${promoter.id}` : "#"
+                                    })
+                                  }}
+                                >
                                   <EyeIcon className="mr-1 h-3.5 w-3.5" /> View
                                 </Link>
                               </Button>
