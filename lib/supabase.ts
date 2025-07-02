@@ -77,3 +77,31 @@ export const handleRealtimeError = (error: any, tableName: string) => {
   console.error(`Unknown error for ${tableName}:`, message)
   return "UNKNOWN_ERROR"
 }
+
+// Utility function to safely create a realtime channel
+export const createRealtimeChannel = (tableName: string, callback: (payload: any) => void) => {
+  try {
+    return supabase
+      .channel(`public-${tableName}-realtime`)
+      .on("postgres_changes", { event: "*", schema: "public", table: tableName }, callback)
+  } catch (error) {
+    console.error(`Error creating realtime channel for ${tableName}:`, error)
+    return null
+  }
+}
+
+// Utility function to safely subscribe to a channel
+export const subscribeToChannel = (channel: any, onStatusChange?: (status: string, error?: any) => void) => {
+  if (!channel) return null
+  
+  try {
+    return channel.subscribe((status: string, error?: any) => {
+      if (onStatusChange) {
+        onStatusChange(status, error)
+      }
+    })
+  } catch (error) {
+    console.error("Error subscribing to channel:", error)
+    return null
+  }
+}

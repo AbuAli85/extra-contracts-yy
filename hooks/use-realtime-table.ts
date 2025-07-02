@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/hooks/use-auth"
+import { devLog } from "@/lib/dev-log"
 
 export function useRealtimeTable(table: string, onChange: (payload: any) => void) {
   const { isAuthenticated } = useAuth()
@@ -20,17 +21,17 @@ export function useRealtimeTable(table: string, onChange: (payload: any) => void
         .subscribe((status, err) => {
           if (status === "CHANNEL_ERROR") {
             const message = err?.message ?? "Unknown channel error"
-            console.error(`${table} channel error (${status}):`, message)
+            devLog(`${table} channel error (${status}): ${message}`)
             
             // Check if it's an authentication error
             if (message.includes("JWT") || message.includes("auth") || message.includes("permission")) {
-              console.warn(`Authentication error detected for ${table}, will retry after auth check`)
+              devLog(`Authentication error detected for ${table}, will retry after auth check`)
               return
             }
           }
         })
     } catch (error) {
-      console.error(`Error setting up ${table} subscription:`, error)
+      devLog(`Error setting up ${table} subscription:`, error)
     }
 
     return () => {

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useEffect, useMemo } from "react"
-import { supabase } from "@/lib/supabase"
+import { useEffect, useMemo, useRef } from "react"
+import { supabase, createRealtimeChannel, subscribeToChannel, handleRealtimeError } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/use-auth"
@@ -26,6 +26,8 @@ export const usePromoters = (enableRealtime: boolean = true) => {
   const queryKey = useMemo(() => ["promoters"], [])
   const { toast } = useToast()
   const { isAuthenticated } = useAuth()
+  const channelRef = useRef<any>(null)
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const queryResult = useQuery<Promoter[], Error>({
     queryKey,
@@ -56,90 +58,99 @@ export const usePromoters = (enableRealtime: boolean = true) => {
 
     let retryCount = 0
     const maxRetries = 3
-    let retryTimeout: NodeJS.Timeout
     let isSubscribed = false
-    let channel: any = null
 
     const setupSubscription = () => {
       if (isSubscribed) return
 
       try {
-        channel = supabase
-          .channel("public-promoters-realtime")
-          .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, (payload) => {
-            devLog("Realtime promoter change received!", payload)
-            queryClient.invalidateQueries({ queryKey: queryKey })
-          })
-          .subscribe((status, err) => {
-            if (status === "SUBSCRIBED") {
-              devLog("Subscribed to promoters channel!")
-              retryCount = 0 // Reset retry count on successful connection
-              isSubscribed = true
-            }
-            if (status === "CHANNEL_ERROR") {
-              const message = err?.message ?? "Unknown channel error"
-              console.error(`Promoters channel error (${status}):`, message)
-              
-              // Check if it's an authentication error
-              if (message.includes("JWT") || message.includes("auth") || message.includes("permission")) {
-                console.warn("Authentication error detected, will retry after auth check")
-                // Don't retry immediately, let the auth state change handler deal with it
-                return
-              }
-                
-              // Retry connection if we haven't exceeded max retries
-              if (retryCount < maxRetries) {
-                retryCount++
-                console.log(`Retrying promoters subscription (${retryCount}/${maxRetries})...`)
-                retryTimeout = setTimeout(() => {
-                  if (channel) {
-                    supabase.removeChannel(channel)
-                  }
-                  isSubscribed = false
-                  setupSubscription()
-                }, 2000 * retryCount) // Exponential backoff
-              } else {
-                console.error("Max retries exceeded for promoters subscription")
-                // Don't show toast for realtime errors as they're not critical
-              }
-            }
-            if (status === "TIMED_OUT") {
-              console.warn(`Subscription timed out (${status})`)
-              
-              // Retry connection if we haven't exceeded max retries
-              if (retryCount < maxRetries) {
-                retryCount++
-                console.log(`Retrying promoters subscription after timeout (${retryCount}/${maxRetries})...`)
-                retryTimeout = setTimeout(() => {
-                  if (channel) {
-                    supabase.removeChannel(channel)
-                  }
-                  isSubscribed = false
-                  setupSubscription()
-                }, 2000 * retryCount) // Exponential backoff
-              } else {
-                console.error("Max retries exceeded for promoters subscription after timeout")
-                // Don't show toast for realtime errors as they're not critical
-              }
-            }
-          })
+        // Clean up any existing channel first
+        if (channelRef.current) {
+          supabase.removeChannel(channelRef.current)
+          channelRef.current = null
+        }
 
-        return channel
+        // Create channel using utility function
+        channelRef.current = createRealtimeChannel("promoters", (payload) => {
+          devLog("Realtime promoter change received!", payload)
+          queryClient.invalidateQueries({ queryKey: queryKey })
+        })
+
+        if (!channelRef.current) {
+          devLog("Failed to create promoters channel")
+          return
+        }
+
+        // Subscribe using utility function
+        subscribeToChannel(channelRef.current, (status, err) => {
+          if (status === "SUBSCRIBED") {
+            devLog("Subscribed to promoters channel!")
+            retryCount = 0 // Reset retry count on successful connection
+            isSubscribed = true
+          }
+          if (status === "CHANNEL_ERROR") {
+            const errorType = handleRealtimeError(err, "promoters")
+            devLog(`Promoters channel error (${status}): ${err?.message ?? "Unknown error"} - Type: ${errorType}`)
+            
+            // Check if it's an authentication error
+            if (errorType === "AUTH_ERROR") {
+              devLog("Authentication error detected, will retry after auth check")
+              // Don't retry immediately, let the auth state change handler deal with it
+              return
+            }
+              
+            // Retry connection if we haven't exceeded max retries
+            if (retryCount < maxRetries) {
+              retryCount++
+              devLog(`Retrying promoters subscription (${retryCount}/${maxRetries})...`)
+              retryTimeoutRef.current = setTimeout(() => {
+                isSubscribed = false
+                setupSubscription()
+              }, 2000 * retryCount) // Exponential backoff
+            } else {
+              devLog("Max retries exceeded for promoters subscription")
+              // Don't show toast for realtime errors as they're not critical
+            }
+          }
+          if (status === "TIMED_OUT") {
+            devLog(`Subscription timed out (${status})`)
+            
+            // Retry connection if we haven't exceeded max retries
+            if (retryCount < maxRetries) {
+              retryCount++
+              devLog(`Retrying promoters subscription after timeout (${retryCount}/${maxRetries})...`)
+              retryTimeoutRef.current = setTimeout(() => {
+                isSubscribed = false
+                setupSubscription()
+              }, 2000 * retryCount) // Exponential backoff
+            } else {
+              devLog("Max retries exceeded for promoters subscription after timeout")
+              // Don't show toast for realtime errors as they're not critical
+            }
+          }
+        })
+
+        return channelRef.current
       } catch (error) {
-        console.error("Error setting up promoters subscription:", error)
+        devLog("Error setting up promoters subscription:", error)
         return null
       }
     }
 
-    const channel = setupSubscription()
+    setupSubscription()
 
     return () => {
-      if (retryTimeout) {
-        clearTimeout(retryTimeout)
+      // Clean up timeout
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current)
+        retryTimeoutRef.current = null
       }
+      
+      // Clean up channel
       isSubscribed = false
-      if (channel) {
-        supabase.removeChannel(channel)
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
       }
     }
   }, [queryClient, queryKey, enableRealtime, isAuthenticated])

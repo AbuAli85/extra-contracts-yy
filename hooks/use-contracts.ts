@@ -95,11 +95,11 @@ export const useContracts = () => {
             }
             if (status === "CHANNEL_ERROR") {
               const message = err?.message ?? "Unknown channel error"
-              console.error(`Contracts channel error (${status}):`, message)
+              devLog(`Contracts channel error (${status}): ${message}`)
               
               // Check if it's an authentication error
               if (message.includes("JWT") || message.includes("auth") || message.includes("permission")) {
-                console.warn("Authentication error detected for contracts, will retry after auth check")
+                devLog("Authentication error detected for contracts, will retry after auth check")
                 // Don't retry immediately, let the auth state change handler deal with it
                 return
               }
@@ -107,7 +107,7 @@ export const useContracts = () => {
               // Retry connection if we haven't exceeded max retries
               if (retryCount < maxRetries) {
                 retryCount++
-                console.log(`Retrying contracts subscription (${retryCount}/${maxRetries})...`)
+                devLog(`Retrying contracts subscription (${retryCount}/${maxRetries})...`)
                 retryTimeout = setTimeout(() => {
                   if (channel) {
                     supabase.removeChannel(channel)
@@ -115,16 +115,16 @@ export const useContracts = () => {
                   setupSubscription()
                 }, 2000 * retryCount) // Exponential backoff
               } else {
-                console.error("Max retries exceeded for contracts subscription")
+                devLog("Max retries exceeded for contracts subscription")
               }
             }
             if (status === "TIMED_OUT") {
-              console.warn(`Subscription timed out (${status})`)
+              devLog(`Subscription timed out (${status})`)
                 
               // Retry connection if we haven't exceeded max retries
               if (retryCount < maxRetries) {
                 retryCount++
-                console.log(`Retrying contracts subscription after timeout (${retryCount}/${maxRetries})...`)
+                devLog(`Retrying contracts subscription after timeout (${retryCount}/${maxRetries})...`)
                 retryTimeout = setTimeout(() => {
                   if (channel) {
                     supabase.removeChannel(channel)
@@ -132,14 +132,14 @@ export const useContracts = () => {
                   setupSubscription()
                 }, 2000 * retryCount) // Exponential backoff
               } else {
-                console.error("Max retries exceeded for contracts subscription after timeout")
+                devLog("Max retries exceeded for contracts subscription after timeout")
               }
             }
           })
 
         return channel
       } catch (error) {
-        console.error("Error setting up contracts subscription:", error)
+        devLog("Error setting up contracts subscription:", error)
         return null
       }
     }
