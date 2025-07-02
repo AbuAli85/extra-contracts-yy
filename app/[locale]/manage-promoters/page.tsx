@@ -330,8 +330,14 @@ export default function ManagePromotersPage() {
                           </TableCell>
                           <TableCell className="px-4 py-3 text-right">
                             <div className="flex justify-end gap-2">
-                              <Button asChild variant="outline" size="sm" className="text-xs">
-                                <Link href={`/manage-promoters/${promoter.id}`}>
+                              <Button 
+                                asChild 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-xs"
+                                disabled={!promoter.id}
+                              >
+                                <Link href={promoter.id ? `/manage-promoters/${promoter.id}` : "#"}>
                                   <EyeIcon className="mr-1 h-3.5 w-3.5" /> View
                                 </Link>
                               </Button>

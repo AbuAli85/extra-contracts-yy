@@ -367,11 +367,16 @@ export default function ManagePromotersPage() {
                           <TableCell className="px-4 py-3 text-right">
                             <div className="flex justify-end gap-2">
                               <Link
-                                href={`/manage-promoters/${promoter.id}`}
+                                href={promoter.id ? `/manage-promoters/${promoter.id}` : "#"}
                                 passHref
                                 legacyBehavior
                               >
-                                <Button variant="outline" size="sm" className="text-xs">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="text-xs"
+                                  disabled={!promoter.id}
+                                >
                                   <EyeIcon className="mr-1 h-3.5 w-3.5" /> View
                                 </Button>
                               </Link>
