@@ -1,12 +1,6 @@
-import { redirect } from 'next/navigation'
+import AnalyticsPage from '../../../dashboard/analytics/page'
 
-export default async function LocaleAnalyticsPage({ 
-  params 
-}: { 
-  params: Promise<{ locale: string }> 
-}) {
+export default async function LocaleAnalyticsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  
-  // Redirect to the main dashboard analytics page
-  redirect('/dashboard/analytics')
+  return <AnalyticsPage locale={locale} />
 } 
