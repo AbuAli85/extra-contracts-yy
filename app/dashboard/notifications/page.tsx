@@ -140,7 +140,7 @@ export default function NotificationsPage() {
     return filtered.slice(start, start + PAGE_SIZE)
   }, [filtered, page])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)), [filtered.length])
 
   // Optimistic updates for better UX
   const toggleRead = async (notif) => {
@@ -204,7 +204,7 @@ export default function NotificationsPage() {
       })
     } catch (err) {
       // Revert on error
-      fetchNotifications()
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: false })))
       toast({
         title: "Error",
         description: "Failed to mark notifications as read.",
@@ -238,7 +238,7 @@ export default function NotificationsPage() {
       })
     } catch (err) {
       // Revert on error
-      fetchNotifications()
+      setNotifications((prev) => [...prev])
       toast({
         title: "Error",
         description: "Failed to clear notifications.",
@@ -259,7 +259,7 @@ export default function NotificationsPage() {
     if (page > totalPages && totalPages > 0) {
       setPage(totalPages)
     }
-  }, [totalPages])
+  }, [filtered.length])
 
   return (
     <DashboardLayout>
