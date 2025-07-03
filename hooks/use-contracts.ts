@@ -14,15 +14,11 @@ import { useEffect } from "react"
 // Detailed contract type including joined relational data
 // This mirrors what the `fetchContracts` query selects
 export type ContractWithRelations = Database["public"]["Tables"]["contracts"]["Row"] & {
-  parties_contracts_employer_id_fkey?: Database["public"]["Tables"]["parties"]["Row"] | null
-  parties_contracts_client_id_fkey?: Database["public"]["Tables"]["parties"]["Row"] | null
-  promoters?: Database["public"]["Tables"]["promoters"]["Row"] | null
+  employer?: Database["public"]["Tables"]["parties"]["Row"] | null
+  client?: Database["public"]["Tables"]["parties"]["Row"] | null
+  promoters?: Database["public"]["Tables"]["promoters"]["Row"][] | null
   promoter_name_en?: string | null
   promoter_name_ar?: string | null
-  // Adjust based on your actual join aliases if different
-  // For example, if you aliased them:
-  // employer?: Database["public"]["Tables"]["parties"]["Row"] | null
-  // client?: Database["public"]["Tables"]["parties"]["Row"] | null
 }
 // Minimal fields required when creating a new contract
 export type ContractInsert = Database["public"]["Tables"]["contracts"]["Insert"]

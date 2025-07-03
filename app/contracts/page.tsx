@@ -335,7 +335,9 @@ export default async function ContractsListPage({
                           </div>
                         </TableCell>
                         <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
-                          {contract.promoter_name_en}
+                          {typeof contract.promoter_name_en === 'string' 
+                            ? contract.promoter_name_en 
+                            : contract.promoter_name_en?.name_en || "N/A"}
                         </TableCell>
                         <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
                           {contract.contract_start_date
