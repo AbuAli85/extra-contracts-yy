@@ -254,12 +254,12 @@ export default function NotificationsPage() {
     setPage(1)
   }, [search, typeFilter, readFilter])
 
-  // Reset page if current page is beyond total pages
+  // Reset page if current page is beyond total pages (only when filters change)
   useEffect(() => {
     if (page > totalPages && totalPages > 0) {
       setPage(totalPages)
     }
-  }, [page, totalPages])
+  }, [totalPages])
 
   return (
     <DashboardLayout>
