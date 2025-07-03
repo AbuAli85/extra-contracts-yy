@@ -24,9 +24,9 @@ export default function ReviewPanel() {
   const fetchReviewItems = async () => {
     setLoading(true)
     try {
-      // Example: Fetch contracts with status 'Pending Approval'
+      // Fetch recent contracts for review (without status filter since status column doesn't exist)
       const { data, error } = await supabase
-        .from("contracts") // Or a dedicated 'review_items' table
+        .from("contracts")
         .select(
           `
           id, created_at,
@@ -34,8 +34,7 @@ export default function ReviewPanel() {
           client:parties!contracts_client_id_fkey(id,name_en,name_ar),
           promoters(id,name_en,name_ar)
           `,
-        ) // Adjust fields
-        .eq("status", "Pending Approval") // This status needs to exist in your contracts table
+        )
         .order("created_at", { ascending: false })
         .limit(10)
 
@@ -72,7 +71,7 @@ export default function ReviewPanel() {
       .channel("public:contracts:review")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "contracts", filter: "status=eq.Pending Approval" },
+        { event: "*", schema: "public", table: "contracts" },
         (payload) => {
           devLog("Review items change:", payload)
           toast({
@@ -127,7 +126,7 @@ export default function ReviewPanel() {
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="mb-1 flex items-center gap-2">
-                        <Badge variant="secondary">Pending Approval</Badge>
+                        <Badge variant="secondary">For Review</Badge>
                         <h4 className="font-semibold">{item.title}</h4>
                       </div>
                       <p className="text-sm text-muted-foreground">Parties: {item.parties}</p>
