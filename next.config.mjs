@@ -1,10 +1,3 @@
-import path from "path"
-import { fileURLToPath } from "url"
-
-// Create a __dirname constant that works in ES modules
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   eslint: {
@@ -14,7 +7,7 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: {
-    unoptimized: true, // Useful for static exports or if image optimization is handled elsewhere
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
@@ -26,11 +19,12 @@ const nextConfig = {
       },
     ],
   },
+  i18n: {
+    locales: ['en', 'ar'],
+    defaultLocale: 'en',
+  },
   webpack: (config) => {
-    // Allow absolute imports starting with /app to resolve from the repository root
-   // config.resolve.alias["/app"] = path.resolve(__dirname, "app")
+    // config.resolve.alias["/app"] = path.resolve(__dirname, "app")
     return config
   },
 }
-
-export default nextConfig
