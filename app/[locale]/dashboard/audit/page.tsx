@@ -1,12 +1,6 @@
-import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation';
 
-export default async function LocaleAuditPage({ 
-  params 
-}: { 
-  params: Promise<{ locale: string }> 
-}) {
-  const { locale } = await params
-  
-  // Redirect to the main dashboard audit page
-  redirect('/dashboard/audit')
-} 
+export default async function LocaleAuditPage({ params }: { params: Promise<{ locale: string }> }) {
+  await params; // If you do not need locale, just await it for type safety
+  redirect('/dashboard/audit');
+}
