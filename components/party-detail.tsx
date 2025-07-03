@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useUser } from '@supabase/auth-helpers-react'
+import { useUserRole } from '../hooks/useUserRole'
 
 export default function PartyDetail({ partyId }) {
   const user = useUser()
+  const role = useUserRole()
   const [notes, setNotes] = useState([])
   const [tags, setTags] = useState([])
   const [activities, setActivities] = useState([])
@@ -59,6 +61,24 @@ export default function PartyDetail({ partyId }) {
     supabase.from('party_files').select('*').eq('party_id', partyId).then(({ data }) => setFiles(data || []))
   }
 
+  const deleteFile = async (file) => {
+    // Only allow if user is uploader, party owner, or admin
+    if (
+      user.id === file.user_id ||
+      user.id === ownerId ||
+      role === 'admin'
+    ) {
+      // Remove from storage
+      const filePath = file.file_url.split('/party-files/')[1]
+      await supabase.storage.from('party-files').remove([filePath])
+      // Remove from DB
+      await supabase.from('party_files').delete().eq('id', file.id)
+      supabase.from('party_files').select('*').eq('party_id', partyId).then(({ data }) => setFiles(data || []))
+    } else {
+      alert('You do not have permission to delete this file.')
+    }
+  }
+
   return (
     <div>
       <h2>Party Details</h2>
@@ -96,8 +116,17 @@ export default function PartyDetail({ partyId }) {
         <input type="file" ref={fileInputRef} onChange={uploadFile} />
         <ul>
           {files.map(f => (
-            <li key={f.id}>
+            <li key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {/* Preview logic */}
+              {f.file_name.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                <img src={f.file_url} alt={f.file_name} style={{ width: 40, height: 40, objectFit: 'cover' }} />
+              ) : f.file_name.match(/\.pdf$/i) ? (
+                <span style={{ fontSize: 24, marginRight: 8 }}>📄</span>
+              ) : null}
               <a href={f.file_url} target="_blank" rel="noopener noreferrer">{f.file_name}</a>
+              {(user.id === f.user_id || user.id === ownerId || role === 'admin') && (
+                <button onClick={() => deleteFile(f)} style={{ marginLeft: 8, color: 'red' }}>Delete</button>
+              )}
             </li>
           ))}
         </ul>
