@@ -374,9 +374,19 @@ export default function PromoterDetailPage() {
                     </Table>
                   </div>
                 ) : (
-                  <p className="py-4 text-center text-sm text-muted-foreground">
-                    No contracts associated with this promoter.
-                  </p>
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <FileTextIcon className="h-12 w-12 text-muted-foreground mb-4" aria-hidden="true" />
+                    <h3 className="text-lg font-semibold mb-2">No Contracts Yet</h3>
+                    <p className="text-sm text-muted-foreground mb-4 text-center max-w-xs">
+                      This promoter does not have any contracts yet. Start by generating a new contract for them.
+                    </p>
+                    <Button asChild variant="outline">
+                      <Link href={`/generate-contract?promoter=${promoterId}`}>
+                        <FileTextIcon className="mr-2 h-4 w-4" />
+                        Generate New Contract
+                      </Link>
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>
