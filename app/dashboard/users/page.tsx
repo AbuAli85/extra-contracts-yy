@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button"
 import { UserPlus } from "lucide-react"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { useToast } from "@/hooks/use-toast"
 
 const ROLES = ["admin", "manager", "viewer"]
 
@@ -13,6 +16,10 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [newEmail, setNewEmail] = useState("")
+  const [newRole, setNewRole] = useState(ROLES[0])
+  const { toast } = useToast()
 
   useEffect(() => {
     async function fetchUsers() {
@@ -34,6 +41,25 @@ export default function UsersPage() {
     setSaving(null)
   }
 
+  const addUser = async () => {
+    if (!newEmail) {
+      toast({ title: "Email required", description: "Please enter an email.", variant: "destructive" })
+      return
+    }
+    setSaving("add")
+    setError(null)
+    const { error } = await supabase.from("app_users").insert([{ email: newEmail, role: newRole }])
+    if (error) setError(error.message)
+    else {
+      setUsers([...users, { id: Math.random().toString(), email: newEmail, role: newRole }]) // Optimistic
+      setShowAddModal(false)
+      setNewEmail("")
+      setNewRole(ROLES[0])
+      toast({ title: "User added", description: `User ${newEmail} added successfully.` })
+    }
+    setSaving(null)
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -44,7 +70,7 @@ export default function UsersPage() {
               Manage users, roles, and permissions. / إدارة المستخدمين والأدوار والأذونات.
             </CardDescription>
           </CardHeader>
-          <Button>
+          <Button onClick={() => setShowAddModal(true)}>
             <UserPlus className="mr-2 h-4 w-4" /> Add User
           </Button>
         </div>
@@ -93,6 +119,36 @@ export default function UsersPage() {
             )}
           </CardContent>
         </Card>
+        <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New User</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input
+                placeholder="Email"
+                value={newEmail}
+                onChange={e => setNewEmail(e.target.value)}
+                type="email"
+                autoFocus
+              />
+              <select
+                value={newRole}
+                onChange={e => setNewRole(e.target.value)}
+                className="border rounded px-2 py-1 w-full"
+              >
+                {ROLES.map(role => (
+                  <option key={role} value={role}>{role}</option>
+                ))}
+              </select>
+            </div>
+            <DialogFooter>
+              <Button onClick={addUser} disabled={saving === "add"}>
+                {saving === "add" ? "Adding..." : "Add User"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   )
