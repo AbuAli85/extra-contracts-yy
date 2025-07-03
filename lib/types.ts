@@ -17,7 +17,6 @@ export interface Party {
   status?: "Active" | "Inactive" | "Suspended" | null
   notes?: string | null
   created_at?: string | null
-  updated_at?: string | null
 }
 
 export interface Promoter {

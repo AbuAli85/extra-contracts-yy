@@ -108,7 +108,7 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
   async function onSubmit(values: PartyFormData) {
     setIsSubmitting(true)
     try {
-      const partyData: Omit<Party, "id" | "created_at" | "updated_at"> = {
+      const partyData: Omit<Party, "id" | "created_at"> = {
         name_en: values.name_en,
         name_ar: values.name_ar,
         crn: values.crn,
