@@ -19,6 +19,8 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
@@ -33,6 +35,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import clsx from "clsx";
 
 const ROLES = ["admin", "manager", "viewer"];
 const STATUS = ["active", "disabled"];
@@ -46,6 +49,17 @@ function getInitials(email: string) {
   if (!email) return "?";
   const [name] = email.split("@");
   return name.slice(0, 2).toUpperCase();
+}
+
+function relativeTime(date: string | null) {
+  if (!date) return "-";
+  const d = new Date(date);
+  const now = new Date();
+  const diff = Math.floor((now.getTime() - d.getTime()) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return d.toLocaleDateString();
 }
 
 export default function UsersPage() {
@@ -73,6 +87,8 @@ export default function UsersPage() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [undoUser, setUndoUser] = useState<any | null>(null);
   const [undoTimeout, setUndoTimeout] = useState<any>(null);
+  const [banner, setBanner] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Simulate current user role (replace with real auth/role check)
@@ -146,20 +162,13 @@ export default function UsersPage() {
 
   // Add user logic
   const addUser = async () => {
+    setFormError(null);
     if (!newEmail) {
-      toast({
-        title: "Email required",
-        description: "Please enter an email.",
-        variant: "destructive",
-      });
+      setFormError("Email is required.");
       return;
     }
     if (!isValidEmail(newEmail)) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      });
+      setFormError("Please enter a valid email address.");
       return;
     }
     setAddLoading(true);
@@ -170,21 +179,12 @@ export default function UsersPage() {
       .select("id")
       .eq("email", newEmail);
     if (checkError) {
-      setError(checkError.message);
-      toast({
-        title: "Error",
-        description: checkError.message,
-        variant: "destructive",
-      });
+      setFormError(checkError.message);
       setAddLoading(false);
       return;
     }
     if (existing && existing.length > 0) {
-      toast({
-        title: "Duplicate email",
-        description: "A user with this email already exists.",
-        variant: "destructive",
-      });
+      setFormError("A user with this email already exists.");
       setAddLoading(false);
       return;
     }
@@ -198,12 +198,7 @@ export default function UsersPage() {
       },
     ]);
     if (insertError) {
-      setError(insertError.message);
-      toast({
-        title: "Error adding user",
-        description: insertError.message,
-        variant: "destructive",
-      });
+      setFormError(insertError.message);
       setAddLoading(false);
       return;
     }
@@ -213,10 +208,7 @@ export default function UsersPage() {
     setNewRole(ROLES[0]);
     setNewStatus(STATUS[0]);
     setNewAvatarUrl("");
-    toast({
-      title: "User added",
-      description: `User ${newEmail} added successfully.`,
-    });
+    setBanner({ type: "success", message: `User ${newEmail} added successfully.` });
     setAddLoading(false);
   };
 
@@ -228,23 +220,17 @@ export default function UsersPage() {
     setNewStatus(user.status || STATUS[0]);
     setNewAvatarUrl(user.avatar_url || "");
     setShowEditModal(true);
+    setFormError(null);
   };
   const editUser = async () => {
+    setFormError(null);
     if (!selectedUser) return;
     if (!newEmail) {
-      toast({
-        title: "Email required",
-        description: "Please enter an email.",
-        variant: "destructive",
-      });
+      setFormError("Email is required.");
       return;
     }
     if (!isValidEmail(newEmail)) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      });
+      setFormError("Please enter a valid email address.");
       return;
     }
     setEditLoading(true);
@@ -256,21 +242,12 @@ export default function UsersPage() {
         .select("id")
         .eq("email", newEmail);
       if (checkError) {
-        setError(checkError.message);
-        toast({
-          title: "Error",
-          description: checkError.message,
-          variant: "destructive",
-        });
+        setFormError(checkError.message);
         setEditLoading(false);
         return;
       }
       if (existing && existing.length > 0) {
-        toast({
-          title: "Duplicate email",
-          description: "A user with this email already exists.",
-          variant: "destructive",
-        });
+        setFormError("A user with this email already exists.");
         setEditLoading(false);
         return;
       }
@@ -286,12 +263,7 @@ export default function UsersPage() {
       })
       .eq("id", selectedUser.id);
     if (updateError) {
-      setError(updateError.message);
-      toast({
-        title: "Error updating user",
-        description: updateError.message,
-        variant: "destructive",
-      });
+      setFormError(updateError.message);
       setEditLoading(false);
       return;
     }
@@ -302,10 +274,7 @@ export default function UsersPage() {
     setNewRole(ROLES[0]);
     setNewStatus(STATUS[0]);
     setNewAvatarUrl("");
-    toast({
-      title: "User updated",
-      description: `User ${newEmail} updated successfully.`,
-    });
+    setBanner({ type: "success", message: `User ${newEmail} updated successfully.` });
     setEditLoading(false);
   };
 
@@ -329,9 +298,9 @@ export default function UsersPage() {
       setUndoUser(null);
     }, 5000);
     setUndoTimeout(timeout);
-    toast({
-      title: "User deleted",
-      description: (
+    setBanner({
+      type: "success",
+      message: (
         <span>
           User deleted.{" "}
           <Button
@@ -339,13 +308,13 @@ export default function UsersPage() {
             size="sm"
             onClick={undoDelete}
             className="inline px-1"
+            aria-label="Undo delete"
           >
             <Undo2 className="inline h-4 w-4 mr-1" />
             Undo
           </Button>
         </span>
-      ),
-      duration: 5000,
+      ) as any,
     });
     setDeleteLoading(false);
   };
@@ -356,10 +325,7 @@ export default function UsersPage() {
     await fetchUsers();
     setUndoUser(null);
     if (undoTimeout) clearTimeout(undoTimeout);
-    toast({
-      title: "Undo successful",
-      description: "User restored.",
-    });
+    setBanner({ type: "success", message: "User restored." });
   };
 
   // Pagination controls
@@ -386,6 +352,31 @@ export default function UsersPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4 md:p-8">
+        {banner && (
+          <div
+            className={clsx(
+              "flex items-center gap-2 px-4 py-2 rounded mb-4",
+              banner.type === "success"
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            )}
+            role="alert"
+          >
+            {banner.type === "success" ? (
+              <CheckCircle2 className="h-5 w-5" />
+            ) : (
+              <XCircle className="h-5 w-5" />
+            )}
+            <span>{banner.message}</span>
+            <button
+              className="ml-auto text-lg font-bold"
+              aria-label="Close banner"
+              onClick={() => setBanner(null)}
+            >
+              ×
+            </button>
+          </div>
+        )}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <CardHeader className="p-0">
@@ -464,6 +455,14 @@ export default function UsersPage() {
               <div className="flex flex-col items-center py-12">
                 <span className="text-6xl mb-2">👤</span>
                 <p className="text-gray-500">No users found.</p>
+                {currentUserRole === "admin" && (
+                  <Button
+                    className="mt-4"
+                    onClick={() => setShowAddModal(true)}
+                  >
+                    <UserPlus className="mr-2 h-4 w-4" /> Add your first user
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -474,6 +473,8 @@ export default function UsersPage() {
                       <th
                         className="px-4 py-2 text-left cursor-pointer select-none"
                         onClick={() => handleSort("email")}
+                        aria-sort={sortBy === "email" ? sortDir : undefined}
+                        tabIndex={0}
                       >
                         Email{" "}
                         {sortBy === "email" &&
@@ -486,6 +487,8 @@ export default function UsersPage() {
                       <th
                         className="px-4 py-2 text-left cursor-pointer select-none"
                         onClick={() => handleSort("role")}
+                        aria-sort={sortBy === "role" ? sortDir : undefined}
+                        tabIndex={0}
                       >
                         Role{" "}
                         {sortBy === "role" &&
@@ -498,6 +501,8 @@ export default function UsersPage() {
                       <th
                         className="px-4 py-2 text-left cursor-pointer select-none"
                         onClick={() => handleSort("status")}
+                        aria-sort={sortBy === "status" ? sortDir : undefined}
+                        tabIndex={0}
                       >
                         Status{" "}
                         {sortBy === "status" &&
@@ -510,6 +515,8 @@ export default function UsersPage() {
                       <th
                         className="px-4 py-2 text-left cursor-pointer select-none"
                         onClick={() => handleSort("created_at")}
+                        aria-sort={sortBy === "created_at" ? sortDir : undefined}
+                        tabIndex={0}
                       >
                         Created At{" "}
                         {sortBy === "created_at" &&
@@ -522,6 +529,8 @@ export default function UsersPage() {
                       <th
                         className="px-4 py-2 text-left cursor-pointer select-none"
                         onClick={() => handleSort("last_login")}
+                        aria-sort={sortBy === "last_login" ? sortDir : undefined}
+                        tabIndex={0}
                       >
                         Last Login{" "}
                         {sortBy === "last_login" &&
@@ -538,11 +547,12 @@ export default function UsersPage() {
                     {paginatedUsers.map((user: any, idx: number) => (
                       <tr
                         key={user.id}
-                        className={
+                        className={clsx(
                           idx % 2 === 0
                             ? "bg-white"
-                            : "bg-gray-50 dark:bg-gray-900/10"
-                        }
+                            : "bg-gray-50 dark:bg-gray-900/10",
+                          "hover:bg-blue-50 transition"
+                        )}
                       >
                         <td className="px-4 py-2">
                           <Avatar>
@@ -555,7 +565,18 @@ export default function UsersPage() {
                         </td>
                         <td className="px-4 py-2 font-mono">{user.email}</td>
                         <td className="px-4 py-2 capitalize">{user.role}</td>
-                        <td className="px-4 py-2 capitalize">{user.status}</td>
+                        <td className="px-4 py-2">
+                          <span
+                            className={clsx(
+                              "inline-block px-2 py-1 rounded text-xs font-semibold",
+                              user.status === "active"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-200 text-gray-600"
+                            )}
+                          >
+                            {user.status}
+                          </span>
+                        </td>
                         <td className="px-4 py-2">
                           {user.created_at
                             ? new Date(user.created_at).toLocaleString()
@@ -563,7 +584,7 @@ export default function UsersPage() {
                         </td>
                         <td className="px-4 py-2">
                           {user.last_login
-                            ? new Date(user.last_login).toLocaleString()
+                            ? relativeTime(user.last_login)
                             : "-"}
                         </td>
                         <td className="px-4 py-2">
@@ -574,6 +595,7 @@ export default function UsersPage() {
                                 variant="ghost"
                                 onClick={() => openEditModal(user)}
                                 title="Edit user"
+                                aria-label="Edit user"
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -582,6 +604,7 @@ export default function UsersPage() {
                                 variant="ghost"
                                 onClick={() => openDeleteModal(user)}
                                 title="Delete user"
+                                aria-label="Delete user"
                               >
                                 <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
@@ -604,6 +627,7 @@ export default function UsersPage() {
                       variant="outline"
                       onClick={() => handlePageChange(page - 1)}
                       disabled={page === 1}
+                      aria-label="Previous page"
                     >
                       <ChevronLeft className="h-4 w-4" /> Prev
                     </Button>
@@ -615,11 +639,15 @@ export default function UsersPage() {
                       variant="outline"
                       onClick={() => handlePageChange(page + 1)}
                       disabled={page === totalPages}
+                      aria-label="Next page"
                     >
                       Next <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
                 )}
+                <div className="text-sm text-muted-foreground mt-2">
+                  Showing {paginatedUsers.length} of {filteredUsers.length} users
+                </div>
               </div>
             )}
           </CardContent>
@@ -641,12 +669,14 @@ export default function UsersPage() {
                 type="email"
                 autoFocus
                 disabled={addLoading}
+                aria-label="User email"
               />
               <select
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value)}
                 className="border rounded px-2 py-1 w-full"
                 disabled={addLoading}
+                aria-label="User role"
               >
                 {ROLES.map((role) => (
                   <option key={role} value={role}>
@@ -659,6 +689,7 @@ export default function UsersPage() {
                 onChange={(e) => setNewStatus(e.target.value)}
                 className="border rounded px-2 py-1 w-full"
                 disabled={addLoading}
+                aria-label="User status"
               >
                 {STATUS.map((status) => (
                   <option key={status} value={status}>
@@ -672,7 +703,11 @@ export default function UsersPage() {
                 onChange={(e) => setNewAvatarUrl(e.target.value)}
                 type="url"
                 disabled={addLoading}
+                aria-label="Avatar URL"
               />
+              {formError && (
+                <div className="text-red-600 text-sm">{formError}</div>
+              )}
             </div>
             <DialogFooter>
               <Button onClick={addUser} disabled={addLoading}>
@@ -701,12 +736,14 @@ export default function UsersPage() {
                 type="email"
                 autoFocus
                 disabled={editLoading}
+                aria-label="User email"
               />
               <select
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value)}
                 className="border rounded px-2 py-1 w-full"
                 disabled={editLoading}
+                aria-label="User role"
               >
                 {ROLES.map((role) => (
                   <option key={role} value={role}>
@@ -719,6 +756,7 @@ export default function UsersPage() {
                 onChange={(e) => setNewStatus(e.target.value)}
                 className="border rounded px-2 py-1 w-full"
                 disabled={editLoading}
+                aria-label="User status"
               >
                 {STATUS.map((status) => (
                   <option key={status} value={status}>
@@ -732,7 +770,11 @@ export default function UsersPage() {
                 onChange={(e) => setNewAvatarUrl(e.target.value)}
                 type="url"
                 disabled={editLoading}
+                aria-label="Avatar URL"
               />
+              {formError && (
+                <div className="text-red-600 text-sm">{formError}</div>
+              )}
             </div>
             <DialogFooter>
               <Button onClick={editUser} disabled={editLoading}>
