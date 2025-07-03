@@ -1,10 +1,9 @@
-import './globals.css' // <-- Move this to the top!
+import './globals.css'
 import type React from "react"
 import type { Metadata } from "next"
 import ClientLayout from "./client-layout"
 
 export const metadata: Metadata = {
-  // Metadata should be in a server component or page.tsx
   title: "Bilingual Contract Generator",
   description: "Generate and manage bilingual contracts efficiently.",
   generator: "v0.dev",
