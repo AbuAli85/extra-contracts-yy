@@ -91,12 +91,12 @@ export default function ContractsDashboardPage() {
       const matchesStatus = statusFilter === "all" || contractStatus === statusFilter
 
       const firstParty =
-        contract.parties_contracts_employer_id_fkey?.name_en ||
-        contract.parties_contracts_employer_id_fkey?.name_ar ||
+        contract.employer?.name_en ||
+        contract.employer?.name_ar ||
         ""
       const secondParty =
-        contract.parties_contracts_client_id_fkey?.name_en ||
-        contract.parties_contracts_client_id_fkey?.name_ar ||
+        contract.client?.name_en ||
+        contract.client?.name_ar ||
         ""
       const promoterName =
         (locale === "ar"
@@ -319,14 +319,10 @@ export default function ContractsDashboardPage() {
                             {contract.id.substring(0, 8)}...
                           </TableCell>
                           <TableCell>
-                            {contract.parties_contracts_employer_id_fkey?.name_en ||
-                              contract.parties_contracts_employer_id_fkey?.name_ar ||
-                              "N/A"}
+                            {contract.employer?.name_en || contract.employer?.name_ar || "N/A"}
                           </TableCell>
                           <TableCell>
-                            {contract.parties_contracts_client_id_fkey?.name_en ||
-                              contract.parties_contracts_client_id_fkey?.name_ar ||
-                              "N/A"}
+                            {contract.client?.name_en || contract.client?.name_ar || "N/A"}
                           </TableCell>
                           <TableCell>{promoterName || "N/A"}</TableCell>
                           <TableCell>
