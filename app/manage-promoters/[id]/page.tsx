@@ -30,6 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import LifecycleStatusIndicator from "@/components/lifecycle-status-indicator"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface PromoterDetails extends Promoter {
   contracts: ContractRecord<{ first_party?: Party; second_party?: Party }>[]
@@ -179,12 +180,27 @@ export default function PromoterDetailPage() {
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back to Promoter List
             </Button>
-            <h1 className="mt-2 text-3xl font-bold text-slate-800 dark:text-slate-100">
-              {promoterDetails.name_en}
-            </h1>
-            <p className="text-muted-foreground" dir="rtl">
-              {promoterDetails.name_ar}
-            </p>
+            <div className="flex items-center gap-4 mb-2">
+              <Avatar className="h-16 w-16">
+                {promoterDetails.profile_image_url ? (
+                  <AvatarImage src={promoterDetails.profile_image_url} alt={promoterDetails.name_en} />
+                ) : (
+                  <AvatarFallback aria-label="Promoter initials">
+                    {promoterDetails.name_en
+                      ? promoterDetails.name_en.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+                      : "P"}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              <div>
+                <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100" aria-label="Promoter name">
+                  {promoterDetails.name_en}
+                </h1>
+                <p className="text-muted-foreground" dir="rtl" aria-label="Promoter Arabic name">
+                  {promoterDetails.name_ar}
+                </p>
+              </div>
+            </div>
           </div>
           <Button 
             asChild
