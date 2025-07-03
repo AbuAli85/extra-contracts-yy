@@ -53,25 +53,27 @@ export default function AuditLogsPage() {
     }
   };
 
-  useEffect(() => {
-    fetchAuditLogs();
-    // Real-time updates
-    const channel = supabase
-      .channel("public:audit_logs:feed")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "audit_logs" },
-        (payload) => {
-          setLogs((prev) => [
-            payload.new,
-            ...prev,
-          ]);
-        }
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
+  // Fetch logs when sort changes
+useEffect(() => {
+  fetchAuditLogs();
+}, [sortKey, sortDirection]);
+
+// Real-time subscription (once)
+useEffect(() => {
+  const channel = supabase
+    .channel("public:audit_logs:feed")
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "audit_logs" },
+      (payload) => {
+        setLogs((prev) => [payload.new, ...prev]);
+      }
+    )
+    .subscribe();
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, []);
     // eslint-disable-next-line
   }, [sortKey, sortDirection]);
 
