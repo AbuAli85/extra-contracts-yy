@@ -85,6 +85,7 @@ export default function NotificationsPage() {
   }
 
   useEffect(() => {
+    console.log("NotificationsPage mounted");
     fetchNotifications()
     
     // Real-time subscription for all events
@@ -112,7 +113,7 @@ export default function NotificationsPage() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [])
+  }, []);
 
   // Filtering, searching, and pagination
   const filtered = useMemo(() => {
