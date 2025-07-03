@@ -67,7 +67,6 @@ export default function NotificationsPage() {
 
   // Fetch notifications and subscribe to real-time updates
   useEffect(() => {
-<<<<<<< HEAD
     let ignore = false
     async function fetchNotifications() {
       setLoading(true)
@@ -94,9 +93,6 @@ export default function NotificationsPage() {
         if (!ignore) setLoading(false)
       }
     }
-=======
-    console.log("NotificationsPage mounted");
->>>>>>> a32edc19e1ae9fcf3cf24ad38db9b53eb107e5b0
     fetchNotifications()
     // Real-time subscription
     const channel = supabase
