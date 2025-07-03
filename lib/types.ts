@@ -54,12 +54,20 @@ export interface ContractRecord<Extra extends Record<string, unknown> = {}> exte
 export interface BilingualPdfData {
   first_party_name_en?: string
   first_party_name_ar?: string
+  first_party_crn?: string
   second_party_name_en?: string
   second_party_name_ar?: string
+  second_party_crn?: string
   promoter_name_en?: string
   promoter_name_ar?: string
+  id_card_number?: string
+  promoter_id_card_url?: string
+  promoter_passport_url?: string
   contract_start_date: string | null
   contract_end_date: string | null
   job_title?: string | null
+  work_location?: string | null
   email: string | null
+  contract_number?: string
+  pdf_url?: string
 }

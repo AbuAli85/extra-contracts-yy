@@ -177,31 +177,15 @@ export async function POST(request: NextRequest) {
     // Flatten the nested payload
     // Note: Party A = Client, Party B = Employer
     const contractToInsert: Database["public"]["Tables"]["contracts"]["Insert"] = {
-      contract_number: body.contract_number,
-      contract_start_date: body.contract_start_date,
-      contract_end_date: body.contract_end_date,
       // Handle both nested and flat ID formats
       // Party A = Client
-      first_party_id: body.first_party?.id || body.first_party_id,
-      first_party_name_en: body.first_party?.name_en,
-      first_party_name_ar: body.first_party?.name_ar,
-      first_party_crn: body.first_party?.crn,
+      client_id: body.first_party?.id || body.first_party_id,
       // Party B = Employer
-      second_party_id: body.second_party?.id || body.second_party_id,
-      second_party_name_en: body.second_party?.name_en,
-      second_party_name_ar: body.second_party?.name_ar,
-      second_party_crn: body.second_party?.crn,
+      employer_id: body.second_party?.id || body.second_party_id,
       promoter_id: body.promoter?.id || body.promoter_id,
-      promoter_name_en: body.promoter?.name_en,
-      promoter_name_ar: body.promoter?.name_ar,
-      id_card_number: body.promoter?.id_card_number,
-      promoter_id_card_url: body.promoter?.id_card_url,
-      promoter_passport_url: body.promoter?.passport_url,
-      email: body.email,
-      // Add job_title, work_location, etc. if present
+      contract_valid_until: body.contract_end_date,
       job_title: body.job_title,
       work_location: body.work_location,
-      pdf_url: body.pdf_url,
     }
     console.log("Contract to insert:", JSON.stringify(contractToInsert, null, 2))
 
@@ -228,24 +212,24 @@ export async function POST(request: NextRequest) {
 
     // Fetch party and promoter details with better error handling
     console.log("Fetching party and promoter details...")
-    console.log("First party ID:", newContract.first_party_id)
-    console.log("Second party ID:", newContract.second_party_id)
+    console.log("Client ID:", newContract.client_id)
+    console.log("Employer ID:", newContract.employer_id)
     console.log("Promoter ID:", newContract.promoter_id)
 
     // Only fetch data if IDs are present
-    const [party1, party2, promoterDetails] = await Promise.all([
-      newContract.first_party_id ? 
+    const [clientParty, employerParty, promoterDetails] = await Promise.all([
+      newContract.client_id ? 
         supabase
           .from("parties")
           .select("name_en, name_ar, crn")
-          .eq("id", newContract.first_party_id)
+          .eq("id", newContract.client_id)
           .single() :
         Promise.resolve({ data: null, error: null }),
-      newContract.second_party_id ?
+      newContract.employer_id ?
         supabase
           .from("parties")
           .select("name_en, name_ar, crn")
-          .eq("id", newContract.second_party_id)
+          .eq("id", newContract.employer_id)
           .single() :
         Promise.resolve({ data: null, error: null }),
       newContract.promoter_id ?
@@ -258,27 +242,27 @@ export async function POST(request: NextRequest) {
     ])
 
     // Log the results of each query
-    console.log("Party 1 result:", { data: party1.data, error: party1.error })
-    console.log("Party 2 result:", { data: party2.data, error: party2.error })
+    console.log("Client party result:", { data: clientParty.data, error: clientParty.error })
+    console.log("Employer party result:", { data: employerParty.data, error: employerParty.error })
     console.log("Promoter result:", { data: promoterDetails.data, error: promoterDetails.error })
 
     // Check for errors in data fetching
-    if (party1.error) {
-      console.error("Error fetching first party:", party1.error)
+    if (clientParty.error) {
+      console.error("Error fetching client party:", clientParty.error)
     }
-    if (party2.error) {
-      console.error("Error fetching second party:", party2.error)
+    if (employerParty.error) {
+      console.error("Error fetching employer party:", employerParty.error)
     }
     if (promoterDetails.error) {
       console.error("Error fetching promoter:", promoterDetails.error)
     }
 
     // Warn if IDs are missing
-    if (!newContract.first_party_id) {
-      console.warn("⚠️ First party ID is missing from contract")
+    if (!newContract.client_id) {
+      console.warn("⚠️ Client ID is missing from contract")
     }
-    if (!newContract.second_party_id) {
-      console.warn("⚠️ Second party ID is missing from contract")
+    if (!newContract.employer_id) {
+      console.warn("⚠️ Employer ID is missing from contract")
     }
     if (!newContract.promoter_id) {
       console.warn("⚠️ Promoter ID is missing from contract")
@@ -289,12 +273,12 @@ export async function POST(request: NextRequest) {
     // Prepare PDF data with correct party roles
     // Party A = Client, Party B = Employer
     const pdfData: BilingualPdfData = {
-      first_party_name_en: party1.data?.name_en, // Client
-      first_party_name_ar: party1.data?.name_ar, // Client
-      first_party_crn: party1.data?.crn, // Client
-      second_party_name_en: party2.data?.name_en, // Employer
-      second_party_name_ar: party2.data?.name_ar, // Employer
-      second_party_crn: party2.data?.crn, // Employer
+      first_party_name_en: clientParty.data?.name_en, // Client
+      first_party_name_ar: clientParty.data?.name_ar, // Client
+      first_party_crn: clientParty.data?.crn, // Client
+      second_party_name_en: employerParty.data?.name_en, // Employer
+      second_party_name_ar: employerParty.data?.name_ar, // Employer
+      second_party_crn: employerParty.data?.crn, // Employer
       promoter_name_en: promoterDetails.data?.name_en,
       promoter_name_ar: promoterDetails.data?.name_ar,
       id_card_number: promoterDetails.data?.id_card_number,

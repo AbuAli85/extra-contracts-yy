@@ -21,15 +21,15 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 
 type ContractDetail = ContractRecord<{
-  first_party: { name_en: string; name_ar: string; crn: string }
-  second_party: { name_en: string; name_ar: string; crn: string }
-  promoter: {
+  employer: { name_en: string; name_ar: string; crn: string }
+  client: { name_en: string; name_ar: string; crn: string }
+  promoters: {
     name_en: string
     name_ar: string
     id_card_number: string
     id_card_url?: string | null
     passport_url?: string | null
-  }
+  }[]
 }>
 
 async function getContractDetails(id: string): Promise<ContractDetail | null> {
@@ -39,9 +39,9 @@ async function getContractDetails(id: string): Promise<ContractDetail | null> {
     .select(
       `
     *,
-    first_party:parties!contracts_first_party_id_fkey (name_en, name_ar, crn),
-    second_party:parties!contracts_second_party_id_fkey (name_en, name_ar, crn),
-    promoter:promoters!contracts_promoter_id_fkey (name_en, name_ar, id_card_number, id_card_url, passport_url)
+    employer:parties!contracts_employer_id_fkey (name_en, name_ar, crn),
+    client:parties!contracts_client_id_fkey (name_en, name_ar, crn),
+    promoters(id,name_en,name_ar,id_card_number,id_card_url,passport_url)
   `,
     )
     .eq("id", id)
@@ -138,9 +138,9 @@ export default async function ContractDetailPage({ params }: { params: Promise<{
     )
   }
 
-  const firstParty = contract.first_party
-  const secondParty = contract.second_party
-  const promoter = contract.promoter
+  const employerParty = contract.employer
+  const clientParty = contract.client
+  const promoter = contract.promoters && contract.promoters.length > 0 ? contract.promoters[0] : null
 
   return (
     <div className="min-h-screen bg-slate-100 px-4 py-8 dark:bg-slate-950 sm:py-12 md:px-6 lg:px-8">
@@ -180,16 +180,16 @@ export default async function ContractDetailPage({ params }: { params: Promise<{
             <SectionCard title="Parties Involved" icon={Building2}>
               <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
                 <div className="space-y-3 rounded-md border bg-background/50 p-4">
-                  <h4 className="font-medium text-card-foreground">First Party</h4>
-                  <DetailItem label="Name (EN)" value={firstParty?.name_en} />
-                  <DetailItem label="Name (AR)" value={firstParty?.name_ar} isRtl />
-                  <DetailItem label="CRN" value={firstParty?.crn} />
+                  <h4 className="font-medium text-card-foreground">Employer</h4>
+                  <DetailItem label="Name (EN)" value={employerParty?.name_en} />
+                  <DetailItem label="Name (AR)" value={employerParty?.name_ar} isRtl />
+                  <DetailItem label="CRN" value={employerParty?.crn} />
                 </div>
                 <div className="space-y-3 rounded-md border bg-background/50 p-4">
-                  <h4 className="font-medium text-card-foreground">Second Party</h4>
-                  <DetailItem label="Name (EN)" value={secondParty?.name_en} />
-                  <DetailItem label="Name (AR)" value={secondParty?.name_ar} isRtl />
-                  <DetailItem label="CRN" value={secondParty?.crn} />
+                  <h4 className="font-medium text-card-foreground">Client</h4>
+                  <DetailItem label="Name (EN)" value={clientParty?.name_en} />
+                  <DetailItem label="Name (AR)" value={clientParty?.name_ar} isRtl />
+                  <DetailItem label="CRN" value={clientParty?.crn} />
                 </div>
               </div>
             </SectionCard>

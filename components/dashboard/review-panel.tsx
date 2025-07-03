@@ -28,7 +28,12 @@ export default function ReviewPanel() {
       const { data, error } = await supabase
         .from("contracts") // Or a dedicated 'review_items' table
         .select(
-          "id, contract_id, promoter_name_en, first_party_name_en, second_party_name_en, created_at, user_id",
+          `
+          id, created_at,
+          employer:parties!contracts_employer_id_fkey(id,name_en,name_ar),
+          client:parties!contracts_client_id_fkey(id,name_en,name_ar),
+          promoters(id,name_en,name_ar)
+          `,
         ) // Adjust fields
         .eq("status", "Pending Approval") // This status needs to exist in your contracts table
         .order("created_at", { ascending: false })
@@ -38,13 +43,13 @@ export default function ReviewPanel() {
 
       const formattedItems: ReviewItem[] = data.map((item: any) => ({
         id: item.id,
-        title: `Contract: ${item.contract_id || item.id}`,
-        promoter: item.promoter_name_en || "N/A", // Assuming promoter_name_en from contracts
-        parties: `${item.first_party_name_en || "Party1"} / ${item.second_party_name_en || "Party2"}`,
+        title: `Contract: ${item.id}`,
+        promoter: item.promoters && item.promoters.length > 0 ? item.promoters[0].name_en || "N/A" : "N/A",
+        parties: `${item.client?.name_en || "Client"} / ${item.employer?.name_en || "Employer"}`,
         period: `Submitted ${formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}`, // Example period
         contractLink: `/contracts/${item.id}`, // Link to view the contract details
         // You might need to fetch submitter details (user_id) separately if not directly available
-        submitter: item.user_id ? `User ${item.user_id.substring(0, 8)}...` : "System",
+        submitter: "System",
         // Use a static placeholder path without query params to avoid file system errors
         avatar: placeholderAvatar,
       }))

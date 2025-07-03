@@ -16,12 +16,11 @@ export default async function ContractPage({ params }: Props) {
     return <div>Contract not found</div>
   }
 
-  const promoterName =
-    contract.promoter_name_en ||
-    (locale === "ar"
-      ? contract.promoter_name_ar || contract.promoter_name_en
-      : contract.promoter_name_en || contract.promoter_name_ar) ||
-    "N/A"
+  const promoterName = contract.promoters && contract.promoters.length > 0 && contract.promoters[0]
+    ? (locale === "ar" 
+        ? contract.promoters[0].name_ar || contract.promoters[0].name_en
+        : contract.promoters[0].name_en || contract.promoters[0].name_ar)
+    : "N/A"
 
   return (
     <ManualErrorBoundary>

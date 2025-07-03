@@ -214,18 +214,7 @@ export default function ContractGeneratorForm({
         email: values.email,
         job_title: values.job_title,
         work_location: values.work_location,
-        // Auto-filled fields
-        first_party_name_en: values.first_party_name_en,
-        first_party_name_ar: values.first_party_name_ar,
-        first_party_crn: values.first_party_crn,
-        second_party_name_en: values.second_party_name_en,
-        second_party_name_ar: values.second_party_name_ar,
-        second_party_crn: values.second_party_crn,
-        promoter_name_en: values.promoter_name_en,
-        promoter_name_ar: values.promoter_name_ar,
-        id_card_number: values.id_card_number,
-        promoter_id_card_url: values.promoter_id_card_url,
-        promoter_passport_url: values.promoter_passport_url,
+
       }
 
       // UPDATE
