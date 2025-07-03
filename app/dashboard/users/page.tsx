@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 const ROLES = ["admin", "manager", "viewer"]
 
 export default function UsersPage() {
-  const [users, setUsers] = useState([])
+  const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
