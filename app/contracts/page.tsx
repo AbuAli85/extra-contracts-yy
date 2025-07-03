@@ -134,7 +134,12 @@ export default async function ContractsListPage({
   let query = supabase
     .from("contracts")
     .select(
-      "id, created_at, first_party_name_en, second_party_name_en, promoter_name_en, status, google_doc_url, error_details, contract_start_date, contract_end_date", // Added dates
+      `
+      id, created_at, status, google_doc_url, error_details, contract_start_date, contract_end_date,
+      employer:parties!contracts_employer_id_fkey(id,name_en,name_ar),
+      client:parties!contracts_client_id_fkey(id,name_en,name_ar),
+      promoters(id,name_en,name_ar)
+      `,
       { count: "exact" },
     )
     .order("created_at", { ascending: false })
@@ -146,7 +151,7 @@ export default async function ContractsListPage({
 
   if (searchQuery) {
     query = query.or(
-      `first_party_name_en.ilike.%${searchQuery}%,second_party_name_en.ilike.%${searchQuery}%,promoter_name_en.ilike.%${searchQuery}%`,
+      `employer.name_en.ilike.%${searchQuery}%,employer.name_ar.ilike.%${searchQuery}%,client.name_en.ilike.%${searchQuery}%,client.name_ar.ilike.%${searchQuery}%,promoters.name_en.ilike.%${searchQuery}%,promoters.name_ar.ilike.%${searchQuery}%`,
     )
   }
 
@@ -328,16 +333,20 @@ export default async function ContractsListPage({
                         </TableCell>
                         <TableCell className="px-4 py-3">
                           <div className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                            {contract.first_party_name_en}
+                            {contract.employer && typeof contract.employer === 'object' && 'name_en' in contract.employer
+                              ? contract.employer.name_en || "N/A"
+                              : "N/A"}
                           </div>
                           <div className="text-xs text-slate-500 dark:text-slate-400">
-                            vs {contract.second_party_name_en}
+                            vs {contract.client && typeof contract.client === 'object' && 'name_en' in contract.client
+                              ? contract.client.name_en || "N/A"
+                              : "N/A"}
                           </div>
                         </TableCell>
                         <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
-                          {typeof contract.promoter_name_en === 'string' 
-                            ? contract.promoter_name_en 
-                            : contract.promoter_name_en?.name_en || "N/A"}
+                          {contract.promoters && contract.promoters.length > 0 && contract.promoters[0]
+                            ? contract.promoters[0].name_en || "N/A"
+                            : "N/A"}
                         </TableCell>
                         <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
                           {contract.contract_start_date

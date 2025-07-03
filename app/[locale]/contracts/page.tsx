@@ -91,17 +91,18 @@ export default function ContractsDashboardPage() {
       const matchesStatus = statusFilter === "all" || contractStatus === statusFilter
 
       const firstParty =
-        contract.employer?.name_en ||
-        contract.employer?.name_ar ||
-        ""
+        (contract.employer && typeof contract.employer === 'object' && 'name_en' in contract.employer
+          ? contract.employer.name_en || contract.employer.name_ar
+          : "") || ""
       const secondParty =
-        contract.client?.name_en ||
-        contract.client?.name_ar ||
-        ""
-      const promoterName =
-        (locale === "ar"
-          ? contract.promoter_name_ar || contract.promoter_name_en
-          : contract.promoter_name_en || contract.promoter_name_ar) || ""
+        (contract.client && typeof contract.client === 'object' && 'name_en' in contract.client
+          ? contract.client.name_en || contract.client.name_ar
+          : "") || ""
+      const promoterName = contract.promoters && contract.promoters.length > 0 && contract.promoters[0]
+        ? (locale === "ar" 
+            ? contract.promoters[0].name_ar || contract.promoters[0].name_en
+            : contract.promoters[0].name_en || contract.promoters[0].name_ar)
+        : ""
 
       const matchesSearch =
         !searchTerm ||
@@ -309,20 +310,25 @@ export default function ContractsDashboardPage() {
                   <TableBody>
                     {filteredAndSortedContracts.map((contract) => {
                       const contractStatus = getContractStatus(contract)
-                      const promoterName =
-                        (locale === "ar"
-                          ? contract.promoter_name_ar || contract.promoter_name_en
-                          : contract.promoter_name_en || contract.promoter_name_ar) || ""
+                      const promoterName = contract.promoters && contract.promoters.length > 0 && contract.promoters[0]
+                        ? (locale === "ar" 
+                            ? contract.promoters[0].name_ar || contract.promoters[0].name_en
+                            : contract.promoters[0].name_en || contract.promoters[0].name_ar)
+                        : ""
                       return (
                         <TableRow key={contract.id}>
                           <TableCell className="font-mono text-xs">
                             {contract.id.substring(0, 8)}...
                           </TableCell>
                           <TableCell>
-                            {contract.employer?.name_en || contract.employer?.name_ar || "N/A"}
+                            {contract.employer && typeof contract.employer === 'object' && 'name_en' in contract.employer
+                              ? contract.employer.name_en || contract.employer.name_ar || "N/A"
+                              : "N/A"}
                           </TableCell>
                           <TableCell>
-                            {contract.client?.name_en || contract.client?.name_ar || "N/A"}
+                            {contract.client && typeof contract.client === 'object' && 'name_en' in contract.client
+                              ? contract.client.name_en || contract.client.name_ar || "N/A"
+                              : "N/A"}
                           </TableCell>
                           <TableCell>{promoterName || "N/A"}</TableCell>
                           <TableCell>

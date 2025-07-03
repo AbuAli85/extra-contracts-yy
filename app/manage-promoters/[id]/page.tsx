@@ -320,11 +320,15 @@ export default function PromoterDetailPage() {
                             <TableCell>
                               <div className="text-xs">
                                 <span className="font-medium">
-                                  {contract.first_party?.name_en || "N/A"}
+                                  {contract.first_party && typeof contract.first_party === 'object' && 'name_en' in contract.first_party
+                                    ? contract.first_party.name_en || "N/A"
+                                    : "N/A"}
                                 </span>
                                 <span className="text-muted-foreground"> vs </span>
                                 <span className="font-medium">
-                                  {contract.second_party?.name_en || "N/A"}
+                                  {contract.second_party && typeof contract.second_party === 'object' && 'name_en' in contract.second_party
+                                    ? contract.second_party.name_en || "N/A"
+                                    : "N/A"}
                                 </span>
                               </div>
                             </TableCell>
