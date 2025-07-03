@@ -11,21 +11,25 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { 
-  Loader2, 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  Info, 
-  BellRing, 
-  Trash2, 
-  Eye, 
-  EyeOff, 
-  ChevronLeft, 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog"
+import { DatePicker } from "@/components/ui/date-picker"
+import {
+  Loader2,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Info,
+  BellRing,
+  Trash2,
+  Eye,
+  EyeOff,
+  ChevronLeft,
   ChevronRight,
   Search,
+  Download,
+  Link as LinkIcon,
 } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
+import { format, formatDistanceToNow, isAfter, isBefore, parseISO } from "date-fns"
 import clsx from "clsx"
 import { toast } from "@/hooks/use-toast"
 
@@ -53,8 +57,13 @@ export default function NotificationsPage() {
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
   const [readFilter, setReadFilter] = useState("")
+  const [userFilter, setUserFilter] = useState("")
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
   const [page, setPage] = useState(1)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [selectedNotif, setSelectedNotif] = useState(null)
+  const [showModal, setShowModal] = useState(false)
   const PAGE_SIZE = 10
 
   // Debug: log mount/unmount
@@ -118,7 +127,13 @@ export default function NotificationsPage() {
       ignore = true
       supabase.removeChannel(channel)
     }
-  }, []);
+  }, [])
+
+  // Get unique users for filter
+  const userOptions = useMemo(() => {
+    const emails = notifications.map((n) => n.user_email).filter(Boolean)
+    return Array.from(new Set(emails))
+  }, [notifications])
 
   // Filtering, searching, and pagination
   const filtered = useMemo(() => {
@@ -138,8 +153,17 @@ export default function NotificationsPage() {
         readFilter === "read" ? n.is_read : !n.is_read
       )
     }
+    if (userFilter) {
+      filtered = filtered.filter((n) => n.user_email === userFilter)
+    }
+    if (startDate) {
+      filtered = filtered.filter((n) => isAfter(parseISO(n.created_at), startDate))
+    }
+    if (endDate) {
+      filtered = filtered.filter((n) => isBefore(parseISO(n.created_at), endDate))
+    }
     return filtered
-  }, [notifications, search, typeFilter, readFilter])
+  }, [notifications, search, typeFilter, readFilter, userFilter, startDate, endDate])
 
   const paginated = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE
@@ -236,10 +260,36 @@ export default function NotificationsPage() {
     }
   }
 
+  // Export to CSV
+  const exportToCSV = () => {
+    const headers = [
+      "id",
+      "type",
+      "message",
+      "created_at",
+      "user_email",
+      "related_contract_id",
+      "related_entity_id",
+      "related_entity_type",
+      "is_read",
+    ]
+    const rows = filtered.map((n) =>
+      headers.map((h) => (n[h] !== undefined && n[h] !== null ? n[h] : "")).join(",")
+    )
+    const csv = [headers.join(","), ...rows].join("\n")
+    const blob = new Blob([csv], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `notifications-${Date.now()}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   // Reset page on filter/search change
   useEffect(() => {
     setPage(1)
-  }, [search, typeFilter, readFilter])
+  }, [search, typeFilter, readFilter, userFilter, startDate, endDate])
 
   // Reset page if current page is beyond total pages
   useEffect(() => {
@@ -264,7 +314,7 @@ export default function NotificationsPage() {
           <CardContent>
             {/* Error Banner */}
             {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg" role="alert">
                 <div className="flex items-center gap-2 text-red-800">
                   <XCircle className="h-4 w-4" />
                   <span className="font-medium">Error loading notifications:</span>
@@ -310,6 +360,29 @@ export default function NotificationsPage() {
                     <option value="unread">Unread</option>
                     <option value="read">Read</option>
                   </select>
+                  <select
+                    value={userFilter}
+                    onChange={(e) => setUserFilter(e.target.value)}
+                    className="border rounded-md px-3 py-2 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    aria-label="Filter by user"
+                  >
+                    <option value="">All Users</option>
+                    {userOptions.map((email) => (
+                      <option key={email} value={email}>{email}</option>
+                    ))}
+                  </select>
+                  <DatePicker
+                    value={startDate}
+                    onChange={setStartDate}
+                    placeholder="Start date"
+                    aria-label="Filter by start date"
+                  />
+                  <DatePicker
+                    value={endDate}
+                    onChange={setEndDate}
+                    placeholder="End date"
+                    aria-label="Filter by end date"
+                  />
                 </div>
               </div>
               <div className="flex gap-2">
@@ -331,6 +404,14 @@ export default function NotificationsPage() {
                   <Trash2 className="h-4 w-4 mr-2" />
                   Clear all
                 </Button>
+                <Button
+                  variant="outline"
+                  onClick={exportToCSV}
+                  aria-label="Export to CSV"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
               </div>
             </div>
             {/* Content */}
@@ -346,7 +427,7 @@ export default function NotificationsPage() {
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications found</h3>
                 <p className="text-gray-500 max-w-sm">
-                  {search || typeFilter || readFilter
+                  {search || typeFilter || readFilter || userFilter || startDate || endDate
                     ? "Try adjusting your filters to see more results."
                     : "You're all caught up! New notifications will appear here."
                   }
@@ -374,6 +455,9 @@ export default function NotificationsPage() {
                           Status
                         </th>
                         <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Related
+                        </th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
@@ -384,12 +468,16 @@ export default function NotificationsPage() {
                         return (
                           <tr
                             key={notif.id}
+                            tabIndex={0}
                             className={clsx(
-                              "hover:bg-gray-50 transition-colors",
+                              "hover:bg-gray-50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary",
                               !notif.is_read
                                 ? "bg-blue-50 dark:bg-blue-900/10"
                                 : "bg-background"
                             )}
+                            aria-label={`Notification: ${notif.message}`}
+                            onClick={() => { setSelectedNotif(notif); setShowModal(true); }}
+                            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { setSelectedNotif(notif); setShowModal(true); } }}
                           >
                             <td className="px-4 py-3 whitespace-nowrap">
                               <IconComponent
@@ -429,10 +517,39 @@ export default function NotificationsPage() {
                               )}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap">
+                              {notif.related_contract_id ? (
+                                <a
+                                  href={`/contracts/${notif.related_contract_id}`}
+                                  className="text-blue-600 underline inline-flex items-center gap-1"
+                                  tabIndex={0}
+                                  aria-label="View related contract"
+                                  onClick={e => e.stopPropagation()}
+                                  onKeyDown={e => e.stopPropagation()}
+                                >
+                                  <LinkIcon className="h-4 w-4" />
+                                  Contract
+                                </a>
+                              ) : notif.related_entity_id ? (
+                                <a
+                                  href={`/${notif.related_entity_type || "entity"}/${notif.related_entity_id}`}
+                                  className="text-blue-600 underline inline-flex items-center gap-1"
+                                  tabIndex={0}
+                                  aria-label="View related entity"
+                                  onClick={e => e.stopPropagation()}
+                                  onKeyDown={e => e.stopPropagation()}
+                                >
+                                  <LinkIcon className="h-4 w-4" />
+                                  {notif.related_entity_type || "Entity"}
+                                </a>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">-</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap">
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                onClick={() => toggleRead(notif)}
+                                onClick={e => { e.stopPropagation(); toggleRead(notif); }}
                                 disabled={isUpdating}
                                 aria-label={
                                   notif.is_read ? "Mark as unread" : "Mark as read"
@@ -493,10 +610,42 @@ export default function NotificationsPage() {
                     {search && ` matching "${search}"`}
                     {typeFilter && ` of type "${typeFilter}"`}
                     {readFilter && ` that are ${readFilter}`}
+                    {userFilter && ` for user ${userFilter}`}
+                    {startDate && ` from ${format(startDate, "yyyy-MM-dd")}`}
+                    {endDate && ` to ${format(endDate, "yyyy-MM-dd")}`}
                   </div>
                 </div>
               </div>
             )}
+            {/* Details Modal */}
+            <Dialog open={showModal} onOpenChange={setShowModal}>
+              <DialogContent aria-modal="true" role="dialog">
+                <DialogHeader>
+                  <DialogTitle>Notification Details</DialogTitle>
+                  <DialogDescription>
+                    Full details for this notification.
+                  </DialogDescription>
+                </DialogHeader>
+                {selectedNotif && (
+                  <div className="space-y-2">
+                    <div><b>Type:</b> {selectedNotif.type}</div>
+                    <div><b>Message:</b> {selectedNotif.message}</div>
+                    <div><b>User Email:</b> {selectedNotif.user_email || "-"}</div>
+                    <div><b>Created At:</b> {format(new Date(selectedNotif.created_at), "yyyy-MM-dd HH:mm:ss")}</div>
+                    <div><b>Status:</b> {selectedNotif.is_read ? "Read" : "Unread"}</div>
+                    {selectedNotif.related_contract_id && (
+                      <div><b>Related Contract:</b> <a href={`/contracts/${selectedNotif.related_contract_id}`} className="text-blue-600 underline">View Contract</a></div>
+                    )}
+                    {selectedNotif.related_entity_id && (
+                      <div><b>Related Entity:</b> <a href={`/${selectedNotif.related_entity_type || "entity"}/${selectedNotif.related_entity_id}`} className="text-blue-600 underline">{selectedNotif.related_entity_type || "Entity"}</a></div>
+                    )}
+                  </div>
+                )}
+                <DialogClose asChild>
+                  <Button variant="outline" aria-label="Close details modal">Close</Button>
+                </DialogClose>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
       </div>
