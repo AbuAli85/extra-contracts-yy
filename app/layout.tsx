@@ -1,3 +1,4 @@
+import './globals.css' // <-- Move this to the top!
 import type React from "react"
 import type { Metadata } from "next"
 import ClientLayout from "./client-layout"
@@ -18,6 +19,3 @@ export default function RootLayout({
 }) {
   return <ClientLayout params={params}>{children}</ClientLayout>
 }
-
-
-import './globals.css'
