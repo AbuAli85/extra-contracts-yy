@@ -24,7 +24,6 @@ import {
   ChevronLeft, 
   ChevronRight,
   Search,
-  Filter
 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import clsx from "clsx"
@@ -58,59 +57,69 @@ export default function NotificationsPage() {
   const [isUpdating, setIsUpdating] = useState(false)
   const PAGE_SIZE = 10
 
-  // Fetch notifications with error handling
-  const fetchNotifications = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const { data, error } = await supabase
-        .from("notifications")
-        .select(
-          "id, type, message, created_at, user_email, related_contract_id, related_entity_id, related_entity_type, is_read"
-        )
-        .order("created_at", { ascending: false })
-      
-      if (error) throw error
-      setNotifications(data || [])
-    } catch (err) {
-      setError(err.message)
-      toast({
-        title: "Error",
-        description: "Failed to load notifications. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
+  // Debug: log mount/unmount
   useEffect(() => {
+    console.log("NotificationsPage mounted")
+    return () => {
+      console.log("NotificationsPage unmounted")
+    }
+  }, [])
+
+  // Fetch notifications and subscribe to real-time updates
+  useEffect(() => {
+<<<<<<< HEAD
+    let ignore = false
+    async function fetchNotifications() {
+      setLoading(true)
+      setError(null)
+      try {
+        const { data, error } = await supabase
+          .from("notifications")
+          .select(
+            "id, type, message, created_at, user_email, related_contract_id, related_entity_id, related_entity_type, is_read"
+          )
+          .order("created_at", { ascending: false })
+        if (error) throw error
+        if (!ignore) setNotifications(data || [])
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message)
+          toast({
+            title: "Error",
+            description: "Failed to load notifications. Please try again.",
+            variant: "destructive",
+          })
+        }
+      } finally {
+        if (!ignore) setLoading(false)
+      }
+    }
+=======
     console.log("NotificationsPage mounted");
+>>>>>>> a32edc19e1ae9fcf3cf24ad38db9b53eb107e5b0
     fetchNotifications()
-    
-    // Real-time subscription for all events
+    // Real-time subscription
     const channel = supabase
       .channel("public:notifications:feed")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "notifications" },
         (payload) => {
-          if (payload.eventType === "INSERT") {
-            setNotifications((prev) => [payload.new, ...prev])
-          } else if (payload.eventType === "UPDATE") {
-            setNotifications((prev) =>
-              prev.map((n) => (n.id === payload.new.id ? payload.new : n))
-            )
-          } else if (payload.eventType === "DELETE") {
-            setNotifications((prev) =>
-              prev.filter((n) => n.id !== payload.old.id)
-            )
-          }
+          setNotifications((prev) => {
+            if (payload.eventType === "INSERT") {
+              return [payload.new, ...prev]
+            } else if (payload.eventType === "UPDATE") {
+              return prev.map((n) => (n.id === payload.new.id ? payload.new : n))
+            } else if (payload.eventType === "DELETE") {
+              return prev.filter((n) => n.id !== payload.old.id)
+            }
+            return prev
+          })
         }
       )
       .subscribe()
-
     return () => {
+      ignore = true
       supabase.removeChannel(channel)
     }
   }, []);
@@ -146,27 +155,22 @@ export default function NotificationsPage() {
   // Optimistic updates for better UX
   const toggleRead = async (notif) => {
     setIsUpdating(true)
-    // Optimistically update UI
     setNotifications((prev) =>
       prev.map((n) =>
         n.id === notif.id ? { ...n, is_read: !notif.is_read } : n
       )
     )
-    
     try {
       const { error } = await supabase
         .from("notifications")
         .update({ is_read: !notif.is_read })
         .eq("id", notif.id)
-      
       if (error) throw error
-      
       toast({
         title: "Success",
         description: `Marked as ${!notif.is_read ? 'read' : 'unread'}`,
       })
     } catch (err) {
-      // Revert on error
       setNotifications((prev) =>
         prev.map((n) =>
           n.id === notif.id ? { ...n, is_read: notif.is_read } : n
@@ -182,29 +186,23 @@ export default function NotificationsPage() {
     }
   }
 
-  // Bulk mark all as read with optimistic update
+  // Bulk mark all as read
   const markAllAsRead = async () => {
     setIsUpdating(true)
     const unreadCount = notifications.filter(n => !n.is_read).length
     if (unreadCount === 0) return
-    
-    // Optimistically update UI
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
-    
     try {
       const { error } = await supabase
         .from("notifications")
         .update({ is_read: true })
         .eq("is_read", false)
-      
       if (error) throw error
-      
       toast({
         title: "Success",
         description: `Marked ${unreadCount} notifications as read`,
       })
     } catch (err) {
-      // Revert on error
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: false })))
       toast({
         title: "Error",
@@ -216,30 +214,22 @@ export default function NotificationsPage() {
     }
   }
 
-  // Bulk clear all with confirmation
+  // Bulk clear all
   const clearAll = async () => {
     if (!confirm("Are you sure you want to delete all notifications? This action cannot be undone.")) {
       return
     }
-    
     setIsUpdating(true)
     const count = notifications.length
-    
-    // Optimistically update UI
     setNotifications([])
-    
     try {
       const { error } = await supabase.from("notifications").delete().neq("id", "")
-      
       if (error) throw error
-      
       toast({
         title: "Success",
         description: `Cleared ${count} notifications`,
       })
     } catch (err) {
-      // Revert on error
-      setNotifications((prev) => [...prev])
       toast({
         title: "Error",
         description: "Failed to clear notifications.",
@@ -255,12 +245,12 @@ export default function NotificationsPage() {
     setPage(1)
   }, [search, typeFilter, readFilter])
 
-  // Reset page if current page is beyond total pages (only when filters change)
+  // Reset page if current page is beyond total pages
   useEffect(() => {
     if (page > totalPages && totalPages > 0) {
       setPage(totalPages)
     }
-  }, [filtered.length])
+  }, [totalPages, page])
 
   return (
     <DashboardLayout>
@@ -286,7 +276,6 @@ export default function NotificationsPage() {
                 </div>
               </div>
             )}
-
             {/* Filters and Actions */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
               <div className="flex flex-col sm:flex-row gap-2">
@@ -348,7 +337,6 @@ export default function NotificationsPage() {
                 </Button>
               </div>
             </div>
-
             {/* Content */}
             {loading ? (
               <div className="flex justify-center items-center py-12">
@@ -362,7 +350,7 @@ export default function NotificationsPage() {
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications found</h3>
                 <p className="text-gray-500 max-w-sm">
-                  {search || typeFilter || readFilter 
+                  {search || typeFilter || readFilter
                     ? "Try adjusting your filters to see more results."
                     : "You're all caught up! New notifications will appear here."
                   }
@@ -467,7 +455,6 @@ export default function NotificationsPage() {
                     </tbody>
                   </table>
                 </div>
-
                 {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="bg-gray-50 px-4 py-3 border-t">
@@ -503,7 +490,6 @@ export default function NotificationsPage() {
                     </div>
                   </div>
                 )}
-
                 {/* Summary */}
                 <div className="bg-gray-50 px-4 py-2 border-t">
                   <div className="text-sm text-gray-600">
@@ -519,5 +505,5 @@ export default function NotificationsPage() {
         </Card>
       </div>
     </DashboardLayout>
-  );
+  )
 }
