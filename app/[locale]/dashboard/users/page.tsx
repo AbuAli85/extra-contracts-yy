@@ -1,12 +1,5 @@
-import { redirect } from 'next/navigation'
+import UsersPage from '@/app/dashboard/users/page'
 
-export default async function LocaleUsersPage({ 
-  params 
-}: { 
-  params: Promise<{ locale: string }> 
-}) {
-  const { locale } = await params
-  
-  // Redirect to the main dashboard users page
-  redirect('/dashboard/users')
+export default function LocaleUsersPage() {
+  return <UsersPage />
 } 
