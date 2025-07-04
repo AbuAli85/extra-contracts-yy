@@ -1,6 +1,8 @@
 "use client"
 
 import type React from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import type { ContractRecord } from "@/lib/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,7 +33,6 @@ import { EnhancedStatusBadge } from "@/components/enhanced-status-badge"
 import { ContractActions } from "@/components/contract-actions"
 import { ContractsAnalyticsDashboard } from "@/components/contracts-analytics"
 import { BulkOperations } from "@/components/bulk-operations"
-import { useState } from "react"
 
 interface SummaryStats {
   total: number
@@ -41,67 +42,108 @@ interface SummaryStats {
   errors: number
 }
 
-export default async function ContractsListPage({
-  searchParams,
-}: {
-  searchParams?: { status?: string; q?: string; page?: string; view?: string }
-}) {
-  const generationStatusFilter = searchParams?.status
-  const searchQuery = searchParams?.q
-  const currentPage = Number(searchParams?.page || 1)
-  const viewMode = searchParams?.view || "table" // 'table' or 'analytics'
+export default function ContractsListPage() {
+  const searchParams = useSearchParams()
+  const [contracts, setContracts] = useState<ContractRecord[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [summaryStats, setSummaryStats] = useState<SummaryStats>({ total: 0, active: 0, upcoming: 0, expired: 0, errors: 0 })
+  const [totalPages, setTotalPages] = useState(0)
+  const [count, setCount] = useState(0)
+  
+  const generationStatusFilter = searchParams?.get('status')
+  const searchQuery = searchParams?.get('q')
+  const currentPage = Number(searchParams?.get('page') || 1)
+  const viewMode = searchParams?.get('view') || 'table'
   const ITEMS_PER_PAGE = 10
 
-  // --- Data Fetching ---
-  let query = supabase
-    .from("contracts")
-    .select(
-      `
-      id, created_at, status, google_doc_url, error_details, contract_start_date, contract_end_date,
-      employer:parties!contracts_employer_id_fkey(id,name_en,name_ar),
-      client:parties!contracts_client_id_fkey(id,name_en,name_ar),
-      promoters(id,name_en,name_ar)
-      `,
-      { count: "exact" },
-    )
-    .order("created_at", { ascending: false })
-    .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1)
+  // Data fetching effect
+  useEffect(() => {
+    async function fetchContracts() {
+      setLoading(true)
+      setError(null)
 
-  if (generationStatusFilter && generationStatusFilter !== "all") {
-    query = query.eq("status", generationStatusFilter)
-  }
-
-  if (searchQuery) {
-    query = query.or(
-      `employer.name_en.ilike.%${searchQuery}%,employer.name_ar.ilike.%${searchQuery}%,client.name_en.ilike.%${searchQuery}%,client.name_ar.ilike.%${searchQuery}%,promoters.name_en.ilike.%${searchQuery}%,promoters.name_ar.ilike.%${searchQuery}%`,
-    )
-  }
-
-  const { data, error, count } = await query
-  const contracts: ContractRecord[] = data || [] // Type should include start/end dates
-  const totalPages = Math.ceil((count || 0) / ITEMS_PER_PAGE)
-
-  // --- Summary Stats (simplified for this example, can be optimized) ---
-  const { data: allContractsDataForStats, error: allContractsErrorStats } = await supabase
-    .from("contracts")
-    .select("status, contract_start_date, contract_end_date")
-
-  const summaryStats: SummaryStats = { total: 0, active: 0, upcoming: 0, expired: 0, errors: 0 }
-  if (!allContractsErrorStats && allContractsDataForStats) {
-    summaryStats.total = allContractsDataForStats.length
-    const now = new Date()
-    allContractsDataForStats.forEach((c) => {
-      if (c.status?.toUpperCase() === "GENERATION_ERROR") summaryStats.errors++
       try {
-        const start = parseISO(c.contract_start_date!)
-        const end = parseISO(c.contract_end_date!)
-        if (isWithinInterval(now, { start, end })) summaryStats.active++
-        else if (isFuture(start)) summaryStats.upcoming++
-        else if (isPast(end)) summaryStats.expired++
-      } catch (e) {
-        /* handle invalid dates if necessary */
+        // Fetch contracts
+        let query = supabase
+          .from("contracts")
+          .select(
+            `
+            id, created_at, status, google_doc_url, error_details, contract_start_date, contract_end_date,
+            employer:parties!contracts_employer_id_fkey(id,name_en,name_ar),
+            client:parties!contracts_client_id_fkey(id,name_en,name_ar),
+            promoters(id,name_en,name_ar)
+            `,
+            { count: "exact" },
+          )
+          .order("created_at", { ascending: false })
+          .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1)
+
+        if (generationStatusFilter && generationStatusFilter !== "all") {
+          query = query.eq("status", generationStatusFilter)
+        }
+
+        if (searchQuery) {
+          query = query.or(
+            `employer.name_en.ilike.%${searchQuery}%,employer.name_ar.ilike.%${searchQuery}%,client.name_en.ilike.%${searchQuery}%,client.name_ar.ilike.%${searchQuery}%,promoters.name_en.ilike.%${searchQuery}%,promoters.name_ar.ilike.%${searchQuery}%`,
+          )
+        }
+
+        const { data, error: contractsError, count: contractsCount } = await query
+
+        if (contractsError) {
+          setError(contractsError.message)
+          return
+        }
+
+        setContracts(data || [])
+        setCount(contractsCount || 0)
+        setTotalPages(Math.ceil((contractsCount || 0) / ITEMS_PER_PAGE))
+
+        // Fetch summary stats
+        const { data: allContractsDataForStats, error: allContractsErrorStats } = await supabase
+          .from("contracts")
+          .select("status, contract_start_date, contract_end_date")
+
+        const newSummaryStats: SummaryStats = { total: 0, active: 0, upcoming: 0, expired: 0, errors: 0 }
+        if (!allContractsErrorStats && allContractsDataForStats) {
+          newSummaryStats.total = allContractsDataForStats.length
+          const now = new Date()
+          allContractsDataForStats.forEach((c) => {
+            if (c.status?.toUpperCase() === "GENERATION_ERROR") newSummaryStats.errors++
+            try {
+              const start = parseISO(c.contract_start_date!)
+              const end = parseISO(c.contract_end_date!)
+              if (isWithinInterval(now, { start, end })) newSummaryStats.active++
+              else if (isFuture(start)) newSummaryStats.upcoming++
+              else if (isPast(end)) newSummaryStats.expired++
+            } catch (e) {
+              /* handle invalid dates if necessary */
+            }
+          })
+        }
+        setSummaryStats(newSummaryStats)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
       }
-    })
+    }
+
+    fetchContracts()
+  }, [generationStatusFilter, searchQuery, currentPage])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="pt-6">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-4">Loading contracts...</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   if (error) {
@@ -112,7 +154,7 @@ export default async function ContractsListPage({
             <CardTitle className="text-destructive">Error</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>Could not fetch contracts: {error.message}</p>
+            <p>Could not fetch contracts: {error}</p>
             <Button asChild variant="outline" className="mt-4">
               <Link href="/">
                 <ArrowLeftIcon className="mr-2 h-4 w-4" /> Back to Home
@@ -127,11 +169,10 @@ export default async function ContractsListPage({
   return (
     <ContractsManagement
       initialContracts={contracts}
-      initialCount={count || 0}
+      initialCount={count}
       totalPages={totalPages}
       currentPage={currentPage}
       summaryStats={summaryStats}
-      searchParams={searchParams}
     />
   )
 }
@@ -143,18 +184,17 @@ function ContractsManagement({
   totalPages,
   currentPage,
   summaryStats,
-  searchParams,
 }: {
   initialContracts: ContractRecord[]
   initialCount: number
   totalPages: number
   currentPage: number
   summaryStats: SummaryStats
-  searchParams?: { status?: string; q?: string; page?: string; view?: string }
 }) {
+  const searchParams = useSearchParams()
   const [selectedContracts, setSelectedContracts] = useState<string[]>([])
   const [contracts, setContracts] = useState(initialContracts)
-  const viewMode = searchParams?.view || "table"
+  const viewMode = searchParams?.get("view") || "table"
 
   const handleSelectContract = (contractId: string, isSelected: boolean) => {
     setSelectedContracts(prev => 
