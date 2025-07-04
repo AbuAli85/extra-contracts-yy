@@ -96,23 +96,20 @@ interface ActivityLog {
 }
 
 interface Props {
-  params: Promise<{
-    id: string
-    locale: string
-  }>
+  // No params needed for client component
 }
 
-export default function ContractDetailPage({ params }: Props) {
-  const [resolvedParams, setResolvedParams] = useState<{ id: string; locale: string } | null>(null)
+export default function ContractDetailPage() {
+  const params = useParams()
+  const contractId = params?.id as string
+  const locale = params?.locale as string
+  
   const [contract, setContract] = useState<ContractDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("overview")
 
-  // Resolve params promise
-  useEffect(() => {
-    params.then(setResolvedParams)
-  }, [params])
+  // Remove the resolvedParams state and useEffect for params resolution
 
   const mockActivityLogs: ActivityLog[] = [
     {
@@ -195,18 +192,18 @@ export default function ContractDetailPage({ params }: Props) {
 
   useEffect(() => {
     async function fetchContract() {
-      if (!resolvedParams?.id) return
+      if (!contractId) return
       
       try {
         setLoading(true)
         setError(null)
-        console.log("Fetching contract with ID:", resolvedParams.id)
+        console.log("Fetching contract with ID:", contractId)
 
         // Fetch basic contract data
         const { data: basicData, error: basicError } = await supabase
           .from("contracts")
           .select("*")
-          .eq("id", resolvedParams.id)
+          .eq("id", contractId)
           .single()
 
         if (basicError) {
@@ -218,14 +215,14 @@ export default function ContractDetailPage({ params }: Props) {
         console.log("Basic contract data:", basicData)
 
         // Enhanced query with relations
-        let enhancedData = { ...basicData }
+        let enhancedData = { ...basicData } as any
         
         // Fetch related parties separately
-        if (basicData.employer_id) {
+        if (basicData.first_party_id) {
           const { data: employerData } = await supabase
             .from("parties")
             .select("name_en, name_ar, crn, address, phone, email")
-            .eq("id", basicData.employer_id)
+            .eq("id", basicData.first_party_id)
             .single()
           
           if (employerData) {
@@ -233,11 +230,11 @@ export default function ContractDetailPage({ params }: Props) {
           }
         }
         
-        if (basicData.client_id) {
+        if (basicData.second_party_id) {
           const { data: clientData } = await supabase
             .from("parties")
             .select("name_en, name_ar, crn, address, phone, email")
-            .eq("id", basicData.client_id)
+            .eq("id", basicData.second_party_id)
             .single()
           
           if (clientData) {
@@ -268,25 +265,10 @@ export default function ContractDetailPage({ params }: Props) {
       }
     }
 
-    if (resolvedParams) {
+    if (contractId) {
       fetchContract()
     }
-  }, [resolvedParams])
-
-  if (!resolvedParams) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-8">
-        <div className="mx-auto max-w-4xl">
-          <Card className="shadow-lg">
-            <CardContent className="p-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-6"></div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Initializing...</h3>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
+  }, [contractId])
 
   if (loading) {
     return (
@@ -392,8 +374,8 @@ export default function ContractDetailPage({ params }: Props) {
                   <div>
                     <label className="font-medium text-gray-500">Contract ID</label>
                     <div className="flex items-center gap-2 mt-1">
-                      <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">{resolvedParams.id}</code>
-                      <Button size="sm" variant="ghost" onClick={() => navigator.clipboard.writeText(resolvedParams.id)}>
+                      <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">{contractId}</code>
+                      <Button size="sm" variant="ghost" onClick={() => navigator.clipboard.writeText(contractId)}>
                         <CopyIcon className="h-3 w-3" />
                       </Button>
                     </div>
@@ -425,7 +407,7 @@ export default function ContractDetailPage({ params }: Props) {
                 )}
                 
                 <Button asChild size="sm" variant="outline" className="gap-2">
-                  <Link href={`/edit-contract/${resolvedParams.id}`}>
+                  <Link href={`/edit-contract/${contractId}`}>
                     <EditIcon className="h-4 w-4" />
                     Edit
                   </Link>
@@ -1200,7 +1182,7 @@ export default function ContractDetailPage({ params }: Props) {
                 <CardContent className="p-6">
                   <div className="space-y-3">
                     <Button asChild className="w-full justify-start gap-2">
-                      <Link href={`/edit-contract/${resolvedParams.id}`}>
+                      <Link href={`/edit-contract/${contractId}`}>
                         <EditIcon className="h-4 w-4" />
                         Edit Contract
                       </Link>
