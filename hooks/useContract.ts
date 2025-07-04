@@ -67,28 +67,59 @@ export function useContract(contractId: string): UseContractResult {
         return
       }
 
+      // Debug: Log the raw data to see what fields are available
+      console.log('Raw contract data from database:', basicData)
+
       // Enhanced query with relations
       let enhancedData: ContractDetail = { 
         id: basicData.id,
         status: basicData.status || undefined,
         created_at: basicData.created_at,
-        employer_id: basicData.first_party_id,
-        client_id: basicData.second_party_id,
+        updated_at: basicData.updated_at,
+        
+        // Party IDs
+        employer_id: basicData.first_party_id || basicData.employer_id,
+        client_id: basicData.second_party_id || basicData.client_id,
         promoter_id: basicData.promoter_id,
-        contract_start_date: basicData.contract_valid_from || undefined,
-        contract_end_date: basicData.contract_valid_until || undefined,
+        
+        // Party Names (direct fields)
+        first_party_name_en: basicData.first_party_name_en,
+        first_party_name_ar: basicData.first_party_name_ar,
+        second_party_name_en: basicData.second_party_name_en,
+        second_party_name_ar: basicData.second_party_name_ar,
+        
+        // Contract Details
+        contract_start_date: basicData.contract_start_date || basicData.contract_valid_from || undefined,
+        contract_end_date: basicData.contract_end_date || basicData.contract_valid_until || undefined,
+        contract_type: basicData.contract_type || undefined,
+        contract_number: basicData.contract_number || undefined,
+        
+        // Employment Details
         job_title: basicData.job_title || undefined,
+        department: basicData.department || undefined,
         work_location: basicData.work_location || undefined,
         email: basicData.email || undefined,
-        pdf_url: basicData.pdf_url || undefined
+        id_card_number: basicData.id_card_number || undefined,
+        
+        // Financial
+        salary: basicData.salary || undefined,
+        currency: basicData.currency || undefined,
+        
+        // Documents
+        google_doc_url: basicData.google_doc_url || undefined,
+        pdf_url: basicData.pdf_url || undefined,
+        
+        // Error handling
+        error_details: basicData.error_details || undefined
       }
       
       // Fetch related parties separately
-      if (basicData.first_party_id) {
+      if (basicData.first_party_id || basicData.employer_id) {
+        const partyId = basicData.first_party_id || basicData.employer_id
         const { data: employerData } = await supabase
           .from("parties")
-          .select("name_en, name_ar, crn")
-          .eq("id", basicData.first_party_id)
+          .select("id, name_en, name_ar, crn, email, phone, address")
+          .eq("id", partyId)
           .single()
         
         if (employerData) {
@@ -96,11 +127,12 @@ export function useContract(contractId: string): UseContractResult {
         }
       }
       
-      if (basicData.second_party_id) {
+      if (basicData.second_party_id || basicData.client_id) {
+        const partyId = basicData.second_party_id || basicData.client_id
         const { data: clientData } = await supabase
           .from("parties")
-          .select("name_en, name_ar, crn")
-          .eq("id", basicData.second_party_id)
+          .select("id, name_en, name_ar, crn, email, phone, address")
+          .eq("id", partyId)
           .single()
         
         if (clientData) {
@@ -111,7 +143,7 @@ export function useContract(contractId: string): UseContractResult {
       if (basicData.promoter_id) {
         const { data: promoterData } = await supabase
           .from("promoters")
-          .select("id, name_en, name_ar, id_card_number")
+          .select("id, name_en, name_ar, id_card_number, email, phone")
           .eq("id", basicData.promoter_id)
           .single()
         
