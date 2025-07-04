@@ -26,7 +26,7 @@ import { formatDate, calculateDuration, copyToClipboard } from "@/utils/format"
 
 export default function ContractDetailPage() {
   const params = useParams()
-  const contractId = params.id as string
+  const contractId = (params?.id as string) || ''
   const { contract, loading, error, refetch } = useContract(contractId)
 
   if (loading) {
@@ -201,9 +201,6 @@ export default function ContractDetailPage() {
     </div>
   )
 }
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
             {/* Key Metrics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg">
