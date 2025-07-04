@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -20,7 +21,10 @@ interface ContractDetailDebug {
   error_details?: string
 }
 
-export default function ContractDetailPage({ params }: { params: { id: string } }) {
+export default function ContractDetailPage() {
+  const params = useParams()
+  const contractId = params.id as string
+  
   const [contract, setContract] = useState<ContractDetailDebug | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -30,13 +34,13 @@ export default function ContractDetailPage({ params }: { params: { id: string } 
     async function fetchContract() {
       try {
         setLoading(true)
-        console.log("Fetching contract with ID:", params.id)
+        console.log("Fetching contract with ID:", contractId)
 
         // Simple query first
         const { data: basicData, error: basicError } = await supabase
           .from("contracts")
           .select("*")
-          .eq("id", params.id)
+          .eq("id", contractId)
           .single()
 
         if (basicError) {
@@ -57,7 +61,7 @@ export default function ContractDetailPage({ params }: { params: { id: string } 
             client:parties!contracts_client_id_fkey (name_en, name_ar, crn),
             promoters(id, name_en, name_ar, id_card_number)
           `)
-          .eq("id", params.id)
+          .eq("id", contractId)
           .single()
 
         if (error) {
@@ -76,8 +80,10 @@ export default function ContractDetailPage({ params }: { params: { id: string } 
       }
     }
 
-    fetchContract()
-  }, [params.id])
+    if (contractId) {
+      fetchContract()
+    }
+  }, [contractId])
 
   if (loading) {
     return (
@@ -129,7 +135,7 @@ export default function ContractDetailPage({ params }: { params: { id: string } 
             </Link>
           </Button>
           <h1 className="text-3xl font-bold">Contract Details</h1>
-          <p className="text-gray-600">Contract ID: {params.id}</p>
+          <p className="text-gray-600">Contract ID: {contractId}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
