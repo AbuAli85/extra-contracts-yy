@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import AuditLogsPage from '@/app/dashboard/audit/page';
 
 export default function LocaleAuditPage({ params }: { params: { locale: string } }) {
-  redirect('/dashboard/audit');
+  return <AuditLogsPage />;
 }
