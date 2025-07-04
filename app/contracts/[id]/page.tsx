@@ -5,13 +5,34 @@ import { useParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
-import { ArrowLeftIcon } from "lucide-react"
+import { 
+  ArrowLeftIcon, 
+  DownloadIcon, 
+  EditIcon, 
+  EyeIcon, 
+  SendIcon, 
+  PrinterIcon, 
+  ShareIcon,
+  HistoryIcon,
+  FileTextIcon,
+  CalendarIcon,
+  UserIcon,
+  BuildingIcon,
+  AlertCircleIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  MoreHorizontalIcon
+} from "lucide-react"
 
 interface ContractDetailDebug {
   id: string
   status?: string
   created_at?: string
+  updated_at?: string
   contract_start_date?: string
   contract_end_date?: string
   job_title?: string
@@ -34,6 +55,19 @@ interface ContractDetailDebug {
   google_doc_url?: string
   pdf_url?: string
   error_details?: string
+  version?: number
+  last_sent_at?: string
+  downloaded_count?: number
+  generation_status?: string
+}
+
+interface ActivityLog {
+  id: string
+  action: string
+  description: string
+  created_at: string
+  user_id?: string
+  metadata?: any
 }
 
 export default function ContractDetailPage() {
@@ -41,9 +75,48 @@ export default function ContractDetailPage() {
   const contractId = params.id as string
   
   const [contract, setContract] = useState<ContractDetailDebug | null>(null)
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [rawData, setRawData] = useState<any>(null)
+  const [activeTab, setActiveTab] = useState("overview")
+
+  const getStatusColor = (status?: string) => {
+    switch (status?.toLowerCase()) {
+      case 'active': return 'bg-green-100 text-green-800'
+      case 'completed': return 'bg-blue-100 text-blue-800'
+      case 'pending': return 'bg-yellow-100 text-yellow-800'
+      case 'draft': return 'bg-gray-100 text-gray-800'
+      case 'cancelled': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const mockActivityLogs: ActivityLog[] = [
+    {
+      id: '1',
+      action: 'created',
+      description: 'Contract was created',
+      created_at: new Date(Date.now() - 86400000 * 2).toISOString()
+    },
+    {
+      id: '2',
+      action: 'generated',
+      description: 'PDF document was generated',
+      created_at: new Date(Date.now() - 86400000 * 1).toISOString()
+    },
+    {
+      id: '3',
+      action: 'viewed',
+      description: 'Contract was viewed',
+      created_at: new Date(Date.now() - 3600000 * 6).toISOString()
+    },
+    {
+      id: '4',
+      action: 'downloaded',
+      description: 'Contract PDF was downloaded',
+      created_at: new Date(Date.now() - 3600000 * 2).toISOString()
+    }
+  ]
 
   useEffect(() => {
     async function fetchContract() {
@@ -51,7 +124,7 @@ export default function ContractDetailPage() {
         setLoading(true)
         console.log("Fetching contract with ID:", contractId)
 
-        // Simple query first
+        // Fetch basic contract data
         const { data: basicData, error: basicError } = await supabase
           .from("contracts")
           .select("*")
@@ -65,7 +138,6 @@ export default function ContractDetailPage() {
         }
 
         console.log("Basic contract data:", basicData)
-        setRawData(basicData)
 
         // Enhanced query with relations - try different approach
         let enhancedData = { ...basicData }
@@ -109,6 +181,7 @@ export default function ContractDetailPage() {
         
         console.log("Enhanced contract data:", enhancedData)
         setContract(enhancedData)
+        setActivityLogs(mockActivityLogs)
       } catch (err) {
         console.error("Exception:", err)
         setError("Failed to load contract")
