@@ -1,8 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import { useParams } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
@@ -12,8 +11,11 @@ import {
   EditIcon, 
   EyeIcon, 
   SendIcon,
-  CopyIcon,
-  FileTextIcon
+  UsersIcon,
+  FileTextIcon,
+  ClockIcon,
+  HistoryIcon,
+  MoreHorizontalIcon
 } from "lucide-react"
 
 // Import our refactored components
