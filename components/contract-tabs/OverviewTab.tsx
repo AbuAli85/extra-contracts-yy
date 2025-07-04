@@ -75,6 +75,17 @@ export function OverviewTab({ contract }: OverviewTabProps) {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
+                  <label className="text-sm font-medium text-gray-500">Contract Type</label>
+                  <p className="font-semibold text-gray-900 mt-1">{contract?.contract_type || "N/A"}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Currency</label>
+                  <p className="font-semibold text-gray-900 mt-1">{contract?.currency || "N/A"}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
                   <label className="text-sm font-medium text-gray-500">Start Date</label>
                   <p className="font-semibold text-gray-900 mt-1">{formatDate(contract?.contract_start_date)}</p>
                 </div>
@@ -104,6 +115,13 @@ export function OverviewTab({ contract }: OverviewTabProps) {
                 <label className="text-sm font-medium text-gray-500">Contract Number</label>
                 <p className="font-semibold text-gray-900 mt-1">{contract?.contract_number || "Not assigned"}</p>
               </div>
+              
+              {contract?.id_card_number && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">ID Card Number</label>
+                  <p className="font-semibold text-gray-900 mt-1">{contract.id_card_number}</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
