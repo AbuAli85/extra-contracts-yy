@@ -174,18 +174,6 @@ export default function ContractDetailPage() {
           {/* Overview Tab - Using our refactored component */}
           <TabsContent value="overview">
             <OverviewTab contract={contract} />
-            
-            {/* Debug: Show raw contract data */}
-            <Card className="mt-6 shadow-lg border-yellow-200 bg-yellow-50">
-              <CardHeader>
-                <CardTitle className="text-yellow-800">Debug: Raw Contract Data</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <pre className="text-xs overflow-auto max-h-96 bg-white p-4 rounded border">
-                  {JSON.stringify(contract, null, 2)}
-                </pre>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           {/* Parties Tab - Enhanced with complete party information */}
