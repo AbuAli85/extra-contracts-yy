@@ -183,7 +183,8 @@ export async function POST(request: NextRequest) {
       // Party B = Employer
       employer_id: body.second_party?.id || body.second_party_id,
       promoter_id: body.promoter?.id || body.promoter_id,
-      contract_valid_until: body.contract_end_date,
+      contract_start_date: body.contract_start_date,
+      contract_end_date: body.contract_end_date,
       job_title: body.job_title,
       work_location: body.work_location,
     }

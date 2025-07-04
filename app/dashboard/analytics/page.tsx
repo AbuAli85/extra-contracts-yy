@@ -28,7 +28,7 @@ export default function AnalyticsPage() {
       // Contracts stats
       const { data: contracts } = await supabase
         .from("contracts")
-        .select("id, contract_valid_until, created_at, status, promoter_id")
+        .select("id, contract_end_date, created_at, status, promoter_id")
       const now = new Date()
       let active = 0, expired = 0, expSoon = 0
       const statusCount: Record<string, number> = {}
@@ -39,8 +39,8 @@ export default function AnalyticsPage() {
         const status = c.status || "Unknown"
         statusCount[status] = (statusCount[status] || 0) + 1
         // Dates
-        if (c.contract_valid_until) {
-          const end = new Date(c.contract_valid_until)
+        if (c.contract_end_date) {
+          const end = new Date(c.contract_end_date)
           if (end >= now && (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24) <= 30) expSoon++
           if (end >= now) active++
           if (end < now) expired++

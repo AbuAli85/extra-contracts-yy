@@ -59,10 +59,10 @@ import { FileTextIcon } from "@radix-ui/react-icons"
 type ContractStatus = "Active" | "Expired" | "Upcoming" | "Unknown"
 
 const getContractStatus = (contract: Contract): ContractStatus => {
-  if (!contract.contract_valid_from || !contract.contract_valid_until) return "Unknown"
+  if (!contract.contract_start_date || !contract.contract_end_date) return "Unknown"
   const now = new Date()
-  const startDate = parseISO(contract.contract_valid_from)
-  const endDate = parseISO(contract.contract_valid_until)
+  const startDate = parseISO(contract.contract_start_date)
+  const endDate = parseISO(contract.contract_end_date)
   if (now >= startDate && now <= endDate) return "Active"
   if (now > endDate) return "Expired"
   if (now < startDate) return "Upcoming"
@@ -296,9 +296,9 @@ export default function ContractsDashboardPage() {
                       </TableHead>
                       <TableHead
                         className="cursor-pointer"
-                        onClick={() => handleSort("contract_valid_until")}
+                        onClick={() => handleSort("contract_end_date")}
                       >
-                        End Date {renderSortIcon("contract_valid_until")}
+                        End Date {renderSortIcon("contract_end_date")}
                       </TableHead>
                       <TableHead className="cursor-pointer" onClick={() => handleSort("status")}>
                         Status {renderSortIcon("status")}
@@ -337,8 +337,8 @@ export default function ContractsDashboardPage() {
                               : "N/A"}
                           </TableCell>
                           <TableCell>
-                            {contract.contract_valid_until
-                              ? format(parseISO(contract.contract_valid_until), "dd-MM-yyyy")
+                            {contract.contract_end_date
+                              ? format(parseISO(contract.contract_end_date), "dd-MM-yyyy")
                               : "N/A"}
                           </TableCell>
                           <TableCell>
