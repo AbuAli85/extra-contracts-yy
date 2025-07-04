@@ -75,7 +75,14 @@ export default function AuditLogsPage() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "audit_logs" },
         (payload) => {
-          setLogs((prev) => [payload.new, ...prev]);
+          // Transform the new log data to match our expected format
+          const newLog = {
+            ...payload.new,
+            user_email: payload.new.user_id || null,
+            ip_address: null,
+            timestamp: payload.new.created_at
+          };
+          setLogs((prev) => [newLog, ...prev]);
         }
       )
       .subscribe();
