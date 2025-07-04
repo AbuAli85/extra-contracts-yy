@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { supabase } from '../lib/supabaseClient'
-import { useUser } from '@supabase/auth-helpers-react'
+import { supabase } from '../lib/supabase'
 import { useUserRole } from '../hooks/useUserRole'
 
 export default function PartyDetail({ partyId }) {
-  const user = useUser()
+  const [user, setUser] = useState<any>(null)
   const role = useUserRole()
   const [notes, setNotes] = useState([])
   const [tags, setTags] = useState([])
@@ -13,6 +12,22 @@ export default function PartyDetail({ partyId }) {
   const [tagInput, setTagInput] = useState('')
   const [ownerId, setOwnerId] = useState(null)
   const [users, setUsers] = useState([])
+
+  useEffect(() => {
+    // Get current user
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    getUser()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
   const [files, setFiles] = useState([])
   const fileInputRef = useRef()
 

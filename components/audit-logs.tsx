@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useUserRole } from '../hooks/useUserRole'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '../lib/supabase'
 
 export default function AuditLogs() {
   const role = useUserRole()
