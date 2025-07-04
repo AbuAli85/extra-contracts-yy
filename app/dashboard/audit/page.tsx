@@ -41,10 +41,17 @@ export default function AuditLogsPage() {
     try {
       const { data, error } = await supabase
         .from("audit_logs")
-        .select("id, user_email, action, ip_address, timestamp, details")
+        .select("id, user_id, action, ip_address, timestamp, details")
         .order(sortKey, { ascending: sortDirection === "asc" });
       if (error) throw error;
-      setLogs(data || []);
+      
+      // Transform the data to add user_email field for compatibility
+      const transformedData = (data || []).map(log => ({
+        ...log,
+        user_email: log.user_id || null // Use user_id as fallback for now
+      }));
+      
+      setLogs(transformedData);
     } catch (err: any) {
       setError(err.message);
       setLogs([]);
@@ -213,10 +220,10 @@ export default function AuditLogsPage() {
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
-                  onClick={() => handleSort("user_email")}
-                  aria-sort={sortKey === "user_email" ? sortDirection : undefined}
+                  onClick={() => handleSort("user_id")}
+                  aria-sort={sortKey === "user_id" ? sortDirection : undefined}
                 >
-                  User {sortKey === "user_email" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
+                  User {sortKey === "user_id" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"

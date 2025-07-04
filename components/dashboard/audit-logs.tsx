@@ -1,5 +1,21 @@
 "use client"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffec      const { data, error } = await supabase
+        .from("audit_logs")
+        .select("id, user_id, action, ip_address, timestamp, details")
+        .order(sortKey || "timestamp", { ascending: sortDirection === "asc" })
+        .limit(100)
+
+      if (error) throw error
+      setLogs(
+        data.map((log: any) => ({
+          id: log.id,
+          user: log.user_id || "System", // Use user_id instead of user_email
+          action: log.action,
+          ipAddress: log.ip_address || "",
+          timestamp: log.timestamp,
+          details: log.details,
+        }))
+      ) "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
   Table,
