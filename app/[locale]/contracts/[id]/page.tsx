@@ -96,7 +96,11 @@ interface ActivityLog {
 }
 
 interface Props {
+<<<<<<< HEAD
+  // No params needed for client component  
+=======
   // No params needed for client component
+>>>>>>> 8868ce6d02ed055274df55a3fcadfdc3857ba1c1
 }
 
 export default function ContractDetailPage() {
@@ -109,8 +113,11 @@ export default function ContractDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("overview")
 
+<<<<<<< HEAD
+=======
   // Remove the resolvedParams state and useEffect for params resolution
 
+>>>>>>> 8868ce6d02ed055274df55a3fcadfdc3857ba1c1
   const mockActivityLogs: ActivityLog[] = [
     {
       id: '1',
@@ -374,8 +381,13 @@ export default function ContractDetailPage() {
                   <div>
                     <label className="font-medium text-gray-500">Contract ID</label>
                     <div className="flex items-center gap-2 mt-1">
+<<<<<<< HEAD
+                      <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">{contractId}</code>
+                      <Button size="sm" variant="ghost" onClick={() => navigator.clipboard.writeText(contractId || '')}>
+=======
                       <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">{contractId}</code>
                       <Button size="sm" variant="ghost" onClick={() => navigator.clipboard.writeText(contractId)}>
+>>>>>>> 8868ce6d02ed055274df55a3fcadfdc3857ba1c1
                         <CopyIcon className="h-3 w-3" />
                       </Button>
                     </div>
