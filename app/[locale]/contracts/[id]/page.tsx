@@ -1,310 +1,40 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useParams } from "next/navigation"
-import { supabase } from "@/lib/supabase"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
 import { 
   ArrowLeftIcon, 
   DownloadIcon, 
   EditIcon, 
   EyeIcon, 
-  SendIcon, 
-  PrinterIcon, 
-  ShareIcon,
-  HistoryIcon,
-  FileTextIcon,
-  CalendarIcon,
-  UserIcon,
-  BuildingIcon,
-  AlertCircleIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  MoreHorizontalIcon,
+  SendIcon,
   CopyIcon,
-  ExternalLinkIcon,
-  MapPinIcon,
-  MailIcon,
-  PhoneIcon,
-  TagIcon
+  FileTextIcon
 } from "lucide-react"
 
-interface ContractDetail {
-  id: string
-  status?: string
-  created_at?: string
-  updated_at?: string
-  contract_start_date?: string
-  contract_end_date?: string
-  job_title?: string
-  work_location?: string
-  email?: string
-  contract_number?: string
-  id_card_number?: string
-  employer_id?: string
-  client_id?: string
-  promoter_id?: string
-  first_party_name_en?: string
-  first_party_name_ar?: string
-  second_party_name_en?: string
-  second_party_name_ar?: string
-  google_doc_url?: string
-  pdf_url?: string
-  error_details?: string
-  salary?: number
-  currency?: string
-  contract_type?: string
-  department?: string
-  employer?: {
-    name_en: string
-    name_ar?: string
-    crn?: string
-    address?: string
-    phone?: string
-    email?: string
-  }
-  client?: {
-    name_en: string
-    name_ar?: string
-    crn?: string
-    address?: string
-    phone?: string
-    email?: string
-  }
-  promoters?: Array<{
-    id: string
-    name_en: string
-    name_ar?: string
-    id_card_number?: string
-    email?: string
-    phone?: string
-  }>
-}
-
-interface ActivityLog {
-  id: string
-  action: string
-  description: string
-  created_at: string
-  user_id?: string
-  metadata?: any
-}
+// Import our refactored components
+import { useContract } from "@/hooks/useContract"
+import { StatusBadge } from "@/components/StatusBadge"
+import { LoadingSpinner } from "@/components/LoadingSpinner"
+import { ErrorCard } from "@/components/ErrorCard"
+import { OverviewTab } from "@/components/contract-tabs/OverviewTab"
+import { formatDate, calculateDuration, copyToClipboard } from "@/utils/format"
 
 export default function ContractDetailPage() {
   const params = useParams()
   const contractId = params.id as string
-  const [contract, setContract] = useState<ContractDetail | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState("overview")
-
-  const mockActivityLogs: ActivityLog[] = [
-    {
-      id: '1',
-      action: 'created',
-      description: 'Contract was created and initialized',
-      created_at: new Date(Date.now() - 86400000 * 3).toISOString()
-    },
-    {
-      id: '2',
-      action: 'generated',
-      description: 'Google document was generated successfully',
-      created_at: new Date(Date.now() - 86400000 * 2).toISOString()
-    },
-    {
-      id: '3',
-      action: 'reviewed',
-      description: 'Contract was reviewed by legal team',
-      created_at: new Date(Date.now() - 86400000 * 1).toISOString()
-    },
-    {
-      id: '4',
-      action: 'sent',
-      description: 'Contract was sent to parties for review',
-      created_at: new Date(Date.now() - 3600000 * 6).toISOString()
-    },
-    {
-      id: '5',
-      action: 'downloaded',
-      description: 'PDF document was downloaded',
-      created_at: new Date(Date.now() - 3600000 * 2).toISOString()
-    }
-  ]
-
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
-
-  const getStatusColor = (status?: string) => {
-    switch (status?.toLowerCase()) {
-      case 'active': return 'bg-green-100 text-green-800 border-green-200'
-      case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'draft': return 'bg-gray-100 text-gray-800 border-gray-200'
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200'
-      case 'expired': return 'bg-orange-100 text-orange-800 border-orange-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
-  }
-
-  const getStatusIcon = (status?: string) => {
-    switch (status?.toLowerCase()) {
-      case 'active': return <CheckCircleIcon className="h-4 w-4" />
-      case 'completed': return <CheckCircleIcon className="h-4 w-4" />
-      case 'pending': return <ClockIcon className="h-4 w-4" />
-      case 'draft': return <FileTextIcon className="h-4 w-4" />
-      case 'cancelled': return <AlertCircleIcon className="h-4 w-4" />
-      case 'expired': return <AlertCircleIcon className="h-4 w-4" />
-      default: return <FileTextIcon className="h-4 w-4" />
-    }
-  }
-
-  const formatCurrency = (amount?: number, currency?: string) => {
-    if (!amount) return 'N/A'
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency || 'USD'
-    }).format(amount)
-  }
-
-  const calculateDuration = (startDate?: string, endDate?: string) => {
-    if (!startDate || !endDate) return 'N/A'
-    const start = new Date(startDate)
-    const end = new Date(endDate)
-    const diffTime = Math.abs(end.getTime() - start.getTime())
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    if (diffDays < 30) return `${diffDays} days`
-    if (diffDays < 365) return `${Math.round(diffDays / 30)} months`
-    return `${Math.round(diffDays / 365)} years`
-  }
-
-  useEffect(() => {
-    async function fetchContract() {
-      try {
-        setLoading(true)
-        setError(null)
-        console.log("Fetching contract with ID:", contractId)
-
-        // Fetch basic contract data
-        const { data: basicData, error: basicError } = await supabase
-          .from("contracts")
-          .select("*")
-          .eq("id", contractId)
-          .single()
-
-        if (basicError) {
-          console.error("Basic query error:", basicError)
-          setError(basicError.message)
-          return
-        }
-
-        console.log("Basic contract data:", basicData)
-
-        // Enhanced query with relations
-        let enhancedData = { ...basicData }
-        
-        // Fetch related parties separately
-        if (basicData.employer_id) {
-          const { data: employerData } = await supabase
-            .from("parties")
-            .select("name_en, name_ar, crn, address, phone, email")
-            .eq("id", basicData.employer_id)
-            .single()
-          
-          if (employerData) {
-            enhancedData.employer = employerData
-          }
-        }
-        
-        if (basicData.client_id) {
-          const { data: clientData } = await supabase
-            .from("parties")
-            .select("name_en, name_ar, crn, address, phone, email")
-            .eq("id", basicData.client_id)
-            .single()
-          
-          if (clientData) {
-            enhancedData.client = clientData
-          }
-        }
-        
-        if (basicData.promoter_id) {
-          const { data: promoterData } = await supabase
-            .from("promoters")
-            .select("id, name_en, name_ar, id_card_number, email, phone")
-            .eq("id", basicData.promoter_id)
-            .single()
-          
-          if (promoterData) {
-            enhancedData.promoters = [promoterData]
-          }
-        }
-        
-        console.log("Enhanced contract data:", enhancedData)
-        setContract(enhancedData)
-        setActivityLogs(mockActivityLogs)
-      } catch (err) {
-        console.error("Exception:", err)
-        setError("Failed to load contract")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (contractId) {
-      fetchContract()
-    }
-  }, [contractId])
+  const { contract, loading, error, refetch } = useContract(contractId)
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-8">
-        <div className="mx-auto max-w-4xl">
-          <Card className="shadow-lg">
-            <CardContent className="p-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-6"></div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Contract Details</h3>
-              <p className="text-gray-600">Please wait while we fetch the contract information...</p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-8">
-        <div className="mx-auto max-w-4xl">
-          <Card className="shadow-lg border-red-200">
-            <CardHeader className="bg-red-50">
-              <CardTitle className="text-red-700 flex items-center gap-2">
-                <AlertCircleIcon className="h-5 w-5" />
-                Error Loading Contract
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <p className="text-red-600 mb-6">{error}</p>
-              <div className="flex gap-3">
-                <Button asChild variant="outline">
-                  <Link href="/contracts">
-                    <ArrowLeftIcon className="mr-2 h-4 w-4" />
-                    Back to Contracts
-                  </Link>
-                </Button>
-                <Button onClick={() => window.location.reload()}>
-                  Try Again
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
+    return <ErrorCard message={error} onRetry={refetch} />
   }
 
   if (!contract) {
@@ -354,10 +84,7 @@ export default function ContractDetailPage() {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-4">
                   <h1 className="text-3xl font-bold text-gray-900">Contract Details</h1>
-                  <Badge className={`${getStatusColor(contract?.status)} flex items-center gap-1 px-3 py-1 text-sm font-medium`}>
-                    {getStatusIcon(contract?.status)}
-                    {contract?.status || 'Unknown'}
-                  </Badge>
+                  <StatusBadge status={contract?.status} />
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
@@ -365,14 +92,14 @@ export default function ContractDetailPage() {
                     <label className="font-medium text-gray-500">Contract ID</label>
                     <div className="flex items-center gap-2 mt-1">
                       <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">{contractId}</code>
-                      <Button size="sm" variant="ghost" onClick={() => navigator.clipboard.writeText(contractId)}>
+                      <Button size="sm" variant="ghost" onClick={() => copyToClipboard(contractId)}>
                         <CopyIcon className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
                   <div>
                     <label className="font-medium text-gray-500">Created</label>
-                    <p className="mt-1">{contract.created_at ? new Date(contract.created_at).toLocaleDateString() : 'N/A'}</p>
+                    <p className="mt-1">{formatDate(contract.created_at)}</p>
                   </div>
                   <div>
                     <label className="font-medium text-gray-500">Duration</label>
@@ -433,6 +160,47 @@ export default function ContractDetailPage() {
               <TabsTrigger value="actions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Actions</TabsTrigger>
             </TabsList>
           </div>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview">
+            <OverviewTab contract={contract} />
+          </TabsContent>
+
+          {/* Placeholder tabs - to be refactored next */}
+          <TabsContent value="parties" className="space-y-6">
+            <div className="text-center py-12">
+              <p className="text-gray-500">Parties tab - Coming soon...</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="documents" className="space-y-6">
+            <div className="text-center py-12">
+              <p className="text-gray-500">Documents tab - Coming soon...</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="timeline" className="space-y-6">
+            <div className="text-center py-12">
+              <p className="text-gray-500">Timeline tab - Coming soon...</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-6">
+            <div className="text-center py-12">
+              <p className="text-gray-500">History tab - Coming soon...</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="actions" className="space-y-6">
+            <div className="text-center py-12">
+              <p className="text-gray-500">Actions tab - Coming soon...</p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  )
+}
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
