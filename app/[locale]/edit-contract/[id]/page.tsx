@@ -79,6 +79,7 @@ export default function EditContractPage() {
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   // Load contract data into form when contract is fetched
   useEffect(() => {
@@ -107,6 +108,19 @@ export default function EditContractPage() {
     }
   }, [contract])
 
+  // Warning for unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [hasUnsavedChanges])
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -115,6 +129,7 @@ export default function EditContractPage() {
     // Clear success/error messages when user starts editing
     setSaveSuccess(false)
     setSaveError(null)
+    setHasUnsavedChanges(true)
   }
 
   const handleSave = async () => {
@@ -123,6 +138,19 @@ export default function EditContractPage() {
     setSaveSuccess(false)
 
     try {
+      // Basic validation
+      if (formData.contract_start_date && formData.contract_end_date) {
+        const startDate = new Date(formData.contract_start_date)
+        const endDate = new Date(formData.contract_end_date)
+        if (startDate > endDate) {
+          throw new Error('Contract start date cannot be after end date')
+        }
+      }
+
+      if (formData.salary && parseFloat(formData.salary) < 0) {
+        throw new Error('Salary cannot be negative')
+      }
+
       const updateData = {
         ...formData,
         salary: formData.salary ? parseFloat(formData.salary) : null,
@@ -138,10 +166,11 @@ export default function EditContractPage() {
 
       setSaveSuccess(true)
       // Refresh contract data
-      refetch()
+      await refetch()
+      setHasUnsavedChanges(false)
       
-      // Auto-hide success message after 3 seconds
-      setTimeout(() => setSaveSuccess(false), 3000)
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setSaveSuccess(false), 5000)
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Failed to save contract')
     } finally {
@@ -628,13 +657,20 @@ export default function EditContractPage() {
             </div>
             
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
-                Auto-save enabled
-              </Badge>
+              {hasUnsavedChanges ? (
+                <Badge variant="destructive" className="text-xs">
+                  Unsaved changes
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-xs">
+                  All changes saved
+                </Badge>
+              )}
               <Button 
                 onClick={handleSave} 
-                disabled={saving}
+                disabled={saving || !hasUnsavedChanges}
                 size="lg"
+                className={hasUnsavedChanges ? "bg-orange-600 hover:bg-orange-700" : ""}
               >
                 {saving ? (
                   <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />

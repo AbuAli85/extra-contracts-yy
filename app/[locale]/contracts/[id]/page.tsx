@@ -53,7 +53,7 @@ export default function ContractDetailPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Contract Not Found</h3>
               <p className="text-gray-600 mb-6">The contract you're looking for doesn't exist or has been removed.</p>
               <Button asChild>
-                <Link href="/contracts">
+                <Link href={`/${params?.locale}/contracts`}>
                   <ArrowLeftIcon className="mr-2 h-4 w-4" />
                   Back to Contracts
                 </Link>
@@ -72,7 +72,7 @@ export default function ContractDetailPage() {
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-6">
             <Button asChild variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
-              <Link href="/contracts">
+              <Link href={`/${params?.locale}/contracts`}>
                 <ArrowLeftIcon className="mr-2 h-4 w-4" />
                 Back to Contracts
               </Link>
@@ -128,7 +128,7 @@ export default function ContractDetailPage() {
                   Preview
                 </Button>
                 <Button asChild size="sm">
-                  <Link href={`/edit-contract/${contractId}`}>
+                  <Link href={`/${params?.locale}/edit-contract/${contractId}`}>
                     <EditIcon className="mr-2 h-4 w-4" />
                     Edit
                   </Link>
@@ -690,7 +690,7 @@ export default function ContractDetailPage() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Button asChild>
-                    <Link href={`/edit-contract/${contractId}`}>
+                    <Link href={`/${params?.locale}/edit-contract/${contractId}`}>
                       <EditIcon className="mr-2 h-4 w-4" />
                       Edit Contract
                     </Link>
