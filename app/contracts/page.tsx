@@ -27,10 +27,10 @@ import { format, parseISO, isWithinInterval, isFuture, isPast } from "date-fns"
 import ContractStatusFilter from "@/components/contract-status-filter"
 import ContractSearchInput from "@/components/contract-search-input"
 import LifecycleStatusIndicator from "@/components/lifecycle-status-indicator"
-import EnhancedStatusBadge from "@/components/enhanced-status-badge"
-import ContractActions from "@/components/contract-actions"
-import ContractsAnalytics from "@/components/contracts-analytics"
-import BulkOperations from "@/components/bulk-operations"
+import { EnhancedStatusBadge } from "@/components/enhanced-status-badge"
+import { ContractActions } from "@/components/contract-actions"
+import { ContractsAnalyticsDashboard } from "@/components/contracts-analytics"
+import { BulkOperations } from "@/components/bulk-operations"
 import { useState } from "react"
 
 interface SummaryStats {
@@ -212,7 +212,7 @@ function ContractsManagement({
 
         {/* Analytics View */}
         {viewMode === "analytics" && (
-          <ContractsAnalytics 
+          <ContractsAnalyticsDashboard 
             contracts={contracts}
             summaryStats={summaryStats}
           />

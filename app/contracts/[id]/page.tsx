@@ -1,5 +1,5 @@
 import type React from "react"
-import { createServerComponentClient } from "@/lib/supabaseServer"
+import { supabase } from "@/lib/supabase"
 import type { ContractRecord } from "@/lib/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -33,7 +33,6 @@ type ContractDetail = ContractRecord<{
 }>
 
 async function getContractDetails(id: string): Promise<ContractDetail | null> {
-  const supabase = await createServerComponentClient()
   const { data, error } = await supabase
     .from("contracts")
     .select(

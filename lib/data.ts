@@ -1,13 +1,11 @@
 import type { ContractWithRelations } from "@/hooks/use-contracts"
-import { createServerComponentClient } from "@/lib/supabaseServer"
+import { supabase } from "@/lib/supabase"
 
 export const getContract = async (contractId: string): Promise<ContractWithRelations | null> => {
   if (!contractId) {
     console.warn("getContract called with no contractId")
     return null
   }
-
-  const supabase = await createServerComponentClient()
 
   const { data, error } = await supabase
     .from("contracts")
