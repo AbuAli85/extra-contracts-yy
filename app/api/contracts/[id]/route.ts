@@ -3,9 +3,12 @@ import { getSupabaseAdmin }         from "@/lib/supabase/admin"
 import { contractGeneratorSchema }  from "@/lib/schema-generator"
 import { format }                   from "date-fns"
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   const supabaseAdmin = getSupabaseAdmin()
-  const { id } = params
+  const { id } = await params
 
   // 1) Parse & validate
   const body = await request.json()
