@@ -5,8 +5,12 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeftIcon, Construction } from "lucide-react"
 
-export default async function EditContractPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+export default async function EditContractPage({ 
+  params 
+}: { 
+  params: Promise<{ id: string; locale: string }> 
+}) {
+  const { id, locale } = await params
   
   return (
     <ManualErrorBoundary>
@@ -26,13 +30,13 @@ export default async function EditContractPage({ params }: { params: Promise<{ i
               This page is under construction. Editing functionality will be implemented here.
             </p>
             <Button asChild variant="outline" className="mr-2 inline-block">
-              <Link href={`/contracts/${id}`}>
+              <Link href={`/${locale}/contracts/${id}`}>
                 <ArrowLeftIcon className="mr-2 h-4 w-4" />
                 Back to Details
               </Link>
             </Button>
             <Button asChild variant="secondary" className="inline-block">
-              <Link href="/contracts">
+              <Link href={`/${locale}/contracts`}>
                 <ArrowLeftIcon className="mr-2 h-4 w-4" />
                 Back to Contracts List
               </Link>
