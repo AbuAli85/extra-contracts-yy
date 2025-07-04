@@ -1,160 +1,294 @@
-# Bilingual Contract Generator
+# Extra Contracts YY - Bilingual Contract Management System
 
-_Automatically synced with your [v0.dev](https://v0.dev) deployments_
+A full-stack Next.js application for managing and generating bilingual (Arabic/English) contracts with real-time updates, role-based dashboards, and webhook integrations.
 
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/abuali85s-projects/v0-fork-of-v0-dev-form-component)
 [![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/zVc3ijHfuT4)
 
-## Overview
+## 🚀 Features
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+- **Bilingual Contract Generation**: Create contracts in both Arabic and English
+- **Real-time Updates**: Live data synchronization using Supabase real-time subscriptions
+- **Role-based Access**: Different dashboards for different user roles
+- **Audit Logging**: Comprehensive tracking of all system activities
+- **Webhook Integration**: Automated PDF generation via Make.com
+- **Internationalization**: Multi-language support with Next.js i18n
+- **Type Safety**: Full TypeScript support with generated Supabase types
+- **Responsive Design**: Mobile-first UI built with Tailwind CSS and Shadcn/UI
 
-## Deployment
+## 🏗️ Architecture
 
-Your project is live at:
+### Technology Stack
 
-**[https://vercel.com/abuali85s-projects/v0-fork-of-v0-dev-form-component](https://vercel.com/abuali85s-projects/v0-fork-of-v0-dev-form-component)**
+- **Frontend**: Next.js 14 (App Router) with React 18 + TypeScript
+- **Styling**: Tailwind CSS + Shadcn/UI components
+- **State Management**: React Query + custom hooks
+- **Database**: Supabase (PostgreSQL) with Row Level Security (RLS)
+- **Authentication**: Supabase Auth
+- **Real-time**: Supabase real-time subscriptions
+- **Testing**: Jest + React Testing Library
+- **Deployment**: Vercel
 
-## Build your app
+### Project Structure
 
-This project requires **Node.js 20**. If you use [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to select this version.
+```
+extra-contracts-yy/
+├── app/                    # Next.js App Router pages
+│   ├── [locale]/          # Internationalized routes
+│   ├── api/               # API routes for contracts, webhooks
+│   └── actions/           # Server actions
+├── components/            # Reusable UI components
+│   ├── ui/               # Shadcn/UI components
+│   └── dashboard/        # Dashboard-specific components
+├── hooks/                # Custom React hooks
+├── lib/                  # Utilities, schemas, Supabase clients
+├── scripts/              # SQL migrations, seeding, webhook monitors
+└── types/                # TypeScript type definitions
+```
 
-Install dependencies before running any scripts:
+## 🛠️ Setup & Installation
 
-\`\`\`bash
+### Prerequisites
+
+- **Node.js 20** or higher
+- **pnpm** (recommended) or npm
+- **Supabase** account and project
+- **Make.com** account (for webhook automation)
+
+### 1. Clone and Install
+
+```bash
+git clone <repository-url>
+cd extra-contracts-yy
 pnpm install
+```
 
-# or
+### 2. Environment Configuration
 
-npm install
-\`\`\`
+Copy the example environment file and configure your variables:
 
-After updating dependencies, run `pnpm install` again and commit the resulting
-`pnpm-lock.yaml`. The CI pipeline runs with a frozen lockfile and will fail if
-`package.json` and the lockfile are out of sync.
+```bash
+cp env.example .env.local
+```
 
-After the dependencies are installed you can lint the project:
+#### Required Environment Variables
 
-\`\`\`bash
-npm run lint
-\`\`\`
+| Variable | Purpose | Scope |
+|----------|---------|-------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Client |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | Client |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Server |
+| `MAKE_WEBHOOK_URL` | Make.com webhook endpoint | Server |
+| `MAKE_WEBHOOK_SECRET` | Webhook authentication secret | Server |
 
-The form at `public/index.html` is generated from `index.html` using the
-`NEXT_PUBLIC_MAKE_WEBHOOK_URL` environment variable. When you run `npm run dev`
-or `npm run build`, the script `scripts/build-form.js` replaces the placeholder
-`__MAKE_WEBHOOK_URL__` in `index.html` and writes the result to
-`public/index.html`.
+#### Optional Environment Variables
 
-If `next lint` reports "not found," install Next.js:
+| Variable | Purpose | Scope |
+|----------|---------|-------|
+| `GOOGLE_CREDENTIALS_JSON` | Google service account credentials | Server |
+| `GOOGLE_DOCS_TEMPLATE_ID` | Google Docs template ID | Server |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | Email configuration | Server |
 
-\`\`\`bash
-pnpm add next
+### 3. Database Setup
 
-# or
+Run the SQL migration scripts in order:
 
-npm install next
-\`\`\`
+```bash
+# Execute scripts in /scripts directory
+# 001_create_promoters_table.sql
+# 002_alter_parties_add_type.sql
+# ... (continue with all numbered scripts)
+```
 
-## Environment Variables
+### 4. Generate TypeScript Types
 
-Copy `env.example` to `.env.local` and fill in the variables. Environment
-variables prefixed with `NEXT_PUBLIC_` are required on the client, while the
-others should remain server-side. Important keys include:
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `NEXT_PUBLIC_MAKE_WEBHOOK_URL`
-- `MAKE_WEBHOOK_URL`
-- `MAKE_WEBHOOK_SECRET`
-
-| Variable                        | Purpose                                                                        | Scope  |
-| ------------------------------- | ------------------------------------------------------------------------------ | ------ |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Base URL of your Supabase project                                              | client |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key used by the browser                                          | client |
-| `SUPABASE_SERVICE_ROLE_KEY`     | Service role key for Supabase admin operations                                 | server |
-| `NEXT_PUBLIC_MAKE_WEBHOOK_URL`  | Public URL for Make.com form submissions; used to generate `public/index.html` | client |
-| `MAKE_WEBHOOK_URL`              | Make.com endpoint for generating PDFs                                          | server |
-| `MAKE_WEBHOOK_SECRET`           | Optional secret for Make.com, not referenced yet                               | server |
-| `GOOGLE_CREDENTIALS_JSON`       | Google service account credentials                                             | server |
-| `GOOGLE_DOCS_TEMPLATE_ID`       | ID of the Google Docs template contract                                        | server |
-| `SMTP_HOST`                     | SMTP server host for sending PDF emails                                        | server |
-| `SMTP_PORT`                     | SMTP server port                                                               | server |
-| `SMTP_USER`                     | Username or email for SMTP authentication                                      | server |
-| `SMTP_PASS`                     | Password for SMTP authentication                                               | server |
-
-Continue building your app on:
-
-**[https://v0.dev/chat/projects/zVc3ijHfuT4](https://v0.dev/chat/projects/zVc3ijHfuT4)**
-
-## How It Works
-
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
-
-## Generate Supabase Types
-
-Install the [Supabase CLI](https://supabase.com/docs/guides/cli) globally:
-
-\`\`\`bash
-npm install -g supabase
-\`\`\`
-
-After installing, generate TypeScript definitions for your database:
-
-\`\`\`bash
+```bash
 npx supabase gen types typescript --project-id <YOUR_PROJECT_REF> --schema public > types/supabase.ts
-\`\`\`
+```
 
-Running this command whenever your database schema changes will keep
-`types/supabase.ts` in sync with your Supabase project.
+### 5. Development
 
-## Running Tests
+```bash
+# Start development server
+pnpm dev
 
-Ensure you have **Node.js** and **pnpm** installed. Install project
-dependencies before running the tests:
+# Run linting
+pnpm lint
 
-\`\`\`bash
-pnpm install
-\`\`\`
-
-You must run `pnpm install` before `pnpm test` so all dependencies are available.
-After the install completes, execute the Jest test suite with:
-
-\`\`\`bash
+# Run tests
 pnpm test
-\`\`\`
 
-Tests rely on the dependencies installed locally by `pnpm install` and will
-fail if they are missing. This command runs all unit tests defined in the
-repository.
+# Build for production
+pnpm build
+```
 
-## Real-Time Data Usage
+## 📖 Usage Guide
 
-This project includes reusable hooks for real-time updates from Supabase:
+### Contract Management
 
-- `useRealtimeContracts()` — real-time contract list
-- `useRealtimePromoters()` — real-time promoter list
-- `useRealtimeParties()` — real-time party list
+1. **Create a Contract**:
+   - Navigate to `/generate-contract`
+   - Fill in party and promoter details
+   - Submit to generate bilingual PDF
 
-### Example Usage
+2. **Manage Contracts**:
+   - View all contracts at `/contracts`
+   - Edit existing contracts
+   - Track contract status and lifecycle
 
-\`\`\`tsx
+### Promoter Management
+
+1. **Add Promoters**:
+   - Go to `/manage-promoters`
+   - Fill in promoter details including ID documents
+   - Upload required documents
+
+2. **Promoter Analytics**:
+   - View promoter performance metrics
+   - Track active contracts per promoter
+
+### Dashboard Features
+
+- **Analytics**: Contract statistics and trends
+- **Audit Logs**: System activity tracking
+- **Notifications**: Real-time alerts and updates
+- **User Management**: Role-based access control
+
+## 🔧 API Reference
+
+### Contract Endpoints
+
+```typescript
+// Create contract
+POST /api/contracts
+{
+  "first_party_id": "uuid",
+  "second_party_id": "uuid", 
+  "promoter_id": "uuid",
+  "job_title": "string",
+  "work_location": "string",
+  "contract_start_date": "YYYY-MM-DD",
+  "contract_end_date": "YYYY-MM-DD"
+}
+
+// Get contract
+GET /api/contracts/[id]
+
+// Update contract
+PUT /api/contracts/[id]
+
+// Delete contract
+DELETE /api/contracts/[id]
+```
+
+### Webhook Endpoints
+
+```typescript
+// Trigger webhook
+POST /api/trigger-webhook
+
+// Test webhook
+POST /api/test-webhook
+```
+
+## 🧪 Testing
+
+### Running Tests
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run tests with coverage
+pnpm test:coverage
+```
+
+### Test Structure
+
+- **Unit Tests**: `__tests__/` folders in each directory
+- **Component Tests**: Test files alongside components
+- **API Tests**: Endpoint testing in `app/api/`
+
+## 🔄 Real-time Features
+
+The application uses Supabase real-time subscriptions for live updates:
+
+```typescript
+// Example: Real-time contracts
 import { useRealtimeContracts } from "@/hooks/use-realtime-contracts"
 
 export default function ContractList() {
   const contracts = useRealtimeContracts()
+  
   return (
-    <ul>
+    <div>
       {contracts.map(contract => (
-        <li key={contract.id}>{contract.contract_number}</li>
+        <ContractCard key={contract.id} contract={contract} />
       ))}
-    </ul>
+    </div>
   )
 }
-\`\`\`
+```
 
-You can use the same pattern for promoters and parties. All lists will update automatically when the database changes.
+Available real-time hooks:
+- `useRealtimeContracts()` - Contract updates
+- `useRealtimePromoters()` - Promoter updates  
+- `useRealtimeParties()` - Party updates
+
+## 🚀 Deployment
+
+### Vercel Deployment
+
+1. Connect your GitHub repository to Vercel
+2. Configure environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Environment Variables for Production
+
+Ensure all required environment variables are set in your production environment:
+
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Make.com
+MAKE_WEBHOOK_URL=your_webhook_url
+MAKE_WEBHOOK_SECRET=your_webhook_secret
+```
+
+## 🔒 Security
+
+- **Row Level Security (RLS)**: Database-level access control
+- **Authentication**: Supabase Auth with role-based permissions
+- **API Security**: Server-side validation and type checking
+- **Environment Variables**: Secure configuration management
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+For support and questions:
+- Check the documentation in `/docs`
+- Review existing issues
+- Create a new issue with detailed information
+
+---
+
+**Live Demo**: [https://vercel.com/abuali85s-projects/v0-fork-of-v0-dev-form-component](https://vercel.com/abuali85s-projects/v0-fork-of-v0-dev-form-component)
+
+**Continue Development**: [https://v0.dev/chat/projects/zVc3ijHfuT4](https://v0.dev/chat/projects/zVc3ijHfuT4)
