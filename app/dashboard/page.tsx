@@ -7,7 +7,7 @@ import ContractReportsTable from "@/components/dashboard/contract-reports-table"
 import ReviewPanel from "@/components/dashboard/review-panel"
 import NotificationSystem from "@/components/dashboard/notification-system"
 import AdminTools from "@/components/dashboard/admin-tools"
-import AuditLogs from "@/components/dashboard/audit-logs"
+// import AuditLogs from "@/components/dashboard/audit-logs" // Temporarily disabled due to corruption
 import { supabase } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
 import type { SummaryWidgetData, ContractStats } from "@/lib/dashboard-types"
@@ -186,7 +186,7 @@ export default function DashboardPage() {
             <AdminTools />
           </div>
         </section>
-        <AuditLogs />
+        {/* <AuditLogs /> Temporarily disabled due to corruption */}
       </div>
     </DashboardLayout>
   )

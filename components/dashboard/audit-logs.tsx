@@ -56,15 +56,15 @@ export default function AuditLogs() {
     try {
       const { data, error } = await supabase
         .from("audit_logs")
-        .select("id, user_email, action, ip_address, timestamp, details")
+        .select("id, user_id, action, ip_address, timestamp, details")
         .order(sortKey || "timestamp", { ascending: sortDirection === "asc" })
         .limit(100)
 
       if (error) throw error
       setLogs(
-        data.map((log: AuditLogRow) => ({
+        data.map((log: any) => ({
           id: log.id,
-          user: log.user_email || "System",
+          user: log.user_id || "System",
           action: log.action,
           ipAddress: log.ip_address || "N/A",
           timestamp: log.timestamp, // This is already an ISO string
@@ -99,14 +99,14 @@ export default function AuditLogs() {
           devLog("New audit log received:", newLog)
           toast({
             title: "New Audit Log Entry",
-            description: `${newLog.user_email || "System"} performed action: ${newLog.action}`,
+            description: `${newLog.user_id || "System"} performed action: ${newLog.action}`,
           })
           setLogs(
             (prev) =>
               [
                 {
                   id: newLog.id,
-                  user: newLog.user_email || "System",
+                  user: newLog.user_id || "System",
                   action: newLog.action,
                   ipAddress: newLog.ip_address || "N/A",
                   timestamp: newLog.timestamp,
