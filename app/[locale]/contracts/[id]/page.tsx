@@ -38,18 +38,15 @@ interface Party {
   name_en: string
   name_ar?: string
   crn?: string
-  address?: string
-  phone?: string
-  email?: string
 }
+
 interface Promoter {
   id: string
   name_en: string
   name_ar?: string
   id_card_number?: string
-  email?: string
-  phone?: string
 }
+
 interface ContractDetail {
   id: string
   status?: string
@@ -76,6 +73,10 @@ interface ContractDetail {
   currency?: string
   contract_type?: string
   department?: string
+  description?: string
+  terms?: string
+  amount?: number
+  payment_terms?: string
   employer?: Party
   client?: Party
   promoters?: Promoter[]
@@ -230,33 +231,6 @@ function PartyCard({
                 </p>
               </div>
             )}
-            {"email" in party && party.email && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">Email</label>
-                <p className="text-sm text-gray-700 mt-1 flex items-center gap-2">
-                  <MailIcon className="h-4 w-4 text-gray-500" />
-                  {party.email}
-                </p>
-              </div>
-            )}
-            {"phone" in party && party.phone && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">Phone</label>
-                <p className="text-sm text-gray-700 mt-1 flex items-center gap-2">
-                  <PhoneIcon className="h-4 w-4 text-gray-500" />
-                  {party.phone}
-                </p>
-              </div>
-            )}
-            {"address" in party && party.address && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">Address</label>
-                <p className="text-sm text-gray-700 mt-1 flex items-start gap-2">
-                  <MapPinIcon className="h-4 w-4 text-gray-500 mt-0.5" />
-                  {party.address}
-                </p>
-              </div>
-            )}
             <div className="pt-4 border-t">
               <Button asChild variant="outline" size="sm" className="w-full">
                 <Link href={detailsLink}>View Details</Link>
@@ -343,6 +317,9 @@ export default function ContractDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
+  const [firstParty, setFirstParty] = useState<Party | null>(null)
+  const [secondParty, setSecondParty] = useState<Party | null>(null)
+  const [promoter, setPromoter] = useState<Promoter | null>(null)
 
   const formattedCreatedAt = useMemo(
     () =>
@@ -389,26 +366,35 @@ export default function ContractDetailPage() {
         if (basicData.first_party_id) {
           const { data: employerData } = await supabase
             .from("parties")
-            .select("name_en, name_ar, crn, address, phone, email")
+            .select("name_en, name_ar, crn")
             .eq("id", basicData.first_party_id)
             .single()
-          if (employerData) enhancedData.employer = employerData
+          if (employerData) {
+            enhancedData.employer = employerData
+            setFirstParty(employerData)
+          }
         }
         if (basicData.second_party_id) {
           const { data: clientData } = await supabase
             .from("parties")
-            .select("name_en, name_ar, crn, address, phone, email")
+            .select("name_en, name_ar, crn")
             .eq("id", basicData.second_party_id)
             .single()
-          if (clientData) enhancedData.client = clientData
+          if (clientData) {
+            enhancedData.client = clientData
+            setSecondParty(clientData)
+          }
         }
         if (basicData.promoter_id) {
           const { data: promoterData } = await supabase
             .from("promoters")
-            .select("id, name_en, name_ar, id_card_number, email, phone")
+            .select("id, name_en, name_ar, id_card_number")
             .eq("id", basicData.promoter_id)
             .single()
-          if (promoterData) enhancedData.promoters = [promoterData]
+          if (promoterData) {
+            enhancedData.promoters = [promoterData]
+            setPromoter(promoterData)
+          }
         }
         setContract(enhancedData)
         setActivityLogs(mockActivityLogs)
@@ -595,7 +581,241 @@ export default function ContractDetailPage() {
             </div>
           </div>
         </div>
-        {/* ...Tabs and rest of component as in previous code... */}
+        
+        {/* Tabs Section */}
+        <Tabs defaultValue="details" className="mt-8">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="parties">Parties</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="details" className="mt-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileTextIcon className="h-5 w-5" />
+                    Contract Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Contract Type</label>
+                    <p className="mt-1">{contract?.contract_type || "Standard"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Description</label>
+                    <p className="mt-1">{contract?.description || "No description provided"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Terms</label>
+                    <p className="mt-1">{contract?.terms || "Standard terms apply"}</p>
+                  </div>
+                  {contract?.contract_start_date && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Start Date</label>
+                      <p className="mt-1">{new Date(contract.contract_start_date).toLocaleDateString()}</p>
+                    </div>
+                  )}
+                  {contract?.contract_end_date && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">End Date</label>
+                      <p className="mt-1">{new Date(contract.contract_end_date).toLocaleDateString()}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BuildingIcon className="h-5 w-5" />
+                    Financial Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {contract?.amount && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Contract Amount</label>
+                      <p className="mt-1 text-2xl font-bold">${contract.amount.toLocaleString()}</p>
+                    </div>
+                  )}
+                  {contract?.currency && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Currency</label>
+                      <p className="mt-1">{contract.currency}</p>
+                    </div>
+                  )}
+                  {contract?.payment_terms && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Payment Terms</label>
+                      <p className="mt-1">{contract.payment_terms}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="parties" className="mt-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              {firstParty && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <UserIcon className="h-5 w-5" />
+                      First Party
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Name</label>
+                      <p className="mt-1 font-medium">{firstParty.name_en}</p>
+                      {firstParty.name_ar && (
+                        <p className="text-sm text-gray-600">{firstParty.name_ar}</p>
+                      )}
+                    </div>
+                    {firstParty.crn && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">CRN</label>
+                        <p className="mt-1">{firstParty.crn}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {secondParty && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <UserIcon className="h-5 w-5" />
+                      Second Party
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Name</label>
+                      <p className="mt-1 font-medium">{secondParty.name_en}</p>
+                      {secondParty.name_ar && (
+                        <p className="text-sm text-gray-600">{secondParty.name_ar}</p>
+                      )}
+                    </div>
+                    {secondParty.crn && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">CRN</label>
+                        <p className="mt-1">{secondParty.crn}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {promoter && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TagIcon className="h-5 w-5" />
+                    Promoter Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Name</label>
+                    <p className="mt-1 font-medium">{promoter.name_en}</p>
+                    {promoter.name_ar && (
+                      <p className="text-sm text-gray-600">{promoter.name_ar}</p>
+                    )}
+                  </div>
+                  {promoter.id_card_number && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">ID Card Number</label>
+                      <p className="mt-1">{promoter.id_card_number}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="history" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <HistoryIcon className="h-5 w-5" />
+                  Contract History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
+                    <div className="flex-shrink-0 w-2 h-2 mt-2 bg-blue-500 rounded-full"></div>
+                    <div>
+                      <p className="font-medium">Contract Created</p>
+                      <p className="text-sm text-gray-600">{formattedCreatedAt}</p>
+                      <p className="text-sm text-gray-500">Initial contract generation completed</p>
+                    </div>
+                  </div>
+                  {contract?.updated_at && contract.updated_at !== contract.created_at && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
+                      <div className="flex-shrink-0 w-2 h-2 mt-2 bg-green-500 rounded-full"></div>
+                      <div>
+                        <p className="font-medium">Contract Updated</p>
+                        <p className="text-sm text-gray-600">{new Date(contract.updated_at).toLocaleString()}</p>
+                        <p className="text-sm text-gray-500">Contract details were modified</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="timeline" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CalendarIcon className="h-5 w-5" />
+                  Contract Timeline
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="relative pl-6">
+                    <div className="absolute left-0 top-1 w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <div className="pb-4">
+                      <p className="font-medium">Contract Created</p>
+                      <p className="text-sm text-gray-600">{formattedCreatedAt}</p>
+                    </div>
+                  </div>
+                  
+                  {contract?.contract_start_date && (
+                    <div className="relative pl-6">
+                      <div className="absolute left-0 top-1 w-3 h-3 bg-green-500 rounded-full"></div>
+                      <div className="pb-4">
+                        <p className="font-medium">Contract Start Date</p>
+                        <p className="text-sm text-gray-600">{new Date(contract.contract_start_date).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {contract?.contract_end_date && (
+                    <div className="relative pl-6">
+                      <div className="absolute left-0 top-1 w-3 h-3 bg-orange-500 rounded-full"></div>
+                      <div className="pb-4">
+                        <p className="font-medium">Contract End Date</p>
+                        <p className="text-sm text-gray-600">{new Date(contract.contract_end_date).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
