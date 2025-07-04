@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useParams } from "next/navigation"
+<<<<<<< HEAD
+=======
 import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -33,7 +35,10 @@ import {
   PhoneIcon,
   TagIcon
 } from "lucide-react"
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
 
+<<<<<<< HEAD
+=======
 interface Party {
   name_en: string
   name_ar?: string
@@ -342,16 +347,27 @@ function DocumentCard({
   )
 }
 
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
 export default function ContractDetailPage() {
   const params = useParams()
   const contractId = params?.id as string
+<<<<<<< HEAD
+  const locale = params?.locale as string
+  
+=======
   // const locale = params?.locale as string // Not used, can be added for i18n
 
   const [contract, setContract] = useState<ContractDetail | null>(null)
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+<<<<<<< HEAD
+=======
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
 
+<<<<<<< HEAD
+=======
   // Memoized values for performance
   const formattedCreatedAt = useMemo(
     () =>
@@ -378,13 +394,24 @@ export default function ContractDetailPage() {
   )
 
   // Fetch contract (and related) info
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
   useEffect(() => {
+<<<<<<< HEAD
+    console.log("Contract ID:", contractId)
+    console.log("Locale:", locale)
+    setLoading(false)
+  }, [contractId, locale])
+=======
     async function fetchContract() {
       if (!contractId) return
       try {
         setLoading(true)
         setError(null)
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
 
+<<<<<<< HEAD
+  if (loading) {
+=======
         // Fetch contract
         const { data: basicData, error: basicError } = await supabase
           .from("contracts")
@@ -437,7 +464,22 @@ export default function ContractDetailPage() {
 
   // --- Loading/Error/Not Found states ---
   if (loading)
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
     return (
+<<<<<<< HEAD
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ 
+            width: '48px', 
+            height: '48px', 
+            border: '2px solid #e5e7eb', 
+            borderTop: '2px solid #3b82f6',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 16px'
+          }}></div>
+          <h3>Loading Contract Details...</h3>
+=======
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-8">
         <div className="mx-auto max-w-4xl">
           <Card className="shadow-lg">
@@ -451,40 +493,38 @@ export default function ContractDetailPage() {
               </p>
             </CardContent>
           </Card>
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
         </div>
       </div>
     )
 
   if (error)
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-8">
-        <div className="mx-auto max-w-4xl">
-          <Card className="shadow-lg border-red-200">
-            <CardHeader className="bg-red-50">
-              <CardTitle className="text-red-700 flex items-center gap-2">
-                <AlertCircleIcon className="h-5 w-5" />
-                Error Loading Contract
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <p className="text-red-600 mb-6">{error}</p>
-              <div className="flex gap-3">
-                <Button asChild variant="outline">
-                  <Link href="/contracts">
-                    <ArrowLeftIcon className="mr-2 h-4 w-4" />
-                    Back to Contracts
-                  </Link>
-                </Button>
-                <Button onClick={() => window.location.reload()}>
-                  Try Again
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      <div style={{ minHeight: '100vh', padding: '32px' }}>
+        <div style={{ maxWidth: '768px', margin: '0 auto' }}>
+          <div style={{ backgroundColor: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', padding: '24px' }}>
+            <h3 style={{ color: '#dc2626', marginBottom: '16px' }}>Error Loading Contract</h3>
+            <p style={{ color: '#dc2626', marginBottom: '24px' }}>{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              style={{
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     )
 
+<<<<<<< HEAD
+=======
   if (!contract)
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-8">
@@ -511,7 +551,22 @@ export default function ContractDetailPage() {
     )
 
   // --- Main Render ---
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
   return (
+<<<<<<< HEAD
+    <div style={{ minHeight: '100vh', padding: '32px', backgroundColor: '#f8fafc' }}>
+      <div style={{ maxWidth: '1024px', margin: '0 auto' }}>
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '16px' }}>Contract Details</h1>
+          <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', fontSize: '14px' }}>
+              <div>
+                <label style={{ fontWeight: '500', color: '#6b7280' }}>Contract ID</label>
+                <div style={{ marginTop: '4px' }}>
+                  <code style={{ backgroundColor: '#f3f4f6', padding: '8px 12px', borderRadius: '6px', fontSize: '12px', fontFamily: 'monospace' }}>
+                    {contractId}
+                  </code>
+=======
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="mx-auto max-w-8xl px-4 py-8">
         {/* Header Section */}
@@ -550,7 +605,10 @@ export default function ContractDetailPage() {
                     {getStatusIcon(contract?.status)}
                     {contract?.status || "Unknown"}
                   </Badge>
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
                 </div>
+<<<<<<< HEAD
+=======
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                   <div>
                     <label className="font-medium text-gray-500">
@@ -581,7 +639,13 @@ export default function ContractDetailPage() {
                     <p className="mt-1">{contract.contract_type || "Standard"}</p>
                   </div>
                 </div>
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
               </div>
+<<<<<<< HEAD
+              <div>
+                <label style={{ fontWeight: '500', color: '#6b7280' }}>Locale</label>
+                <p style={{ marginTop: '4px' }}>{locale}</p>
+=======
               {/* Quick Actions */}
               <div className="flex items-center gap-2 ml-8">
                 {contract?.google_doc_url && (
@@ -610,23 +674,58 @@ export default function ContractDetailPage() {
                   <SendIcon className="h-4 w-4" />
                   Send
                 </Button>
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
+              </div>
+              <div>
+                <label style={{ fontWeight: '500', color: '#6b7280' }}>Status</label>
+                <p style={{ marginTop: '4px' }}>✅ Page loaded successfully!</p>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-1">
-            <TabsList className="grid w-full grid-cols-6 bg-transparent">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Overview</TabsTrigger>
-              <TabsTrigger value="parties" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Parties</TabsTrigger>
-              <TabsTrigger value="documents" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Documents</TabsTrigger>
-              <TabsTrigger value="timeline" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Timeline</TabsTrigger>
-              <TabsTrigger value="history" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">History</TabsTrigger>
-              <TabsTrigger value="actions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Actions</TabsTrigger>
-            </TabsList>
+        
+        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>Simple Contract View</h2>
+          <p style={{ color: '#6b7280', marginBottom: '16px' }}>
+            This is a simplified version of the contract detail page to test if the basic routing and params work correctly.
+          </p>
+          <div style={{ padding: '16px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
+            <p style={{ color: '#166534' }}>
+              ✅ The page is rendering correctly without hydration errors.
+            </p>
           </div>
+<<<<<<< HEAD
+          <div style={{ marginTop: '24px' }}>
+            <button 
+              onClick={() => window.history.back()}
+              style={{
+                backgroundColor: '#6b7280',
+                color: 'white',
+                padding: '12px 24px',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer',
+                marginRight: '12px'
+              }}
+            >
+              ← Back
+            </button>
+            <button 
+              onClick={() => setError('This is a test error')}
+              style={{
+                backgroundColor: '#dc2626',
+                color: 'white',
+                padding: '12px 24px',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              Test Error
+            </button>
+          </div>
+        </div>
+=======
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             {/* Key Metrics Cards */}
@@ -964,6 +1063,7 @@ export default function ContractDetailPage() {
             {/* ... (Actions logic unchanged for brevity) ... */}
           </TabsContent>
         </Tabs>
+>>>>>>> 20e2e847ea7e947ea9d3b4ab9ffb2e84fcbf87a9
       </div>
     </div>
   )
