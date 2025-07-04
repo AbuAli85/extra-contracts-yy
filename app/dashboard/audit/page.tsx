@@ -28,7 +28,7 @@ export default function AuditLogsPage() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortKey, setSortKey] = useState("timestamp");
+  const [sortKey, setSortKey] = useState("created_at");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
@@ -41,14 +41,16 @@ export default function AuditLogsPage() {
     try {
       const { data, error } = await supabase
         .from("audit_logs")
-        .select("id, user_id, action, ip_address, timestamp, details")
+        .select("id, user_id, action, entity_type, entity_id, details, created_at")
         .order(sortKey, { ascending: sortDirection === "asc" });
       if (error) throw error;
       
-      // Transform the data to add user_email field for compatibility
+      // Transform the data to add compatibility fields
       const transformedData = (data || []).map(log => ({
         ...log,
-        user_email: log.user_id || null // Use user_id as fallback for now
+        user_email: log.user_id || null, // For compatibility
+        ip_address: null, // Column doesn't exist in schema
+        timestamp: log.created_at // Map created_at to timestamp
       }));
       
       setLogs(transformedData);
@@ -90,7 +92,8 @@ export default function AuditLogsPage() {
         (log) =>
           (log.user_email || "System").toLowerCase().includes(searchTerm.toLowerCase()) ||
           log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (log.ip_address && log.ip_address.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (log.entity_type && log.entity_type.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (log.entity_id && log.entity_id.toString().toLowerCase().includes(searchTerm.toLowerCase())) ||
           (log.details &&
             typeof log.details === "string" &&
             log.details.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -103,7 +106,7 @@ export default function AuditLogsPage() {
     filtered = [...filtered].sort((a, b) => {
       let valA = a[sortKey];
       let valB = b[sortKey];
-      if (sortKey === "timestamp") {
+      if (sortKey === "created_at" || sortKey === "timestamp") {
         valA = valA ? new Date(valA).getTime() : 0;
         valB = valB ? new Date(valB).getTime() : 0;
       }
@@ -135,12 +138,13 @@ export default function AuditLogsPage() {
 
   // Export to CSV
   const exportCSV = () => {
-    const headers = ["Timestamp", "User", "Action", "IP Address", "Details"];
+    const headers = ["Timestamp", "User", "Action", "Entity Type", "Entity ID", "Details"];
     const rows = filteredLogs.map((log) => [
       log.timestamp,
       log.user_email || "System",
       log.action,
-      log.ip_address || "",
+      log.entity_type || "",
+      log.entity_id || "",
       typeof log.details === "object" ? JSON.stringify(log.details) : log.details || "",
     ]);
     const csv =
@@ -213,10 +217,10 @@ export default function AuditLogsPage() {
               <TableRow>
                 <TableHead
                   className="cursor-pointer"
-                  onClick={() => handleSort("timestamp")}
-                  aria-sort={sortKey === "timestamp" ? sortDirection : undefined}
+                  onClick={() => handleSort("created_at")}
+                  aria-sort={sortKey === "created_at" ? sortDirection : undefined}
                 >
-                  Timestamp {sortKey === "timestamp" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
+                  Timestamp {sortKey === "created_at" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
@@ -234,10 +238,17 @@ export default function AuditLogsPage() {
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
-                  onClick={() => handleSort("ip_address")}
-                  aria-sort={sortKey === "ip_address" ? sortDirection : undefined}
+                  onClick={() => handleSort("entity_type")}
+                  aria-sort={sortKey === "entity_type" ? sortDirection : undefined}
                 >
-                  IP Address {sortKey === "ip_address" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
+                  Entity Type {sortKey === "entity_type" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort("entity_id")}
+                  aria-sort={sortKey === "entity_id" ? sortDirection : undefined}
+                >
+                  Entity ID {sortKey === "entity_id" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
@@ -268,7 +279,8 @@ export default function AuditLogsPage() {
                     <TableCell>{log.timestamp ? format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss') : "-"}</TableCell>
                     <TableCell>{log.user_email || "System"}</TableCell>
                     <TableCell>{log.action}</TableCell>
-                    <TableCell>{log.ip_address || "-"}</TableCell>
+                    <TableCell>{log.entity_type || "-"}</TableCell>
+                    <TableCell>{log.entity_id || "-"}</TableCell>
                     <TableCell>
                       {typeof log.details === "object"
                         ? JSON.stringify(log.details)
