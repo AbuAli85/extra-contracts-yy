@@ -14,10 +14,25 @@ interface ContractDetailDebug {
   created_at?: string
   contract_start_date?: string
   contract_end_date?: string
+  job_title?: string
+  work_location?: string
+  email?: string
+  contract_number?: string
+  id_card_number?: string
+  employer_id?: string
+  client_id?: string
+  promoter_id?: string
+  first_party_name_en?: string
+  first_party_name_ar?: string
+  second_party_name_en?: string
+  second_party_name_ar?: string
+  promoter_name_en?: string
+  promoter_name_ar?: string
   employer?: any
   client?: any
   promoters?: any[]
   google_doc_url?: string
+  pdf_url?: string
   error_details?: string
 }
 
@@ -52,26 +67,48 @@ export default function ContractDetailPage() {
         console.log("Basic contract data:", basicData)
         setRawData(basicData)
 
-        // Enhanced query with relations
-        const { data, error } = await supabase
-          .from("contracts")
-          .select(`
-            *,
-            employer:parties!contracts_employer_id_fkey (name_en, name_ar, crn),
-            client:parties!contracts_client_id_fkey (name_en, name_ar, crn),
-            promoters(id, name_en, name_ar, id_card_number)
-          `)
-          .eq("id", contractId)
-          .single()
-
-        if (error) {
-          console.error("Enhanced query error:", error)
-          // Use basic data if enhanced query fails
-          setContract(basicData)
-        } else {
-          console.log("Enhanced contract data:", data)
-          setContract(data)
+        // Enhanced query with relations - try different approach
+        let enhancedData = { ...basicData }
+        
+        // Try to fetch related parties separately
+        if (basicData.employer_id) {
+          const { data: employerData } = await supabase
+            .from("parties")
+            .select("name_en, name_ar, crn")
+            .eq("id", basicData.employer_id)
+            .single()
+          
+          if (employerData) {
+            enhancedData.employer = employerData
+          }
         }
+        
+        if (basicData.client_id) {
+          const { data: clientData } = await supabase
+            .from("parties")
+            .select("name_en, name_ar, crn")
+            .eq("id", basicData.client_id)
+            .single()
+          
+          if (clientData) {
+            enhancedData.client = clientData
+          }
+        }
+        
+        if (basicData.promoter_id) {
+          const { data: promoterData } = await supabase
+            .from("promoters")
+            .select("id, name_en, name_ar, id_card_number")
+            .eq("id", basicData.promoter_id)
+            .single()
+          
+          if (promoterData) {
+            enhancedData.promoters = [promoterData]
+          }
+        }
+        
+        console.log("Enhanced contract data:", enhancedData)
+        setContract(enhancedData)
       } catch (err) {
         console.error("Exception:", err)
         setError("Failed to load contract")
@@ -165,6 +202,18 @@ export default function ContractDetailPage() {
                 <label className="text-sm font-medium text-gray-500">End Date</label>
                 <p>{contract?.contract_end_date ? new Date(contract.contract_end_date).toLocaleDateString() : "N/A"}</p>
               </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Job Title</label>
+                <p>{contract?.job_title || "N/A"}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Work Location</label>
+                <p>{contract?.work_location || "N/A"}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Email</label>
+                <p>{contract?.email || "N/A"}</p>
+              </div>
             </CardContent>
           </Card>
 
@@ -176,16 +225,22 @@ export default function ContractDetailPage() {
             <CardContent className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-gray-500">Employer</label>
-                <p>{contract?.employer?.name_en || "N/A"}</p>
-                {contract?.employer?.name_ar && (
-                  <p className="text-sm text-gray-600" dir="rtl">{contract.employer.name_ar}</p>
+                <p>{contract?.employer?.name_en || contract?.first_party_name_en || "N/A"}</p>
+                {(contract?.employer?.name_ar || contract?.first_party_name_ar) && (
+                  <p className="text-sm text-gray-600" dir="rtl">{contract?.employer?.name_ar || contract?.first_party_name_ar}</p>
+                )}
+                {contract?.employer?.crn && (
+                  <p className="text-xs text-gray-500">CRN: {contract.employer.crn}</p>
                 )}
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">Client</label>
-                <p>{contract?.client?.name_en || "N/A"}</p>
-                {contract?.client?.name_ar && (
-                  <p className="text-sm text-gray-600" dir="rtl">{contract.client.name_ar}</p>
+                <p>{contract?.client?.name_en || contract?.second_party_name_en || "N/A"}</p>
+                {(contract?.client?.name_ar || contract?.second_party_name_ar) && (
+                  <p className="text-sm text-gray-600" dir="rtl">{contract?.client?.name_ar || contract?.second_party_name_ar}</p>
+                )}
+                {contract?.client?.crn && (
+                  <p className="text-xs text-gray-500">CRN: {contract.client.crn}</p>
                 )}
               </div>
               <div>
@@ -196,6 +251,16 @@ export default function ContractDetailPage() {
                     {contract.promoters[0].name_ar && (
                       <p className="text-sm text-gray-600" dir="rtl">{contract.promoters[0].name_ar}</p>
                     )}
+                    {contract.promoters[0].id_card_number && (
+                      <p className="text-xs text-gray-500">ID: {contract.promoters[0].id_card_number}</p>
+                    )}
+                  </div>
+                ) : contract?.promoter_name_en ? (
+                  <div>
+                    <p>{contract.promoter_name_en}</p>
+                    {contract.promoter_name_ar && (
+                      <p className="text-sm text-gray-600" dir="rtl">{contract.promoter_name_ar}</p>
+                    )}
                   </div>
                 ) : (
                   <p>N/A</p>
@@ -204,21 +269,80 @@ export default function ContractDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Document */}
-          {contract?.google_doc_url && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Generated Document</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full">
-                  <a href={contract.google_doc_url} target="_blank" rel="noopener noreferrer">
-                    View Google Document
-                  </a>
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+          {/* Document and Links */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Documents & Links</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {contract?.google_doc_url && (
+                <div>
+                  <Button asChild className="w-full">
+                    <a href={contract.google_doc_url} target="_blank" rel="noopener noreferrer">
+                      View Google Document
+                    </a>
+                  </Button>
+                </div>
+              )}
+              {contract?.pdf_url && (
+                <div>
+                  <Button asChild variant="outline" className="w-full">
+                    <a href={contract.pdf_url} target="_blank" rel="noopener noreferrer">
+                      View PDF Document
+                    </a>
+                  </Button>
+                </div>
+              )}
+              {!contract?.google_doc_url && !contract?.pdf_url && (
+                <p className="text-gray-500 text-center">No documents available</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Additional Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Additional Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {contract?.contract_number && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Contract Number</label>
+                  <p>{contract.contract_number}</p>
+                </div>
+              )}
+              {contract?.id_card_number && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">ID Card Number</label>
+                  <p>{contract.id_card_number}</p>
+                </div>
+              )}
+              {contract?.employer_id && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Employer ID</label>
+                  <p className="font-mono text-sm">{contract.employer_id}</p>
+                </div>
+              )}
+              {contract?.client_id && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Client ID</label>
+                  <p className="font-mono text-sm">{contract.client_id}</p>
+                </div>
+              )}
+              {contract?.promoter_id && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Promoter ID</label>
+                  <p className="font-mono text-sm">{contract.promoter_id}</p>
+                </div>
+              )}
+              {contract?.error_details && (
+                <div>
+                  <label className="text-sm font-medium text-red-500">Error Details</label>
+                  <p className="text-red-600 text-sm">{contract.error_details}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Debug Information */}
           <Card>
