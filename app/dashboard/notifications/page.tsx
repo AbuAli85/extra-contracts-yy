@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog"
-import { DatePicker } from "@/components/ui/date-picker"
+import { DatePickerWithManualInput } from "@/components/date-picker-with-manual-input"
 import {
   Loader2,
   CheckCircle,
@@ -58,8 +58,8 @@ export default function NotificationsPage() {
   const [typeFilter, setTypeFilter] = useState("")
   const [readFilter, setReadFilter] = useState("")
   const [userFilter, setUserFilter] = useState("")
-  const [startDate, setStartDate] = useState(null)
-  const [endDate, setEndDate] = useState(null)
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined)
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [page, setPage] = useState(1)
   const [isUpdating, setIsUpdating] = useState(false)
   const [selectedNotif, setSelectedNotif] = useState(null)
@@ -371,15 +371,15 @@ export default function NotificationsPage() {
                       <option key={email} value={email}>{email}</option>
                     ))}
                   </select>
-                  <DatePicker
-                    value={startDate}
-                    onChange={setStartDate}
+                  <DatePickerWithManualInput
+                    date={startDate}
+                    setDate={setStartDate}
                     placeholder="Start date"
                     aria-label="Filter by start date"
                   />
-                  <DatePicker
-                    value={endDate}
-                    onChange={setEndDate}
+                  <DatePickerWithManualInput
+                    date={endDate}
+                    setDate={setEndDate}
                     placeholder="End date"
                     aria-label="Filter by end date"
                   />
