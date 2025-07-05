@@ -597,57 +597,110 @@ export default function NotificationsPage() {
                         disabled={page === totalPages}
                         aria-label="Next page"
                       >
-                        Next
                         <ChevronRight className="h-4 w-4 ml-1" />
+                        Next
                       </Button>
                     </div>
                   </div>
                 )}
-                {/* Summary */}
-                <div className="bg-gray-50 px-4 py-2 border-t">
-                  <div className="text-sm text-gray-600">
-                    Showing {paginated.length} of {filtered.length} notifications
-                    {search && ` matching "${search}"`}
-                    {typeFilter && ` of type "${typeFilter}"`}
-                    {readFilter && ` that are ${readFilter}`}
-                    {userFilter && ` for user ${userFilter}`}
-                    {startDate && ` from ${format(startDate, "yyyy-MM-dd")}`}
-                    {endDate && ` to ${format(endDate, "yyyy-MM-dd")}`}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        {/* Notification Details Modal */}
+        {selectedNotif && (
+          <Dialog open={showModal} onOpenChange={setShowModal}>
+            <DialogContent className="max-w-2xl p-6 rounded-lg shadow-lg">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-semibold">
+                  Notification Details
+                </DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  {format(new Date(selectedNotif.created_at), "MMMM dd, yyyy HH:mm:ss")}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-4">
+                <p className="text-sm text-gray-900">
+                  {selectedNotif.message}
+                </p>
+                <div className="mt-4">
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Related To:
+                  </span>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {selectedNotif.related_contract_id && (
+                      <a
+                        href={`/contracts/${selectedNotif.related_contract_id}`}
+                        className="inline-flex items-center px-3 py-1 text-sm rounded-md bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                        onClick={e => e.stopPropagation()}
+                        onKeyDown={e => e.stopPropagation()}
+                        aria-label="View related contract"
+                      >
+                        <LinkIcon className="h-4 w-4 mr-1" />
+                        Contract
+                      </a>
+                    )}
+                    {selectedNotif.related_entity_id && (
+                      <a
+                        href={`/${selectedNotif.related_entity_type || "entity"}/${selectedNotif.related_entity_id}`}
+                        className="inline-flex items-center px-3 py-1 text-sm rounded-md bg-green-100 text-green-800 hover:bg-green-200 transition-colors"
+                        onClick={e => e.stopPropagation()}
+                        onKeyDown={e => e.stopPropagation()}
+                        aria-label="View related entity"
+                      >
+                        <LinkIcon className="h-4 w-4 mr-1" />
+                        {selectedNotif.related_entity_type || "Entity"}
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
-            )}
-            {/* Details Modal */}
-            <Dialog open={showModal} onOpenChange={setShowModal}>
-              <DialogContent aria-modal="true" role="dialog">
-                <DialogHeader>
-                  <DialogTitle>Notification Details</DialogTitle>
-                  <DialogDescription>
-                    Full details for this notification.
-                  </DialogDescription>
-                </DialogHeader>
-                {selectedNotif && (
-                  <div className="space-y-2">
-                    <div><b>Type:</b> {selectedNotif.type}</div>
-                    <div><b>Message:</b> {selectedNotif.message}</div>
-                    <div><b>User Email:</b> {selectedNotif.user_email || "-"}</div>
-                    <div><b>Created At:</b> {format(new Date(selectedNotif.created_at), "yyyy-MM-dd HH:mm:ss")}</div>
-                    <div><b>Status:</b> {selectedNotif.is_read ? "Read" : "Unread"}</div>
-                    {selectedNotif.related_contract_id && (
-                      <div><b>Related Contract:</b> <a href={`/contracts/${selectedNotif.related_contract_id}`} className="text-blue-600 underline">View Contract</a></div>
-                    )}
-                    {selectedNotif.related_entity_id && (
-                      <div><b>Related Entity:</b> <a href={`/${selectedNotif.related_entity_type || "entity"}/${selectedNotif.related_entity_id}`} className="text-blue-600 underline">{selectedNotif.related_entity_type || "Entity"}</a></div>
-                    )}
-                  </div>
-                )}
-                <DialogClose asChild>
-                  <Button variant="outline" aria-label="Close details modal">Close</Button>
-                </DialogClose>
-              </DialogContent>
-            </Dialog>
-          </CardContent>
-        </Card>
+              <div className="mt-6 flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowModal(false)}
+                  aria-label="Close"
+                >
+                  Close
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={async () => {
+                    if (confirm("Are you sure you want to delete this notification?")) {
+                      setIsUpdating(true)
+                      try {
+                        const { error } = await supabase
+                          .from("notifications")
+                          .delete()
+                          .eq("id", selectedNotif.id)
+                        if (error) throw error
+                        setNotifications((prev) => prev.filter((n) => n.id !== selectedNotif.id))
+                        setShowModal(false)
+                        toast({
+                          title: "Success",
+                          description: "Notification deleted.",
+                        })
+                      } catch (err) {
+                        toast({
+                          title: "Error",
+                          description: "Failed to delete notification.",
+                          variant: "destructive",
+                        })
+                      } finally {
+                        setIsUpdating(false)
+                      }
+                    }
+                  }}
+                  disabled={isUpdating}
+                  aria-label="Delete notification"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </DashboardLayout>
   )
