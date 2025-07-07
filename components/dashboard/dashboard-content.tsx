@@ -31,7 +31,7 @@ import {
   Bell,
   Settings,
   Zap,
-  FileTemplate
+  File
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "next-intl"
@@ -207,7 +207,7 @@ export default function DashboardContent({ locale }: DashboardContentProps) {
               <span>Analytics</span>
             </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center space-x-2">
-              <FileTemplate className="h-4 w-4" />
+              <File className="h-4 w-4" />
               <span>Templates</span>
             </TabsTrigger>
             <TabsTrigger value="workflows" className="flex items-center space-x-2">
