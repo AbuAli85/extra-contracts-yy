@@ -134,33 +134,33 @@ export function EnhancedAnalytics({ data }: EnhancedAnalyticsProps) {
       {/* Detailed Analytics Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">{t("overview")}</TabsTrigger>
-          <TabsTrigger value="performance">{t("performance")}</TabsTrigger>
-          <TabsTrigger value="revenue">{t("revenue")}</TabsTrigger>
-          <TabsTrigger value="trends">{t("trends")}</TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="revenue">Revenue</TabsTrigger>
+          <TabsTrigger value="trends">Trends</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>{t("contractStatus")}</CardTitle>
+                <CardTitle>Contract Status</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t("active")}</span>
+                  <span className="text-sm font-medium">Active</span>
                   <Badge variant="default">{data.activeContracts}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t("pending")}</span>
+                  <span className="text-sm font-medium">Pending</span>
                   <Badge variant="secondary">{data.pendingContracts}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t("completed")}</span>
+                  <span className="text-sm font-medium">Completed</span>
                   <Badge variant="outline">{data.completedContracts}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t("failed")}</span>
+                  <span className="text-sm font-medium">Failed</span>
                   <Badge variant="destructive">{data.failedContracts}</Badge>
                 </div>
               </CardContent>
@@ -168,15 +168,15 @@ export function EnhancedAnalytics({ data }: EnhancedAnalyticsProps) {
 
             <Card>
               <CardHeader>
-                <CardTitle>{t("monthlyTargets")}</CardTitle>
+                <CardTitle>Monthly Targets</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t("target")}</span>
+                  <span className="text-sm font-medium">Target</span>
                   <span className="text-sm text-muted-foreground">{data.monthlyTargets.target}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t("achieved")}</span>
+                  <span className="text-sm font-medium">Achieved</span>
                   <span className="text-sm font-semibold">{data.monthlyTargets.achieved}</span>
                 </div>
                 <Progress value={data.monthlyTargets.percentage} className="h-2" />
@@ -192,40 +192,40 @@ export function EnhancedAnalytics({ data }: EnhancedAnalyticsProps) {
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">{t("processingEfficiency")}</CardTitle>
+                <CardTitle className="text-lg">Processing Efficiency</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">{data.successRate}%</div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {t("avgProcessingTime")}: {data.averageProcessingTime} days
+                  Avg Processing Time: {data.averageProcessingTime} days
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">{t("contractValue")}</CardTitle>
+                <CardTitle className="text-lg">Contract Value</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-blue-600">
                   ${data.averageContractValue.toLocaleString()}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {t("averageContractValue")}
+                  Average Contract Value
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">{t("monthlyGrowth")}</CardTitle>
+                <CardTitle className="text-lg">Monthly Growth</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className={`text-3xl font-bold ${data.monthlyGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {data.monthlyGrowth > 0 ? '+' : ''}{data.monthlyGrowth}%
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {t("comparedToLastMonth")}
+                  Compared to last month
                 </p>
               </CardContent>
             </Card>
@@ -235,21 +235,21 @@ export function EnhancedAnalytics({ data }: EnhancedAnalyticsProps) {
         <TabsContent value="revenue" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>{t("revenueBreakdown")}</CardTitle>
+              <CardTitle>Revenue Breakdown</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t("totalRevenue")}</span>
+                  <span className="text-sm font-medium">Total Revenue</span>
                   <span className="text-lg font-bold">${data.totalRevenue.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t("averageContractValue")}</span>
+                  <span className="text-sm font-medium">Average Contract Value</span>
                   <span className="text-lg font-semibold">${data.averageContractValue.toLocaleString()}</span>
                 </div>
                 <div className="pt-4 border-t">
                   <div className="text-sm text-muted-foreground">
-                    {t("revenueGrowth")}: 
+                    Revenue Growth: 
                     <span className={`ml-2 font-semibold ${data.recentTrends.revenue > 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {data.recentTrends.revenue > 0 ? '+' : ''}{data.recentTrends.revenue}%
                     </span>
@@ -264,11 +264,11 @@ export function EnhancedAnalytics({ data }: EnhancedAnalyticsProps) {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>{t("recentTrends")}</CardTitle>
+                <CardTitle>Recent Trends</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">{t("contractGeneration")}</span>
+                  <span className="text-sm">Contract Generation</span>
                   <div className="flex items-center space-x-2">
                     {data.recentTrends.contracts > 0 ? (
                       <TrendingUp className="h-4 w-4 text-green-500" />
@@ -281,7 +281,7 @@ export function EnhancedAnalytics({ data }: EnhancedAnalyticsProps) {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">{t("revenue")}</span>
+                  <span className="text-sm">Revenue</span>
                   <div className="flex items-center space-x-2">
                     {data.recentTrends.revenue > 0 ? (
                       <TrendingUp className="h-4 w-4 text-green-500" />
@@ -294,7 +294,7 @@ export function EnhancedAnalytics({ data }: EnhancedAnalyticsProps) {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">{t("efficiency")}</span>
+                  <span className="text-sm">Efficiency</span>
                   <div className="flex items-center space-x-2">
                     {data.recentTrends.efficiency > 0 ? (
                       <TrendingUp className="h-4 w-4 text-green-500" />
@@ -311,7 +311,7 @@ export function EnhancedAnalytics({ data }: EnhancedAnalyticsProps) {
 
             <Card>
               <CardHeader>
-                <CardTitle>{t("keyInsights")}</CardTitle>
+                <CardTitle>Key Insights</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">

@@ -493,7 +493,7 @@ export function WorkflowManager({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("completedToday")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Completed Today</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -507,7 +507,7 @@ export function WorkflowManager({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("overdue")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Overdue</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
@@ -524,9 +524,9 @@ export function WorkflowManager({
       {/* Workflows */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="active">{t("active")}</TabsTrigger>
-          <TabsTrigger value="completed">{t("completed")}</TabsTrigger>
-          <TabsTrigger value="paused">{t("paused")}</TabsTrigger>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="completed">Completed</TabsTrigger>
+          <TabsTrigger value="paused">Paused</TabsTrigger>
         </TabsList>
         
         <TabsContent value={activeTab} className="space-y-4">
@@ -539,8 +539,8 @@ export function WorkflowManager({
           {filteredWorkflows.length === 0 && (
             <div className="text-center py-12">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium">{t("noWorkflows")}</h3>
-              <p className="text-muted-foreground">{t("noWorkflowsDescription")}</p>
+              <h3 className="text-lg font-medium">No workflows found</h3>
+              <p className="text-muted-foreground">Create your first workflow to get started</p>
             </div>
           )}
         </TabsContent>
@@ -550,7 +550,7 @@ export function WorkflowManager({
       <Dialog open={!!selectedWorkflow} onOpenChange={() => setSelectedWorkflow(null)}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{t("workflowDetails")}</DialogTitle>
+            <DialogTitle>Workflow Details</DialogTitle>
           </DialogHeader>
           {selectedWorkflow && <WorkflowDetails workflow={selectedWorkflow} />}
         </DialogContent>

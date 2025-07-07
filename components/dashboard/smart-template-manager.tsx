@@ -264,7 +264,7 @@ export function SmartTemplateManager({
           
           <TabsContent value="english">
             <div>
-              <Label htmlFor="content_english">{t("templateContentEnglish")}</Label>
+              <Label htmlFor="content_english">Template Content (English)</Label>
               <Textarea
                 id="content_english"
                 value={formData.content_english}
@@ -277,7 +277,7 @@ export function SmartTemplateManager({
           
           <TabsContent value="spanish">
             <div>
-              <Label htmlFor="content_spanish">{t("templateContentSpanish")}</Label>
+              <Label htmlFor="content_spanish">Template Content (Spanish)</Label>
               <Textarea
                 id="content_spanish"
                 value={formData.content_spanish}
@@ -291,10 +291,10 @@ export function SmartTemplateManager({
 
         <div className="flex justify-end space-x-2">
           <Button type="button" variant="outline" onClick={onCancel}>
-            {t("cancel")}
+            Cancel
           </Button>
           <Button type="submit">
-            {template ? t("updateTemplate") : t("createTemplate")}
+            {template ? "Update Template" : "Create Template"}
           </Button>
         </div>
       </form>
@@ -306,28 +306,28 @@ export function SmartTemplateManager({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">{t("contractTemplates")}</h2>
-          <p className="text-muted-foreground">{t("manageTemplatesDescription")}</p>
+          <h2 className="text-2xl font-bold">Contract Templates</h2>
+          <p className="text-muted-foreground">Manage and organize your contract templates</p>
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm">
             <Upload className="h-4 w-4 mr-1" />
-            {t("import")}
+            Import
           </Button>
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-1" />
-            {t("export")}
+            Export
           </Button>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-1" />
-                {t("createTemplate")}
+                Create Template
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{t("createNewTemplate")}</DialogTitle>
+                <DialogTitle>Create New Template</DialogTitle>
               </DialogHeader>
               <TemplateForm 
                 onSubmit={(data) => {
@@ -347,7 +347,7 @@ export function SmartTemplateManager({
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={t("searchTemplates")}
+              placeholder="Search templates..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -379,8 +379,8 @@ export function SmartTemplateManager({
       {filteredTemplates.length === 0 && (
         <div className="text-center py-12">
           <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium">{t("noTemplatesFound")}</h3>
-          <p className="text-muted-foreground">{t("noTemplatesDescription")}</p>
+          <h3 className="text-lg font-medium">No templates found</h3>
+          <p className="text-muted-foreground">Create your first template to get started</p>
         </div>
       )}
 
@@ -388,7 +388,7 @@ export function SmartTemplateManager({
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{t("editTemplate")}</DialogTitle>
+            <DialogTitle>Edit Template</DialogTitle>
           </DialogHeader>
           {selectedTemplate && (
             <TemplateForm 
