@@ -27,11 +27,11 @@ import {
   Users, 
   Building, 
   BarChart3,
-  FileTemplate,
   Workflow,
   Bell,
   Settings,
-  Zap
+  Zap,
+  FileTemplate
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "next-intl"
@@ -53,6 +53,7 @@ export default function DashboardContent({ locale }: DashboardContentProps) {
   const [stats, setStats] = useState<ContractStats>(initialStats)
   const [loadingStats, setLoadingStats] = useState(true)
   const { toast } = useToast()
+  const t = useTranslations("DashboardContent")
 
   useEffect(() => {
     let isMounted = true
@@ -174,96 +175,165 @@ export default function DashboardContent({ locale }: DashboardContentProps) {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {summaryData.map((data, index) => (
-            <SummaryWidget key={index} data={data} isLoading={loadingStats} />
-          ))}
-        </div>
-        <ChartsSection />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <ContractReportsTable />
+      <div className="space-y-6 p-6">
+        {/* Enhanced Dashboard Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Comprehensive contract management and analytics
+            </p>
           </div>
-          <div className="space-y-6">
-            <ReviewPanel />
-            <NotificationSystem />
-            <AdminTools />
+          <div className="flex items-center space-x-2">
+            <Badge variant="outline">
+              {stats.totalContracts} {stats.totalContracts === 1 ? 'Contract' : 'Contracts'}
+            </Badge>
+            <Button variant="outline" size="sm">
+              <Settings className="h-4 w-4 mr-1" />
+              Settings
+            </Button>
           </div>
         </div>
-        <EnhancedAnalytics />
-        <SmartTemplateManager />
-        <WorkflowManager />
-        <NotificationCenter />
-        <IntegrationManager />
+
+        {/* Enhanced Tabbed Interface */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
-            <TabsTrigger value="workflows">Workflows</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="integrations">Integrations</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="overview" className="flex items-center space-x-2">
+              <BarChart3 className="h-4 w-4" />
+              <span>Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center space-x-2">
+              <BarChart3 className="h-4 w-4" />
+              <span>Analytics</span>
+            </TabsTrigger>
+            <TabsTrigger value="templates" className="flex items-center space-x-2">
+              <FileTemplate className="h-4 w-4" />
+              <span>Templates</span>
+            </TabsTrigger>
+            <TabsTrigger value="workflows" className="flex items-center space-x-2">
+              <Workflow className="h-4 w-4" />
+              <span>Workflows</span>
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center space-x-2">
+              <Bell className="h-4 w-4" />
+              <span>Notifications</span>
+            </TabsTrigger>
+            <TabsTrigger value="integrations" className="flex items-center space-x-2">
+              <Zap className="h-4 w-4" />
+              <span>Integrations</span>
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="overview">
-            <Card>
-              <CardHeader>
-                <CardTitle>Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Overview content goes here.</p>
-              </CardContent>
-            </Card>
+
+          <TabsContent value="overview" className="space-y-6">
+            {/* Summary Widgets */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {summaryData.map((data, index) => (
+                <SummaryWidget key={index} data={data} isLoading={loadingStats} />
+              ))}
+            </div>
+            
+            {/* Charts and Reports */}
+            <ChartsSection />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <ContractReportsTable />
+              </div>
+              <div className="space-y-6">
+                <ReviewPanel />
+                <NotificationSystem />
+                <AdminTools />
+              </div>
+            </div>
           </TabsContent>
-          <TabsContent value="analytics">
-            <Card>
-              <CardHeader>
-                <CardTitle>Analytics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Analytics content goes here.</p>
-              </CardContent>
-            </Card>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <EnhancedAnalytics 
+              data={{
+                totalContracts: stats.totalContracts,
+                activeContracts: stats.activeContracts,
+                pendingContracts: 0,
+                completedContracts: 0,
+                failedContracts: 0,
+                monthlyGrowth: 12,
+                totalRevenue: 125000,
+                averageContractValue: 5000,
+                averageProcessingTime: 3.5,
+                successRate: 94,
+                monthlyTargets: {
+                  target: 50,
+                  achieved: 42,
+                  percentage: 84
+                },
+                recentTrends: {
+                  contracts: 15,
+                  revenue: 8,
+                  efficiency: 5
+                }
+              }}
+            />
           </TabsContent>
-          <TabsContent value="templates">
-            <Card>
-              <CardHeader>
-                <CardTitle>Templates</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Templates content goes here.</p>
-              </CardContent>
-            </Card>
+
+          <TabsContent value="templates" className="space-y-6">
+            <SmartTemplateManager
+              templates={[]}
+              onCreateTemplate={(template) => console.log("Creating template:", template)}
+              onUpdateTemplate={(id, updates) => console.log("Updating template:", id, updates)}
+              onDeleteTemplate={(id) => console.log("Deleting template:", id)}
+              onUseTemplate={(templateId) => console.log("Using template:", templateId)}
+            />
           </TabsContent>
-          <TabsContent value="workflows">
-            <Card>
-              <CardHeader>
-                <CardTitle>Workflows</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Workflows content goes here.</p>
-              </CardContent>
-            </Card>
+
+          <TabsContent value="workflows" className="space-y-6">
+            <WorkflowManager
+              workflows={[]}
+              onApproveStep={(workflowId, stepId, notes) => console.log("Approving step:", workflowId, stepId, notes)}
+              onRejectStep={(workflowId, stepId, notes) => console.log("Rejecting step:", workflowId, stepId, notes)}
+              onSkipStep={(workflowId, stepId, notes) => console.log("Skipping step:", workflowId, stepId, notes)}
+              onAddComment={(workflowId, message) => console.log("Adding comment:", workflowId, message)}
+              onPauseWorkflow={(workflowId) => console.log("Pausing workflow:", workflowId)}
+              onResumeWorkflow={(workflowId) => console.log("Resuming workflow:", workflowId)}
+              onCancelWorkflow={(workflowId) => console.log("Cancelling workflow:", workflowId)}
+            />
           </TabsContent>
-          <TabsContent value="notifications">
-            <Card>
-              <CardHeader>
-                <CardTitle>Notifications</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Notifications content goes here.</p>
-              </CardContent>
-            </Card>
+
+          <TabsContent value="notifications" className="space-y-6">
+            <NotificationCenter
+              notifications={[]}
+              settings={{
+                email_notifications: true,
+                push_notifications: true,
+                slack_notifications: false,
+                notification_types: {
+                  contract_updates: true,
+                  payment_reminders: true,
+                  deadline_alerts: true,
+                  workflow_updates: true,
+                  system_updates: false
+                },
+                quiet_hours: {
+                  enabled: false,
+                  start_time: "22:00",
+                  end_time: "08:00"
+                }
+              }}
+              onMarkAsRead={(notificationId) => console.log("Marking as read:", notificationId)}
+              onMarkAllAsRead={() => console.log("Marking all as read")}
+              onDeleteNotification={(notificationId) => console.log("Deleting notification:", notificationId)}
+              onUpdateSettings={(settings) => console.log("Updating settings:", settings)}
+            />
           </TabsContent>
-          <TabsContent value="integrations">
-            <Card>
-              <CardHeader>
-                <CardTitle>Integrations</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Integrations content goes here.</p>
-              </CardContent>
-            </Card>
+
+          <TabsContent value="integrations" className="space-y-6">
+            <IntegrationManager
+              integrations={[]}
+              templates={[]}
+              onCreateIntegration={(template, config) => console.log("Creating integration:", template, config)}
+              onUpdateIntegration={(id, updates) => console.log("Updating integration:", id, updates)}
+              onDeleteIntegration={(id) => console.log("Deleting integration:", id)}
+              onTestIntegration={(id) => console.log("Testing integration:", id)}
+              onSyncIntegration={(id) => console.log("Syncing integration:", id)}
+            />
           </TabsContent>
         </Tabs>
       </div>
