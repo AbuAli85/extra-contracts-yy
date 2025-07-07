@@ -1,50 +1,52 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { createParty, getParties, deleteParty } from "@/app/actions/parties"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/lib/supabase" // Your Supabase client instance
+import type { Database } from "@/types/supabase" // Assuming generated Supabase types
+import { useToast } from "@/hooks/use-toast"
+import { devLog } from "@/lib/dev-log"
 
-// Query hook for fetching all parties
-export function useParties() {
-  return useQuery({
-    queryKey: ["parties"],
-    queryFn: async () => {
-      const response = await getParties()
-      if (!response.success) {
-        throw new Error(response.message)
-      }
-      return response.data
-    },
-  })
+// Define the structure of a Party based on your select query
+export type Party = Pick<
+  Database["public"]["Tables"]["parties"]["Row"],
+  "id" | "name_en" | "name_ar" | "crn" | "type" | "role" | "cr_expiry_date" | 
+  "contact_person" | "contact_email" | "contact_phone" | "address_en" | "address_ar" |
+  "tax_number" | "license_number" | "license_expiry_date" | "status" | "notes"
+>
+
+const fetchParties = async (partyType?: "Employer" | "Client" | "Both"): Promise<Party[]> => {
+  let query = supabase
+    .from("parties")
+    .select(`
+      id, name_en, name_ar, crn, type, role, cr_expiry_date,
+      contact_person, contact_email, contact_phone, address_en, address_ar,
+      tax_number, license_number, license_expiry_date, status, notes
+    `)
+    .order("name_en", { ascending: true })
+
+  if (partyType) {
+    query = query.eq("type", partyType)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    devLog("Error fetching parties:", error)
+    throw new Error(error.message) // React Query will handle this error
+  }
+  return data || []
 }
 
-// Mutation hook for creating a party
-export function useCreatePartyMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async (formData: FormData) => {
-      const response = await createParty(null, formData)
-      if (!response.success) {
-        throw new Error(response.message)
-      }
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["parties"] })
-    },
-  })
-}
-
-// Mutation hook for deleting a party
-export function useDeletePartyMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const response = await deleteParty(id)
-      if (!response.success) {
-        throw new Error(response.message)
-      }
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["parties"] })
+export const useParties = (partyType?: "Employer" | "Client" | "Both") => {
+  const { toast } = useToast()
+  return useQuery<Party[], Error>({
+    queryKey: ["parties", partyType || "all"], // Unique query key based on type
+    queryFn: () => fetchParties(partyType),
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+    onError: (error) => {
+      toast({
+        title: "Error loading parties",
+        description: error.message,
+        variant: "destructive",
+      })
     },
   })
 }

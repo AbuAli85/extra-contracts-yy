@@ -1,60 +1,84 @@
--- Add 'profile_picture_url' column to 'promoters' table if it doesn't exist
+-- Refactor the promoters table
+-- Add new notification and status fields
+-- Remove fields that will be moved to the new 'contracts' table
+
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='profile_picture_url') THEN
-        ALTER TABLE promoters ADD COLUMN profile_picture_url TEXT;
+    -- Rename legacy notification columns if present
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name='promoters' AND column_name='notify_before_id_expiry_days'
+    ) THEN
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name='promoters' AND column_name='notify_days_before_id_expiry'
+        ) THEN
+            ALTER TABLE promoters RENAME COLUMN notify_before_id_expiry_days TO notify_days_before_id_expiry;
+        ELSE
+            ALTER TABLE promoters DROP COLUMN notify_before_id_expiry_days;
+        END IF;
     END IF;
-END
-$$;
 
--- Add 'website' column to 'promoters' table if it doesn't exist
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='website') THEN
-        ALTER TABLE promoters ADD COLUMN website TEXT;
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name='promoters' AND column_name='notify_before_passport_expiry_days'
+    ) THEN
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name='promoters' AND column_name='notify_days_before_passport_expiry'
+        ) THEN
+            ALTER TABLE promoters RENAME COLUMN notify_before_passport_expiry_days TO notify_days_before_passport_expiry;
+        ELSE
+            ALTER TABLE promoters DROP COLUMN notify_before_passport_expiry_days;
+        END IF;
     END IF;
-END
-$$;
 
--- Add 'bio' column to 'promoters' table if it doesn't exist
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='bio') THEN
-        ALTER TABLE promoters ADD COLUMN bio TEXT;
+    -- Add notify_days_before_id_expiry
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='notify_days_before_id_expiry') THEN
+        ALTER TABLE promoters ADD COLUMN notify_days_before_id_expiry INTEGER DEFAULT 30;
     END IF;
-END
-$$;
 
--- Add 'city', 'state', 'zip_code', 'country' columns to 'promoters' table if they don't exist
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='city') THEN
-        ALTER TABLE promoters ADD COLUMN city TEXT;
+    -- Add notify_days_before_passport_expiry
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='notify_days_before_passport_expiry') THEN
+        ALTER TABLE promoters ADD COLUMN notify_days_before_passport_expiry INTEGER DEFAULT 30;
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='state') THEN
-        ALTER TABLE promoters ADD COLUMN state TEXT;
+
+    -- Add status (using TEXT with a CHECK constraint for ENUM-like behavior)
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='status') THEN
+        ALTER TABLE promoters ADD COLUMN status TEXT DEFAULT 'active';
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='zip_code') THEN
-        ALTER TABLE promoters ADD COLUMN zip_code TEXT;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints
+        WHERE table_name='promoters' AND constraint_name='promoters_status_check'
+    ) THEN
+        ALTER TABLE promoters ADD CONSTRAINT promoters_status_check CHECK (status IN ('active', 'inactive', 'suspended'));
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='country') THEN
-        ALTER TABLE promoters ADD COLUMN country TEXT;
+
+    -- Remove old contract-related fields if they exist.
+    -- Be cautious with DROP COLUMN if data migration is needed.
+    -- For this script, we assume it's safe or data is handled separately.
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='employer_id') THEN
+        ALTER TABLE promoters DROP COLUMN employer_id;
     END IF;
-END
-$$;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='outsourced_to_id') THEN
+        ALTER TABLE promoters DROP COLUMN outsourced_to_id;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='job_title') THEN
+        ALTER TABLE promoters DROP COLUMN job_title;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='work_location') THEN
+        ALTER TABLE promoters DROP COLUMN work_location;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='contract_valid_until') THEN
+        ALTER TABLE promoters DROP COLUMN contract_valid_until;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='promoters' AND column_name='notify_before_contract_expiry_days') THEN
+        ALTER TABLE promoters DROP COLUMN notify_before_contract_expiry_days;
+    END IF;
 
--- Update RLS policies for 'promoters' table if necessary
--- This assumes your RLS policies might need to be adjusted for new columns.
--- If your existing policies are generic (e.g., based on user_id), you might not need to change them.
--- Example:
--- ALTER POLICY "Enable read access for all users" ON promoters
--- FOR SELECT USING (TRUE);
+END $$;
 
--- ALTER POLICY "Enable insert for authenticated users only" ON promoters
--- FOR INSERT WITH CHECK (auth.role() = 'authenticated');
-
--- ALTER POLICY "Enable update for users based on user_id" ON promoters
--- FOR UPDATE USING (auth.uid() = id); -- Assuming promoter ID is linked to user ID for ownership
-
--- ALTER POLICY "Enable delete for users based on user_id" ON promoters
--- FOR DELETE USING (auth.uid() = id); -- Assuming promoter ID is linked to user ID for ownership
+COMMENT ON COLUMN promoters.notify_days_before_id_expiry IS 'Number of days before ID card expiry to notify. Default 30.';
+COMMENT ON COLUMN promoters.notify_days_before_passport_expiry IS 'Number of days before passport expiry to notify. Default 30.';
+COMMENT ON COLUMN promoters.status IS 'Status of the promoter: active, inactive, suspended. Default active.';

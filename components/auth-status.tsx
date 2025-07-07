@@ -1,118 +1,74 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { supabase } from "@/lib/supabase"
 import type { User } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
-import { useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { LogOut, UserIcon, Settings } from "lucide-react"
-import Link from "next/link"
+import { LogInIcon, LogOutIcon, UserCircle } from "lucide-react"
 
-export function AuthStatus() {
+export default function AuthStatus() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const { toast } = useToast()
-  const t = useTranslations("AuthStatus")
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
-    const getUser = async () => {
+    setMounted(true)
+    
+    const getSession = async () => {
       const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      setUser(user)
+        data: { session },
+      } = await supabase.auth.getSession()
+      setUser(session?.user ?? null)
       setLoading(false)
     }
-
-    getUser()
+    getSession()
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null)
-      setLoading(false)
+      setUser(session?.user ?? null)
     })
 
     return () => {
       subscription.unsubscribe()
     }
-  }, [supabase])
+  }, [])
 
   const handleLogout = async () => {
-    setLoading(true)
-    const { error } = await supabase.auth.signOut()
-    if (error) {
-      toast({
-        title: t("logoutError"),
-        description: error.message,
-        variant: "destructive",
-      })
-    } else {
-      toast({
-        title: t("logoutSuccess"),
-        description: t("loggedOutMessage"),
-      })
-      router.push("/login")
-    }
-    setLoading(false)
+    await supabase.auth.signOut()
+    router.push("/")
+    router.refresh()
   }
 
-  if (loading) {
-    return <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
-  }
-
-  if (!user) {
-    return (
-      <Button asChild size="sm">
-        <Link href="/login">{t("signIn")}</Link>
-      </Button>
-    )
+  // Show loading state until component is mounted to prevent hydration mismatch
+  if (!mounted || loading) {
+    return <div className="h-10 w-24 animate-pulse rounded-md bg-muted/50" />
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user.user_metadata.avatar_url || "/placeholder-user.jpg"} alt={user.email || "User"} />
-            <AvatarFallback>
-              <UserIcon className="h-5 w-5" />
-            </AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.user_metadata.full_name || user.email}</p>
-            <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+    <div className="flex items-center gap-4 border-b p-4">
+      {user ? (
+        <>
+          <div className="flex items-center gap-2">
+            <UserCircle className="h-5 w-5 text-muted-foreground" />
+            <span className="text-sm font-medium">{user.email}</span>
           </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/dashboard/settings">
-            <Settings className="mr-2 h-4 w-4" />
-            <span>{t("settings")}</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} disabled={loading}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>{t("logout")}</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <Button variant="outline" size="sm" onClick={handleLogout}>
+            <LogOutIcon className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </>
+      ) : (
+        <Link href="/login" passHref legacyBehavior>
+          <Button variant="default" size="sm">
+            <LogInIcon className="mr-2 h-4 w-4" />
+            Login / Sign Up
+          </Button>
+        </Link>
+      )}
+    </div>
   )
 }

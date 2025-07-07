@@ -1,89 +1,74 @@
 "use client"
-
-import { useTranslations } from "next-intl"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import DashboardLayout from "@/components/dashboard/dashboard-layout"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
 
-export default function DashboardSettingsPage() {
-  const t = useTranslations("DashboardSettingsPage")
-
+export default function SettingsPage() {
   return (
-    <div className="p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("title")}</CardTitle>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <CardHeader className="p-0">
+          <CardTitle>System Settings / إعدادات النظام</CardTitle>
+          <CardDescription>
+            Configure application settings and preferences. / تكوين إعدادات وتفضيلات التطبيق.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-8">
-          {/* General Settings */}
-          <div>
-            <h3 className="mb-4 text-lg font-semibold">{t("generalSettings")}</h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="appName">{t("appName")}</Label>
-                <Input id="appName" defaultValue="Bilingual Contract Generator" />
-              </div>
-              <div>
-                <Label htmlFor="defaultLanguage">{t("defaultLanguage")}</Label>
-                <Input id="defaultLanguage" defaultValue="English" />
-              </div>
-              <div className="md:col-span-2">
-                <Label htmlFor="companyAddress">{t("companyAddress")}</Label>
-                <Textarea id="companyAddress" defaultValue="123 Main St, Anytown, USA 12345" />
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Notification Settings */}
-          <div>
-            <h3 className="mb-4 text-lg font-semibold">{t("notificationSettings")}</h3>
-            <div className="grid gap-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="emailNotifications">{t("emailNotifications")}</Label>
-                <Switch id="emailNotifications" defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="smsNotifications">{t("smsNotifications")}</Label>
-                <Switch id="smsNotifications" />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="inAppNotifications">{t("inAppNotifications")}</Label>
-                <Switch id="inAppNotifications" defaultChecked />
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Security Settings */}
-          <div>
-            <h3 className="mb-4 text-lg font-semibold">{t("securitySettings")}</h3>
-            <div className="grid gap-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="twoFactorAuth">{t("twoFactorAuth")}</Label>
-                <Switch id="twoFactorAuth" />
-              </div>
-              <div>
-                <Label htmlFor="password">{t("changePassword")}</Label>
-                <Input id="password" type="password" placeholder={t("newPassword")} />
-                <Button variant="outline" className="mt-2 bg-transparent">
-                  {t("updatePassword")}
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <Button>{t("saveChanges")}</Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        <Tabs defaultValue="general">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="integrations">Integrations</TabsTrigger>
+          </TabsList>
+          <TabsContent value="general">
+            <Card>
+              <CardHeader>
+                <CardTitle>General Settings</CardTitle>
+                <CardDescription>Manage general application settings.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <Label htmlFor="appName">Application Name</Label>
+                  <Input id="appName" defaultValue="Contract Management CRM" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="defaultCurrency">Default Currency</Label>
+                  <Input id="defaultCurrency" defaultValue="USD" />
+                </div>
+                <Button>Save Changes</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="notifications">
+            <Card>
+              <CardHeader>
+                <CardTitle>Notification Settings</CardTitle>
+                <CardDescription>Configure how you receive notifications.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">Notification preferences will be here.</p>
+                <Button>Save Changes</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="integrations">
+            <Card>
+              <CardHeader>
+                <CardTitle>Integrations</CardTitle>
+                <CardDescription>Manage third-party integrations.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  Integration settings (e.g., Make.com webhook URL) will be here.
+                </p>
+                <Button>Save Changes</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </DashboardLayout>
   )
 }

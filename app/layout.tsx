@@ -1,30 +1,20 @@
+import './globals.css'
 import type React from "react"
-import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/sonner"
-import "./globals.css"
+import type { Metadata } from "next"
+import ClientLayout from "./client-layout"
 
-const inter = Inter({ subsets: ["latin"] })
-
-export const metadata = {
+export const metadata: Metadata = {
   title: "Bilingual Contract Generator",
-  description: "Generate contracts in multiple languages",
-    generator: 'v0.dev'
+  description: "Generate and manage bilingual contracts efficiently.",
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
   children,
+  params,
 }: {
   children: React.ReactNode
+  params: { locale: string }
 }) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
-          <Toaster />
-        </ThemeProvider>
-      </body>
-    </html>
-  )
+  return <ClientLayout params={params}>{children}</ClientLayout>
 }

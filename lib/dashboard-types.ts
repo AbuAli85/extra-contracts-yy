@@ -1,76 +1,102 @@
-export interface DashboardAnalytics {
-  totalContracts: number
-  pendingContracts: number
-  completedContracts: number
-  failedContracts: number
-  contractsThisMonth: number
-  contractsLastMonth: number
-  averageProcessingTime: number
-  successRate: number
-}
-
-export interface PendingReview {
-  id: string
-  contract_name: string
-  status: string
-  updated_at: string
-}
-
-export interface AdminAction {
-  id: string
-  action: string
-  created_at: string
-  user_id: string
-  details?: string
-  resource_type?: string
-  resource_id?: string
-}
-
-export interface Notification {
-  id: string
-  message: string
-  created_at: string
-  read: boolean
-  type?: string
-  user_id: string
-}
-
-export interface User {
-  id: string
-  email: string
-  role: string
-  created_at: string
-  full_name?: string
-  last_sign_in_at?: string
-}
+import type React from "react"
 
 export interface ContractStats {
-  total: number
-  pending: number
-  completed: number
-  failed: number
-  thisMonth: number
-  lastMonth: number
-  growth: number
+  totalContracts: number
+  activeContracts: number
+  expiredContracts: number
+  expiringSoonContracts: number
+  totalPromoters: number
+  totalCompanies: number
 }
-
-export interface ChartData {
-  name: string
-  value: number
+export interface SummaryWidgetData {
+  title: string
+  titleAr: string
+  value: string | number
+  icon: React.ElementType
+  trend?: "up" | "down" | "neutral" | string
+  comparison?: string
   color?: string
+  description?: string
+  period?: string
 }
 
-export interface AuditLog extends AdminAction {
-  ip_address?: string
-  user_agent?: string
-  details: string
-  resource_type: string
-  resource_id: string
+export interface ContractReportItem {
+  id: string // from contracts.id (via contracts_view)
+  contract_id: string // from contracts_view (originally contracts.contract_id)
+  promoter_name: string // from contracts_view
+  employer_name: string // from contracts_view
+  client_name: string // from contracts_view
+  start_date: string // from contracts_view (originally contracts.contract_start_date)
+  end_date: string // from contracts_view (originally contracts.contract_end_date)
+  status: "Active" | "Expired" | "Soon-to-Expire" | "Pending Approval" | "Draft" // from contracts_view (originally contracts.status)
 }
 
-export interface ServerActionResponse<T = any> {
-  success: boolean
+export interface ReviewItem {
+  id: string
+  title: string
+  promoter: string
+  parties: string
+  period: string
+  contractLink: string
+  submitter?: string
+  avatar?: string
+}
+
+export interface NotificationItem {
+  id: string
+  type: "success" | "error" | "warning" | "info" | "default"
   message: string
-  data?: T | null
-  errors?: Record<string, string[]> | null
+  timestamp: string // ISO Date string from created_at
+  context?: string
+  isRead?: boolean
+  user_email?: string
+  related_contract_id?: string // This is the required field
+  related_entity_id?: string
+  related_entity_type?: string
+}
+
+// Row shape from the `notifications` table used in realtime payloads
+export interface NotificationRow {
+  id: string
+  type: NotificationItem["type"]
+  message: string
+  created_at: string
+  user_email?: string | null
+  related_contract_id?: string | null
+  related_entity_id?: string | null
+  related_entity_type?: string | null
+  is_read: boolean
+}
+
+export interface AuditLogItem {
+  id: string
+  user: string // Mapped from user_email or "System"
+  action: string
+  ipAddress: string // Mapped from ip_address
+  timestamp: string // ISO Date string from timestamp
+  details?: string | object // Mapped from details
+}
+
+// Row shape from the `audit_logs` table used in realtime payloads
+export interface AuditLogRow {
+  id: string
+  user_email?: string | null
+  action: string
+  ip_address?: string | null
+  timestamp: string
+  details?: string | object | null
+}
+
+export interface ContractsByStatusDataPoint {
+  name: string
+  nameAr: string
+  count: number
+  fill: string
+}
+
+export interface MonthlyContractRevenueDataPoint {
+  month: string
+  monthAr: string
+  contracts: number
+  revenue: number
 }

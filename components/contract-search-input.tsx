@@ -1,28 +1,34 @@
 "use client"
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useDebouncedCallback } from "use-debounce"
 import { Input } from "@/components/ui/input"
-import { useTranslations } from "next-intl"
-import { Search } from "lucide-react"
+import { SearchIcon } from "lucide-react"
 
-interface ContractSearchInputProps {
-  searchTerm: string
-  onSearchChange: (value: string) => void
-  placeholder?: string
-}
+export default function ContractSearchInput() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
-export function ContractSearchInput({ searchTerm, onSearchChange, placeholder }: ContractSearchInputProps) {
-  const t = useTranslations("ContractSearchInput")
-  const currentPlaceholder = placeholder || t("searchContracts")
+  const handleSearch = useDebouncedCallback((term: string) => {
+    const params = new URLSearchParams(searchParams)
+    if (term) {
+      params.set("q", term)
+    } else {
+      params.delete("q")
+    }
+    router.replace(`${pathname}?${params.toString()}`)
+  }, 300) // Debounce input to avoid excessive re-renders
 
   return (
     <div className="relative">
-      <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
       <Input
-        type="text"
-        placeholder={currentPlaceholder}
-        value={searchTerm}
-        onChange={(e) => onSearchChange(e.target.value)}
-        className="pl-8"
+        type="search"
+        placeholder="Search by party or promoter..."
+        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+        onChange={(e) => handleSearch(e.target.value)}
+        defaultValue={searchParams.get("q")?.toString()}
       />
     </div>
   )

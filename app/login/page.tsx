@@ -1,9 +1,9 @@
-import { redirect } from "next/navigation"
+import AuthForm from "@/components/auth-form"
 
-// This page is intentionally left blank or can be used for non-i18n specific logic
-// The actual content is in app/[locale]/login/page.tsx
 export default function LoginPage() {
-  // Redirect to the default locale version if accessed directly without locale
-  redirect("/en/login")
-  return null
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+      <AuthForm />
+    </div>
+  )
 }

@@ -1,77 +1,47 @@
 import type React from "react"
-import { format, isPast, isFuture, parseISO, isValid, addDays } from "date-fns"
-import { CheckCircle2Icon, XCircleIcon, AlertTriangleIcon, ClockIcon, HelpCircleIcon } from "lucide-react" // Added HelpCircleIcon
+import { format, parseISO, differenceInDays, isPast } from "date-fns"
+import { AlertTriangleIcon, ShieldCheckIcon, ShieldAlertIcon } from "lucide-react"
 
-export const CONTRACT_STATUSES = [
-  "Draft",
-  "Pending Review",
-  "Approved",
-  "Active",
-  "Completed",
-  "Archived",
-  "Terminated",
-] as const
-
-export type ContractStatus = (typeof CONTRACT_STATUSES)[number]
-
-type DocumentStatus = {
+export const getDocumentStatus = (
+  expiryDate: string | null | undefined,
+): {
   text: string
-  colorClass: string
   Icon: React.ElementType
-  tooltip: string
-}
-
-export function getDocumentStatus(expiryDateString: string | null): DocumentStatus {
-  if (!expiryDateString) {
+  colorClass: string
+  tooltip?: string
+} => {
+  if (!expiryDate) {
     return {
-      text: "N/A",
-      colorClass: "text-gray-500",
-      Icon: ClockIcon,
-      tooltip: "No expiry date provided.",
+      text: "No Date",
+      Icon: AlertTriangleIcon,
+      colorClass: "text-slate-500",
+      tooltip: "Expiry date not set",
     }
   }
+  const date = parseISO(expiryDate)
+  const today = new Date()
+  const daysUntilExpiry = differenceInDays(date, today)
 
-  const expiryDate = parseISO(expiryDateString)
-
-  if (!isValid(expiryDate)) {
-    return {
-      text: "Invalid Date",
-      colorClass: "text-red-500",
-      Icon: XCircleIcon,
-      tooltip: "The provided date is invalid.",
-    }
-  }
-
-  const now = new Date()
-  const threeMonthsFromNow = addDays(now, 90) // Approximately 3 months
-
-  if (isPast(expiryDate) && expiryDate < now) {
+  if (isPast(date)) {
     return {
       text: "Expired",
+      Icon: ShieldAlertIcon,
       colorClass: "text-red-500",
-      Icon: XCircleIcon,
-      tooltip: `Expired on ${format(expiryDate, "PPP")}.`,
+      tooltip: `Expired on ${format(date, "MMM d, yyyy")}`,
     }
-  } else if (isFuture(expiryDate) && expiryDate <= threeMonthsFromNow) {
+  }
+  if (daysUntilExpiry <= 30) {
     return {
-      text: "Expiring Soon",
+      text: "Expires Soon",
+      Icon: ShieldAlertIcon,
       colorClass: "text-orange-500",
-      Icon: AlertTriangleIcon,
-      tooltip: `Expires on ${format(expiryDate, "PPP")}.`,
+      tooltip: `Expires in ${daysUntilExpiry} day(s) on ${format(date, "MMM d, yyyy")}`,
     }
-  } else if (isFuture(expiryDate) && expiryDate > threeMonthsFromNow) {
-    return {
-      text: "Valid",
-      colorClass: "text-green-500",
-      Icon: CheckCircle2Icon,
-      tooltip: `Valid until ${format(expiryDate, "PPP")}.`,
-    }
-  } else {
-    return {
-      text: "Unknown",
-      colorClass: "text-gray-500",
-      Icon: HelpCircleIcon,
-      tooltip: "Could not determine status.",
-    }
+  }
+  return {
+    text: "Valid",
+    Icon: ShieldCheckIcon,
+    colorClass: "text-green-500",
+    tooltip: `Valid until ${format(date, "MMM d, yyyy")}`,
   }
 }

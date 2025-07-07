@@ -1,31 +1,64 @@
-"use client"
-
 import type React from "react"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import { SupabaseListener } from "@/app/supabase-listener"
-import { usePathname } from "next/navigation"
-import { NextIntlClientProvider } from "next-intl"
-import { pick } from "lodash"
+import { Inter, Lexend } from "next/font/google" // Lexend as display font
+import { Suspense } from "react"
+import Loading from "./loading"
+import { ClientProviders } from "@/components/client-providers"
+import { ClientHeader } from "@/components/client-header"
+import { ClientFooter } from "@/components/client-footer"
+import { cn } from "@/lib/utils"
 
-// Create a client
-const queryClient = new QueryClient()
+const fontInter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+})
 
-export function ClientLayout({ children, messages }: { children: React.ReactNode; messages: any }) {
-  const pathname = usePathname()
+const fontLexend = Lexend({
+  // Example display font
+  subsets: ["latin"],
+  variable: "--font-lexend",
+  weight: ["400", "500", "600", "700"],
+})
+
+export default async function ClientLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  const dir = locale === "ar" ? "rtl" : "ltr"
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <NextIntlClientProvider messages={pick(messages, pathname)}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <SupabaseListener />
-          {children}
-          <Toaster />
-        </ThemeProvider>
-      </NextIntlClientProvider>
-    </QueryClientProvider>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
+      <head>
+        {/* Include font links if not handled by next/font automatically for all weights */}
+      </head>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          fontInter.variable,
+          fontLexend.variable,
+        )}
+        suppressHydrationWarning
+      >
+        <ClientProviders>
+          <div className="relative flex min-h-screen flex-col">
+            {/* HEADER */}
+            <ClientHeader locale={locale} />
+
+            {/* MAIN CONTENT */}
+            <main className="flex-1">
+              <Suspense fallback={<Loading />}>
+                <div className="container py-8 md:py-12">{children}</div>
+              </Suspense>
+            </main>
+
+            {/* FOOTER */}
+            <ClientFooter />
+          </div>
+        </ClientProviders>
+      </body>
+    </html>
   )
 }
-
-export default ClientLayout

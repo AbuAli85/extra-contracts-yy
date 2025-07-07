@@ -1,77 +1,73 @@
-export interface Contract {
-  id: string
-  contract_name: string
-  status: ContractStatus
-  created_at: string
-  updated_at: string
-  user_id: string
-  party_a_id?: string
-  party_b_id?: string
-  promoter_id?: string
-  contract_data?: any
-}
-
 export interface Party {
   id: string
-  name: string
-  email: string
-  phone?: string
-  address?: string
-  type: PartyType
-  created_at: string
-  updated_at: string
-  user_id: string
+  name_en: string
+  name_ar: string
+  crn: string
+  type?: "Employer" | "Client" | "Both" | "Generic" | null
+  role?: string | null
+  cr_expiry_date?: string | null
+  contact_person?: string | null
+  contact_email?: string | null
+  contact_phone?: string | null
+  address_en?: string | null
+  address_ar?: string | null
+  tax_number?: string | null
+  license_number?: string | null
+  license_expiry_date?: string | null
+  status?: "Active" | "Inactive" | "Suspended" | null
+  notes?: string | null
+  created_at?: string | null
 }
 
 export interface Promoter {
   id: string
-  name: string
-  email: string
-  phone?: string
-  company?: string
-  bio?: string
-  website?: string
-  social_media?: any
-  created_at: string
-  updated_at: string
-  user_id: string
+  name_en: string
+  name_ar: string
+  id_card_number: string
+  id_card_url?: string | null
+  passport_url?: string | null
+  status?: string | null
+  id_card_expiry_date?: string | null
+  passport_expiry_date?: string | null
+  notify_days_before_id_expiry?: number | null
+  notify_days_before_passport_expiry?: number | null
+  notes?: string | null
+  created_at?: string | null
+  active_contracts_count?: number
 }
 
-export enum PartyType {
-  INDIVIDUAL = "individual",
-  COMPANY = "company",
-  ORGANIZATION = "organization",
-}
+export interface PromoterProfile extends Promoter {}
 
-export enum ContractStatus {
-  DRAFT = "draft",
-  PENDING = "pending",
-  ACTIVE = "active",
-  COMPLETED = "completed",
-  CANCELLED = "cancelled",
-}
-
-export interface User {
+export interface ContractRecord<Extra extends Record<string, unknown> = {}> extends Extra {
   id: string
-  email: string
-  role?: string
-  created_at: string
+  created_at?: string | null
+  first_party_name_en?: string | null
+  second_party_name_en?: string | null
+  promoter_name_en?: string | null
+  status?: string | null
+  google_doc_url?: string | null
+  error_details?: string | null
+  contract_start_date?: string | null
+  contract_end_date?: string | null
 }
 
-export interface AuditLog {
-  id: string
-  action: string
-  user_id: string
-  created_at: string
-  details?: any
-}
-
-export interface DashboardStats {
-  totalContracts: number
-  activeContracts: number
-  pendingContracts: number
-  completedContracts: number
-  totalParties: number
-  totalPromoters: number
-  recentActivity: AuditLog[]
+export interface BilingualPdfData {
+  first_party_name_en?: string
+  first_party_name_ar?: string
+  first_party_crn?: string
+  second_party_name_en?: string
+  second_party_name_ar?: string
+  second_party_crn?: string
+  promoter_name_en?: string
+  promoter_name_ar?: string
+  id_card_number?: string
+  promoter_id_card_url?: string
+  promoter_passport_url?: string
+  contract_start_date: string | null
+  contract_end_date: string | null
+  job_title?: string | null
+  work_location?: string | null
+  email: string | null
+  contract_number?: string
+  pdf_url?: string
 }
