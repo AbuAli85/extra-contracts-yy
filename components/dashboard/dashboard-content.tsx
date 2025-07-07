@@ -7,11 +7,34 @@ import ContractReportsTable from "@/components/dashboard/contract-reports-table"
 import ReviewPanel from "@/components/dashboard/review-panel"
 import NotificationSystem from "@/components/dashboard/notification-system"
 import AdminTools from "@/components/dashboard/admin-tools"
+import { EnhancedAnalytics } from "@/components/dashboard/enhanced-analytics"
+import { SmartTemplateManager } from "@/components/dashboard/smart-template-manager"
+import { WorkflowManager } from "@/components/dashboard/workflow-manager"
+import { NotificationCenter } from "@/components/dashboard/notification-center"
+import { IntegrationManager } from "@/components/dashboard/integration-manager"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { supabase } from "@/lib/supabase"
 import { devLog } from "@/lib/dev-log"
 import type { SummaryWidgetData, ContractStats } from "@/lib/dashboard-types"
-import { FileText, FileCheck, FileX, CalendarClock, Users, Building } from "lucide-react"
+import { 
+  FileText, 
+  FileCheck, 
+  FileX, 
+  CalendarClock, 
+  Users, 
+  Building, 
+  BarChart3,
+  FileTemplate,
+  Workflow,
+  Bell,
+  Settings,
+  Zap
+} from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useTranslations } from "next-intl"
 
 interface DashboardContentProps {
   locale?: string
@@ -168,6 +191,81 @@ export default function DashboardContent({ locale }: DashboardContentProps) {
             <AdminTools />
           </div>
         </div>
+        <EnhancedAnalytics />
+        <SmartTemplateManager />
+        <WorkflowManager />
+        <NotificationCenter />
+        <IntegrationManager />
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="workflows">Workflows</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="integrations">Integrations</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">
+            <Card>
+              <CardHeader>
+                <CardTitle>Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Overview content goes here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="analytics">
+            <Card>
+              <CardHeader>
+                <CardTitle>Analytics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Analytics content goes here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="templates">
+            <Card>
+              <CardHeader>
+                <CardTitle>Templates</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Templates content goes here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="workflows">
+            <Card>
+              <CardHeader>
+                <CardTitle>Workflows</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Workflows content goes here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="notifications">
+            <Card>
+              <CardHeader>
+                <CardTitle>Notifications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Notifications content goes here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="integrations">
+            <Card>
+              <CardHeader>
+                <CardTitle>Integrations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Integrations content goes here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   )
