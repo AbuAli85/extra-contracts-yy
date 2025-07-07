@@ -1,47 +1,35 @@
--- Add 'type' column to 'parties' table if it doesn't exist
+-- Add a 'type' column to the parties table to distinguish between Employer and Client
+-- Ensure this script is idempotent (can be run multiple times without error)
+
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='parties' AND column_name='type') THEN
-        ALTER TABLE parties ADD COLUMN type TEXT NOT NULL DEFAULT 'Individual';
-        -- You might want to update existing rows to a default value if needed
-        -- UPDATE parties SET type = 'Individual' WHERE type IS NULL;
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public' -- or your specific schema
+        AND table_name = 'parties'
+        AND column_name = 'type'
+    ) THEN
+        ALTER TABLE parties
+        ADD COLUMN type TEXT; -- Consider ENUM or CHECK constraint for specific values
     END IF;
-END
-$$;
+END $$;
 
--- Create a new type for party_type if it doesn't exist
+-- Add a CHECK constraint if you want to strictly enforce values (optional, but good practice)
+-- This might fail if there's existing data that doesn't conform.
+-- Consider updating existing data first or making the constraint more flexible.
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'party_type') THEN
-        CREATE TYPE party_type AS ENUM ('Individual', 'Company');
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.table_constraints
+        WHERE table_schema = 'public'
+        AND table_name = 'parties'
+        AND constraint_name = 'parties_type_check'
+    ) THEN
+        ALTER TABLE parties
+        ADD CONSTRAINT parties_type_check CHECK (type IN ('Employer', 'Client', 'Generic', NULL));
     END IF;
-END
-$$;
+END $$;
 
--- Alter column to use the new ENUM type, if it's not already
--- This step might require dropping and re-adding the column if there's existing data
--- or if the column type is incompatible. Proceed with caution in production.
--- For simplicity, assuming it's a new column or can be cast.
-DO $$
-BEGIN
-    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='parties' AND column_name='type' AND data_type='text') THEN
-        ALTER TABLE parties ALTER COLUMN type TYPE party_type USING type::party_type;
-    END IF;
-END
-$$;
-
--- Update RLS policies for 'parties' table to include the new 'type' column if necessary
--- This assumes your RLS policies might need to consider the 'type' column for access control.
--- If your existing policies are generic (e.g., based on user_id), you might not need to change them.
--- Example:
--- ALTER POLICY "Enable read access for all users" ON parties
--- FOR SELECT USING (TRUE);
-
--- ALTER POLICY "Enable insert for authenticated users only" ON parties
--- FOR INSERT WITH CHECK (auth.role() = 'authenticated');
-
--- ALTER POLICY "Enable update for users based on user_id" ON parties
--- FOR UPDATE USING (auth.uid() = user_id); -- Assuming a user_id column exists
-
--- ALTER POLICY "Enable delete for users based on user_id" ON parties
--- FOR DELETE USING (auth.uid() = user_id); -- Assuming a user_id column exists
+COMMENT ON COLUMN parties.type IS 'Type of party, e.g., Employer, Client, or Generic.';

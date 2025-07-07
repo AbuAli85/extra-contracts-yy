@@ -1,71 +1,93 @@
 "use client"
-import { addDays, format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
+// CORE INPUT COMPONENT: Does NOT render FormItem, FormLabel, FormControl, FormMessage by itself.
+import type React from "react"
 
-import { cn } from "@/lib/utils"
+// These will be provided by the parent FormField.
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useTranslations } from "next-intl"
+import { cn } from "@/lib/utils"
+import { CalendarIcon } from "lucide-react"
+import { format, addYears, startOfToday } from "date-fns"
 
 interface DatePickerWithPresetsFieldProps {
-  value?: Date
-  onChange: (date?: Date) => void
-  disabled?: boolean
+  field: {
+    // React Hook Form field object
+    name: string
+    value: Date | null | undefined
+    onChange: (date: Date | null) => void
+    onBlur: () => void
+    ref: React.Ref<any>
+  }
   placeholder?: string
+  disabled?: boolean
+  disabledCalendar?: (date: Date) => boolean
+  presets?: { label: string; date: Date }[]
 }
 
-export function DatePickerWithPresetsField({
-  value,
-  onChange,
-  disabled,
-  placeholder,
-}: DatePickerWithPresetsFieldProps) {
-  const t = useTranslations("DatePickerWithPresetsField")
+const defaultPresets = [
+  { label: "Today", date: startOfToday() },
+  { label: "+1Y", date: addYears(startOfToday(), 1) },
+  { label: "+2Y", date: addYears(startOfToday(), 2) },
+  { label: "+3Y", date: addYears(startOfToday(), 3) },
+  { label: "+4Y", date: addYears(startOfToday(), 4) },
+  { label: "+5Y", date: addYears(startOfToday(), 5) },
+]
 
+export default function DatePickerWithPresetsField({
+  field,
+  placeholder,
+  disabled,
+  disabledCalendar,
+  presets = defaultPresets,
+}: DatePickerWithPresetsFieldProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
+        {/* FormControl will wrap this Button in the parent component */}
         <Button
           variant={"outline"}
-          className={cn("w-full justify-start text-left font-normal", !value && "text-muted-foreground")}
+          className={cn(
+            "w-full justify-start text-left font-normal", // Ensure justify-start for icon alignment
+            !field.value && "text-muted-foreground",
+            disabled && "cursor-not-allowed bg-muted/50 opacity-50",
+          )}
           disabled={disabled}
+          ref={field.ref} // Pass ref to the trigger
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? format(value, "PPP") : <span>{placeholder || t("placeholder")}</span>}
+          {field.value ? (
+            format(new Date(field.value), "PPP")
+          ) : (
+            <span>{placeholder || "Pick a date"}</span>
+          )}
+          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
-        <Select
-          onValueChange={(selectValue) => {
-            const days = Number.parseInt(selectValue)
-            if (!isNaN(days)) {
-              onChange(addDays(new Date(), days))
-            } else if (selectValue === "today") {
-              onChange(new Date())
-            } else {
-              onChange(undefined)
-            }
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={t("select")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="today">{t("today")}</SelectItem>
-            <SelectItem value="7">{t("in7Days")}</SelectItem>
-            <SelectItem value="14">{t("in14Days")}</SelectItem>
-            <SelectItem value="30">{t("in30Days")}</SelectItem>
-            <SelectItem value="90">{t("in90Days")}</SelectItem>
-            <SelectItem value="365">{t("in1Year")}</SelectItem>
-            <SelectItem value="none">{t("clear")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <div className="rounded-md border">
-          <Calendar mode="single" selected={value} onSelect={onChange} initialFocus disabled={disabled} />
-        </div>
-      </PopoverContent>
+      {!disabled && (
+        <PopoverContent className="w-auto p-0" align="start">
+          <div className="grid grid-cols-3 gap-2 border-b p-2">
+            {presets.map(({ label: presetLabel, date }) => (
+              <Button
+                key={presetLabel}
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => field.onChange(date)}
+                className="h-7 text-xs"
+              >
+                {presetLabel}
+              </Button>
+            ))}
+          </div>
+          <Calendar
+            mode="single"
+            selected={field.value ? new Date(field.value) : undefined}
+            onSelect={(date) => field.onChange(date || null)} // Ensure null is passed if date is undefined
+            disabled={disabledCalendar}
+            initialFocus
+          />
+        </PopoverContent>
+      )}
     </Popover>
   )
 }

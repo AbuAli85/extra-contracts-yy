@@ -1,228 +1,114 @@
 "use client"
-import { useState } from "react"
-import type React from "react"
-import { useTranslations } from "next-intl"
-import { createClient } from "@/lib/supabase/client"
-import { devLog } from "@/lib/dev-log"
-import { Loader2, Database, UserPlus, Mail } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Link } from "@/navigation"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { useToast } from "@/components/ui/use-toast"
-import type { AdminAction } from "@/lib/dashboard-types"
+import { Users, Settings, DatabaseZap, Mail, FileSpreadsheet } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { Input } from "@/components/ui/input" // For file input
+import type React from "react"
 
-interface AdminToolsProps {
-  actions: AdminAction[]
-}
-
-export function AdminTools({ actions }: AdminToolsProps) {
+export default function AdminTools() {
   const { toast } = useToast()
-  const t = useTranslations("AdminTools")
-  const [loading, setLoading] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const supabase = createClient()
 
-  const handleAction = (actionName: string) => {
-    toast({
-      title: t("actionTriggered"),
-      description: t("actionTriggeredDescription", { actionName }),
-    })
-    // In a real application, you would call a server action or API route here
-    console.log(`Admin action triggered: ${actionName}`)
-  }
-
-  const handleRunMigration = async () => {
-    setLoading(true)
-    try {
-      // This is a placeholder. In a real app, you'd trigger a server-side migration script.
-      // For now, we'll simulate success/failure.
-      devLog("Simulating database migration...")
-      await new Promise((resolve) => setTimeout(resolve, 2000)) // Simulate API call
-      toast({ title: t("migrationSuccessTitle"), description: t("migrationSuccessDescription") })
-    } catch (error: any) {
-      console.error("Migration error:", error)
+  const handleBulkImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
       toast({
-        title: t("migrationErrorTitle"),
-        description: error.message || t("migrationErrorDescription"),
-        variant: "destructive",
+        title: "File Selected",
+        description: `Selected file: ${file.name}. Upload logic not implemented.`,
       })
-    } finally {
-      setLoading(false)
+      // Placeholder for actual CSV upload and processing logic
+      // e.g., using Supabase Edge Functions or a server-side API route
     }
   }
 
-  const handleCreateUser = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${location.origin}/auth/callback`,
-        },
-      })
-
-      if (error) throw error
-
-      if (data.user) {
-        toast({ title: t("userCreateSuccessTitle"), description: t("userCreateSuccessDescription") })
-        setEmail("")
-        setPassword("")
-      } else {
-        toast({ title: t("userCreatePendingTitle"), description: t("userCreatePendingDescription") })
-      }
-    } catch (error: any) {
-      console.error("User creation error:", error)
-      toast({
-        title: t("userCreateErrorTitle"),
-        description: error.message || t("userCreateErrorDescription"),
-        variant: "destructive",
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSendWelcomeEmail = async () => {
-    setLoading(true)
-    try {
-      // This is a placeholder. In a real app, you'd trigger a server-side function
-      // to send a welcome email, possibly using a service like Resend or SendGrid.
-      devLog("Simulating sending welcome email...")
-      await new Promise((resolve) => setTimeout(resolve, 2000)) // Simulate API call
-      toast({ title: t("welcomeEmailSuccessTitle"), description: t("welcomeEmailSuccessDescription") })
-    } catch (error: any) {
-      console.error("Welcome email error:", error)
-      toast({
-        title: t("welcomeEmailErrorTitle"),
-        description: error.message || t("welcomeEmailErrorDescription"),
-        variant: "destructive",
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
+  const adminActions = [
+    {
+      label: "Manage Users",
+      labelAr: "إدارة المستخدمين",
+      icon: Users,
+      action: () =>
+        toast({
+          title: "Manage Users",
+          description: "Navigate to user management page (not implemented).",
+        }),
+    },
+    {
+      label: "System Settings",
+      labelAr: "إعدادات النظام",
+      icon: Settings,
+      action: () =>
+        toast({
+          title: "System Settings",
+          description: "Navigate to settings page (not implemented).",
+        }),
+    },
+    {
+      label: "Database Backup",
+      labelAr: "نسخ احتياطي لقاعدة البيانات",
+      icon: DatabaseZap,
+      action: () =>
+        toast({
+          title: "Database Backup",
+          description: "Trigger database backup (not implemented).",
+        }),
+    },
+    {
+      label: "Email Templates",
+      labelAr: "قوالب البريد الإلكتروني",
+      icon: Mail,
+      action: () =>
+        toast({
+          title: "Email Templates",
+          description: "Navigate to email template editor (not implemented).",
+        }),
+    },
+  ]
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
+        <CardTitle>Admin Tools / أدوات المسؤول</CardTitle>
+        <CardDescription>
+          Quick access to administrative functions. / وصول سريع إلى الوظائف الإدارية.
+        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
-          {actions.length === 0 ? (
-            <p className="text-muted-foreground">{t("noActions")}</p>
-          ) : (
-            actions.map((action) => (
-              <div key={action.id} className="flex items-center justify-between rounded-md border p-3">
-                <div>
-                  <p className="font-medium">{action.action}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("lastPerformed")}: {new Date(action.timestamp).toLocaleString()} by {action.user_id}
-                  </p>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => handleAction(action.action)}>
-                  {t("run")}
-                </Button>
-              </div>
-            ))
-          )}
-          <div className="space-y-6 mt-4">
-            <div className="space-y-2">
-              <Label htmlFor="announcement-title">{t("sendAnnouncement")}</Label>
-              <Input id="announcement-title" placeholder={t("announcementTitle")} />
-              <Textarea id="announcement-content" placeholder={t("announcementContent")} rows={3} />
-              <Button className="w-full">{t("sendAnnouncementButton")}</Button>
+      <CardContent className="space-y-4">
+        {adminActions.map((tool) => (
+          <Button
+            key={tool.label}
+            variant="outline"
+            onClick={tool.action}
+            className="w-full justify-start p-4 text-left"
+          >
+            <tool.icon className="mr-3 h-5 w-5" />
+            <div>
+              <p>{tool.label}</p>
+              <p className="text-xs text-muted-foreground">{tool.labelAr}</p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="user-management">{t("userManagement")}</Label>
-              <Link href="/dashboard/users">
-                <Button variant="outline" className="w-full bg-transparent">
-                  {t("manageUsers")}
-                </Button>
-              </Link>
+          </Button>
+        ))}
+        <div className="space-y-2 rounded-md border p-4">
+          <label
+            htmlFor="bulk-import-input"
+            className="flex cursor-pointer items-center gap-2 font-semibold"
+          >
+            <FileSpreadsheet className="h-5 w-5" />
+            <div>
+              <p>Bulk Contract Import</p>
+              <p className="text-xs text-muted-foreground">استيراد جماعي للعقود</p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="audit-logs">{t("auditLogs")}</Label>
-              <Link href="/dashboard/audit">
-                <Button variant="outline" className="w-full bg-transparent">
-                  {t("viewAuditLogs")}
-                </Button>
-              </Link>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Button onClick={handleRunMigration} disabled={loading}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
-                {t("runMigrations")}
-              </Button>
-
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button disabled={loading}>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    {t("createNewUser")}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>{t("createNewUserTitle")}</DialogTitle>
-                    <DialogDescription>{t("createNewUserDescription")}</DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleCreateUser} className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="email">{t("emailLabel")}</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="user@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        disabled={loading}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="password">{t("passwordLabel")}</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        disabled={loading}
-                      />
-                    </div>
-                    <Button type="submit" disabled={loading}>
-                      {loading ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <UserPlus className="mr-2 h-4 w-4" />
-                      )}
-                      {t("createUserButton")}
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
-
-              <Button onClick={handleSendWelcomeEmail} disabled={loading}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
-                {t("sendWelcomeEmail")}
-              </Button>
-            </div>
-          </div>
+          </label>
+          <Input
+            id="bulk-import-input"
+            type="file"
+            accept=".csv"
+            onChange={handleBulkImport}
+            className="mt-1"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Upload a CSV file to import multiple contracts.
+          </p>
         </div>
       </CardContent>
     </Card>

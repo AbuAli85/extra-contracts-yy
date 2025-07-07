@@ -1,47 +1,19 @@
-"use client"
-
-import { useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
-import { useContractsStore } from "@/lib/stores/contracts-store"
-import { toast } from "sonner"
+import { useState, useCallback, useEffect } from "react"
+import { supabase } from "@/lib/supabase"
+import { useRealtimeTable } from "./use-realtime-table"
 
 export function useRealtimeContracts() {
-  const { fetchContracts } = useContractsStore()
+  const [contracts, setContracts] = useState([])
 
-  useEffect(() => {
-    const supabase = createClient()
+  const fetchContracts = useCallback(async () => {
+    const { data } = await supabase.from("contracts").select("*").order("created_at", { ascending: false })
+    setContracts(data || [])
+  }, [])
 
-    const channel = supabase
-      .channel("contracts-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "contracts",
-        },
-        (payload) => {
-          console.log("Contract change received:", payload)
+  useRealtimeTable("contracts", fetchContracts)
 
-          if (payload.eventType === "INSERT") {
-            toast.success("New contract created")
-          } else if (payload.eventType === "UPDATE") {
-            const newRecord = payload.new as any
-            if (newRecord.status === "completed") {
-              toast.success("Contract completed successfully")
-            } else if (newRecord.status === "failed") {
-              toast.error("Contract generation failed")
-            }
-          }
+  // Initial fetch
+  useEffect(() => { fetchContracts() }, [fetchContracts])
 
-          // Refresh contracts list
-          fetchContracts()
-        },
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [fetchContracts])
+  return contracts
 }

@@ -1,63 +1,35 @@
 "use client"
 
-import { Component, type ErrorInfo, type ReactNode } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
-import { Button } from "./ui/button"
+import React from "react"
 
-interface ErrorBoundaryProps {
-  children: ReactNode
-  fallback?: ReactNode
-}
-
-interface ErrorBoundaryState {
+interface State {
   hasError: boolean
-  error: Error | null
-  errorInfo: ErrorInfo | null
 }
 
-export class ManualErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
+export class ManualErrorBoundary extends React.Component<{ children: React.ReactNode }, State> {
+  constructor(props: { children: React.ReactNode }) {
     super(props)
-    this.state = { hasError: false, error: null, errorInfo: null }
+    this.state = { hasError: false }
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    // Update state so the next render will show the fallback UI.
-    return { hasError: true, error, errorInfo: null }
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true }
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // You can also log the error to an error reporting service
-    console.error("Uncaught error:", error, errorInfo)
-    this.setState({ errorInfo })
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("ManualErrorBoundary caught an error:", error, errorInfo)
   }
 
   render() {
     if (this.state.hasError) {
-      // You can render any custom fallback UI
       return (
-        this.props.fallback || (
-          <div className="flex min-h-[80vh] items-center justify-center p-4">
-            <Card className="w-full max-w-md text-center">
-              <CardHeader>
-                <CardTitle className="text-destructive">Something went wrong.</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-lg">We're sorry, but an unexpected error occurred.</p>
-                {this.state.error && <p className="text-sm text-muted-foreground">Error: {this.state.error.message}</p>}
-                {this.state.errorInfo && (
-                  <details className="mt-4 whitespace-pre-wrap text-left text-xs text-muted-foreground">
-                    <summary>Error Details</summary>
-                    {this.state.errorInfo.componentStack}
-                  </details>
-                )}
-                <Button onClick={() => this.setState({ hasError: false, error: null, errorInfo: null })}>
-                  Try again
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        )
+        <div className="border border-red-500 p-4">
+          <h2 className="font-semibold text-red-700">An Error Occurred</h2>
+          <p>This part of the application has crashed.</p>
+          <button onClick={() => this.setState({ hasError: false })} className="text-sm underline">
+            Try to reload this component
+          </button>
+        </div>
       )
     }
 

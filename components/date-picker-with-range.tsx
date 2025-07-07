@@ -1,24 +1,22 @@
 "use client"
+
+import type * as React from "react"
 import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
 import type { DateRange } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { useTranslations } from "next-intl"
+import { CalendarIcon } from "lucide-react"
 
-interface DatePickerWithRangeProps {
-  date?: DateRange
+interface DatePickerWithRangeProps extends React.HTMLAttributes<HTMLDivElement> {
+  date: DateRange | undefined
   onDateChange: (date: DateRange | undefined) => void
   className?: string
-  disabled?: boolean
 }
 
-export function DatePickerWithRange({ date, onDateChange, className, disabled }: DatePickerWithRangeProps) {
-  const t = useTranslations("DatePickerWithRange")
-
+export function DatePickerWithRange({ className, date, onDateChange }: DatePickerWithRangeProps) {
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -26,8 +24,10 @@ export function DatePickerWithRange({ date, onDateChange, className, disabled }:
           <Button
             id="date"
             variant={"outline"}
-            className={cn("w-full justify-start text-left font-normal", !date?.from && "text-muted-foreground")}
-            disabled={disabled}
+            className={cn(
+              "w-full justify-start text-left font-normal", // Changed from w-[300px] to w-full
+              !date && "text-muted-foreground",
+            )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {date?.from ? (
@@ -39,7 +39,7 @@ export function DatePickerWithRange({ date, onDateChange, className, disabled }:
                 format(date.from, "LLL dd, y")
               )
             ) : (
-              <span>{t("pickADate")}</span>
+              <span>Pick a date range</span>
             )}
           </Button>
         </PopoverTrigger>
@@ -51,7 +51,6 @@ export function DatePickerWithRange({ date, onDateChange, className, disabled }:
             selected={date}
             onSelect={onDateChange}
             numberOfMonths={2}
-            disabled={disabled}
           />
         </PopoverContent>
       </Popover>

@@ -1,14 +1,10 @@
-"use client"
+// /app/edit-contract/[id]/loading.tsx
+"use client" // recommended, so you can use hooks or client-side only code
 
-import { Loader2 } from "lucide-react"
-import { useTranslations } from "next-intl"
-
-export default function EditContractLoading() {
-  const t = useTranslations("Loading")
+export default function LoadingContractById() {
   return (
-    <div className="flex min-h-[80vh] items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin" />
-      <span className="sr-only">{t("loadingContract")}</span>
+    <div className="flex h-screen items-center justify-center">
+      <div className="h-16 w-16 animate-spin rounded-full border-b-2 border-t-2 border-gray-900" />
     </div>
   )
 }

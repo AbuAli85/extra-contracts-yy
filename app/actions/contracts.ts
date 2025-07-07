@@ -1,73 +1,73 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
-import { revalidatePath } from "next/cache"
-import type { Contract } from "@/lib/types"
+import { createServerComponentClient } from "@/lib/supabaseServer"
+import type { Database } from "@/types/supabase"
 
-export async function getContracts(): Promise<Contract[]> {
-  const supabase = await createClient()
+export type ContractInsert = Database["public"]["Tables"]["contracts"]["Insert"]
 
-  const { data, error } = await supabase.from("contracts").select("*").order("created_at", { ascending: false })
+export async function createContract(newContract: ContractInsert) {
+  const supabase = await createServerComponentClient()
+  const { data, error } = await supabase
+    .from("contracts")
+    .insert(newContract)
+    .select(
+      `id,
+       created_at,
+       job_title,
+       contract_start_date,
+       contract_end_date,
+       status,
+       pdf_url,
+       contract_number,
+       contract_value,
+       email,
+       first_party_id,
+       second_party_id,
+       promoter_id,
+       first_party:parties!contracts_first_party_id_fkey (id, name_en, name_ar, crn, type),
+       second_party:parties!contracts_second_party_id_fkey (id, name_en, name_ar, crn, type),
+       promoters (id, name_en, name_ar, id_card_number, id_card_url, passport_url, status)`,
+    )
+    .single()
 
-  if (error) {
-    console.error("Error fetching contracts:", error)
-    return []
-  }
-
-  return data || []
-}
-
-export async function getContractById(id: string): Promise<Contract | null> {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase.from("contracts").select("*").eq("id", id).single()
-
-  if (error) {
-    console.error("Error fetching contract:", error)
-    return null
-  }
-
+  if (error) throw new Error(error.message)
+  if (!data) throw new Error("Contract creation failed, no data returned.")
   return data
 }
 
-export async function createContract(contractData: Partial<Contract>) {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase.from("contracts").insert(contractData).select().single()
-
-  if (error) {
-    console.error("Error creating contract:", error)
-    throw new Error("Failed to create contract")
-  }
-
-  revalidatePath("/contracts")
-  return data
+export async function deleteContract(contractId: string) {
+  const supabase = await createServerComponentClient()
+  const { error } = await supabase.from("contracts").delete().eq("id", contractId)
+  if (error) throw new Error(error.message)
 }
 
-export async function updateContract(id: string, contractData: Partial<Contract>) {
-  const supabase = await createClient()
+export async function updateContract(contractId: string, updatedContract: Partial<ContractInsert>) {
+  const supabase = await createServerComponentClient()
+  const { data, error } = await supabase
+    .from("contracts")
+    .update(updatedContract)
+    .eq("id", contractId)
+    .select(
+      `id,
+       created_at,
+       job_title,
+       contract_start_date,
+       contract_end_date,
+       status,
+       pdf_url,
+       contract_number,
+       contract_value,
+       email,
+       first_party_id,
+       second_party_id,
+       promoter_id,
+       first_party:parties!contracts_first_party_id_fkey (id, name_en, name_ar, crn, type),
+       second_party:parties!contracts_second_party_id_fkey (id, name_en, name_ar, crn, type),
+       promoters (id, name_en, name_ar, id_card_number, id_card_url, passport_url, status)`,
+    )
+    .single()
 
-  const { data, error } = await supabase.from("contracts").update(contractData).eq("id", id).select().single()
-
-  if (error) {
-    console.error("Error updating contract:", error)
-    throw new Error("Failed to update contract")
-  }
-
-  revalidatePath("/contracts")
-  revalidatePath(`/contracts/${id}`)
+  if (error) throw new Error(error.message)
+  if (!data) throw new Error("Contract update failed, no data returned.")
   return data
-}
-
-export async function deleteContract(id: string) {
-  const supabase = await createClient()
-
-  const { error } = await supabase.from("contracts").delete().eq("id", id)
-
-  if (error) {
-    console.error("Error deleting contract:", error)
-    throw new Error("Failed to delete contract")
-  }
-
-  revalidatePath("/contracts")
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -13,7 +13,6 @@ import { DatePickerWithManualInput } from "./date-picker-with-manual-input"
 import { useParties } from "@/hooks/use-parties"
 import { usePromoters } from "@/hooks/use-promoters"
 import { createContract, updateContract } from "@/app/actions/contracts"
-import { useActionState } from "react"
 import { Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
@@ -28,6 +27,12 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
   const t = useTranslations("ContractGeneratorForm")
   const { toast } = useToast()
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [actionState, setActionState] = useState<{
+    success: boolean
+    message: string
+    errors?: Record<string, string[]>
+  }>({ success: false, message: "" })
 
   const form = useForm<GenerateContractFormValues>({
     resolver: zodResolver(generateContractFormSchema),
@@ -45,18 +50,6 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
       contentSpanish: contract?.content_spanish || "",
     },
   })
-
-  const [createState, createAction, createPending] = useActionState(createContract, {
-    success: false,
-    message: "",
-  })
-  const [updateState, updateAction, updatePending] = useActionState(
-    // Bind contract.id to the updateContract action if contract exists
-    contract
-      ? updateContract.bind(null, contract.id)
-      : async () => ({ success: false, message: "No contract ID provided for update." }),
-    { success: false, message: "" },
-  )
 
   const { data: partiesData, isLoading: isLoadingParties, isError: isErrorParties, error: partiesError } = useParties()
   const {
@@ -79,27 +72,26 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
     })) || []
 
   useEffect(() => {
-    const state = contract ? updateState : createState
-    if (state.message) {
+    if (actionState.message) {
       toast({
-        title: state.success ? t("successMessage") : t("errorMessage"),
-        description: state.message,
-        variant: state.success ? "default" : "destructive",
+        title: actionState.success ? t("successMessage") : t("errorMessage"),
+        description: actionState.message,
+        variant: actionState.success ? "default" : "destructive",
       })
-      if (state.success) {
+      if (actionState.success) {
         // Redirect to contracts list or detail page after successful submission/update
         router.push("/contracts")
       }
     }
-    if (state.errors) {
-      for (const field in state.errors) {
+    if (actionState.errors) {
+      for (const field in actionState.errors) {
         form.setError(field as keyof GenerateContractFormValues, {
           type: "server",
-          message: state.errors[field]?.[0],
+          message: actionState.errors[field]?.[0],
         })
       }
     }
-  }, [createState, updateState, toast, t, router, form, contract])
+  }, [actionState, toast, t, router, form])
 
   const onSubmit = (data: GenerateContractFormValues) => {
     const formData = new FormData()
@@ -115,14 +107,23 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
       }
     })
 
+    startTransition(async () => {
+      try {
+        let result
     if (contract) {
-      updateAction(formData)
+          result = await updateContract(contract.id, formData)
     } else {
-      createAction(formData)
+          result = await createContract(formData)
     }
+        setActionState(result)
+      } catch (error) {
+        setActionState({
+          success: false,
+          message: error instanceof Error ? error.message : "An unknown error occurred",
+        })
+      }
+    })
   }
-
-  const isPending = createPending || updatePending
 
   if (isLoadingParties || isLoadingPromoters) {
     return (
@@ -175,7 +176,7 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
           name="partyA"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("partyALabel")}</FormLabel>
+              <FormLabel>Client (Party A)</FormLabel>
               <FormControl>
                 <ComboboxField
                   options={partyOptions}
@@ -196,7 +197,7 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
           name="partyB"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("partyBLabel")}</FormLabel>
+              <FormLabel>Employer (Party B)</FormLabel>
               <FormControl>
                 <ComboboxField
                   options={partyOptions}
@@ -337,3 +338,5 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
     </Form>
   )
 }
+
+export default ContractGeneratorForm
