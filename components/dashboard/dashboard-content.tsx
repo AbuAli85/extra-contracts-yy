@@ -34,7 +34,6 @@ import {
   File
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { useTranslations } from "next-intl"
 
 interface DashboardContentProps {
   locale?: string
@@ -53,7 +52,8 @@ export default function DashboardContent({ locale }: DashboardContentProps) {
   const [stats, setStats] = useState<ContractStats>(initialStats)
   const [loadingStats, setLoadingStats] = useState(true)
   const { toast } = useToast()
-  const t = useTranslations("DashboardContent")
+  // Removed useTranslations for now to fix context issue
+  // const t = useTranslations("DashboardContent")
 
   useEffect(() => {
     let isMounted = true

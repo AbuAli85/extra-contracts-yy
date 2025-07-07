@@ -29,7 +29,7 @@ import {
   Play,
   RotateCcw
 } from "lucide-react"
-import { useTranslations } from "next-intl"
+// import { useTranslations } from "next-intl"
 
 interface WorkflowStep {
   id: string
@@ -103,7 +103,7 @@ export function WorkflowManager({
   onResumeWorkflow,
   onCancelWorkflow
 }: WorkflowManagerProps) {
-  const t = useTranslations("WorkflowManager")
+  // const t = useTranslations("WorkflowManager")
   const [selectedWorkflow, setSelectedWorkflow] = useState<ContractWorkflow | null>(null)
   const [actionNotes, setActionNotes] = useState("")
   const [commentText, setCommentText] = useState("")
@@ -181,7 +181,7 @@ export function WorkflowManager({
             {/* Progress */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">{t("progress")}</span>
+                <span className="text-sm font-medium">Progress</span>
                 <span className="text-sm text-muted-foreground">
                   {workflow.current_step}/{workflow.total_steps}
                 </span>
@@ -194,7 +194,7 @@ export function WorkflowManager({
               <div className="p-3 bg-muted rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-medium text-sm">{t("currentStep")}</div>
+                    <div className="font-medium text-sm">Current Step</div>
                     <div className="text-sm text-muted-foreground">{currentStep.name}</div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -234,7 +234,7 @@ export function WorkflowManager({
                 onClick={() => setSelectedWorkflow(workflow)}
               >
                 <Eye className="h-4 w-4 mr-1" />
-                {t("viewDetails")}
+                View Details
               </Button>
               <div className="flex items-center space-x-2">
                 {workflow.status === "active" && (
@@ -289,19 +289,19 @@ export function WorkflowManager({
       {/* Progress Overview */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">{t("workflowProgress")}</CardTitle>
+          <CardTitle className="text-lg">Workflow Progress</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span>{t("overallProgress")}</span>
+              <span>Overall Progress</span>
               <span className="font-medium">{workflow.current_step}/{workflow.total_steps}</span>
             </div>
             <Progress value={getProgressPercentage(workflow)} className="h-2" />
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>{t("started")}: {new Date(workflow.started_at).toLocaleString()}</span>
+              <span>Started: {new Date(workflow.started_at).toLocaleString()}</span>
               {workflow.deadline && (
-                <span>{t("deadline")}: {new Date(workflow.deadline).toLocaleString()}</span>
+                <span>Deadline: {new Date(workflow.deadline).toLocaleString()}</span>
               )}
             </div>
           </div>
@@ -311,7 +311,7 @@ export function WorkflowManager({
       {/* Steps Timeline */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">{t("workflowSteps")}</CardTitle>
+          <CardTitle className="text-lg">Workflow Steps</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -358,7 +358,7 @@ export function WorkflowManager({
                   
                   {step.notes && (
                     <div className="mt-2 p-2 bg-muted rounded text-sm">
-                      <strong>{t("notes")}:</strong> {step.notes}
+                      <strong>Notes:</strong> {step.notes}
                     </div>
                   )}
                   
@@ -369,7 +369,7 @@ export function WorkflowManager({
                         onClick={() => onApproveStep(workflow.id, step.id, actionNotes)}
                       >
                         <CheckCircle className="h-4 w-4 mr-1" />
-                        {t("approve")}
+                        Approve
                       </Button>
                       <Button
                         variant="outline"
@@ -377,7 +377,7 @@ export function WorkflowManager({
                         onClick={() => onRejectStep(workflow.id, step.id, actionNotes)}
                       >
                         <XCircle className="h-4 w-4 mr-1" />
-                        {t("reject")}
+                        Reject
                       </Button>
                       <Button
                         variant="ghost"
@@ -385,7 +385,7 @@ export function WorkflowManager({
                         onClick={() => onSkipStep(workflow.id, step.id, actionNotes)}
                       >
                         <ArrowRight className="h-4 w-4 mr-1" />
-                        {t("skip")}
+                        Skip
                       </Button>
                     </div>
                   )}
@@ -399,7 +399,7 @@ export function WorkflowManager({
       {/* Comments */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">{t("comments")}</CardTitle>
+          <CardTitle className="text-lg">Comments</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -429,7 +429,7 @@ export function WorkflowManager({
               </Avatar>
               <div className="flex-1 space-y-2">
                 <Textarea
-                  placeholder={t("addComment")}
+                  placeholder="Add your comment..."
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   rows={3}
@@ -443,7 +443,7 @@ export function WorkflowManager({
                   disabled={!commentText.trim()}
                 >
                   <Send className="h-4 w-4 mr-1" />
-                  {t("sendComment")}
+                  Send Comment
                 </Button>
               </div>
             </div>
@@ -458,13 +458,13 @@ export function WorkflowManager({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">{t("contractWorkflows")}</h2>
-          <p className="text-muted-foreground">{t("manageContractApprovals")}</p>
+          <h2 className="text-2xl font-bold">Contract Workflows</h2>
+          <p className="text-muted-foreground">Manage contract approval workflows</p>
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline">
             <History className="h-4 w-4 mr-1" />
-            {t("viewHistory")}
+            View History
           </Button>
         </div>
       </div>
@@ -473,7 +473,7 @@ export function WorkflowManager({
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("activeWorkflows")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Workflows</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -483,7 +483,7 @@ export function WorkflowManager({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("pendingApprovals")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
