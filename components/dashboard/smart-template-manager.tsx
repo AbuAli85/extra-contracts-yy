@@ -25,7 +25,7 @@ import {
   Download,
   Upload
 } from "lucide-react"
-import { useTranslations } from "next-intl"
+// import { useTranslations } from "next-intl"
 
 interface ContractTemplate {
   id: string
@@ -57,7 +57,7 @@ export function SmartTemplateManager({
   onDeleteTemplate,
   onUseTemplate 
 }: SmartTemplateManagerProps) {
-  const t = useTranslations("SmartTemplateManager")
+  // const t = useTranslations("SmartTemplateManager")
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | null>(null)
@@ -65,13 +65,13 @@ export function SmartTemplateManager({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   const categories = [
-    { value: "all", label: t("allCategories") },
-    { value: "employment", label: t("employment") },
-    { value: "services", label: t("services") },
-    { value: "sales", label: t("sales") },
-    { value: "partnership", label: t("partnership") },
-    { value: "rental", label: t("rental") },
-    { value: "custom", label: t("custom") }
+    { value: "all", label: "All Categories" },
+    { value: "employment", label: "Employment" },
+    { value: "services", label: "Services" },
+    { value: "sales", label: "Sales" },
+    { value: "partnership", label: "Partnership" },
+    { value: "rental", label: "Rental" },
+    { value: "custom", label: "Custom" }
   ]
 
   const filteredTemplates = templates.filter(template => {
@@ -132,7 +132,7 @@ export function SmartTemplateManager({
             <div className="flex items-center space-x-2">
               <Button size="sm" onClick={() => onUseTemplate(template.id)}>
                 <FileText className="h-4 w-4 mr-1" />
-                {t("useTemplate")}
+                Use Template
               </Button>
               <Button 
                 variant="outline" 
@@ -201,7 +201,7 @@ export function SmartTemplateManager({
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="name">{t("templateName")}</Label>
+            <Label htmlFor="name">Template Name</Label>
             <Input
               id="name"
               value={formData.name}
@@ -210,7 +210,7 @@ export function SmartTemplateManager({
             />
           </div>
           <div>
-            <Label htmlFor="category">{t("category")}</Label>
+            <Label htmlFor="category">Category</Label>
             <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
               <SelectTrigger>
                 <SelectValue />
@@ -227,7 +227,7 @@ export function SmartTemplateManager({
         </div>
 
         <div>
-          <Label htmlFor="description">{t("description")}</Label>
+          <Label htmlFor="description">Description</Label>
           <Textarea
             id="description"
             value={formData.description}
@@ -237,29 +237,29 @@ export function SmartTemplateManager({
         </div>
 
         <div>
-          <Label htmlFor="tags">{t("tags")}</Label>
+          <Label htmlFor="tags">Tags</Label>
           <Input
             id="tags"
             value={formData.tags}
             onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-            placeholder={t("tagsPlaceholder")}
+            placeholder="Enter tags separated by commas"
           />
         </div>
 
         <div>
-          <Label htmlFor="variables">{t("variables")}</Label>
+          <Label htmlFor="variables">Variables</Label>
           <Input
             id="variables"
             value={formData.variables}
             onChange={(e) => setFormData({ ...formData, variables: e.target.value })}
-            placeholder={t("variablesPlaceholder")}
+            placeholder="Enter variables separated by commas (e.g., name, date, amount)"
           />
         </div>
 
         <Tabs defaultValue="english" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="english">{t("englishContent")}</TabsTrigger>
-            <TabsTrigger value="spanish">{t("spanishContent")}</TabsTrigger>
+            <TabsTrigger value="english">English Content</TabsTrigger>
+            <TabsTrigger value="spanish">Spanish Content</TabsTrigger>
           </TabsList>
           
           <TabsContent value="english">

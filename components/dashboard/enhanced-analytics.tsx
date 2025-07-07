@@ -16,7 +16,6 @@ import {
   Calendar,
   BarChart3
 } from "lucide-react"
-import { useTranslations } from "next-intl"
 
 interface AnalyticsData {
   totalContracts: number
@@ -46,7 +45,7 @@ interface EnhancedAnalyticsProps {
 }
 
 export function EnhancedAnalytics({ data }: EnhancedAnalyticsProps) {
-  const t = useTranslations("EnhancedAnalytics")
+  // const t = useTranslations("EnhancedAnalytics")
 
   const MetricCard = ({ 
     title, 
@@ -105,27 +104,27 @@ export function EnhancedAnalytics({ data }: EnhancedAnalyticsProps) {
       {/* Key Metrics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          title={t("totalContracts")}
+          title="Total Contracts"
           value={data.totalContracts}
           change={data.monthlyGrowth}
           icon={FileText}
         />
         <MetricCard
-          title={t("totalRevenue")}
+          title="Total Revenue"
           value={data.totalRevenue}
           change={data.recentTrends.revenue}
           icon={DollarSign}
           format="currency"
         />
         <MetricCard
-          title={t("successRate")}
+          title="Success Rate"
           value={data.successRate}
           change={data.recentTrends.efficiency}
           icon={Target}
           format="percentage"
         />
         <MetricCard
-          title={t("avgProcessingTime")}
+          title="Avg Processing Time"
           value={data.averageProcessingTime}
           icon={Clock}
           format="time"
