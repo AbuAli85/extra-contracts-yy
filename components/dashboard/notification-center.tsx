@@ -28,7 +28,7 @@ import {
   DollarSign,
   Zap
 } from "lucide-react"
-import { useTranslations } from "next-intl"
+// import { useTranslations } from "next-intl"
 
 interface NotificationItem {
   id: string
@@ -78,7 +78,7 @@ export function NotificationCenter({
   onDeleteNotification,
   onUpdateSettings 
 }: NotificationCenterProps) {
-  const t = useTranslations("NotificationCenter")
+  // const t = useTranslations("NotificationCenter")
   const [activeTab, setActiveTab] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -174,7 +174,7 @@ export function NotificationCenter({
                   </span>
                   {notification.action_url && (
                     <Button variant="link" size="sm" className="p-0 h-auto text-xs">
-                      {t("viewDetails")}
+                      View Details
                     </Button>
                   )}
                 </div>
@@ -207,15 +207,15 @@ export function NotificationCenter({
   const NotificationSettings = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-4">{t("notificationChannels")}</h3>
+        <h3 className="text-lg font-medium mb-4">Notification Channels</h3>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="email-notifications" className="text-sm font-medium">
-                {t("emailNotifications")}
+                Email Notifications
               </Label>
               <p className="text-xs text-muted-foreground">
-                {t("emailNotificationsDesc")}
+                Receive notifications via email
               </p>
             </div>
             <Switch
@@ -230,10 +230,10 @@ export function NotificationCenter({
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="push-notifications" className="text-sm font-medium">
-                {t("pushNotifications")}
+                Push Notifications
               </Label>
               <p className="text-xs text-muted-foreground">
-                {t("pushNotificationsDesc")}
+                Receive push notifications in your browser
               </p>
             </div>
             <Switch
@@ -248,10 +248,10 @@ export function NotificationCenter({
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="slack-notifications" className="text-sm font-medium">
-                {t("slackNotifications")}
+                Slack Notifications
               </Label>
               <p className="text-xs text-muted-foreground">
-                {t("slackNotificationsDesc")}
+                Send notifications to your Slack workspace
               </p>
             </div>
             <Switch
@@ -266,15 +266,15 @@ export function NotificationCenter({
       </div>
 
       <div>
-        <h3 className="text-lg font-medium mb-4">{t("notificationTypes")}</h3>
+        <h3 className="text-lg font-medium mb-4">Notification Types</h3>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="contract-updates" className="text-sm font-medium">
-                {t("contractUpdates")}
+                Contract Updates
               </Label>
               <p className="text-xs text-muted-foreground">
-                {t("contractUpdatesDesc")}
+                Notifications about contract status changes
               </p>
             </div>
             <Switch
@@ -294,10 +294,10 @@ export function NotificationCenter({
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="payment-reminders" className="text-sm font-medium">
-                {t("paymentReminders")}
+                Payment Reminders
               </Label>
               <p className="text-xs text-muted-foreground">
-                {t("paymentRemindersDesc")}
+                Reminders for upcoming payments
               </p>
             </div>
             <Switch
@@ -317,10 +317,10 @@ export function NotificationCenter({
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="deadline-alerts" className="text-sm font-medium">
-                {t("deadlineAlerts")}
+                Deadline Alerts
               </Label>
               <p className="text-xs text-muted-foreground">
-                {t("deadlineAlertsDesc")}
+                Alerts for approaching deadlines
               </p>
             </div>
             <Switch
@@ -340,10 +340,10 @@ export function NotificationCenter({
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="workflow-updates" className="text-sm font-medium">
-                {t("workflowUpdates")}
+                Workflow Updates
               </Label>
               <p className="text-xs text-muted-foreground">
-                {t("workflowUpdatesDesc")}
+                Updates on workflow approvals and changes
               </p>
             </div>
             <Switch
@@ -363,10 +363,10 @@ export function NotificationCenter({
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="system-updates" className="text-sm font-medium">
-                {t("systemUpdates")}
+                System Updates
               </Label>
               <p className="text-xs text-muted-foreground">
-                {t("systemUpdatesDesc")}
+                System maintenance and feature updates
               </p>
             </div>
             <Switch
@@ -386,15 +386,15 @@ export function NotificationCenter({
       </div>
 
       <div>
-        <h3 className="text-lg font-medium mb-4">{t("quietHours")}</h3>
+        <h3 className="text-lg font-medium mb-4">Quiet Hours</h3>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="quiet-hours" className="text-sm font-medium">
-                {t("enableQuietHours")}
+                Enable Quiet Hours
               </Label>
               <p className="text-xs text-muted-foreground">
-                {t("quietHoursDesc")}
+                Disable notifications during specified hours
               </p>
             </div>
             <Switch
@@ -415,7 +415,7 @@ export function NotificationCenter({
             <div className="flex items-center space-x-4">
               <div className="flex-1">
                 <Label htmlFor="start-time" className="text-sm font-medium">
-                  {t("startTime")}
+                  Start Time
                 </Label>
                 <input
                   type="time"
@@ -434,7 +434,7 @@ export function NotificationCenter({
               </div>
               <div className="flex-1">
                 <Label htmlFor="end-time" className="text-sm font-medium">
-                  {t("endTime")}
+                  End Time
                 </Label>
                 <input
                   type="time"
@@ -464,14 +464,14 @@ export function NotificationCenter({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div>
-            <h2 className="text-2xl font-bold">{t("notifications")}</h2>
+            <h2 className="text-2xl font-bold">Notifications</h2>
             <p className="text-muted-foreground">
-              {t("notificationCount", { count: notifications.length })}
+              {notifications.length} notifications
             </p>
           </div>
           {unreadCount > 0 && (
             <Badge variant="destructive" className="px-2 py-1">
-              {unreadCount} {t("unread")}
+              {unreadCount} unread
             </Badge>
           )}
         </div>
@@ -483,18 +483,18 @@ export function NotificationCenter({
             disabled={unreadCount === 0}
           >
             <CheckCircle className="h-4 w-4 mr-1" />
-            {t("markAllRead")}
+            Mark All as Read
           </Button>
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
                 <Settings className="h-4 w-4 mr-1" />
-                {t("settings")}
+                Settings
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>{t("notificationSettings")}</DialogTitle>
+                <DialogTitle>Notification Settings</DialogTitle>
               </DialogHeader>
               <NotificationSettings />
             </DialogContent>
@@ -506,7 +506,7 @@ export function NotificationCenter({
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("totalNotifications")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Notifications</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{notifications.length}</div>
@@ -514,7 +514,7 @@ export function NotificationCenter({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("unreadNotifications")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Unread Notifications</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{unreadCount}</div>
@@ -522,7 +522,7 @@ export function NotificationCenter({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("urgentNotifications")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Urgent Notifications</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{urgentCount}</div>
@@ -530,7 +530,7 @@ export function NotificationCenter({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("todaysNotifications")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Today's Notifications</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -549,7 +549,7 @@ export function NotificationCenter({
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder={t("searchNotifications")}
+              placeholder="Search notifications..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -561,14 +561,14 @@ export function NotificationCenter({
       {/* Notifications */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">{t("all")}</TabsTrigger>
+          <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="unread">
-            {t("unread")} {unreadCount > 0 && `(${unreadCount})`}
+            Unread {unreadCount > 0 && `(${unreadCount})`}
           </TabsTrigger>
           <TabsTrigger value="urgent">
-            {t("urgent")} {urgentCount > 0 && `(${urgentCount})`}
+            Urgent {urgentCount > 0 && `(${urgentCount})`}
           </TabsTrigger>
-          <TabsTrigger value="contract_created">{t("contracts")}</TabsTrigger>
+          <TabsTrigger value="contract_created">Contracts</TabsTrigger>
         </TabsList>
         
         <TabsContent value={activeTab} className="space-y-4">
@@ -581,8 +581,8 @@ export function NotificationCenter({
           {filteredNotifications.length === 0 && (
             <div className="text-center py-12">
               <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium">{t("noNotifications")}</h3>
-              <p className="text-muted-foreground">{t("noNotificationsDesc")}</p>
+              <h3 className="text-lg font-medium">No notifications</h3>
+              <p className="text-muted-foreground">You're all caught up!</p>
             </div>
           )}
         </TabsContent>

@@ -31,7 +31,7 @@ import {
   Shield,
   Activity
 } from "lucide-react"
-import { useTranslations } from "next-intl"
+// import { useTranslations } from "next-intl"
 
 interface Integration {
   id: string
@@ -85,7 +85,7 @@ export function IntegrationManager({
   onTestIntegration,
   onSyncIntegration 
 }: IntegrationManagerProps) {
-  const t = useTranslations("IntegrationManager")
+  // const t = useTranslations("IntegrationManager")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState<IntegrationTemplate | null>(null)
@@ -114,13 +114,13 @@ export function IntegrationManager({
   }
 
   const categories = [
-    { value: "all", label: t("allCategories") },
-    { value: "storage", label: t("storage") },
-    { value: "communication", label: t("communication") },
-    { value: "payment", label: t("payment") },
-    { value: "automation", label: t("automation") },
-    { value: "analytics", label: t("analytics") },
-    { value: "security", label: t("security") }
+    { value: "all", label: "All Categories" },
+    { value: "storage", label: "Storage" },
+    { value: "communication", label: "Communication" },
+    { value: "payment", label: "Payment" },
+    { value: "automation", label: "Automation" },
+    { value: "analytics", label: "Analytics" },
+    { value: "security", label: "Security" }
   ]
 
   const filteredIntegrations = integrations.filter(integration => 
@@ -160,7 +160,7 @@ export function IntegrationManager({
       <CardContent>
         <div className="space-y-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">{t("lastSync")}</span>
+            <span className="text-muted-foreground">Last Sync</span>
             <span>{new Date(integration.last_sync).toLocaleString()}</span>
           </div>
           
@@ -172,7 +172,7 @@ export function IntegrationManager({
                 onClick={() => onTestIntegration(integration.id)}
               >
                 <CheckCircle className="h-4 w-4 mr-1" />
-                {t("test")}
+                Test
               </Button>
               <Button
                 variant="outline"
@@ -180,7 +180,7 @@ export function IntegrationManager({
                 onClick={() => onSyncIntegration(integration.id)}
               >
                 <RefreshCw className="h-4 w-4 mr-1" />
-                {t("sync")}
+                Sync
               </Button>
             </div>
             <div className="flex items-center space-x-1">
@@ -226,7 +226,7 @@ export function IntegrationManager({
           <div className="flex items-center space-x-2">
             {template.popular && (
               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                {t("popular")}
+                Popular
               </Badge>
             )}
             <ExternalLink className="h-4 w-4 text-muted-foreground" />
@@ -292,7 +292,7 @@ export function IntegrationManager({
                 onValueChange={(value) => setConfigData({ ...configData, [field.name]: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t("selectOption")} />
+                  <SelectValue placeholder="Select option" />
                 </SelectTrigger>
                 <SelectContent>
                   {field.options.map((option) => (
@@ -331,7 +331,7 @@ export function IntegrationManager({
             setConfigData({})
           }}
         >
-          {t("cancel")}
+          Cancel
         </Button>
         <Button 
           onClick={() => {
@@ -341,7 +341,7 @@ export function IntegrationManager({
             setConfigData({})
           }}
         >
-          {t("connect")}
+          Connect
         </Button>
       </div>
     </div>
@@ -352,12 +352,12 @@ export function IntegrationManager({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">{t("integrations")}</h2>
-          <p className="text-muted-foreground">{t("manageIntegrationsDesc")}</p>
+          <h2 className="text-2xl font-bold">Integrations</h2>
+          <p className="text-muted-foreground">Manage your third-party integrations</p>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-1" />
-          {t("addIntegration")}
+          Add Integration
         </Button>
       </div>
 
@@ -365,7 +365,7 @@ export function IntegrationManager({
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("totalIntegrations")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Integrations</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{integrations.length}</div>
@@ -373,7 +373,7 @@ export function IntegrationManager({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("activeIntegrations")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Integrations</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
@@ -383,7 +383,7 @@ export function IntegrationManager({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("errorIntegrations")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Failed Integrations</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
@@ -393,7 +393,7 @@ export function IntegrationManager({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("availableTemplates")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Available Templates</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{templates.length}</div>
@@ -404,7 +404,7 @@ export function IntegrationManager({
       {/* Category Filter */}
       <div className="flex items-center space-x-4">
         <Label htmlFor="category-filter" className="text-sm font-medium">
-          {t("category")}:
+          Category:
         </Label>
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger className="w-48">
@@ -423,8 +423,8 @@ export function IntegrationManager({
       {/* Integrations */}
       <Tabs defaultValue="active" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="active">{t("myIntegrations")}</TabsTrigger>
-          <TabsTrigger value="available">{t("availableIntegrations")}</TabsTrigger>
+          <TabsTrigger value="active">My Integrations</TabsTrigger>
+          <TabsTrigger value="available">Available Integrations</TabsTrigger>
         </TabsList>
         
         <TabsContent value="active" className="space-y-4">
@@ -437,8 +437,8 @@ export function IntegrationManager({
           {filteredIntegrations.length === 0 && (
             <div className="text-center py-12">
               <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium">{t("noIntegrations")}</h3>
-              <p className="text-muted-foreground">{t("noIntegrationsDesc")}</p>
+              <h3 className="text-lg font-medium">No integrations found</h3>
+              <p className="text-muted-foreground">Connect your first integration to get started</p>
             </div>
           )}
         </TabsContent>
@@ -453,8 +453,8 @@ export function IntegrationManager({
           {filteredTemplates.length === 0 && (
             <div className="text-center py-12">
               <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium">{t("noTemplates")}</h3>
-              <p className="text-muted-foreground">{t("noTemplatesDesc")}</p>
+              <h3 className="text-lg font-medium">No templates available</h3>
+              <p className="text-muted-foreground">Check back later for more integration options</p>
             </div>
           )}
         </TabsContent>
@@ -464,13 +464,13 @@ export function IntegrationManager({
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{t("addIntegration")}</DialogTitle>
+            <DialogTitle>Add Integration</DialogTitle>
           </DialogHeader>
           {selectedTemplate ? (
             <IntegrationForm template={selectedTemplate} />
           ) : (
             <div className="space-y-4">
-              <p className="text-muted-foreground">{t("selectIntegrationTemplate")}</p>
+              <p className="text-muted-foreground">Select an integration template to get started</p>
               <div className="grid gap-3">
                 {templates.map(template => (
                   <div
