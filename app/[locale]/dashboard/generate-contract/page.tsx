@@ -12,7 +12,7 @@ import {
   Sparkles, FileText, CheckCircle, TrendingUp, Users, Shield, 
   Zap, Globe, Star, Award, Info, AlertTriangle, Settings 
 } from "lucide-react"
-import "../../../styles/contract-enhancements.css"
+import "../../../../styles/contract-enhancements.css"
 
 export default function DashboardGenerateContractPage() {
   const [progress, setProgress] = useState(65)
