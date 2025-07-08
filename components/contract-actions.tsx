@@ -115,17 +115,19 @@ export function ContractActions({
         .single()
 
       if (fetchError) throw fetchError
+      if (!originalContract) return
 
-      const { id, created_at, updated_at, ...contractData } = originalContract
+      const { id, created_at, updated_at, user_id, ...contractData } = originalContract
       const duplicatedContract = {
         ...contractData,
+        user_id: user_id ?? undefined, // Ensure user_id is not null
         status: 'draft',
-        first_party_name: `${contractData.first_party_name} (Copy)`,
+        contract_name: `${contractData.contract_name || 'Contract'} (Copy)`,
       }
 
       const { error: insertError } = await supabase
         .from('contracts')
-        .insert(duplicatedContract)
+        .insert([duplicatedContract]) // insert expects an array
 
       if (insertError) throw insertError
 

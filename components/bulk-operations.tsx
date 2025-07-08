@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -36,9 +36,20 @@ import {
 import { toast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
 
+interface ContractForBulkOps {
+  id: string;
+  status: string;
+  first_party_name?: string;
+  second_party_name?: string;
+  start_date?: string;
+  end_date?: string;
+  contract_value?: number;
+  created_at?: string;
+}
+
 interface BulkOperationsProps {
   selectedContracts: string[]
-  allContracts: any[]
+  allContracts: ContractForBulkOps[]
   onSelectionChange: (selected: string[]) => void
   onRefresh: () => void
 }
@@ -58,7 +69,7 @@ export function BulkOperations({
   const isAllSelected = selectedCount === totalCount && totalCount > 0
   const isIndeterminate = selectedCount > 0 && selectedCount < totalCount
 
-  const handleSelectAll = (checked: boolean | string) => {
+  const handleSelectAll = (checked: boolean) => {
     if (checked) {
       onSelectionChange(allContracts.map(contract => contract.id))
     } else {
@@ -195,7 +206,8 @@ export function BulkOperations({
     )
     
     const counts = selectedData.reduce((acc, contract) => {
-      acc[contract.status] = (acc[contract.status] || 0) + 1
+      const status = contract.status || 'unknown';
+      acc[status] = (acc[status] || 0) + 1
       return acc
     }, {} as Record<string, number>)
 
@@ -207,10 +219,7 @@ export function BulkOperations({
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2">
           <Checkbox
-            checked={isAllSelected}
-            ref={(ref) => {
-              if (ref) ref.indeterminate = isIndeterminate
-            }}
+            checked={isIndeterminate ? "indeterminate" : isAllSelected}
             onCheckedChange={handleSelectAll}
             aria-label="Select all contracts"
           />

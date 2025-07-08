@@ -1,14 +1,28 @@
 import React from 'react';
 import { format, parseISO } from 'date-fns';
 
-const DetailItem = ({ label, value }) => (
+interface DetailItemProps {
+  label: string;
+  value: React.ReactNode;
+}
+
+const DetailItem: React.FC<DetailItemProps> = ({ label, value }) => (
   <div className="flex items-center justify-between">
     <span className="text-sm font-medium text-gray-500">{label}</span>
     <span className="text-sm font-medium text-gray-900">{value}</span>
   </div>
 );
 
-const ContractDetailPage = ({ contract }) => {
+interface ContractDetails {
+    contract_start_date?: string | null;
+    contract_end_date?: string | null;
+}
+
+interface ContractDetailPageProps {
+    contract: ContractDetails;
+}
+
+const ContractDetailPage: React.FC<ContractDetailPageProps> = ({ contract }) => {
   return (
     <div className="space-y-4">
       <DetailItem
