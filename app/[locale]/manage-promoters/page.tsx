@@ -112,7 +112,6 @@ export default function ManagePromotersPage() {
   const [bulkActionLoading, setBulkActionLoading] = useState(false)
   const { toast } = useToast()
   const isMountedRef = useRef(true)
-  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Helper functions for enhanced promoter data
   const getDocumentStatusType = (daysUntilExpiry: number | null, dateString: string | null): "valid" | "expiring" | "expired" | "missing" => {
@@ -142,7 +141,9 @@ export default function ManagePromotersPage() {
 
   // Enhanced data fetching with real contract counts
   const fetchPromotersWithContractCount = useCallback(async () => {
-    if (isMountedRef.current) setIsLoading(true)
+    if (isMountedRef.current) {
+      setIsLoading(true)
+    }
     
     try {
       // Fetch promoters with contract count from the contracts table
@@ -191,7 +192,9 @@ export default function ManagePromotersPage() {
         })
       )
 
-      setPromoters(enhancedData)
+      if (isMountedRef.current) {
+        setPromoters(enhancedData)
+      }
     } catch (error) {
       console.error("Unexpected error:", error)
       toast({
@@ -200,13 +203,18 @@ export default function ManagePromotersPage() {
         variant: "destructive",
       })
     } finally {
-      if (isMountedRef.current) setIsLoading(false)
+      if (isMountedRef.current) {
+        setIsLoading(false)
+      }
     }
   }, [toast])
 
-  // Enhanced filter and sort promoters
-  const applyFilters = useCallback(() => {
-    if (!promoters.length) return
+  // Apply filters and sorting
+  const applyFiltersAndSort = useCallback(() => {
+    if (!promoters || promoters.length === 0) {
+      setFilteredPromoters([])
+      return
+    }
 
     let filtered = promoters.filter(promoter => {
       // Search filter - enhanced to include passport number
@@ -287,7 +295,9 @@ export default function ManagePromotersPage() {
       }
     })
 
-    setFilteredPromoters(sorted)
+    if (isMountedRef.current) {
+      setFilteredPromoters(sorted)
+    }
   }, [promoters, searchTerm, filterStatus, documentFilter, sortBy, sortOrder])
 
   // Calculate statistics
@@ -307,39 +317,35 @@ export default function ManagePromotersPage() {
     }
   }, [filteredPromoters])
 
+  // Initial data fetch and setup
   useEffect(() => {
+    isMountedRef.current = true
     fetchPromotersWithContractCount()
     return () => {
       isMountedRef.current = false
     }
   }, [fetchPromotersWithContractCount])
 
+  // Apply filters whenever dependencies change
   useEffect(() => {
-    applyFilters()
-  }, [searchTerm, filterStatus, documentFilter, sortBy, sortOrder, applyFilters])
+    applyFiltersAndSort()
+  }, [applyFiltersAndSort])
 
   // Auto-refresh functionality
   useEffect(() => {
-    const startAutoRefresh = () => {
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current)
-      }
-      refreshIntervalRef.current = setInterval(() => {
-        if (isMountedRef.current && !isLoading) {
-          setIsRefreshing(true)
-          fetchPromotersWithContractCount().finally(() => {
+    const refreshInterval = setInterval(() => {
+      if (isMountedRef.current && !isLoading) {
+        setIsRefreshing(true)
+        fetchPromotersWithContractCount().finally(() => {
+          if (isMountedRef.current) {
             setIsRefreshing(false)
-          })
-        }
-      }, 5 * 60 * 1000) // Refresh every 5 minutes
-    }
-
-    startAutoRefresh()
+          }
+        })
+      }
+    }, 5 * 60 * 1000) // Refresh every 5 minutes
 
     return () => {
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current)
-      }
+      clearInterval(refreshInterval)
     }
   }, [fetchPromotersWithContractCount, isLoading])
 

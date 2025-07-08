@@ -122,35 +122,7 @@ export default function ManagePartiesPage() {
   const [bulkActionLoading, setBulkActionLoading] = useState(false)
   const { toast } = useToast()
   const isMountedRef = useRef(true)
-  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Helper functions for enhanced party data
-  const getDocumentStatusType = (daysUntilExpiry: number | null, dateString: string | null): "valid" | "expiring" | "expired" | "missing" => {
-    if (!dateString) return "missing"
-    if (daysUntilExpiry === null) return "missing"
-    if (daysUntilExpiry < 0) return "expired"
-    if (daysUntilExpiry <= 30) return "expiring"
-    return "valid"
-  }
-
-  const getOverallStatus = (party: Party): "active" | "warning" | "critical" | "inactive" => {
-    if (!party.status || party.status === "Inactive" || party.status === "Suspended") return "inactive"
-    
-    const crExpiry = party.cr_expiry_date ? differenceInDays(parseISO(party.cr_expiry_date), new Date()) : null
-    const licenseExpiry = party.license_expiry_date ? differenceInDays(parseISO(party.license_expiry_date), new Date()) : null
-    
-    if ((crExpiry !== null && crExpiry < 0) || (licenseExpiry !== null && licenseExpiry < 0)) {
-      return "critical"
-    }
-    
-    if ((crExpiry !== null && crExpiry <= 30) || (licenseExpiry !== null && licenseExpiry <= 30)) {
-      return "warning"
-    }
-    
-    return "active"
-  }
-
-  // Enhanced data fetching with contract counts
   const fetchPartiesWithContractCount = useCallback(async () => {
     if (isMountedRef.current) setIsLoading(true)
     
@@ -199,7 +171,9 @@ export default function ManagePartiesPage() {
         })
       )
 
-      setParties(enhancedData)
+      if (isMountedRef.current) {
+        setParties(enhancedData)
+      }
     } catch (error) {
       console.error("Unexpected error:", error)
       toast({
@@ -212,9 +186,66 @@ export default function ManagePartiesPage() {
     }
   }, [toast])
 
+  // Combine fetching and auto-refresh logic
+  useEffect(() => {
+    isMountedRef.current = true
+    fetchPartiesWithContractCount()
+
+    const refreshInterval = setInterval(() => {
+      if (isMountedRef.current && !isLoading) {
+        setIsRefreshing(true)
+        fetchPartiesWithContractCount().finally(() => {
+          if (isMountedRef.current) {
+            setIsRefreshing(false)
+          }
+        })
+      }
+    }, 5 * 60 * 1000) // Refresh every 5 minutes
+
+    return () => {
+      isMountedRef.current = false
+      clearInterval(refreshInterval)
+    }
+  }, [fetchPartiesWithContractCount]) // Re-run if fetch function instance changes
+
+  // Apply filters whenever parties or filter settings change
+  useEffect(() => {
+    applyFilters()
+  }, [parties, searchTerm, statusFilter, typeFilter, documentFilter, sortBy, sortOrder])
+
+
+  // Helper functions for enhanced party data
+  const getDocumentStatusType = (daysUntilExpiry: number | null, dateString: string | null): "valid" | "expiring" | "expired" | "missing" => {
+    if (!dateString) return "missing"
+    if (daysUntilExpiry === null) return "missing"
+    if (daysUntilExpiry < 0) return "expired"
+    if (daysUntilExpiry <= 30) return "expiring"
+    return "valid"
+  }
+
+  const getOverallStatus = (party: Party): "active" | "warning" | "critical" | "inactive" => {
+    if (!party.status || party.status === "Inactive" || party.status === "Suspended") return "inactive"
+    
+    const crExpiry = party.cr_expiry_date ? differenceInDays(parseISO(party.cr_expiry_date), new Date()) : null
+    const licenseExpiry = party.license_expiry_date ? differenceInDays(parseISO(party.license_expiry_date), new Date()) : null
+    
+    if ((crExpiry !== null && crExpiry < 0) || (licenseExpiry !== null && licenseExpiry < 0)) {
+      return "critical"
+    }
+    
+    if ((crExpiry !== null && crExpiry <= 30) || (licenseExpiry !== null && licenseExpiry <= 30)) {
+      return "warning"
+    }
+    
+    return "active"
+  }
+
   // Enhanced filter and sort parties
   const applyFilters = useCallback(() => {
-    if (!parties.length) return
+    if (!parties || parties.length === 0) {
+      setFilteredParties([])
+      return
+    }
 
     let filtered = parties.filter(party => {
       // Search filter - enhanced to include more fields
@@ -299,8 +330,10 @@ export default function ManagePartiesPage() {
       }
     })
 
-    setFilteredParties(sorted)
-  }, [parties, searchTerm, statusFilter, typeFilter, documentFilter, sortBy, sortOrder])
+    if (isMountedRef.current) {
+      setFilteredParties(sorted)
+    }
+  }, [searchTerm, statusFilter, typeFilter, documentFilter, sortBy, sortOrder, parties])
 
   // Calculate statistics
   const stats = useMemo((): PartyStats => {
@@ -326,42 +359,6 @@ export default function ManagePartiesPage() {
       total_contracts: totalContracts,
     }
   }, [filteredParties])
-
-  useEffect(() => {
-    fetchPartiesWithContractCount()
-    return () => {
-      isMountedRef.current = false
-    }
-  }, [fetchPartiesWithContractCount])
-
-  useEffect(() => {
-    applyFilters()
-  }, [searchTerm, statusFilter, typeFilter, documentFilter, sortBy, sortOrder, applyFilters])
-
-  // Auto-refresh functionality
-  useEffect(() => {
-    const startAutoRefresh = () => {
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current)
-      }
-      refreshIntervalRef.current = setInterval(() => {
-        if (isMountedRef.current && !isLoading) {
-          setIsRefreshing(true)
-          fetchPartiesWithContractCount().finally(() => {
-            setIsRefreshing(false)
-          })
-        }
-      }, 5 * 60 * 1000) // Refresh every 5 minutes
-    }
-
-    startAutoRefresh()
-
-    return () => {
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current)
-      }
-    }
-  }, [fetchPartiesWithContractCount, isLoading])
 
   const handleEdit = (party: Party) => {
     setSelectedParty(party)
