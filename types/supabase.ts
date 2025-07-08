@@ -22,14 +22,22 @@ export interface Database {
           promoter_id: string
           contract_valid_from?: string | null
           contract_valid_until?: string | null
-          contract_start_date?: string | null // YYYY-MM-DD
-          contract_end_date?: string | null // YYYY-MM-DD
+          contract_start_date?: string | null
+          contract_end_date?: string | null
           contract_value?: number | null
           job_title?: string | null
           status?: string | null
           work_location?: string | null
-          email?: string | null // For notifications
-          // ... other fields from your schema
+          email?: string | null
+          contract_name?: string | null
+          party_a?: string | null
+          party_b?: string | null
+          contract_type?: string | null
+          terms?: string | null
+          department?: string | null
+          currency?: string | null
+          end_date?: string | null
+          duration?: string | null
         }
         Insert: {
           id?: string
@@ -51,7 +59,15 @@ export interface Database {
           status?: string | null
           work_location?: string | null
           email?: string | null
-          // ... other fields
+          contract_name?: string | null
+          party_a?: string | null
+          party_b?: string | null
+          contract_type?: string | null
+          terms?: string | null
+          department?: string | null
+          currency?: string | null
+          end_date?: string | null
+          duration?: string | null
         }
         Update: {
           id?: string
@@ -73,7 +89,15 @@ export interface Database {
           status?: string | null
           work_location?: string | null
           email?: string | null
-          // ... other fields
+          contract_name?: string | null
+          party_a?: string | null
+          party_b?: string | null
+          contract_type?: string | null
+          terms?: string | null
+          department?: string | null
+          currency?: string | null
+          end_date?: string | null
+          duration?: string | null
         }
         Relationships: [
           {

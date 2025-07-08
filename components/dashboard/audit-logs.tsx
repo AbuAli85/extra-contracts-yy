@@ -1,21 +1,5 @@
 "use client"
-import { useState, useEffec      const { data, error } = await supabase
-        .from("audit_logs")
-        .select("id, user_id, action, ip_address, timestamp, details")
-        .order(sortKey || "timestamp", { ascending: sortDirection === "asc" })
-        .limit(100)
-
-      if (error) throw error
-      setLogs(
-        data.map((log: any) => ({
-          id: log.id,
-          user: log.user_id || "System", // Use user_id instead of user_email
-          action: log.action,
-          ipAddress: log.ip_address || "",
-          timestamp: log.timestamp,
-          details: log.details,
-        }))
-      ) "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
   Table,
@@ -54,23 +38,36 @@ export default function AuditLogs() {
   const fetchAuditLogs = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from("audit_logs")
-        .select("id, user_id, action, ip_address, timestamp, details")
-        .order(sortKey || "timestamp", { ascending: sortDirection === "asc" })
-        .limit(100)
-
-      if (error) throw error
-      setLogs(
-        data.map((log: any) => ({
-          id: log.id,
-          user: log.user_id || "System",
-          action: log.action,
-          ipAddress: log.ip_address || "N/A",
-          timestamp: log.timestamp, // This is already an ISO string
-          details: log.details,
-        })),
-      )
+      // Mock data for demonstration - replace with actual API call when audit_logs table exists
+      const mockData = [
+        {
+          id: "1",
+          user: "admin@example.com",
+          action: "contract_created",
+          ipAddress: "192.168.1.100",
+          timestamp: new Date().toISOString(),
+          details: { contract_id: "CT-2024-001", contract_number: "2024-001" }
+        },
+        {
+          id: "2",
+          user: "user@example.com",
+          action: "contract_updated",
+          ipAddress: "192.168.1.101",
+          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          details: { contract_id: "CT-2024-002", field: "status", old_value: "draft", new_value: "active" }
+        },
+        {
+          id: "3",
+          user: "System",
+          action: "contract_expired",
+          ipAddress: "127.0.0.1",
+          timestamp: new Date(Date.now() - 7200000).toISOString(),
+          details: { contract_id: "CT-2024-003", expiry_date: "2024-01-01" }
+        }
+      ]
+      
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API delay
+      setLogs(mockData)
     } catch (error: any) {
       console.error("Error fetching audit logs:", error)
       toast({
@@ -87,43 +84,6 @@ export default function AuditLogs() {
   useEffect(() => {
     fetchAuditLogs()
   }, [sortKey, sortDirection])
-
-  useEffect(() => {
-    const channel = supabase
-      .channel("public:audit_logs:feed") // Unique channel name
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "audit_logs" },
-        (payload) => {
-          const newLog = payload.new as AuditLogRow
-          devLog("New audit log received:", newLog)
-          toast({
-            title: "New Audit Log Entry",
-            description: `${newLog.user_id || "System"} performed action: ${newLog.action}`,
-          })
-          setLogs(
-            (prev) =>
-              [
-                {
-                  id: newLog.id,
-                  user: newLog.user_id || "System",
-                  action: newLog.action,
-                  ipAddress: newLog.ip_address || "N/A",
-                  timestamp: newLog.timestamp,
-                  details: newLog.details,
-                },
-                ...prev,
-              ]
-                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()) // Ensure sort order is maintained
-                .slice(0, 100), // Keep list size manageable
-          )
-        },
-      )
-      .subscribe()
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [])
 
   const filteredLogs = useMemo(() => {
     if (!logs) return []

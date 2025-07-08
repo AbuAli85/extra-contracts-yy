@@ -1,13 +1,5 @@
 import { NextResponse } from 'next/server'
-import      // 🏬 PARTY A = CLIENT COMPANY (first_party)
-      first_party_name_en: contract.client_company?.name_en || '',
-      first_party_name_ar: contract.client_company?.name_ar || '',
-      first_party_crn: contract.client_company?.crn || '',
-      
-      // 🏢 PARTY B = EMPLOYER COMPANY (second_party)
-      second_party_name_en: contract.employer_company?.name_en || '',
-      second_party_name_ar: contract.employer_company?.name_ar || '',
-      second_party_crn: contract.employer_company?.crn || '',Client } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
