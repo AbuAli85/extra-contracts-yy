@@ -18,7 +18,7 @@ interface PromoterDetailsPageProps {
 
 export default async function PromoterDetailsPage({ params }: PromoterDetailsPageProps) {
   // Redirect to the default locale version if accessed directly without locale
-  redirect("/en/manage-promoters")
+  // redirect("/en/manage-promoters")
 
   const t = await getTranslations("PromoterDetailsPage")
   const promoter: Promoter | null = await getPromoterById(params.id)
