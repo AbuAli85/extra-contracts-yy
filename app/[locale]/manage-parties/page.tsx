@@ -310,8 +310,8 @@ export default function ManagePartiesPage() {
     const suspended = filteredParties.filter(p => p.status === "Suspended").length
     const expiring = filteredParties.filter(p => p.overall_status === "warning").length
     const expired = filteredParties.filter(p => p.overall_status === "critical").length
-    const employers = filteredParties.filter(p => p.party_type === "Employer").length
-    const clients = filteredParties.filter(p => p.party_type === "Client").length
+    const employers = filteredParties.filter(p => p.type === "Employer").length
+    const clients = filteredParties.filter(p => p.type === "Client").length
     const totalContracts = filteredParties.reduce((sum, p) => sum + (p.contract_count || 0), 0)
     
     return {

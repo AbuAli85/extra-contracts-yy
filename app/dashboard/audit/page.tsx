@@ -25,23 +25,36 @@ import clsx from "clsx";
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 interface AuditLogItem {
-  id: string
-  user_id?: string | null
-  action: string
-  entity_type: string
-  entity_id: string
-  details?: any
-  created_at: string
-  user_email?: string | null
-  ip_address?: string | null
-  timestamp: string
+  id: string;
+  user_id?: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  details?: any;
+  created_at: string;
+  user_email?: string | null;
+  ip_address?: string | null;
+  timestamp: string;
+}
+
+// Define a type for the payload from Supabase
+interface AuditLogPayload {
+  new: {
+    id: string;
+    user_id?: string | null;
+    action: string;
+    entity_type: string;
+    entity_id: string;
+    details?: any;
+    created_at: string;
+  };
 }
 
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<AuditLogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortKey, setSortKey] = useState("created_at");
+  const [sortKey, setSortKey] = useState<keyof AuditLogItem>("created_at");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
@@ -87,13 +100,13 @@ export default function AuditLogsPage() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "audit_logs" },
-        (payload) => {
+        (payload: AuditLogPayload) => {
           // Transform the new log data to match our expected format
-          const newLog = {
+          const newLog: AuditLogItem = {
             ...payload.new,
             user_email: payload.new.user_id || null,
-            ip_address: null,
-            timestamp: payload.new.created_at
+            ip_address: null, // Column doesn't exist in schema
+            timestamp: payload.new.created_at, // Map created_at to timestamp
           };
           setLogs((prev) => [newLog, ...prev]);
         }
@@ -127,15 +140,18 @@ export default function AuditLogsPage() {
       let valA = a[sortKey];
       let valB = b[sortKey];
       if (sortKey === "created_at" || sortKey === "timestamp") {
-        valA = valA ? new Date(valA).getTime() : 0;
-        valB = valB ? new Date(valB).getTime() : 0;
+        valA = valA ? new Date(valA as string).getTime() : 0;
+        valB = valB ? new Date(valB as string).getTime() : 0;
       }
       if (typeof valA === "string" && typeof valB === "string") {
         return sortDirection === "asc"
           ? valA.localeCompare(valB)
           : valB.localeCompare(valA);
       }
-      return sortDirection === "asc" ? valA - valB : valB - valA;
+      if (typeof valA === "number" && typeof valB === "number") {
+        return sortDirection === "asc" ? valA - valB : valB - valA;
+      }
+      return 0;
     });
     return filtered;
   }, [logs, searchTerm, sortKey, sortDirection]);
@@ -147,7 +163,7 @@ export default function AuditLogsPage() {
   }, [filteredLogs, page, pageSize]);
 
   // Sorting
-  const handleSort = (key: string) => {
+  const handleSort = (key: keyof AuditLogItem) => {
     if (sortKey === key) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -238,42 +254,42 @@ export default function AuditLogsPage() {
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => handleSort("created_at")}
-                  aria-sort={sortKey === "created_at" ? sortDirection : undefined}
+                  aria-sort={sortKey === "created_at" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
                 >
                   Timestamp {sortKey === "created_at" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => handleSort("user_id")}
-                  aria-sort={sortKey === "user_id" ? sortDirection : undefined}
+                  aria-sort={sortKey === "user_id" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
                 >
                   User {sortKey === "user_id" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => handleSort("action")}
-                  aria-sort={sortKey === "action" ? sortDirection : undefined}
+                  aria-sort={sortKey === "action" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
                 >
                   Action {sortKey === "action" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => handleSort("entity_type")}
-                  aria-sort={sortKey === "entity_type" ? sortDirection : undefined}
+                  aria-sort={sortKey === "entity_type" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
                 >
                   Entity Type {sortKey === "entity_type" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => handleSort("entity_id")}
-                  aria-sort={sortKey === "entity_id" ? sortDirection : undefined}
+                  aria-sort={sortKey === "entity_id" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
                 >
                   Entity ID {sortKey === "entity_id" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => handleSort("details")}
-                  aria-sort={sortKey === "details" ? sortDirection : undefined}
+                  aria-sort={sortKey === "details" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
                 >
                   Details {sortKey === "details" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>

@@ -6,7 +6,7 @@ import { nanoid } from "nanoid"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Generate unique contract number
     const contractNumber = `CNT-${nanoid(8).toUpperCase()}`
@@ -63,7 +63,7 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
     const { contractId, status, pdfUrl } = body
-    const supabase = createClient()  // No arguments needed
+    const supabase = await createClient() // No arguments needed
 
     // Update contract status
     const { error } = await supabase

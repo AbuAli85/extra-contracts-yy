@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { promoterProfileSchema, type PromoterProfileFormData } from "@/lib/promoter-profile-schema"
+import { promoterProfileSchema, type PromoterProfileFormData, type PromoterStatus } from "@/lib/promoter-profile-schema"
 import { promoterStatusesList } from "@/types/custom"
 import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
@@ -78,7 +78,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
   const isEditScreen = !!promoterToEdit
   const [isEditable, setIsEditable] = useState(!isEditScreen)
 
-  const { reset, ...form } = useForm<PromoterProfileFormData>({
+  const form = useForm<PromoterProfileFormData>({
     resolver: zodResolver(promoterProfileSchema),
     defaultValues: {
       name_en: "",
@@ -111,7 +111,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
 
   useEffect(() => {
     if (promoterToEdit) {
-      reset({
+      form.reset({
         name_en: promoterToEdit.name_en || "",
         name_ar: promoterToEdit.name_ar || "",
         id_card_number: promoterToEdit.id_card_number || "",
@@ -125,13 +125,13 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         passport_expiry_date: promoterToEdit.passport_expiry_date
           ? parseISO(promoterToEdit.passport_expiry_date)
           : null,
-        status: promoterToEdit.status || "active",
+        status: (promoterToEdit.status as PromoterStatus) || "active",
         notify_days_before_id_expiry: promoterToEdit.notify_days_before_id_expiry ?? 30,
         notify_days_before_passport_expiry: promoterToEdit.notify_days_before_passport_expiry ?? 90,
         notes: promoterToEdit.notes || "",
       })
     } else {
-      reset({
+      form.reset({
         name_en: "",
         name_ar: "",
         id_card_number: "",
@@ -147,7 +147,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         notes: "",
       })
     }
-  }, [promoterToEdit, reset])
+  }, [promoterToEdit, form.reset])
 
   const uploadFile = async (
     file: File | null | undefined,
@@ -199,7 +199,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         passportUrlResult = null
       }
 
-      const promoterData: Partial<Promoter> = {
+      const promoterData = {
         name_en: values.name_en,
         name_ar: values.name_ar,
         id_card_number: values.id_card_number,
@@ -226,7 +226,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         if (error) throw error
         toast({ title: "Success!", description: "Promoter updated successfully." })
       } else {
-        const { error } = await supabase.from("promoters").insert(promoterData).select()
+        const { error } = await supabase.from("promoters").insert([promoterData]).select()
         if (error) throw error
         toast({ title: "Success!", description: "Promoter added successfully." })
       }
@@ -545,6 +545,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
                       placeholder="Add any internal notes about this promoter..."
                       className="min-h-[120px] resize-y"
                       {...field}
+                      value={field.value ?? ""}
                       disabled={formActuallyDisabled}
                     />
                   </FormControl>

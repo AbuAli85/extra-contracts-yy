@@ -11,7 +11,10 @@ export async function GET() {
     console.log('Main webhook URL:', mainWebhookUrl ? 'Configured ✅' : 'Not configured ❌')
     console.log('Slack webhook URL:', slackWebhookUrl ? 'Configured ✅' : 'Not configured ❌')
     
-    const results = {
+    const results: {
+      mainWebhook: { configured: boolean; tested: boolean; error: string | null };
+      slackWebhook: { configured: boolean; tested: boolean; error: string | null };
+    } = {
       mainWebhook: { configured: false, tested: false, error: null },
       slackWebhook: { configured: false, tested: false, error: null }
     }

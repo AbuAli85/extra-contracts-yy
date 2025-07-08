@@ -30,7 +30,7 @@ export async function getPromoterById(id: string): Promise<Promoter | null> {
   return data
 }
 
-export async function createPromoter(promoterData: Partial<Promoter>) {
+export async function createPromoter(promoterData: Omit<Promoter, "id" | "created_at">) {
   const supabase = await createClient()
 
   const { data, error } = await supabase.from("promoters").insert(promoterData).select().single()

@@ -13,7 +13,7 @@ export const summaryWidgetsData: SummaryWidgetData[] = [
   {
     title: "Total Contracts",
     titleAr: "إجمالي العقود",
-    value: 1250,
+    value: "1,250",
     icon: FileText,
     trend: "+12%",
     color: "text-blue-500",
@@ -21,7 +21,7 @@ export const summaryWidgetsData: SummaryWidgetData[] = [
   {
     title: "Active Contracts",
     titleAr: "العقود النشطة",
-    value: 850,
+    value: "850",
     icon: FileCheck,
     trend: "+5%",
     color: "text-green-500",
@@ -29,7 +29,7 @@ export const summaryWidgetsData: SummaryWidgetData[] = [
   {
     title: "Expired Contracts",
     titleAr: "العقود منتهية الصلاحية",
-    value: 300,
+    value: "300",
     icon: FileX,
     trend: "-2%",
     color: "text-red-500",
@@ -37,7 +37,7 @@ export const summaryWidgetsData: SummaryWidgetData[] = [
   {
     title: "Expiring in 30 Days",
     titleAr: "تنتهي خلال 30 يومًا",
-    value: 75,
+    value: "75",
     icon: CalendarClock,
     trend: "+10",
     color: "text-orange-500",
@@ -45,14 +45,14 @@ export const summaryWidgetsData: SummaryWidgetData[] = [
   {
     title: "Total Promoters",
     titleAr: "إجمالي المروجين",
-    value: 250,
+    value: "250",
     icon: Users,
     color: "text-purple-500",
   },
   {
     title: "Total Companies",
     titleAr: "إجمالي الشركات",
-    value: 150,
+    value: "150",
     icon: Building,
     color: "text-teal-500",
   },
@@ -145,19 +145,19 @@ export const contractsMissingDocuments: ReviewItem[] = [
 export const notificationItemsData: NotificationItem[] = [
   {
     id: "n1",
+    type: "warning",
+    message: "Contract CON-003 for Beta Group (promoter: Fatima Khan) will expire in 20 days.",
+    created_at: new Date().toISOString(),
+    is_read: false,
     related_contract_id: "CON-003",
-    promoterName: "Fatima Khan",
-    clientName: "Beta Group",
-    daysUntilExpiry: 20,
-    expiryDate: "2024-07-25",
   },
   {
     id: "n2",
+    type: "warning",
+    message: "Contract CON-006 for Epsilon Solutions (promoter: Maria Garcia) will expire in 28 days.",
+    created_at: new Date().toISOString(),
+    is_read: false,
     related_contract_id: "CON-006",
-    promoterName: "Maria Garcia",
-    clientName: "Epsilon Solutions",
-    daysUntilExpiry: 28,
-    expiryDate: "2024-08-02",
   },
 ]
 
@@ -177,9 +177,9 @@ export const contractsPerMonthChartData: ContractsPerMonthData[] = [
 ]
 
 export const contractsByStatusChartData: ContractsByStatusData[] = [
-  { name: "Active", value: 850, fill: "hsl(var(--chart-1))" },
-  { name: "Expired", value: 300, fill: "hsl(var(--chart-2))" },
-  { name: "Soon-to-Expire", value: 75, fill: "hsl(var(--chart-3))" },
+  { name: "Active", nameAr: "نشط", count: 850, fill: "hsl(var(--chart-1))" },
+  { name: "Expired", nameAr: "منتهي الصلاحية", count: 300, fill: "hsl(var(--chart-2))" },
+  { name: "Soon-to-Expire", nameAr: "سينتهي قريبا", count: 75, fill: "hsl(var(--chart-3))" },
 ]
 
 export const contractVolumeTrendData: ContractVolumeData[] = Array.from({ length: 12 }, (_, i) => {

@@ -19,6 +19,9 @@ const dateOptionalNullableSchema = z
   .optional()
   .nullable()
 
+export const promoterStatuses = z.enum(["active", "inactive", "suspended"])
+export type PromoterStatus = z.infer<typeof promoterStatuses>
+
 export const promoterProfileSchema = z.object({
   name_en: z.string().min(1, "Name (English) is required."),
   name_ar: z.string().min(1, "Name (Arabic) is required."),
@@ -27,7 +30,7 @@ export const promoterProfileSchema = z.object({
   outsourced_to_id: z.string().nullable().optional(),
   job_title: z.string().optional().nullable(),
   work_location: z.string().optional().nullable(),
-  status: z.enum(["active", "inactive", "suspended"], { required_error: "Status is required." }),
+  status: promoterStatuses.describe("Status is required."),
   contract_valid_until: dateOptionalNullableSchema,
   id_card_image: fileSchema,
   passport_image: fileSchema,

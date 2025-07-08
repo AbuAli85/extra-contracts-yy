@@ -30,7 +30,7 @@ export async function getPartyById(id: string): Promise<Party | null> {
   return data
 }
 
-export async function createParty(partyData: Partial<Party>) {
+export async function createParty(partyData: Omit<Party, "id" | "created_at">) {
   const supabase = await createClient()
 
   const { data, error } = await supabase.from("parties").insert(partyData).select().single()

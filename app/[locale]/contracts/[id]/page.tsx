@@ -335,7 +335,7 @@ export default function ContractDetailPage() {
             </div>
 
             {/* Promoters Section */}
-            {contract?.promoters && (
+            {contract?.promoters && contract.promoters.length > 0 && (
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -349,46 +349,46 @@ export default function ContractDetailPage() {
                       <div>
                         <label className="text-sm font-medium text-gray-500">Name (English)</label>
                         <h4 className="font-semibold text-gray-900 mt-1">
-                          {contract.promoters.name_en || "Unnamed Promoter"}
+                          {contract.promoters[0].name_en || "Unnamed Promoter"}
                         </h4>
                       </div>
                       
-                      {contract.promoters.name_ar && (
+                      {contract.promoters[0].name_ar && (
                         <div>
                           <label className="text-sm font-medium text-gray-500">Name (Arabic)</label>
-                          <p className="font-semibold text-gray-900 mt-1" dir="rtl">{contract.promoters.name_ar}</p>
+                          <p className="font-semibold text-gray-900 mt-1" dir="rtl">{contract.promoters[0].name_ar}</p>
                         </div>
                       )}
                       
-                      {contract.promoters.id_card_number && (
+                      {contract.promoters[0].id_card_number && (
                         <div>
                           <label className="text-sm font-medium text-gray-500">ID Number</label>
-                          <p className="font-mono text-sm text-gray-700 mt-1">{contract.promoters.id_card_number}</p>
+                          <p className="font-mono text-sm text-gray-700 mt-1">{contract.promoters[0].id_card_number}</p>
                         </div>
                       )}
                       
-                      {contract.promoters.email && (
+                      {contract.promoters[0].email && (
                         <div>
                           <label className="text-sm font-medium text-gray-500">Email</label>
                           <p className="text-gray-700 mt-1 flex items-center gap-2">
                             <MailIcon className="h-4 w-4 text-gray-500" />
-                            {contract.promoters.email}
+                            {contract.promoters[0].email}
                           </p>
                         </div>
                       )}
                       
-                      {contract.promoters.phone && (
+                      {contract.promoters[0].phone && (
                         <div>
                           <label className="text-sm font-medium text-gray-500">Phone</label>
-                          <p className="text-gray-700 mt-1">{contract.promoters.phone}</p>
+                          <p className="text-gray-700 mt-1">{contract.promoters[0].phone}</p>
                         </div>
                       )}
                       
-                      {contract.promoters.status && (
+                      {contract.promoters[0].status && (
                         <div>
                           <label className="text-sm font-medium text-gray-500">Status</label>
                           <div className="text-gray-700 mt-1">
-                            <StatusBadge status={contract.promoters.status} />
+                            <StatusBadge status={contract.promoters[0].status} />
                           </div>
                         </div>
                       )}

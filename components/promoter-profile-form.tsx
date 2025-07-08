@@ -338,16 +338,19 @@ export default function PromoterProfileForm({
                   name="id_card_image"
                   render={({ field: fileField }) => (
                     <FormItem>
-                      <ImageUploadField
-                        field={fileField}
-                        initialImageUrl={form.watch("existing_id_card_url")}
-                        label="ID Card Image"
-                        disabled={formDisabled}
-                        onImageRemove={() => {
-                          form.setValue("existing_id_card_url", null)
-                          form.setValue("id_card_image", null)
-                        }}
-                      />
+                      <FormLabel>ID Card Image</FormLabel>
+                      <FormControl>
+                        <ImageUploadField
+                          field={fileField}
+                          initialImageUrl={form.watch("existing_id_card_url")}
+                          disabled={formDisabled}
+                          onImageRemove={() => {
+                            form.setValue("existing_id_card_url", null)
+                            form.setValue("id_card_image", null)
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -355,12 +358,17 @@ export default function PromoterProfileForm({
                   control={form.control}
                   name="id_card_expiry_date"
                   render={({ field }) => (
-                    <DatePickerWithPresetsField
-                      field={field}
-                      label="ID Card Expiry Date"
-                      placeholder="Select ID card expiry"
-                      disabled={formDisabled}
-                    />
+                    <FormItem>
+                      <FormLabel>ID Card Expiry Date</FormLabel>
+                      <FormControl>
+                        <DatePickerWithPresetsField
+                          field={field}
+                          placeholder="Select ID card expiry"
+                          disabled={formDisabled}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
               </div>
@@ -435,12 +443,17 @@ export default function PromoterProfileForm({
                   control={form.control}
                   name="contract_valid_until"
                   render={({ field }) => (
-                    <DatePickerWithPresetsField
-                      field={field}
-                      label="Contract Valid Until"
-                      placeholder="Select contract end date"
-                      disabled={formDisabled}
-                    />
+                    <FormItem>
+                      <FormLabel>Contract Valid Until</FormLabel>
+                      <FormControl>
+                        <DatePickerWithPresetsField
+                          field={field}
+                          placeholder="Select contract end date"
+                          disabled={formDisabled}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
                 <FormField
@@ -448,16 +461,19 @@ export default function PromoterProfileForm({
                   name="passport_image"
                   render={({ field: fileField }) => (
                     <FormItem>
-                      <ImageUploadField
-                        field={fileField}
-                        initialImageUrl={form.watch("existing_passport_url")}
-                        label="Passport Image"
-                        disabled={formDisabled}
-                        onImageRemove={() => {
-                          form.setValue("existing_passport_url", null)
-                          form.setValue("passport_image", null)
-                        }}
-                      />
+                      <FormLabel>Passport Image</FormLabel>
+                      <FormControl>
+                        <ImageUploadField
+                          field={fileField}
+                          initialImageUrl={form.watch("existing_passport_url")}
+                          disabled={formDisabled}
+                          onImageRemove={() => {
+                            form.setValue("existing_passport_url", null)
+                            form.setValue("passport_image", null)
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -465,12 +481,17 @@ export default function PromoterProfileForm({
                   control={form.control}
                   name="passport_expiry_date"
                   render={({ field }) => (
-                    <DatePickerWithPresetsField
-                      field={field}
-                      label="Passport Expiry Date"
-                      placeholder="Select passport expiry"
-                      disabled={formDisabled}
-                    />
+                    <FormItem>
+                      <FormLabel>Passport Expiry Date</FormLabel>
+                      <FormControl>
+                        <DatePickerWithPresetsField
+                          field={field}
+                          placeholder="Select passport expiry"
+                          disabled={formDisabled}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
               </div>

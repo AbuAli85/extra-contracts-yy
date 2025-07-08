@@ -291,7 +291,7 @@ export async function POST(request: NextRequest) {
       promoter_passport_url: promoterDetails.data?.passport_url,
       job_title: newContract.job_title,
       work_location: newContract.work_location,
-      email: newContract.email,
+      email: newContract.email ?? null,
       contract_start_date: newContract.contract_start_date ?? null,
       contract_end_date: newContract.contract_end_date ?? null,
       contract_number: newContract.contract_number,

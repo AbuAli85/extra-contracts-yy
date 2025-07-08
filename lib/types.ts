@@ -59,6 +59,8 @@ export interface Contract {
   contract_number?: string | null
   is_current?: boolean | null
   pdf_url?: string | null
+  google_doc_url?: string | null
+  error_details?: string | null
   user_id?: string | null
   first_party_id: string
   second_party_id: string
@@ -188,6 +190,16 @@ export interface ContractDetail extends Omit<Contract, 'parties' | 'promoters'> 
   promoter: Promoter
   contract_value: number
   status: string
+  salary?: number | null
+}
+
+export interface ActivityLog {
+  id: string;
+  action: string;
+  description: string;
+  created_at: string;
+  user_id?: string;
+  metadata?: any;
 }
 
 export interface ContractDetailDebug extends Contract {
@@ -244,4 +256,4 @@ export interface PartyFile {
   created_at: string;
 }
 
-export type ContractStatus = 'draft' | 'pending' | 'active' | 'completed' | 'cancelled'
+export type ContractStatus = "draft" | "pending" | "active" | "completed" | "cancelled" | "expired" | "failed" | "generating"

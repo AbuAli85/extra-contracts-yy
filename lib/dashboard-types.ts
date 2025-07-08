@@ -89,11 +89,21 @@ export interface AuditLogRow {
   details?: string | object | null
 }
 
-export interface ContractsByStatusDataPoint {
+export interface ContractsByStatusData {
   name: string
   nameAr: string
   count: number
   fill: string
+}
+
+export interface ContractsPerMonthData {
+  month: string
+  contracts: number
+}
+
+export interface ContractVolumeData {
+  month: string
+  volume: number
 }
 
 export interface MonthlyContractRevenueDataPoint {
@@ -163,31 +173,6 @@ export interface User {
   created_at: string
   full_name?: string
   last_sign_in_at?: string
-}
-
-export interface ContractsPerMonthData {
-  month: string
-  count: number
-  contracts: number  // Add this field used in dashboard data
-}
-
-export interface ContractsByStatusData {
-  name: string
-  value: number
-  fill?: string
-}
-
-export interface ContractVolumeData {
-  month: string
-  volume: number
-  value: number
-}
-
-export interface ServerActionResponse<T = any> {
-  success: boolean
-  data?: T
-  error?: string
-  message?: string
 }
 
 export interface Notification {

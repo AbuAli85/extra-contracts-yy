@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import LifecycleStatusIndicator from "@/components/lifecycle-status-indicator"
+import { DocumentStatusBadge } from "@/components/document-status-badge"
 
 interface PromoterDetails extends Promoter {
   contracts: Contract[]
@@ -70,7 +70,7 @@ function DetailItem({
 export default function PromoterDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const promoterId = params.id as string
+  const promoterId = params?.id as string
 
   const [promoterDetails, setPromoterDetails] = useState<PromoterDetails | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -239,15 +239,15 @@ export default function PromoterDetailPage() {
                       <h4 className="text-sm font-medium text-muted-foreground">Document Status</h4>
                       <div className="flex flex-wrap gap-3">
                         {promoterDetails.id_card_expiry_date && (
-                          <LifecycleStatusIndicator
-                            status={idCardStatus}
+                          <DocumentStatusBadge
+                            status={idCardStatus.status}
                             label="ID Card"
                             expiryDate={promoterDetails.id_card_expiry_date}
                           />
                         )}
                         {promoterDetails.passport_expiry_date && (
-                          <LifecycleStatusIndicator
-                            status={passportStatus}
+                          <DocumentStatusBadge
+                            status={passportStatus.status}
                             label="Passport"
                             expiryDate={promoterDetails.passport_expiry_date}
                           />
@@ -415,4 +415,4 @@ export default function PromoterDetailPage() {
       </div>
     </div>
   )
-} 
+}

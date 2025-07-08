@@ -2,7 +2,7 @@
  * Utility functions for formatting data
  */
 
-export const formatCurrency = (amount?: number, currency?: string): string => {
+export const formatCurrency = (amount?: number, currency?: string | null): string => {
   if (!amount) return 'N/A'
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -10,17 +10,17 @@ export const formatCurrency = (amount?: number, currency?: string): string => {
   }).format(amount)
 }
 
-export const formatDate = (dateString?: string): string => {
+export const formatDate = (dateString?: string | null): string => {
   if (!dateString) return 'N/A'
   return new Date(dateString).toLocaleDateString()
 }
 
-export const formatDateTime = (dateString?: string): string => {
+export const formatDateTime = (dateString?: string | null): string => {
   if (!dateString) return 'N/A'
   return new Date(dateString).toLocaleString()
 }
 
-export const calculateDuration = (startDate?: string, endDate?: string): string => {
+export const calculateDuration = (startDate?: string | null, endDate?: string | null): string => {
   if (!startDate || !endDate) return 'N/A'
   const start = new Date(startDate)
   const end = new Date(endDate)

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { KeyMetricCard } from '@/components/KeyMetricCard'
-import { ContractDetail } from '@/types/contract'
+import { ContractDetail } from '@/lib/types'
 import { formatCurrency, calculateDuration, formatDate, formatDateTime, copyToClipboard } from '@/utils/format'
 import { 
   CalendarIcon, 
@@ -22,13 +22,14 @@ import {
 } from '@/constants/contract-options'
 
 interface OverviewTabProps {
-  contract: ContractDetail
+  contract: ContractDetail | null
 }
 
 export function OverviewTab({ contract }: OverviewTabProps) {
-  // Debug logging can be enabled for troubleshooting
-  // console.log('📊 OverviewTab received contract data:', contract)
-  
+  if (!contract) {
+    return <div>No contract data available.</div>
+  }
+
   return (
     <div className="space-y-6">
       {/* Key Metrics Cards */}
@@ -48,8 +49,8 @@ export function OverviewTab({ contract }: OverviewTabProps) {
         />
 
         <KeyMetricCard
-          title="Salary"
-          value={formatCurrency(contract?.salary, contract?.currency)}
+          title="Value"
+          value={formatCurrency(contract?.contract_value, contract?.currency)}
           icon={TagIcon}
           colorClass="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200"
         />
@@ -198,7 +199,7 @@ export function OverviewTab({ contract }: OverviewTabProps) {
                 <div>
                   <label className="text-sm font-medium text-gray-500">Promoter</label>
                   <p className="font-mono text-sm text-gray-700 mt-1">
-                    {contract?.promoters?.name_en || contract?.promoter_id || "N/A"}
+                    {contract?.promoter?.name_en || contract?.promoter_id || "N/A"}
                   </p>
                 </div>
               </div>

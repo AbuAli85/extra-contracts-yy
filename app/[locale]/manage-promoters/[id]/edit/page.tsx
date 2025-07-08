@@ -15,7 +15,7 @@ import { toast } from "@/hooks/use-toast"
 export default function EditPromoterPage() {
   const params = useParams()
   const router = useRouter()
-  const promoterId = params.id as string
+  const promoterId = params?.id as string
 
   const [promoter, setPromoter] = useState<Promoter | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -260,4 +260,4 @@ export default function EditPromoterPage() {
       </div>
     </div>
   )
-} 
+}

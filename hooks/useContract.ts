@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { ContractDetail, ActivityLog } from '@/types/contract'
+import { ContractDetail, ActivityLog, Party } from '@/lib/types'
 
 // Mock activity logs - replace with real data fetch later
 const mockActivityLogs: ActivityLog[] = [
@@ -99,20 +99,26 @@ export function useContract(contractId: string): UseContractResult {
         throw new Error(error.message)
       }
 
-      if (!data) {
-        setError("Contract not found")
-        return
+      if (data) {
+        // Transform the data to match the ContractDetail type
+        const promoter = Array.isArray(data.promoters) ? data.promoters[0] : data.promoters;
+        const transformedData = {
+          ...data,
+          parties: [data.first_party, data.second_party].filter(Boolean) as Party[],
+          promoters: Array.isArray(data.promoters) ? data.promoters : (data.promoters ? [data.promoters] : []),
+          promoter: promoter || null,
+        } as unknown as ContractDetail;
+
+        setContract(transformedData);
+      } else {
+        setContract(null)
       }
 
-      // Debug: Log the fetched data to see what we're getting
-      // console.log('📊 Fetched contract data:', data)
-      
-      // Cast to ContractDetail type
-      setContract(data as ContractDetail)
+      // Mock activity logs for now
       setActivityLogs(mockActivityLogs)
-    } catch (err) {
-      setError("Failed to load contract")
-      console.error('Contract fetch error:', err)
+    } catch (err: any) {
+      console.error("Detailed fetch error:", err)
+      setError(err.message || "An unknown error occurred.")
     } finally {
       setLoading(false)
     }

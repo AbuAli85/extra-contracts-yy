@@ -76,8 +76,8 @@ const fetchContracts = async (): Promise<ContractWithRelations[]> => {
       devLog("Both schemas failed:", oldError)
       throw new Error(oldError.message)
     }
-    
-    data = oldData
+
+    data = oldData as any
     error = null
   }
 
