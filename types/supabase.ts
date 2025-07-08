@@ -133,7 +133,20 @@ export interface Database {
           name_ar: string
           crn: string
           type?: "Employer" | "Client" | "Generic" | null
-          // ... other fields
+          role?: string | null
+          cr_expiry_date?: string | null
+          contact_person?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          address_en?: string | null
+          address_ar?: string | null
+          tax_number?: string | null
+          license_number?: string | null
+          license_expiry_date?: string | null
+          status?: string | null
+          notes?: string | null
+          created_at?: string | null
+          owner_id?: string | null
         }
         Insert: {
           id?: string
@@ -141,7 +154,20 @@ export interface Database {
           name_ar: string
           crn: string
           type?: "Employer" | "Client" | "Generic" | null
-          // ... other fields
+          role?: string | null
+          cr_expiry_date?: string | null
+          contact_person?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          address_en?: string | null
+          address_ar?: string | null
+          tax_number?: string | null
+          license_number?: string | null
+          license_expiry_date?: string | null
+          status?: string | null
+          notes?: string | null
+          created_at?: string | null
+          owner_id?: string | null
         }
         Update: {
           id?: string
@@ -149,7 +175,20 @@ export interface Database {
           name_ar?: string
           crn?: string
           type?: "Employer" | "Client" | "Generic" | null
-          // ... other fields
+          role?: string | null
+          cr_expiry_date?: string | null
+          contact_person?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          address_en?: string | null
+          address_ar?: string | null
+          tax_number?: string | null
+          license_number?: string | null
+          license_expiry_date?: string | null
+          status?: string | null
+          notes?: string | null
+          created_at?: string | null
+          owner_id?: string | null
         }
         Relationships: []
       }
@@ -168,7 +207,11 @@ export interface Database {
           notify_days_before_passport_expiry?: number | null
           notes?: string | null
           created_at?: string | null
-          // ... other fields
+          employer_id?: string | null
+          outsourced_to_id?: string | null
+          job_title?: string | null
+          work_location?: string | null
+          contract_valid_until?: string | null
         }
         Insert: {
           id?: string
@@ -184,7 +227,11 @@ export interface Database {
           notify_days_before_passport_expiry?: number | null
           notes?: string | null
           created_at?: string | null
-          // ... other fields
+          employer_id?: string | null
+          outsourced_to_id?: string | null
+          job_title?: string | null
+          work_location?: string | null
+          contract_valid_until?: string | null
         }
         Update: {
           id?: string
@@ -200,7 +247,248 @@ export interface Database {
           notify_days_before_passport_expiry?: number | null
           notes?: string | null
           created_at?: string | null
-          // ... other fields
+          employer_id?: string | null
+          outsourced_to_id?: string | null
+          job_title?: string | null
+          work_location?: string | null
+          contract_valid_until?: string | null
+        }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          id: string
+          action: string
+          entity_type: string
+          entity_id: string
+          details?: Json | null
+          user_id?: string | null
+          created_at: string
+          table_name?: string | null
+          record_id?: string | null
+        }
+        Insert: {
+          id?: string
+          action: string
+          entity_type: string
+          entity_id: string
+          details?: Json | null
+          user_id?: string | null
+          created_at?: string
+          table_name?: string | null
+          record_id?: string | null
+        }
+        Update: {
+          id?: string
+          action?: string
+          entity_type?: string
+          entity_id?: string
+          details?: Json | null
+          user_id?: string | null
+          created_at?: string
+          table_name?: string | null
+          record_id?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          id: string
+          type: string
+          message: string
+          created_at: string
+          is_read: boolean
+          user_email?: string | null
+          related_contract_id?: string | null
+          user_id?: string | null
+          read?: boolean | null
+        }
+        Insert: {
+          id?: string
+          type: string
+          message: string
+          created_at?: string
+          is_read?: boolean
+          user_email?: string | null
+          related_contract_id?: string | null
+          user_id?: string | null
+          read?: boolean | null
+        }
+        Update: {
+          id?: string
+          type?: string
+          message?: string
+          created_at?: string
+          is_read?: boolean
+          user_email?: string | null
+          related_contract_id?: string | null
+          user_id?: string | null
+          read?: boolean | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          id: string
+          full_name?: string | null
+          role?: string | null
+          created_at?: string | null
+        }
+        Insert: {
+          id?: string
+          full_name?: string | null
+          role?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          full_name?: string | null
+          role?: string | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          id: string
+          email: string
+          role: string
+          created_at: string
+          profile_data?: Json | null
+        }
+        Insert: {
+          id?: string
+          email: string
+          role: string
+          created_at?: string
+          profile_data?: Json | null
+        }
+        Update: {
+          id?: string
+          email?: string
+          role?: string
+          created_at?: string
+          profile_data?: Json | null
+        }
+        Relationships: []
+      }
+      app_users: {
+        Row: {
+          id: string
+          email: string
+          role: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          role: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          role?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      party_files: {
+        Row: {
+          id: string
+          party_id: string
+          file_name: string
+          file_url: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          party_id: string
+          file_name: string
+          file_url: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          party_id?: string
+          file_name?: string
+          file_url?: string
+          user_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      party_notes: {
+        Row: {
+          id: string
+          party_id: string
+          user_id: string
+          note: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          party_id: string
+          user_id: string
+          note: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          party_id?: string
+          user_id?: string
+          note?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      party_tags: {
+        Row: {
+          id: string
+          party_id: string
+          tag: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          party_id: string
+          tag: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          party_id?: string
+          tag?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      party_activities: {
+        Row: {
+          id: string
+          party_id: string
+          activity_type: string
+          details: string
+          created_at: string
+          user_id?: string | null
+        }
+        Insert: {
+          id?: string
+          party_id: string
+          activity_type: string
+          details: string
+          created_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          party_id?: string
+          activity_type?: string
+          details?: string
+          created_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -210,7 +498,15 @@ export interface Database {
       // ... views
     }
     Functions: {
-      // ... functions
+      get_dashboard_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      files_per_month: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      // ... other functions
     }
     Enums: {
       // ... enums
