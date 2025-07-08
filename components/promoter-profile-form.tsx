@@ -98,7 +98,7 @@ export default function PromoterProfileForm({
         outsourced_to_id: promoterToEdit.outsourced_to_id || null,
         job_title: promoterToEdit.job_title || "",
         work_location: promoterToEdit.work_location || "",
-        status: promoterToEdit.status || "active",
+        status: (promoterToEdit.status as "active" | "inactive" | "suspended") || "active",
         contract_valid_until: promoterToEdit.contract_valid_until
           ? parseISO(promoterToEdit.contract_valid_until)
           : null,

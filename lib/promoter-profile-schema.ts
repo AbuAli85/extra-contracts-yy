@@ -28,6 +28,7 @@ export const promoterProfileSchema = z.object({
   job_title: z.string().optional().nullable(),
   work_location: z.string().optional().nullable(),
   status: z.enum(["active", "inactive", "suspended"], { required_error: "Status is required." }),
+  contract_valid_until: dateOptionalNullableSchema,
   id_card_image: fileSchema,
   passport_image: fileSchema,
   existing_id_card_url: z.string().optional().nullable(),
