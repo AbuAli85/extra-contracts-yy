@@ -124,6 +124,8 @@ export interface SimpleContract extends Contract {
   // For now, it will just be an alias for Contract
 }
 
+export interface PromoterProfile extends Promoter {}
+
 export interface ContractRecord {
   id: string
   created_at?: string | null

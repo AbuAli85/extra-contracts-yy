@@ -25,7 +25,7 @@ export default async function PromoterDetailsPage({ params }: PromoterDetailsPag
 
   if (!promoter) {
     notFound()
-    return null
+    return null // Ensure the function exits here
   }
 
   return (

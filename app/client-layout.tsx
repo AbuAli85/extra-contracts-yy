@@ -24,9 +24,9 @@ export default async function ClientLayout({
   params,
 }: {
   children: React.ReactNode
-  params: Promise<{ locale: string }>
+  params: { locale: string }
 }) {
-  const { locale } = await params
+  const { locale } = params
   const dir = locale === "ar" ? "rtl" : "ltr"
 
   return (
