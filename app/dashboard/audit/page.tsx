@@ -24,8 +24,21 @@ import clsx from "clsx";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
+interface AuditLogItem {
+  id: string
+  user_id?: string | null
+  action: string
+  entity_type: string
+  entity_id: string
+  details?: any
+  created_at: string
+  user_email?: string | null
+  ip_address?: string | null
+  timestamp: string
+}
+
 export default function AuditLogsPage() {
-  const [logs, setLogs] = useState([]);
+  const [logs, setLogs] = useState<AuditLogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortKey, setSortKey] = useState("created_at");

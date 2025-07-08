@@ -33,6 +33,8 @@ import { format, formatDistanceToNow, isAfter, isBefore, parseISO } from "date-f
 import clsx from "clsx"
 import { toast } from "@/hooks/use-toast"
 
+import { NotificationItem } from "@/lib/dashboard-types"
+
 const iconMap = {
   success: CheckCircle,
   error: XCircle,
@@ -41,7 +43,7 @@ const iconMap = {
   default: BellRing,
 }
 
-const getIconColor = (type) => {
+const getIconColor = (type: string) => {
   if (type === "success") return "text-green-500"
   if (type === "error") return "text-red-500"
   if (type === "warning") return "text-orange-500"
@@ -51,9 +53,9 @@ const getIconColor = (type) => {
 const NOTIF_TYPES = ["success", "error", "warning", "info"]
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState([])
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
   const [readFilter, setReadFilter] = useState("")
@@ -62,7 +64,7 @@ export default function NotificationsPage() {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [page, setPage] = useState(1)
   const [isUpdating, setIsUpdating] = useState(false)
-  const [selectedNotif, setSelectedNotif] = useState(null)
+  const [selectedNotif, setSelectedNotif] = useState<NotificationItem | null>(null)
   const [showModal, setShowModal] = useState(false)
   const PAGE_SIZE = 10
 
@@ -84,12 +86,12 @@ export default function NotificationsPage() {
         const { data, error } = await supabase
           .from("notifications")
           .select(
-            "id, type, message, created_at, user_email, related_contract_id, related_entity_id, related_entity_type, is_read"
+            "id, type, message, created_at, user_email, related_contract_id, is_read"
           )
           .order("created_at", { ascending: false })
         if (error) throw error
-        if (!ignore) setNotifications(data || [])
-      } catch (err) {
+        if (!ignore) setNotifications((data || []) as NotificationItem[])
+      } catch (err: any) {
         if (!ignore) {
           setError(err.message)
           toast({
@@ -112,9 +114,9 @@ export default function NotificationsPage() {
         (payload) => {
           setNotifications((prev) => {
             if (payload.eventType === "INSERT") {
-              return [payload.new, ...prev]
+              return [payload.new as NotificationItem, ...prev]
             } else if (payload.eventType === "UPDATE") {
-              return prev.map((n) => (n.id === payload.new.id ? payload.new : n))
+              return prev.map((n) => (n.id === payload.new.id ? payload.new as NotificationItem : n))
             } else if (payload.eventType === "DELETE") {
               return prev.filter((n) => n.id !== payload.old.id)
             }
@@ -173,7 +175,7 @@ export default function NotificationsPage() {
   const totalPages = useMemo(() => Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)), [filtered.length])
 
   // Optimistic updates for better UX
-  const toggleRead = async (notif) => {
+  const toggleRead = async (notif: NotificationItem) => {
     setIsUpdating(true)
     setNotifications((prev) =>
       prev.map((n) =>
@@ -274,7 +276,10 @@ export default function NotificationsPage() {
       "is_read",
     ]
     const rows = filtered.map((n) =>
-      headers.map((h) => (n[h] !== undefined && n[h] !== null ? n[h] : "")).join(",")
+      headers.map((h) => {
+        const value = (n as any)[h];
+        return (value !== undefined && value !== null ? value : "");
+      }).join(",")
     )
     const csv = [headers.join(","), ...rows].join("\n")
     const blob = new Blob([csv], { type: "text/csv" })

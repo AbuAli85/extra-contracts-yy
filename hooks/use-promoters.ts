@@ -35,13 +35,6 @@ export const usePromoters = (enableRealtime: boolean = true) => {
     staleTime: 1000 * 60 * 5,
     retry: false,
     enabled: isAuthenticated !== null, // Only run query when we know auth status
-    onError: (error) => {
-      toast({
-        title: "Error loading promoters",
-        description: error.message,
-        variant: "destructive",
-      })
-    },
   })
 
   // --- Realtime subscription ---
@@ -153,7 +146,7 @@ export const usePromoters = (enableRealtime: boolean = true) => {
         channelRef.current = null
       }
     }
-  }, [queryClient, queryKey, enableRealtime, isAuthenticated])
+  }, [isAuthenticated, enableRealtime, queryClient, queryKey, toast])
 
-  return { ...queryResult, errorMessage: queryResult.error?.message }
+  return queryResult
 }

@@ -26,6 +26,8 @@ import { LoadingSpinner } from "@/components/LoadingSpinner"
 import { ErrorCard } from "@/components/ErrorCard"
 import { OverviewTab } from "@/components/contract-tabs/OverviewTab"
 import { formatDate, calculateDuration, copyToClipboard } from "@/utils/format"
+import { ContractDetail, Party, Promoter } from '@/lib/types';
+import { getContractById } from '@/app/actions/contracts';
 
 export default function ContractDetailPage() {
   const params = useParams()
@@ -193,6 +195,20 @@ export default function ContractDetailPage() {
                     <h4 className="font-semibold text-gray-900">Employer</h4>
                     <p className="text-gray-600">{contract?.employer_name || "Not specified"}</p>
                     <p className="text-sm text-gray-500">Company representative</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Promoters</p>
+                      <p className="text-sm text-gray-900">
+                        {contract.promoters?.map((p: Promoter) => p.name_en).join(', ')}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Parties</p>
+                      <p className="text-sm text-gray-900">
+                        {contract.parties?.map((p: Party) => p.name_en).join(', ')}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </CardContent>

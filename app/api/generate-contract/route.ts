@@ -6,8 +6,7 @@ import { nanoid } from "nanoid"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const cookieStore = cookies()
-    const supabase = createClient(cookieStore)
+    const supabase = createClient()
 
     // Generate unique contract number
     const contractNumber = `CNT-${nanoid(8).toUpperCase()}`
@@ -17,11 +16,12 @@ export async function POST(request: NextRequest) {
       .from("contracts")
       .insert({
         contract_number: contractNumber,
+        first_party_id: body.first_party_id,
+        second_party_id: body.second_party_id,
+        promoter_id: body.promoter_id,
         contract_name: body.contract_name,
-        party_a: body.party_a,
-        party_b: body.party_b,
         contract_type: body.contract_type,
-        terms: body.terms,
+        job_title: body.job_title,
         status: "generating",
       })
       .select()
@@ -63,8 +63,7 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
     const { contractId, status, pdfUrl } = body
-    const cookieStore = cookies()
-    const supabase = createClient(cookieStore)
+    const supabase = createClient()  // No arguments needed
 
     // Update contract status
     const { error } = await supabase

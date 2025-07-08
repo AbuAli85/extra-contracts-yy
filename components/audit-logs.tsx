@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useUserRole } from '../hooks/useUserRole'
 import { supabase } from '../lib/supabase'
+import { AuditLog } from '@/lib/dashboard-types'
 
 export default function AuditLogs() {
   const role = useUserRole()
-  const [logs, setLogs] = useState([])
+  const [logs, setLogs] = useState<AuditLog[]>([])
 
   useEffect(() => {
     if (role === 'admin') {
@@ -13,7 +14,15 @@ export default function AuditLogs() {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50)
-        .then(({ data }) => setLogs(data || []))
+        .then(({ data }) => {
+          if (data) {
+            const typedData = data.map(log => ({
+              ...log,
+              details: typeof log.details === 'string' ? log.details : JSON.stringify(log.details || {})
+            })) as AuditLog[]
+            setLogs(typedData)
+          }
+        })
     }
   }, [role])
 

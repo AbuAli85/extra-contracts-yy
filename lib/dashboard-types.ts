@@ -46,11 +46,13 @@ export interface NotificationItem {
   id: string
   type: "success" | "error" | "warning" | "info" | "default"
   message: string
-  timestamp: string // ISO Date string from created_at
+  created_at: string // Changed from timestamp to match DB
+  timestamp?: string // Add timestamp for compatibility  
   context?: string
-  isRead?: boolean
+  is_read?: boolean // Changed from isRead to match DB
+  isRead?: boolean // Add isRead for compatibility
   user_email?: string
-  related_contract_id?: string // This is the required field
+  related_contract_id?: string
   related_entity_id?: string
   related_entity_type?: string
 }
@@ -99,4 +101,103 @@ export interface MonthlyContractRevenueDataPoint {
   monthAr: string
   contracts: number
   revenue: number
+}
+
+// Additional types for the dashboard
+export interface DashboardAnalytics {
+  total_contracts: number
+  active_contracts: number
+  pending_contracts: number
+  completed_contracts: number
+  failed_contracts: number
+  contracts_this_month: number
+  contracts_last_month: number
+  average_processing_time: number
+  success_rate: number
+  generated_contracts: number
+  draft_contracts: number
+  expired_contracts: number
+  total_parties: number
+  total_promoters: number
+  revenue_this_month: number
+  revenue_last_month: number
+  growth_percentage: number
+}
+
+export interface PendingReview {
+  id: string
+  type: "contract" | "promoter" | "party"
+  title: string
+  description: string
+  priority: "high" | "medium" | "low"
+  created_at: string
+  updated_at: string | null
+}
+
+export interface AdminAction {
+  id: string
+  action: string
+  created_at: string
+  user_id: string
+  details: string
+  resource_type: string
+  resource_id: string
+  user?: User | null
+}
+
+export interface AuditLog {
+  id: string
+  action: string
+  entity_type: string
+  entity_id: string
+  details?: string | null
+  user_id?: string | null
+  created_at: string
+  user?: User | null
+}
+
+export interface User {
+  id: string
+  email: string
+  role: string
+  created_at: string
+  full_name?: string
+  last_sign_in_at?: string
+}
+
+export interface ContractsPerMonthData {
+  month: string
+  count: number
+  contracts: number  // Add this field used in dashboard data
+}
+
+export interface ContractsByStatusData {
+  name: string
+  value: number
+  fill?: string
+}
+
+export interface ContractVolumeData {
+  month: string
+  volume: number
+  value: number
+}
+
+export interface ServerActionResponse<T = any> {
+  success: boolean
+  data?: T
+  error?: string
+  message?: string
+}
+
+export interface Notification {
+  id: string
+  type: "success" | "error" | "warning" | "info" | "default"
+  message: string
+  timestamp: string
+  user_email?: string | undefined
+  related_contract_id?: string | undefined
+  isRead: boolean
+  context?: string | undefined
+  user_id: string
 }

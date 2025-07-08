@@ -41,7 +41,7 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const { reset, ...form } = useForm<PartyFormData>({
+  const form = useForm<PartyFormData>({
     resolver: zodResolver(partyFormSchema),
     defaultValues: {
       name_en: "",
@@ -65,11 +65,11 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
 
   useEffect(() => {
     if (partyToEdit) {
-      reset({
+      form.reset({
         name_en: partyToEdit.name_en || "",
         name_ar: partyToEdit.name_ar || "",
         crn: partyToEdit.crn || "",
-        type: (partyToEdit.type as "Employer" | "Client" | "Both") || "Employer",
+        type: (partyToEdit.type as "Employer" | "Client") || "Employer",
         role: partyToEdit.role || "",
         cr_expiry_date: partyToEdit.cr_expiry_date ? parseISO(partyToEdit.cr_expiry_date) : undefined,
         contact_person: partyToEdit.contact_person || "",
@@ -84,7 +84,7 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
         notes: partyToEdit.notes || "",
       })
     } else {
-      reset({
+      form.reset({
         name_en: "",
         name_ar: "",
         crn: "",
@@ -103,7 +103,7 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
         notes: "",
       })
     }
-  }, [partyToEdit, reset])
+  }, [partyToEdit, form.reset])
 
   async function onSubmit(values: PartyFormData) {
     setIsSubmitting(true)
@@ -112,7 +112,7 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
         name_en: values.name_en,
         name_ar: values.name_ar,
         crn: values.crn,
-        type: values.type,
+        type: values.type as "Employer" | "Client",
         role: values.role,
         cr_expiry_date: values.cr_expiry_date ? format(values.cr_expiry_date, 'yyyy-MM-dd') : null,
         contact_person: values.contact_person || null,
@@ -213,7 +213,6 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
                         <SelectContent>
                           <SelectItem value="Employer">Employer</SelectItem>
                           <SelectItem value="Client">Client</SelectItem>
-                          <SelectItem value="Both">Both</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -291,7 +290,7 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
                       <FormControl>
                         <DatePickerWithManualInput
                           date={field.value}
-                          onDateChange={field.onChange}
+                          setDate={field.onChange}
                           placeholder="Select expiry date"
                         />
                       </FormControl>
@@ -339,7 +338,7 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
                     <FormControl>
                       <DatePickerWithManualInput
                         date={field.value}
-                        onDateChange={field.onChange}
+                        setDate={field.onChange}
                         placeholder="Select license expiry date"
                       />
                     </FormControl>

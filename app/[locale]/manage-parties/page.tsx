@@ -75,6 +75,10 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
+interface PartyWithContractCount extends Party {
+  contract_count?: number;
+}
+
 // Enhanced Party interface
 interface EnhancedParty extends Party {
   cr_status: "valid" | "expiring" | "expired" | "missing"
@@ -95,12 +99,11 @@ interface PartyStats {
   expired_documents: number
   employers: number
   clients: number
-  both: number
   total_contracts: number
 }
 
 export default function ManagePartiesPage() {
-  const [parties, setParties] = useState<Party[]>([])
+  const [parties, setParties] = useState<PartyWithContractCount[]>([])
   const [filteredParties, setFilteredParties] = useState<EnhancedParty[]>([])
   const [selectedParties, setSelectedParties] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -307,9 +310,8 @@ export default function ManagePartiesPage() {
     const suspended = filteredParties.filter(p => p.status === "Suspended").length
     const expiring = filteredParties.filter(p => p.overall_status === "warning").length
     const expired = filteredParties.filter(p => p.overall_status === "critical").length
-    const employers = filteredParties.filter(p => p.type === "Employer" || p.type === "Both").length
-    const clients = filteredParties.filter(p => p.type === "Client" || p.type === "Both").length
-    const both = filteredParties.filter(p => p.type === "Both").length
+    const employers = filteredParties.filter(p => p.party_type === "Employer").length
+    const clients = filteredParties.filter(p => p.party_type === "Client").length
     const totalContracts = filteredParties.reduce((sum, p) => sum + (p.contract_count || 0), 0)
     
     return {
@@ -321,7 +323,6 @@ export default function ManagePartiesPage() {
       expired_documents: expired,
       employers,
       clients,
-      both,
       total_contracts: totalContracts,
     }
   }, [filteredParties])
@@ -513,8 +514,6 @@ export default function ManagePartiesPage() {
         return <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">Employer</Badge>
       case "Client":
         return <Badge variant="outline" className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">Client</Badge>
-      case "Both":
-        return <Badge variant="outline" className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">Both</Badge>
       case "Generic":
         return <Badge variant="outline" className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">Generic</Badge>
       default:
@@ -790,7 +789,6 @@ export default function ManagePartiesPage() {
                   <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="Employer">Employer</SelectItem>
                   <SelectItem value="Client">Client</SelectItem>
-                  <SelectItem value="Both">Both</SelectItem>
                   <SelectItem value="Generic">Generic</SelectItem>
                 </SelectContent>
               </Select>

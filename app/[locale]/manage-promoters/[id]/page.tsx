@@ -5,7 +5,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import type { Promoter, ContractRecord, Party } from "@/lib/types"
+import type { Promoter, Contract, Party } from "@/lib/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -32,7 +32,7 @@ import {
 import LifecycleStatusIndicator from "@/components/lifecycle-status-indicator"
 
 interface PromoterDetails extends Promoter {
-  contracts: ContractRecord<{ first_party?: Party; second_party?: Party }>[]
+  contracts: Contract[]
 }
 
 function DetailItem({
@@ -114,11 +114,7 @@ export default function PromoterDetailPage() {
 
       setPromoterDetails({
         ...promoterData,
-        contracts:
-          (contractsData as ContractRecord<{
-            first_party?: Party
-            second_party?: Party
-          }>[]) || [],
+        contracts: (contractsData as Contract[]) || [],
       })
       setIsLoading(false)
     }

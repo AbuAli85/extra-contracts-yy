@@ -18,9 +18,9 @@ export default function AnalyticsPage() {
     totalPromoters: 0,
     totalCompanies: 0,
   })
-  const [statusData, setStatusData] = useState([])
-  const [monthlyData, setMonthlyData] = useState([])
-  const [promoterData, setPromoterData] = useState([])
+  const [statusData, setStatusData] = useState<{ name: string; value: number }[]>([])
+  const [monthlyData, setMonthlyData] = useState<{ month: string; value: number }[]>([])
+  const [promoterData, setPromoterData] = useState<{ name: string; value: number }[]>([])
 
   useEffect(() => {
     async function fetchAnalytics() {

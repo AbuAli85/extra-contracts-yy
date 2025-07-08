@@ -19,7 +19,6 @@ export interface PartyStats {
   expired_documents: number
   employers: number
   clients: number
-  both: number
   generic: number
   total_contracts: number
   with_contracts: number
@@ -98,9 +97,8 @@ export const calculatePartyStats = (parties: EnhancedParty[]): PartyStats => {
   const suspended = parties.filter(p => p.status === "Suspended").length
   const expiring = parties.filter(p => p.overall_status === "warning").length
   const expired = parties.filter(p => p.overall_status === "critical").length
-  const employers = parties.filter(p => p.type === "Employer" || p.type === "Both").length
-  const clients = parties.filter(p => p.type === "Client" || p.type === "Both").length
-  const both = parties.filter(p => p.type === "Both").length
+  const employers = parties.filter(p => p.type === "Employer").length
+  const clients = parties.filter(p => p.type === "Client").length
   const generic = parties.filter(p => p.type === "Generic").length
   const totalContracts = parties.reduce((sum, p) => sum + (p.contract_count || 0), 0)
   const withContracts = parties.filter(p => (p.contract_count || 0) > 0).length
@@ -115,7 +113,6 @@ export const calculatePartyStats = (parties: EnhancedParty[]): PartyStats => {
     expired_documents: expired,
     employers,
     clients,
-    both,
     generic,
     total_contracts: totalContracts,
     with_contracts: withContracts,
@@ -263,7 +260,6 @@ export const getPartiesByType = (parties: EnhancedParty[]) => {
   return {
     employers: parties.filter(p => p.type === "Employer"),
     clients: parties.filter(p => p.type === "Client"), 
-    both: parties.filter(p => p.type === "Both"),
     generic: parties.filter(p => p.type === "Generic"),
   }
 }
