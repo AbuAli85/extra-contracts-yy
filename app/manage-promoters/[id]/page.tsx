@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Edit } from "lucide-react"
+import { Promoter } from "@/lib/types";
 
 interface PromoterDetailsPageProps {
   params: {
@@ -20,11 +21,11 @@ export default async function PromoterDetailsPage({ params }: PromoterDetailsPag
   redirect("/en/manage-promoters")
 
   const t = await getTranslations("PromoterDetailsPage")
-  const { data: promoter, error } = await getPromoterById(params.id)
+  const promoter: Promoter | null = await getPromoterById(params.id)
 
-  if (error || !promoter) {
-    console.error("Error fetching promoter:", error)
+  if (!promoter) {
     notFound()
+    return null
   }
 
   return (
@@ -34,20 +35,20 @@ export default async function PromoterDetailsPage({ params }: PromoterDetailsPag
           <div className="flex items-center space-x-4">
             {promoter.profile_picture_url ? (
               <Image
-                src={promoter.profile_picture_url || "/placeholder.svg"}
-                alt={promoter.name}
+                src={promoter.profile_picture_url}
+                alt={promoter.name_en || 'Promoter'}
                 width={80}
                 height={80}
                 className="rounded-full object-cover"
               />
             ) : (
               <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground">
-                {promoter.name.charAt(0).toUpperCase()}
+                {promoter.name_en?.charAt(0).toUpperCase()}
               </div>
             )}
             <div className="space-y-1">
-              <CardTitle className="text-2xl font-bold">{promoter.name}</CardTitle>
-              <CardDescription>{promoter.company}</CardDescription>
+              <CardTitle className="text-2xl font-bold">{promoter.name_en}</CardTitle>
+              <CardDescription>{promoter.company || 'N/A'}</CardDescription>
             </div>
           </div>
           <Button variant="outline" asChild>
@@ -62,7 +63,7 @@ export default async function PromoterDetailsPage({ params }: PromoterDetailsPag
             <div>
               <h3 className="font-semibold text-lg mb-2">{t("contactInformation")}</h3>
               <p>
-                <span className="font-medium">{t("email")}:</span> {promoter.email}
+                <span className="font-medium">{t("email")}:</span> {promoter.email || 'N/A'}
               </p>
               <p>
                 <span className="font-medium">{t("phone")}:</span> {promoter.phone || "N/A"}
@@ -85,11 +86,11 @@ export default async function PromoterDetailsPage({ params }: PromoterDetailsPag
             </div>
             <div>
               <h3 className="font-semibold text-lg mb-2">{t("companyAddress")}</h3>
-              <p>{promoter.address}</p>
+              <p>{promoter.address || 'N/A'}</p>
               <p>
-                {promoter.city}, {promoter.state} {promoter.zip_code}
+                {promoter.city && `${promoter.city}, `}{promoter.state && `${promoter.state} `}{promoter.zip_code}
               </p>
-              <p>{promoter.country}</p>
+              <p>{promoter.country || 'N/A'}</p>
             </div>
           </div>
 

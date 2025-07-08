@@ -3,7 +3,7 @@ export interface Party {
   name_en: string
   name_ar: string
   crn: string
-  type?: "Employer" | "Client" | "Generic" | null  // Removed "Both" to match database
+  type?: "Employer" | "Client" | "Generic" | null
   role?: string | null
   cr_expiry_date?: string | null
   contact_person?: string | null
@@ -14,11 +14,10 @@ export interface Party {
   tax_number?: string | null
   license_number?: string | null
   license_expiry_date?: string | null
-  status?: string | null  // Changed from literal union to string
+  status?: string | null
   notes?: string | null
   created_at?: string | null
   owner_id?: string | null
-  // Additional fields for the contract page
   email?: string | null
   phone?: string | null
   address?: string | null
@@ -44,12 +43,21 @@ export interface Promoter {
   job_title?: string | null
   work_location?: string | null
   contract_valid_until?: string | null
-  // Additional fields found in the codebase
   email?: string | null
   phone?: string | null
   national_id?: string | null
   crn?: string | null
   address?: string | null
+  contact_person?: string | null
+  website?: string | null
+  city?: string | null
+  country?: string | null
+  profile_picture_url?: string | null
+  company?: string | null
+  name?: string
+  state?: string
+  zip_code?: string
+  bio?: string
 }
 
 export interface Contract {
@@ -83,67 +91,37 @@ export interface Contract {
   currency?: string | null
   end_date?: string | null
   duration?: string | null
-  
-  // Additional fields found in codebase
-  effective_date?: string | null
-  termination_date?: string | null
-  payment_terms?: string | null
-  content_english?: string | null
-  content_spanish?: string | null
-  
-  // Legacy field names (used in some forms)
-  party_a_id?: string | null
-  party_b_id?: string | null
-  
-  // Direct employer/client fields
-  employer_id?: string | null
-  client_id?: string | null
-  employee_name?: string | null
-  employee_email?: string | null
-  employer_name?: string | null
-  
-  // Party A (Client) - Direct fields
-  first_party_name_en?: string | null
-  first_party_name_ar?: string | null
-  first_party_crn?: string | null
-  
-  // Party B (Employer) - Direct fields  
-  second_party_name_en?: string | null
-  second_party_name_ar?: string | null
-  second_party_crn?: string | null
-  
-  // Promoter - Direct fields
-  promoter_name_en?: string | null
-  promoter_name_ar?: string | null
-  id_card_number?: string | null
-  promoter_id_card_url?: string | null
-  promoter_passport_url?: string | null
-  
-  // Legacy field names
-  first_party_name?: string | null
-  second_party_name?: string | null
-  promoter_name?: string | null
-  
-  // Related entities (joins)
+  parties?: Party[] | null
+  party?: Party | null
+  promoter?: Promoter | null
+  promoters?: Promoter[] | null
   first_party?: Party | null
   second_party?: Party | null
-  promoter?: Promoter | null
-  
-  // These should be arrays for list pages or detail pages with multiple entities
-  parties?: Party[] | null
-  promoters?: Promoter[] | null
-  
-  // Related entities for enhancement
   employer?: Party | null
   client?: Party | null
+  title?: string | null;
+  start_date?: string | null;
+  total_value?: number | null;
+  promoter_name_ar?: string | null;
+  promoter_name_en?: string | null;
+  first_party_name_en?: string | null;
+  first_party_name_ar?: string | null;
+  second_party_name_en?: string | null;
+  second_party_name_ar?: string | null;
+  id_card_number?: string | null;
+  salary?: number | null;
+  employer_id?: string | null;
+  client_id?: string | null;
 }
 
-export interface PromoterProfile extends Promoter {
-  employer_id?: string | null
-  outsourced_to_id?: string | null
-  job_title?: string | null
-  work_location?: string | null
-  contract_valid_until?: string | null
+export interface ContractDetail extends Contract {
+  // This can be used to enforce non-optional properties for detail views
+  // For now, it will just be an alias for Contract
+}
+
+export interface SimpleContract extends Contract {
+  // This can be used for simpler contract views
+  // For now, it will just be an alias for Contract
 }
 
 export interface ContractRecord {
@@ -180,19 +158,6 @@ export interface BilingualPdfData {
   pdf_url?: string | null
 }
 
-// Additional interfaces for contract pages
-export interface ContractDetail extends Omit<Contract, 'parties' | 'promoters'> {
-  id: string
-  parties: Party[]
-  promoters: Promoter[]
-  first_party: Party
-  second_party: Party
-  promoter: Promoter
-  contract_value: number
-  status: string
-  salary?: number | null
-}
-
 export interface ActivityLog {
   id: string;
   action: string;
@@ -200,27 +165,6 @@ export interface ActivityLog {
   created_at: string;
   user_id?: string;
   metadata?: any;
-}
-
-export interface ContractDetailDebug extends Contract {
-  status?: string // Allow string for compatibility
-  employer_id?: string | null
-  client_id?: string | null
-  promoters?: {
-    id: string
-    name_en: string
-    name_ar: string
-    id_card_number: string
-    id_card_url?: string | null
-    passport_url?: string | null
-    status?: string | null
-    email?: string | null
-    phone?: string | null
-  }[] | null
-}
-
-export interface SimpleContract extends Omit<Contract, 'status'> {
-  status?: string // Allow string for compatibility
 }
 
 export interface PartyNote {
@@ -256,4 +200,4 @@ export interface PartyFile {
   created_at: string;
 }
 
-export type ContractStatus = "draft" | "pending" | "active" | "completed" | "cancelled" | "expired" | "failed" | "generating"
+export type ContractStatus = "draft" | "pending" | "active" | "completed" | "cancelled" | "expired" | "failed" | "generating";

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
+import { Contract as ContractDetail, ActivityLog } from "@/lib/types"
 import { 
   ArrowLeftIcon, 
   DownloadIcon, 
@@ -34,69 +35,13 @@ import {
   TagIcon
 } from "lucide-react"
 
-interface ContractDetail {
-  id: string
-  status?: string
-  created_at?: string
-  updated_at?: string
-  contract_start_date?: string
-  contract_end_date?: string
-  job_title?: string
-  work_location?: string
-  email?: string
-  contract_number?: string
-  id_card_number?: string
-  employer_id?: string
-  client_id?: string
-  promoter_id?: string
-  first_party_name_en?: string
-  first_party_name_ar?: string
-  second_party_name_en?: string
-  second_party_name_ar?: string
-  google_doc_url?: string
-  pdf_url?: string
-  error_details?: string
-  salary?: number
-  currency?: string
-  contract_type?: string
-  department?: string
-  employer?: {
-    name_en: string
-    name_ar?: string
-    crn?: string
-    address?: string
-    phone?: string
-    email?: string
-  }
-  client?: {
-    name_en: string
-    name_ar?: string
-    crn?: string
-    address?: string
-    phone?: string
-    email?: string
-  }
-  promoters?: Array<{
-    id: string
-    name_en: string
-    name_ar?: string
-    id_card_number?: string
-    email?: string
-    phone?: string
-  }>
-}
-
-interface ActivityLog {
-  id: string
-  action: string
-  description: string
-  created_at: string
-  user_id?: string
-  metadata?: any
-}
-
 export default function ContractDetailPage() {
   const params = useParams()
+
+  if (!params) {
+    return <div>Loading page...</div>
+  }
+
   const contractId = params.id as string
   const [contract, setContract] = useState<ContractDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -138,7 +83,7 @@ export default function ContractDetailPage() {
 
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
 
-  const getStatusColor = (status?: string) => {
+  const getStatusColor = (status?: string | null) => {
     switch (status?.toLowerCase()) {
       case 'active': return 'bg-green-100 text-green-800 border-green-200'
       case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200'
@@ -150,7 +95,7 @@ export default function ContractDetailPage() {
     }
   }
 
-  const getStatusIcon = (status?: string) => {
+  const getStatusIcon = (status?: string | null) => {
     switch (status?.toLowerCase()) {
       case 'active': return <CheckCircleIcon className="h-4 w-4" />
       case 'completed': return <CheckCircleIcon className="h-4 w-4" />
@@ -162,7 +107,7 @@ export default function ContractDetailPage() {
     }
   }
 
-  const formatCurrency = (amount?: number, currency?: string) => {
+  const formatCurrency = (amount?: number | null, currency?: string | null) => {
     if (!amount) return 'N/A'
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -170,7 +115,7 @@ export default function ContractDetailPage() {
     }).format(amount)
   }
 
-  const calculateDuration = (startDate?: string, endDate?: string) => {
+  const calculateDuration = (startDate?: string | null, endDate?: string | null) => {
     if (!startDate || !endDate) return 'N/A'
     const start = new Date(startDate)
     const end = new Date(endDate)
@@ -190,7 +135,7 @@ export default function ContractDetailPage() {
         console.log("Fetching contract with ID:", contractId)
 
         // Fetch basic contract data
-        const { data: basicData, error: basicError } = await supabase
+        const { data, error: basicError } = await supabase
           .from("contracts")
           .select("*")
           .eq("id", contractId)
@@ -202,6 +147,8 @@ export default function ContractDetailPage() {
           return
         }
 
+        const basicData = data as ContractDetail
+
         console.log("Basic contract data:", basicData)
 
         // Enhanced query with relations
@@ -211,7 +158,7 @@ export default function ContractDetailPage() {
         if (basicData.employer_id) {
           const { data: employerData } = await supabase
             .from("parties")
-            .select("name_en, name_ar, crn, address, phone, email")
+            .select("id, name_en, name_ar, crn, address_en, address_ar, contact_phone, contact_email")
             .eq("id", basicData.employer_id)
             .single()
           
@@ -223,7 +170,7 @@ export default function ContractDetailPage() {
         if (basicData.client_id) {
           const { data: clientData } = await supabase
             .from("parties")
-            .select("name_en, name_ar, crn, address, phone, email")
+            .select("id, name_en, name_ar, crn, address_en, address_ar, contact_phone, contact_email")
             .eq("id", basicData.client_id)
             .single()
           
@@ -233,13 +180,13 @@ export default function ContractDetailPage() {
         }
         
         if (basicData.promoter_id) {
-          const { data: promoterData } = await supabase
+          const { data: promoterData, error: promoterError } = await supabase
             .from("promoters")
             .select("id, name_en, name_ar, id_card_number, email, phone")
             .eq("id", basicData.promoter_id)
             .single()
           
-          if (promoterData) {
+          if (!promoterError && promoterData && typeof promoterData === 'object' && 'id' in promoterData) {
             enhancedData.promoters = [promoterData]
           }
         }
@@ -648,30 +595,30 @@ export default function ContractDetailPage() {
                         <p className="font-mono text-sm text-gray-700 mt-1">{contract.employer.crn}</p>
                       </div>
                     )}
-                    {contract?.employer?.email && (
+                    {contract?.employer?.contact_email && (
                       <div>
                         <label className="text-sm font-medium text-gray-500">Email</label>
                         <p className="text-sm text-gray-700 mt-1 flex items-center gap-2">
                           <MailIcon className="h-4 w-4 text-gray-500" />
-                          {contract.employer.email}
+                          {contract.employer.contact_email}
                         </p>
                       </div>
                     )}
-                    {contract?.employer?.phone && (
+                    {contract?.employer?.contact_phone && (
                       <div>
                         <label className="text-sm font-medium text-gray-500">Phone</label>
                         <p className="text-sm text-gray-700 mt-1 flex items-center gap-2">
                           <PhoneIcon className="h-4 w-4 text-gray-500" />
-                          {contract.employer.phone}
+                          {contract.employer.contact_phone}
                         </p>
                       </div>
                     )}
-                    {contract?.employer?.address && (
+                    {contract?.employer?.address_en && (
                       <div>
                         <label className="text-sm font-medium text-gray-500">Address</label>
                         <p className="text-sm text-gray-700 mt-1 flex items-start gap-2">
                           <MapPinIcon className="h-4 w-4 text-gray-500 mt-0.5" />
-                          {contract.employer.address}
+                          {contract.employer.address_en}
                         </p>
                       </div>
                     )}
@@ -713,30 +660,30 @@ export default function ContractDetailPage() {
                         <p className="font-mono text-sm text-gray-700 mt-1">{contract.client.crn}</p>
                       </div>
                     )}
-                    {contract?.client?.email && (
+                    {contract?.client?.contact_email && (
                       <div>
                         <label className="text-sm font-medium text-gray-500">Email</label>
                         <p className="text-sm text-gray-700 mt-1 flex items-center gap-2">
                           <MailIcon className="h-4 w-4 text-gray-500" />
-                          {contract.client.email}
+                          {contract.client.contact_email}
                         </p>
                       </div>
                     )}
-                    {contract?.client?.phone && (
+                    {contract?.client?.contact_phone && (
                       <div>
                         <label className="text-sm font-medium text-gray-500">Phone</label>
                         <p className="text-sm text-gray-700 mt-1 flex items-center gap-2">
                           <PhoneIcon className="h-4 w-4 text-gray-500" />
-                          {contract.client.phone}
+                          {contract.client.contact_phone}
                         </p>
                       </div>
                     )}
-                    {contract?.client?.address && (
+                    {contract?.client?.address_en && (
                       <div>
                         <label className="text-sm font-medium text-gray-500">Address</label>
                         <p className="text-sm text-gray-700 mt-1 flex items-start gap-2">
                           <MapPinIcon className="h-4 w-4 text-gray-500 mt-0.5" />
-                          {contract.client.address}
+                          {contract.client.address_en}
                         </p>
                       </div>
                     )}

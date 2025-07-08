@@ -6,16 +6,16 @@ import { supabase } from "@/lib/supabase"
 
 interface SimpleContract {
   id: string
-  status?: string
+  status?: string | null
   created_at?: string
-  job_title?: string
-  first_party_name_en?: string
-  second_party_name_en?: string
+  job_title?: string | null
+  first_party_name_en?: string | null
+  second_party_name_en?: string | null
 }
 
 export default function ContractDetailPageSimple() {
   const params = useParams()
-  const contractId = params.id as string
+  const contractId = params?.id as string
   const [contract, setContract] = useState<SimpleContract | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

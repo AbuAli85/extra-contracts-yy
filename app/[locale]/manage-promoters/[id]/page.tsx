@@ -99,22 +99,19 @@ export default function PromoterDetailPage() {
         .from("contracts")
         .select(
           `
-      *,
-      first_party:parties!contracts_first_party_id_fkey(id, name_en, name_ar, crn),
-      second_party:parties!contracts_second_party_id_fkey(id, name_en, name_ar, crn)
-    `,
+          *,
+          second_party:parties!inner(id, name_en, name_ar)
+        `
         )
         .eq("promoter_id", promoterId)
-        .order("contract_start_date", { ascending: false })
 
       if (contractsError) {
-        console.warn("Could not fetch contracts for promoter:", contractsError.message)
-        // Continue with promoter data, contracts will be empty array
+        setError(contractsError.message)
       }
 
       setPromoterDetails({
         ...promoterData,
-        contracts: (contractsData as Contract[]) || [],
+        contracts: (contractsData as any) || [],
       })
       setIsLoading(false)
     }
@@ -124,295 +121,163 @@ export default function PromoterDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-100 dark:bg-slate-950">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="ml-3 text-lg text-slate-700 dark:text-slate-300">
-          Loading promoter details...
-        </p>
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-16 w-16 animate-spin" />
       </div>
     )
   }
 
-  if (error || !promoterDetails) {
+  if (error) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-4 dark:bg-slate-950">
-        <Card className="w-full max-w-md bg-card text-center shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-2xl text-destructive">Error</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-card-foreground/80">{error || "Could not load promoter details."}</p>
-            <Button
-              variant="outline"
-              onClick={() => router.push("/manage-promoters")}
-              className="mt-6"
-            >
-              <ArrowLeftIcon className="mr-2 h-4 w-4" />
-              Back to Promoter List
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="flex h-screen flex-col items-center justify-center">
+        <p className="mb-4 text-red-500">{error}</p>
+        <Button onClick={() => router.back()}>
+          <ArrowLeftIcon className="mr-2 h-4 w-4" />
+          Go Back
+        </Button>
       </div>
     )
   }
 
-  const idCardStatus = getDocumentStatus(promoterDetails.id_card_expiry_date)
-  const passportStatus = getDocumentStatus(promoterDetails.passport_expiry_date)
+  if (!promoterDetails) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center">
+        <p className="mb-4">Promoter not found.</p>
+        <Button onClick={() => router.back()}>
+          <ArrowLeftIcon className="mr-2 h-4 w-4" />
+          Go Back
+        </Button>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-8 dark:bg-slate-950 sm:py-12 md:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/manage-promoters")}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeftIcon className="mr-2 h-4 w-4" />
-              Back to Promoter List
-            </Button>
-            <h1 className="mt-2 text-3xl font-bold text-slate-800 dark:text-slate-100">
-              {promoterDetails.name_en}
-            </h1>
-            <p className="text-muted-foreground" dir="rtl">
-              {promoterDetails.name_ar}
-            </p>
-          </div>
-          <Button 
-            asChild
-            disabled={!promoterId}
-          >
-            <Link href={promoterId ? `/manage-promoters/${promoterId}/edit` : "#"}>
-              <EditIcon className="mr-2 h-4 w-4" />
-              Edit Promoter
-            </Link>
+    <div className="container mx-auto max-w-6xl p-4 md:p-6">
+      <div className="mb-6 flex items-center justify-between">
+        <Button variant="outline" onClick={() => router.back()}>
+          <ArrowLeftIcon className="mr-2 h-4 w-4" />
+          Back to Promoters
+        </Button>
+        <Link href={`/manage-promoters/${promoterId}/edit`} passHref>
+          <Button>
+            <EditIcon className="mr-2 h-4 w-4" />
+            Edit Promoter
           </Button>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
-          {/* Promoter Information */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserCircle2Icon className="h-5 w-5" />
-                  Promoter Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <DetailItem label="Name (English)" value={promoterDetails.name_en} />
-                  <DetailItem label="Name (Arabic)" value={promoterDetails.name_ar} isRtl />
-                  <DetailItem label="Email" value={promoterDetails.email} />
-                  <DetailItem label="Phone" value={promoterDetails.phone} />
-                  <DetailItem label="National ID" value={promoterDetails.national_id} />
-                  <DetailItem label="CRN" value={promoterDetails.crn} />
-                </div>
-
-                <Separator />
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <DetailItem
-                    label="ID Card Expiry"
-                    value={
-                      promoterDetails.id_card_expiry_date
-                        ? format(parseISO(promoterDetails.id_card_expiry_date), "PPP")
-                        : null
-                    }
-                  />
-                  <DetailItem
-                    label="Passport Expiry"
-                    value={
-                      promoterDetails.passport_expiry_date
-                        ? format(parseISO(promoterDetails.passport_expiry_date), "PPP")
-                        : null
-                    }
-                  />
-                </div>
-
-                {(promoterDetails.id_card_expiry_date || promoterDetails.passport_expiry_date) && (
-                  <>
-                    <Separator />
-                    <div className="space-y-3">
-                      <h4 className="text-sm font-medium text-muted-foreground">Document Status</h4>
-                      <div className="flex flex-wrap gap-3">
-                        {promoterDetails.id_card_expiry_date && (
-                          <DocumentStatusBadge
-                            status={idCardStatus.status}
-                            label="ID Card"
-                            expiryDate={promoterDetails.id_card_expiry_date}
-                          />
-                        )}
-                        {promoterDetails.passport_expiry_date && (
-                          <DocumentStatusBadge
-                            status={passportStatus.status}
-                            label="Passport"
-                            expiryDate={promoterDetails.passport_expiry_date}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {promoterDetails.address && (
-                  <>
-                    <Separator />
-                    <DetailItem label="Address" value={promoterDetails.address} />
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Contracts Summary */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileTextIcon className="h-5 w-5" />
-                  Contracts Summary
-                </CardTitle>
-                <CardDescription>
-                  {promoterDetails.contracts.length} total contracts
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Active Contracts</span>
-                    <span className="text-sm font-medium">
-                      {promoterDetails.contracts.filter((contract) =>
-                        contract.contract_end_date
-                          ? !isPast(parseISO(contract.contract_end_date))
-                          : true,
-                      ).length}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Expired Contracts</span>
-                    <span className="text-sm font-medium">
-                      {promoterDetails.contracts.filter((contract) =>
-                        contract.contract_end_date
-                          ? isPast(parseISO(contract.contract_end_date))
-                          : false,
-                      ).length}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BriefcaseIcon className="h-5 w-5" />
-                  Quick Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button asChild className="w-full justify-start" variant="outline">
-                  <Link href={`/generate-contract?promoter=${promoterId}`}>
-                    <FileTextIcon className="mr-2 h-4 w-4" />
-                    Generate New Contract
-                  </Link>
-                </Button>
-                <Button asChild className="w-full justify-start" variant="outline">
-                  <Link href={`/manage-promoters/${promoterId}/edit`}>
-                    <EditIcon className="mr-2 h-4 w-4" />
-                    Edit Promoter
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Contracts List */}
-        {promoterDetails.contracts.length > 0 && (
-          <div className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileTextIcon className="h-5 w-5" />
-                  Contracts
-                </CardTitle>
-                <CardDescription>
-                  All contracts associated with this promoter
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Contract ID</TableHead>
-                        <TableHead>First Party</TableHead>
-                        <TableHead>Second Party</TableHead>
-                        <TableHead>Start Date</TableHead>
-                        <TableHead>End Date</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {promoterDetails.contracts.map((contract) => {
-                        const isExpired = contract.contract_end_date
-                          ? isPast(parseISO(contract.contract_end_date))
-                          : false
-                        return (
-                          <TableRow key={contract.id}>
-                            <TableCell className="font-mono text-sm">
-                              {contract.id.slice(0, 8)}...
-                            </TableCell>
-                            <TableCell>
-                              {contract.first_party?.name_en || "N/A"}
-                            </TableCell>
-                            <TableCell>
-                              {contract.second_party?.name_en || "N/A"}
-                            </TableCell>
-                            <TableCell>
-                              {contract.contract_start_date
-                                ? format(parseISO(contract.contract_start_date), "PP")
-                                : "N/A"}
-                            </TableCell>
-                            <TableCell>
-                              {contract.contract_end_date
-                                ? format(parseISO(contract.contract_end_date), "PP")
-                                : "N/A"}
-                            </TableCell>
-                            <TableCell>
-                              <span
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                  isExpired
-                                    ? "bg-red-100 text-red-800"
-                                    : "bg-green-100 text-green-800"
-                                }`}
-                              >
-                                {isExpired ? "Expired" : "Active"}
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <Button asChild size="sm" variant="ghost">
-                                <Link href={`/contracts/${contract.id}`}>
-                                  <ExternalLinkIcon className="h-4 w-4" />
-                                </Link>
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        </Link>
       </div>
+
+      <Card className="overflow-hidden">
+        <CardHeader className="bg-muted/40 flex flex-col items-start gap-4 p-6 md:flex-row md:items-center">
+          <div className="flex items-center gap-4">
+            {promoterDetails.profile_picture_url ? (
+              <img
+                src={promoterDetails.profile_picture_url}
+                alt={promoterDetails.name_en}
+                className="h-20 w-20 rounded-full object-cover"
+              />
+            ) : (
+              <UserCircle2Icon className="h-20 w-20 text-muted-foreground" />
+            )}
+            <div className="grid gap-1">
+              <CardTitle className="text-2xl">{promoterDetails.name_en}</CardTitle>
+              {promoterDetails.company && (
+                <CardDescription className="flex items-center gap-2">
+                  <BriefcaseIcon className="h-4 w-4" />
+                  <span>{promoterDetails.company}</span>
+                </CardDescription>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-3">
+            <div className="grid gap-4 md:col-span-1">
+              <h3 className="text-lg font-semibold">Contact Information</h3>
+              <DetailItem label="Contact Person" value={promoterDetails.contact_person} />
+              <DetailItem label="Email" value={promoterDetails.email} />
+              <DetailItem label="Phone" value={promoterDetails.phone} />
+              {promoterDetails.website && (
+                <DetailItem
+                  label="Website"
+                  value={
+                    <a
+                      href={promoterDetails.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center text-blue-500 hover:underline"
+                    >
+                      {promoterDetails.website}
+                      <ExternalLinkIcon className="ml-1 h-4 w-4" />
+                    </a>
+                  }
+                />
+              )}
+            </div>
+            <div className="grid gap-4 md:col-span-2">
+              <h3 className="text-lg font-semibold">Location</h3>
+              <DetailItem label="Address" value={promoterDetails.address} />
+              <DetailItem label="City" value={promoterDetails.city} />
+              <DetailItem label="Country" value={promoterDetails.country} />
+            </div>
+          </div>
+
+          <Separator className="my-8" />
+
+          <div>
+            <h3 className="mb-4 text-lg font-semibold">Associated Contracts</h3>
+            {promoterDetails.contracts && promoterDetails.contracts.length > 0 ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Contract Name</TableHead>
+                      <TableHead>Party</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>End Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {promoterDetails.contracts.map(contract => {
+                      const statusInfo = getDocumentStatus(contract.end_date)
+                      const party = (contract as any).second_party as Party | undefined;
+                      return (
+                        <TableRow key={contract.id}>
+                          <TableCell className="font-medium">{contract.contract_name}</TableCell>
+                          <TableCell>{party?.name_en ?? "N/A"}</TableCell>
+                          <TableCell>
+                            <DocumentStatusBadge status={statusInfo.status} label={statusInfo.text} expiryDate={contract.end_date} />
+                          </TableCell>
+                          <TableCell>
+                            {contract.end_date
+                              ? format(parseISO(contract.end_date), "PPP")
+                              : "N/A"}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Link href={`/contracts/${contract.id}`} passHref>
+                              <Button variant="outline" size="sm">
+                                <FileTextIcon className="mr-2 h-4 w-4" />
+                                View
+                              </Button>
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-md border-2 border-dashed border-muted-foreground/30 bg-muted/20 p-12 text-center">
+                <FileTextIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                <p className="mt-4 text-sm text-muted-foreground">
+                  This promoter has no associated contracts yet.
+                </p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

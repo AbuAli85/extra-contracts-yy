@@ -27,53 +27,18 @@ import {
   ClockIcon,
   MoreHorizontalIcon
 } from "lucide-react"
-
-interface ContractDetail {
-  id: string
-  status?: string
-  created_at?: string
-  updated_at?: string
-  contract_start_date?: string
-  contract_end_date?: string
-  job_title?: string
-  work_location?: string
-  email?: string
-  contract_number?: string
-  id_card_number?: string
-  employer_id?: string
-  client_id?: string
-  promoter_id?: string
-  first_party_name_en?: string
-  first_party_name_ar?: string
-  second_party_name_en?: string
-  second_party_name_ar?: string
-  promoter_name_en?: string
-  promoter_name_ar?: string
-  employer?: any
-  client?: any
-  promoters?: any[]
-  google_doc_url?: string
-  pdf_url?: string
-  error_details?: string
-}
-
-interface ActivityLog {
-  id: string
-  action: string
-  description: string
-  created_at: string
-}
+import { Contract, ActivityLog, Party, Promoter } from "@/lib/types"
 
 export default function ContractDetailPage() {
   const params = useParams()
-  const contractId = params.id as string
+  const contractId = params?.id as string
   
-  const [contract, setContract] = useState<ContractDetail | null>(null)
+  const [contract, setContract] = useState<Contract | null>(null)
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const getStatusColor = (status?: string) => {
+  const getStatusColor = (status?: string | null) => {
     switch (status?.toLowerCase()) {
       case 'active': return 'bg-green-100 text-green-800'
       case 'completed': return 'bg-blue-100 text-blue-800'
@@ -113,6 +78,11 @@ export default function ContractDetailPage() {
 
   useEffect(() => {
     async function fetchContract() {
+      if (!contractId) {
+        setLoading(false)
+        setError("Contract ID is missing.")
+        return
+      }
       try {
         setLoading(true)
         console.log("Fetching contract with ID:", contractId)
@@ -130,45 +100,48 @@ export default function ContractDetailPage() {
           return
         }
 
-        console.log("Basic contract data:", basicData)
+        if (!basicData) {
+            setError(`Contract with ID ${contractId} not found.`)
+            setLoading(false);
+            return;
+        }
 
-        // Enhanced query with relations
-        let enhancedData = { ...basicData }
+        let enhancedData: Contract = basicData as Contract;
         
         // Try to fetch related parties separately
-        if (basicData.employer_id) {
+        if (enhancedData.employer_id) {
           const { data: employerData } = await supabase
             .from("parties")
             .select("name_en, name_ar, crn")
-            .eq("id", basicData.employer_id)
+            .eq("id", enhancedData.employer_id)
             .single()
           
           if (employerData) {
-            enhancedData.employer = employerData
+            enhancedData.employer = employerData as Party
           }
         }
         
-        if (basicData.client_id) {
+        if (enhancedData.client_id) {
           const { data: clientData } = await supabase
             .from("parties")
             .select("name_en, name_ar, crn")
-            .eq("id", basicData.client_id)
+            .eq("id", enhancedData.client_id)
             .single()
           
           if (clientData) {
-            enhancedData.client = clientData
+            enhancedData.client = clientData as Party
           }
         }
         
-        if (basicData.promoter_id) {
+        if (enhancedData.promoter_id) {
           const { data: promoterData } = await supabase
             .from("promoters")
             .select("id, name_en, name_ar, id_card_number")
-            .eq("id", basicData.promoter_id)
+            .eq("id", enhancedData.promoter_id)
             .single()
           
           if (promoterData) {
-            enhancedData.promoters = [promoterData]
+            enhancedData.promoters = [promoterData as Promoter]
           }
         }
         
@@ -183,9 +156,7 @@ export default function ContractDetailPage() {
       }
     }
 
-    if (contractId) {
-      fetchContract()
-    }
+    fetchContract()
   }, [contractId])
 
   if (loading) {

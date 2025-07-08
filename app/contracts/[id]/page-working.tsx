@@ -6,28 +6,28 @@ import { supabase } from "@/lib/supabase"
 
 interface SimpleContract {
   id: string
-  status?: string
+  status?: string | null
   created_at?: string
-  job_title?: string
-  first_party_name_en?: string
-  second_party_name_en?: string
-  promoter_id?: string
-  work_location?: string
-  email?: string
-  contract_number?: string
-  contract_start_date?: string
-  contract_end_date?: string
+  job_title?: string | null
+  first_party_name_en?: string | null
+  second_party_name_en?: string | null
+  promoter_id?: string | null
+  work_location?: string | null
+  email?: string | null
+  contract_number?: string | null
+  contract_start_date?: string | null
+  contract_end_date?: string | null
 }
 
 interface Promoter {
   id: string
   name_en: string
-  name_ar?: string
+  name_ar?: string | null
 }
 
 export default function ContractDetailPage() {
   const params = useParams()
-  const contractId = params.id as string
+  const contractId = params?.id as string
   const [contract, setContract] = useState<SimpleContract | null>(null)
   const [promoter, setPromoter] = useState<Promoter | null>(null)
   const [loading, setLoading] = useState(true)

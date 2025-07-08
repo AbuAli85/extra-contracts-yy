@@ -27,39 +27,7 @@ import {
   ClockIcon,
   MoreHorizontalIcon
 } from "lucide-react"
-
-interface ContractDetail {
-  id: string
-  status?: string
-  created_at?: string
-  updated_at?: string
-  contract_start_date?: string
-  contract_end_date?: string
-  job_title?: string
-  work_location?: string
-  email?: string
-  contract_number?: string
-  id_card_number?: string
-  employer_id?: string
-  client_id?: string
-  promoter_id?: string
-  first_party_name_en?: string
-  first_party_name_ar?: string
-  second_party_name_en?: string
-  second_party_name_ar?: string
-  promoter_name_en?: string
-  promoter_name_ar?: string
-  employer?: any
-  client?: any
-  promoters?: any[]
-  google_doc_url?: string
-  pdf_url?: string
-  error_details?: string
-  version?: number
-  last_sent_at?: string
-  downloaded_count?: number
-  generation_status?: string
-}
+import { ContractDetail, Party, Promoter } from "@/lib/types"
 
 interface ActivityLog {
   id: string
@@ -72,14 +40,22 @@ interface ActivityLog {
 
 export default function ContractDetailPage() {
   const params = useParams()
-  const contractId = params.id as string
   
   const [contract, setContract] = useState<ContractDetail | null>(null)
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const getStatusColor = (status?: string) => {
+  if (!params) {
+    return (
+      <div className="min-h-screen bg-slate-50 px-4 py-8">
+        <div className="mx-auto max-w-4xl">Loading...</div>
+      </div>
+    )
+  }
+  const contractId = params.id as string
+
+  const getStatusColor = (status?: string | null) => {
     switch (status?.toLowerCase()) {
       case 'active': return 'bg-green-100 text-green-800'
       case 'completed': return 'bg-blue-100 text-blue-800'
@@ -128,7 +104,7 @@ export default function ContractDetailPage() {
           .from("contracts")
           .select("*")
           .eq("id", contractId)
-          .single()
+          .single<ContractDetail>()
 
         if (basicError) {
           console.error("Basic query error:", basicError)
@@ -138,16 +114,14 @@ export default function ContractDetailPage() {
 
         console.log("Basic contract data:", basicData)
 
-        // Enhanced query with relations - try different approach
-        let enhancedData = { ...basicData }
+        let enhancedData: ContractDetail = { ...basicData }
         
-        // Try to fetch related parties separately
         if (basicData.employer_id) {
           const { data: employerData } = await supabase
             .from("parties")
-            .select("name_en, name_ar, crn")
+            .select("id, name_en, name_ar, crn")
             .eq("id", basicData.employer_id)
-            .single()
+            .single<Party>()
           
           if (employerData) {
             enhancedData.employer = employerData
@@ -157,9 +131,9 @@ export default function ContractDetailPage() {
         if (basicData.client_id) {
           const { data: clientData } = await supabase
             .from("parties")
-            .select("name_en, name_ar, crn")
+            .select("id, name_en, name_ar, crn")
             .eq("id", basicData.client_id)
-            .single()
+            .single<Party>()
           
           if (clientData) {
             enhancedData.client = clientData
@@ -171,7 +145,7 @@ export default function ContractDetailPage() {
             .from("promoters")
             .select("id, name_en, name_ar, id_card_number")
             .eq("id", basicData.promoter_id)
-            .single()
+            .single<Promoter>()
           
           if (promoterData) {
             enhancedData.promoters = [promoterData]
@@ -181,9 +155,9 @@ export default function ContractDetailPage() {
         console.log("Enhanced contract data:", enhancedData)
         setContract(enhancedData)
         setActivityLogs(mockActivityLogs)
-      } catch (err) {
+      } catch (err: any) {
         console.error("Exception:", err)
-        setError("Failed to load contract")
+        setError(err.message || "Failed to load contract")
       } finally {
         setLoading(false)
       }
