@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -58,11 +58,11 @@ export function BulkOperations({
   const isAllSelected = selectedCount === totalCount && totalCount > 0
   const isIndeterminate = selectedCount > 0 && selectedCount < totalCount
 
-  const handleSelectAll = () => {
-    if (isAllSelected) {
-      onSelectionChange([])
-    } else {
+  const handleSelectAll = (checked: boolean | string) => {
+    if (checked) {
       onSelectionChange(allContracts.map(contract => contract.id))
+    } else {
+      onSelectionChange([])
     }
   }
 
@@ -229,25 +229,20 @@ export function BulkOperations({
       <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <div className="flex items-center space-x-4">
           <Checkbox
-            checked={isAllSelected}
-            ref={(ref) => {
-              if (ref) ref.indeterminate = isIndeterminate
-            }}
+            checked={isIndeterminate ? "indeterminate" : isAllSelected}
             onCheckedChange={handleSelectAll}
             aria-label="Select all contracts"
+            className="mr-2"
           />
-          
-          <div className="flex items-center space-x-2">
-            <Badge variant="secondary">
-              {selectedCount} selected
+          <Badge variant="secondary" className="mr-4">
+            {selectedCount} selected
+          </Badge>
+
+          {Object.entries(statusCounts).map(([status, count]) => (
+            <Badge key={status} variant="outline" className="text-xs">
+              {status}: {count}
             </Badge>
-            
-            {Object.entries(statusCounts).map(([status, count]) => (
-              <Badge key={status} variant="outline" className="text-xs">
-                {status}: {count}
-              </Badge>
-            ))}
-          </div>
+          ))}
         </div>
 
         {isProcessing ? (
