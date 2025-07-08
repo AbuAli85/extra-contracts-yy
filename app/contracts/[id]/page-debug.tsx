@@ -9,15 +9,15 @@ import { ArrowLeftIcon } from "lucide-react"
 
 interface ContractDetailDebug {
   id: string
-  status?: string
+  status?: string | null
   created_at?: string
-  contract_start_date?: string
-  contract_end_date?: string
+  contract_start_date?: string | null
+  contract_end_date?: string | null
   employer?: any
   client?: any
-  promoters?: any[]
-  google_doc_url?: string
-  error_details?: string
+  promoters?: any
+  google_doc_url?: string | null
+  error_details?: string | null
 }
 
 export default function ContractDetailPage({ params }: { params: { id: string } }) {
