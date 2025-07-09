@@ -59,15 +59,16 @@ export async function updatePromoter(id: string, promoterData: Partial<Promoter>
   return data
 }
 
-export async function deletePromoter(id: string) {
+export async function deletePromoter(id: string): Promise<{ success: boolean; message: string }> {
   const supabase = await createClient()
 
   const { error } = await supabase.from("promoters").delete().eq("id", id)
 
   if (error) {
     console.error("Error deleting promoter:", error)
-    throw new Error("Failed to delete promoter")
+    return { success: false, message: "Failed to delete promoter" }
   }
 
   revalidatePath("/manage-promoters")
+  return { success: true, message: "Promoter deleted successfully" }
 }
