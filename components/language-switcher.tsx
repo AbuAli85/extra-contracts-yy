@@ -21,11 +21,12 @@ export function LanguageSwitcher() {
   const router = useRouter()
   const pathname = usePathname()
 
-  const segments = pathname.split("/")
+  const segments = pathname ? pathname.split("/") : []
   const currentLocaleValue = segments[1] === "ar" ? "ar" : "en"
   const currentLocale = locales.find((loc) => loc.value === currentLocaleValue) || locales[0]
 
   const onSelectLocale = (newLocale: string) => {
+    if (!pathname) return
     const newPath = `/${newLocale}${pathname.substring(currentLocaleValue.length + 1)}`
     router.push(newPath)
     // router.refresh(); // Consider if refresh is needed for server components

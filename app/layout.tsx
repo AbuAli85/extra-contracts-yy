@@ -1,7 +1,6 @@
 import './globals.css'
 import type React from "react"
 import type { Metadata } from "next"
-import ClientLayout from "./client-layout"
 
 export const metadata: Metadata = {
   title: "Bilingual Contract Generator",
@@ -11,10 +10,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  params,
 }: {
   children: React.ReactNode
-  params: { locale: string }
 }) {
-  return <ClientLayout params={params}>{children}</ClientLayout>
+  return <>{children}</>
 }

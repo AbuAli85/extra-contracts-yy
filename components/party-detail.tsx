@@ -41,7 +41,7 @@ export default function PartyDetail({ partyId }: { partyId: number }) {
     supabase.from('party_tags').select('*').eq('party_id', partyIdStr).then(({ data }) => setTags(data as unknown as PartyTag[] || []))
     supabase.from('party_activities').select('*').eq('party_id', partyIdStr).then(({ data }) => setActivities(data as unknown as PartyActivity[] || []))
     supabase.from('parties').select('owner_id').eq('id', partyIdStr).single().then(({ data }) => setOwnerId(data?.owner_id || null))
-    supabase.from('profiles').select('id, full_name').then(({ data }) => setUsers(data || []))
+    supabase.from('profiles').select('id, full_name').then(({ data }) => setUsers((data || []).map(u => ({ id: u.id, full_name: u.full_name ?? null }))))
     supabase.from('party_files').select('*').eq('party_id', partyIdStr).then(({ data }) => setFiles(data as unknown as PartyFile[] || []))
   }, [partyId])
 

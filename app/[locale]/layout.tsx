@@ -1,14 +1,13 @@
 import "../globals.css"
 import type React from "react"
+import ClientLayout from "../client-layout"
 
-export default async function Layout({ 
+export default function LocaleLayout({ 
   children, 
   params 
 }: { 
   children: React.ReactNode
-  params: Promise<{ locale: string }> 
+  params: { locale: string }
 }) {
-  const { locale } = await params
-  // You can use locale here if needed
-  return <>{children}</>
+  return <ClientLayout params={params}>{children}</ClientLayout>
 }

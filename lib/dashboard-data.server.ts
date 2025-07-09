@@ -155,7 +155,7 @@ export async function getAuditLogsSrv(): Promise<ServerActionResponse<AuditLog[]
       user: Array.isArray(log.users) ? log.users[0] : log.users
     }))
 
-    return { success: true, data: auditLogs }
+    return { success: true, data: auditLogs, message: "Audit logs fetched successfully." }
 
   } catch (error) {
     console.error("Error in getAuditLogs:", error)
@@ -187,7 +187,7 @@ export async function getNotificationsSrv(): Promise<ServerActionResponse<Notifi
       timestamp: n.created_at,
     }))
 
-    return { success: true, data: notifications }
+    return { success: true, data: notifications, message: "Notifications fetched successfully." }
 
   } catch (error) {
     console.error("Error fetching notifications:", error)
@@ -215,7 +215,7 @@ export async function getUsersSrv(): Promise<ServerActionResponse<User[]>> {
       created_at: u.created_at,
     }))
 
-    return { success: true, data: users }
+    return { success: true, data: users, message: "Users fetched successfully." }
 
   } catch (error) {
     console.error("Error fetching users:", error)

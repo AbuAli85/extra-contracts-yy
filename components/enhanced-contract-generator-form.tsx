@@ -289,7 +289,7 @@ export default function EnhancedContractGeneratorForm({
   }, [watchedStartDate, watchedEndDate, form])
 
   // Contract mutation with enhanced error handling
-  const { mutate: saveContract, isLoading: isSubmitting } = useMutation({
+  const { mutate: saveContract, status } = useMutation({
     mutationFn: async (values: ContractGeneratorFormData) => {
       const payload = {
         ...values,
@@ -355,6 +355,7 @@ export default function EnhancedContractGeneratorForm({
       })
     },
   })
+  const isSubmitting = status === 'pending'
 
   const onSubmit = useCallback((values: ContractGeneratorFormData) => {
     saveContract(values)

@@ -19,7 +19,7 @@ const fontLexend = Lexend({
   weight: ["400", "500", "600", "700"],
 })
 
-export default async function ClientLayout({
+export default function ClientLayout({
   children,
   params,
 }: {
@@ -38,25 +38,13 @@ export default async function ClientLayout({
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
           fontInter.variable,
-          fontLexend.variable,
+          fontLexend.variable
         )}
-        suppressHydrationWarning
       >
         <ClientProviders>
-          <div className="relative flex min-h-screen flex-col">
-            {/* HEADER */}
-            <ClientHeader locale={locale} />
-
-            {/* MAIN CONTENT */}
-            <main className="flex-1">
-              <Suspense fallback={<Loading />}>
-                <div className="container py-8 md:py-12">{children}</div>
-              </Suspense>
-            </main>
-
-            {/* FOOTER */}
-            <ClientFooter />
-          </div>
+          <ClientHeader locale={locale} />
+          <Suspense fallback={<Loading />}>{children}</Suspense>
+          <ClientFooter />
         </ClientProviders>
       </body>
     </html>

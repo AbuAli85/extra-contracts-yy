@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [currentYear, setCurrentYear] = useState("")
 
   // Extract locale from pathname
-  const locale = pathname.startsWith('/en/') ? 'en' : pathname.startsWith('/ar/') ? 'ar' : 'en'
+  const locale = pathname && pathname.startsWith('/en/') ? 'en' : pathname && pathname.startsWith('/ar/') ? 'ar' : 'en'
   
   // Create locale-aware nav items
   const localeNavItems = navItems.map(item => ({

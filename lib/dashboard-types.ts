@@ -186,3 +186,9 @@ export interface Notification {
   context?: string | undefined
   user_id: string
 }
+
+export interface ServerActionResponse<T = unknown> {
+  success: boolean;
+  message: string;
+  data?: T;
+}
