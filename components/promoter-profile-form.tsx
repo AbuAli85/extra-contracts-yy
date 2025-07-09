@@ -5,11 +5,7 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { promoterProfileSchema, type PromoterProfileFormData } from "@/lib/promoter-profile-schema"
-<<<<<<< HEAD
-import { sampleEmployers, sampleClients, promoterStatuses } from "@/lib/fixtures/promoter-profile"
-=======
 import { promoterStatuses } from "@/lib/fixtures/promoter-profile"
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 import type { PromoterProfile } from "@/lib/types" // Assuming PromoterProfile is defined in lib/types.ts
 import { useToast } from "@/hooks/use-toast"
 import { useParties, type Party } from "@/hooks/use-parties" // Import useParties hook
@@ -45,15 +41,11 @@ interface PromoterProfileFormProps {
   onFormSubmitSuccess?: (data: PromoterProfileFormData) => void // Callback for successful submission
 }
 
-<<<<<<< HEAD
-type SubmissionData = Omit<PromoterProfileFormData, "id_card_image" | "passport_image"> & {
-=======
 // This type can be simplified or removed if your API call handles the data transformation
 type SubmissionData = Omit<
   PromoterProfileFormData,
   "id_card_image" | "passport_image" | "existing_id_card_url" | "existing_passport_url"
 > & {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   id_card_url: string | null
   passport_url: string | null
   contract_valid_until: string | null
@@ -70,15 +62,11 @@ export default function PromoterProfileForm({
   const isEditMode = !!promoterToEdit
   const [isEditable, setIsEditable] = useState(!isEditMode) // Editable by default in add mode
 
-<<<<<<< HEAD
-  const { reset, ...form } = useForm<PromoterProfileFormData>({
-=======
   // Fetch parties for employer and client dropdowns
   const { data: employers, isLoading: isLoadingEmployers } = useParties("Employer")
   const { data: clients, isLoading: isLoadingClients } = useParties("Client")
 
   const form = useForm<PromoterProfileFormData>({
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     resolver: zodResolver(promoterProfileSchema),
     defaultValues: {
       name_en: "",
@@ -102,7 +90,7 @@ export default function PromoterProfileForm({
 
   useEffect(() => {
     if (isEditMode && promoterToEdit) {
-      reset({
+      form.reset({
         name_en: promoterToEdit.name_en || "",
         name_ar: promoterToEdit.name_ar || "",
         id_card_number: promoterToEdit.id_card_number || "",
@@ -127,11 +115,7 @@ export default function PromoterProfileForm({
         notes: promoterToEdit.notes || "",
       })
     }
-<<<<<<< HEAD
-  }, [isEditMode, promoterToEdit, reset])
-=======
   }, [isEditMode, promoterToEdit, form.reset])
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
   async function onSubmit(values: PromoterProfileFormData) {
     setIsSubmitting(true)
@@ -161,28 +145,10 @@ export default function PromoterProfileForm({
           ? "new_file_placeholder_url_passport.jpg" // Placeholder for new upload
           : existing_passport_url ?? null
 
-<<<<<<< HEAD
-      const { id_card_image, passport_image, ...rest } = values
-      const submissionData: SubmissionData = {
-        ...rest,
-        // This part is more about preparing data for a simulated API call.
-        // The actual URL determination (upload new, use existing, or null)
-        // would happen with your `uploadFile` function and Supabase logic.
-        // For now, we assume `values.existing_id_card_url` is correctly nulled if removed.
-        id_card_url:
-          id_card_image instanceof File
-            ? "new_file_placeholder_url_id_card.jpg" // Placeholder for new upload
-            : values.existing_id_card_url,
-        passport_url:
-          passport_image instanceof File
-            ? "new_file_placeholder_url_passport.jpg" // Placeholder for new upload
-            : values.existing_passport_url,
-=======
       const submissionData = {
         ...rest,
         id_card_url,
         passport_url,
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         contract_valid_until: values.contract_valid_until
           ? format(new Date(values.contract_valid_until), "yyyy-MM-dd")
           : null,
@@ -200,7 +166,7 @@ export default function PromoterProfileForm({
       } else {
         // await api.createPromoter(submissionData);
         toast({ title: "Success!", description: "New promoter added successfully." })
-        reset() // Reset form after successful addition
+        form.reset() // Reset form after successful addition
       }
       onFormSubmitSuccess?.(values)
     } catch (error: any) {
@@ -307,13 +273,8 @@ export default function PromoterProfileForm({
                       <FormLabel>Employer Agency</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-<<<<<<< HEAD
-                        value={field.value || ""}
-                        disabled={formDisabled}
-=======
                         value={field.value ?? ""}
                         disabled={formDisabled || isLoadingEmployers}
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -346,13 +307,8 @@ export default function PromoterProfileForm({
                       <FormLabel>Currently Outsourced To (Client)</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-<<<<<<< HEAD
-                        value={field.value || ""}
-                        disabled={formDisabled}
-=======
                         value={field.value ?? ""}
                         disabled={formDisabled || isLoadingClients}
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -448,10 +404,7 @@ export default function PromoterProfileForm({
                           placeholder="e.g., City Mall, Main Branch"
                           {...field}
                           disabled={formDisabled}
-<<<<<<< HEAD
-=======
                           value={field.value ?? ""}
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         />
                       </FormControl>
                       <FormMessage />

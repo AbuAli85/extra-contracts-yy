@@ -2,11 +2,7 @@
 import { useState, useEffect } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-<<<<<<< HEAD
-import { promoterProfileSchema, type PromoterProfileFormData } from "@/lib/promoter-profile-schema"
-=======
 import { promoterProfileSchema, type PromoterProfileFormData, type PromoterStatus } from "@/lib/promoter-profile-schema"
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 import { promoterStatusesList } from "@/types/custom"
 import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
@@ -82,11 +78,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
   const isEditScreen = !!promoterToEdit
   const [isEditable, setIsEditable] = useState(!isEditScreen)
 
-<<<<<<< HEAD
-  const { reset, ...form } = useForm<PromoterProfileFormData>({
-=======
   const form = useForm<PromoterProfileFormData>({
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     resolver: zodResolver(promoterProfileSchema),
     defaultValues: {
       name_en: "",
@@ -119,7 +111,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
 
   useEffect(() => {
     if (promoterToEdit) {
-      reset({
+      form.reset({
         name_en: promoterToEdit.name_en || "",
         name_ar: promoterToEdit.name_ar || "",
         id_card_number: promoterToEdit.id_card_number || "",
@@ -133,21 +125,13 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         passport_expiry_date: promoterToEdit.passport_expiry_date
           ? parseISO(promoterToEdit.passport_expiry_date)
           : null,
-<<<<<<< HEAD
-        status: promoterToEdit.status || "active",
-=======
         status: (promoterToEdit.status as PromoterStatus) || "active",
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         notify_days_before_id_expiry: promoterToEdit.notify_days_before_id_expiry ?? 30,
         notify_days_before_passport_expiry: promoterToEdit.notify_days_before_passport_expiry ?? 90,
         notes: promoterToEdit.notes || "",
       })
     } else {
-<<<<<<< HEAD
-      reset({
-=======
       form.reset({
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         name_en: "",
         name_ar: "",
         id_card_number: "",
@@ -163,11 +147,7 @@ export default function PromoterForm({ promoterToEdit, onFormSubmit }: PromoterF
         notes: "",
       })
     }
-<<<<<<< HEAD
-  }, [promoterToEdit, reset])
-=======
   }, [promoterToEdit, form.reset])
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
   const uploadFile = async (
     file: File | null | undefined,

@@ -69,11 +69,7 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
         name_en: partyToEdit.name_en || "",
         name_ar: partyToEdit.name_ar || "",
         crn: partyToEdit.crn || "",
-<<<<<<< HEAD
-        type: (partyToEdit.type as "Employer" | "Client" | "Both") || "Employer",
-=======
         type: (partyToEdit.type as "Employer" | "Client") || "Employer",
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         role: partyToEdit.role || "",
         cr_expiry_date: partyToEdit.cr_expiry_date ? parseISO(partyToEdit.cr_expiry_date) : undefined,
         contact_person: partyToEdit.contact_person || "",
@@ -107,29 +103,17 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
         notes: "",
       })
     }
-<<<<<<< HEAD
   }, [partyToEdit, reset])
-=======
-  }, [partyToEdit, form.reset])
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
   async function onSubmit(values: PartyFormData) {
     setIsSubmitting(true)
     try {
       const partyData: Omit<Party, "id" | "created_at"> = {
-<<<<<<< HEAD
-        name_en: values.name_en,
-        name_ar: values.name_ar,
-        crn: values.crn,
-        type: values.type,
-        role: values.role,
-=======
         name_en: values.name_en || "",
         name_ar: values.name_ar || "",
         crn: values.crn || "",
         type: values.type as "Employer" | "Client",
         role: values.role || null,
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         cr_expiry_date: values.cr_expiry_date ? format(values.cr_expiry_date, 'yyyy-MM-dd') : null,
         contact_person: values.contact_person || null,
         contact_email: values.contact_email || null,
@@ -229,10 +213,6 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
                         <SelectContent>
                           <SelectItem value="Employer">Employer</SelectItem>
                           <SelectItem value="Client">Client</SelectItem>
-<<<<<<< HEAD
-                          <SelectItem value="Both">Both</SelectItem>
-=======
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -310,11 +290,7 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
                       <FormControl>
                         <DatePickerWithManualInput
                           date={field.value}
-<<<<<<< HEAD
                           onDateChange={field.onChange}
-=======
-                          setDate={field.onChange}
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                           placeholder="Select expiry date"
                         />
                       </FormControl>
@@ -362,11 +338,7 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
                     <FormControl>
                       <DatePickerWithManualInput
                         date={field.value}
-<<<<<<< HEAD
                         onDateChange={field.onChange}
-=======
-                        setDate={field.onChange}
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         placeholder="Select license expiry date"
                       />
                     </FormControl>
