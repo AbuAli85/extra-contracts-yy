@@ -206,3 +206,28 @@ export const contractGeneratorSchema = z
       path: ["email"],
     }
   )
+
+// Example contract form sections (update as needed for your form)
+export const CONTRACT_FORM_SECTIONS = [
+  {
+    title: "Parties",
+    fields: ["first_party_id", "second_party_id", "promoter_id"],
+    required: true,
+  },
+  {
+    title: "Job Details",
+    fields: ["job_title", "department", "contract_type", "work_location"],
+    required: true,
+  },
+  {
+    title: "Compensation",
+    fields: ["basic_salary", "currency"],
+    required: false,
+  },
+  // Add more sections as needed
+]
+
+// Returns all required fields from CONTRACT_FORM_SECTIONS
+export function getRequiredFields() {
+  return CONTRACT_FORM_SECTIONS.filter((section) => section.required).flatMap((section) => section.fields)
+}
