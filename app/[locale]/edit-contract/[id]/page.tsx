@@ -507,18 +507,11 @@ export default function EditContractPage() {
                         <SelectValue placeholder="Currency" />
                       </SelectTrigger>
                       <SelectContent>
-<<<<<<< HEAD
+                        <SelectItem value="AED">AED</SelectItem>
                         <SelectItem value="USD">USD</SelectItem>
                         <SelectItem value="EUR">EUR</SelectItem>
                         <SelectItem value="SAR">SAR</SelectItem>
-                        <SelectItem value="AED">AED</SelectItem>
-=======
                         <SelectItem value="OMR">OMR</SelectItem>
-                        <SelectItem value="AED">AED</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="SAR">SAR</SelectItem>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       </SelectContent>
                     </Select>
                   </div>

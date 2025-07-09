@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 "use client"
 import { useEffect, useState } from "react"
 import DashboardLayout from "@/components/dashboard/dashboard-layout"
@@ -189,10 +188,4 @@ export default function DashboardPage() {
       </div>
     </DashboardLayout>
   )
-=======
-import DashboardContent from "@/components/dashboard/dashboard-content"
-
-export default function DashboardPage() {
-  return <DashboardContent />
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 }
