@@ -37,6 +37,18 @@ import {
 import { useParties, type Party as PartyType } from "@/hooks/use-parties"
 import { usePromoters } from "@/hooks/use-promoters"
 import type { Promoter } from "@/types/custom"
+<<<<<<< HEAD
+=======
+import { 
+  JOB_TITLES, 
+  DEPARTMENTS, 
+  CONTRACT_TYPES, 
+  CURRENCIES, 
+  WORK_LOCATIONS,
+  getOptionLabel 
+} from "@/constants/contract-options"
+import { validateContractData } from "@/lib/contract-utils"
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
 interface ContractGeneratorFormProps {
   /** Existing contract when editing; new contract if undefined. */
@@ -57,6 +69,7 @@ export default function ContractGeneratorForm({
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
+<<<<<<< HEAD
   // Load parties & promoters
   const {
     data: employerParties,
@@ -65,10 +78,23 @@ export default function ContractGeneratorForm({
   } = useParties("Employer")
   const {
     data: clientParties,
+=======
+  // Load parties & promoters - Party A (Client) and Party B (Employer)
+  const {
+    data: clientParties, // Party A
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     isLoading: isLoadingClientParties,
     error: clientPartiesError,
   } = useParties("Client")
   const {
+<<<<<<< HEAD
+=======
+    data: employerParties, // Party B  
+    isLoading: isLoadingEmployerParties,
+    error: employerPartiesError,
+  } = useParties("Employer")
+  const {
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     data: promoters,
     isLoading: isLoadingPromoters,
     error: promotersError,
@@ -91,11 +117,22 @@ export default function ContractGeneratorForm({
       email: "",
       job_title: "",
       work_location: "",
+<<<<<<< HEAD
     },
   })
 
   const [selectedEmployer, setSelectedEmployer] = useState<PartyType | null>(null)
   const [selectedClient, setSelectedClient] = useState<PartyType | null>(null)
+=======
+      department: "",
+      contract_type: "",
+      currency: "",
+    },
+  })
+
+  const [selectedClient, setSelectedClient] = useState<PartyType | null>(null) // Party A
+  const [selectedEmployer, setSelectedEmployer] = useState<PartyType | null>(null) // Party B
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
   // Build combobox options
   useEffect(() => {
@@ -125,6 +162,12 @@ export default function ContractGeneratorForm({
         email: contract.email ?? "",
         job_title: contract.job_title ?? "",
         work_location: contract.work_location ?? "",
+<<<<<<< HEAD
+=======
+        department: contract.department ?? "",
+        contract_type: contract.contract_type ?? "",
+        currency: contract.currency ?? "",
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
       })
     }
   }, [contract, reset])
@@ -143,17 +186,26 @@ export default function ContractGeneratorForm({
     }
   }, [watchedPromoterId, promoters])
 
+<<<<<<< HEAD
   // When employer is selected, auto-fill fields
   useEffect(() => {
     if (form.watch('first_party_id') && employerParties) {
       const party = employerParties.find(p => p.id === form.watch('first_party_id'))
       setSelectedEmployer(party || null)
+=======
+  // When Party A (Client) is selected, auto-fill fields
+  useEffect(() => {
+    if (form.watch('first_party_id') && clientParties) {
+      const party = clientParties.find(p => p.id === form.watch('first_party_id'))
+      setSelectedClient(party || null)
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
       if (party) {
         form.setValue('first_party_name_en', party.name_en)
         form.setValue('first_party_name_ar', party.name_ar)
         form.setValue('first_party_crn', party.crn)
       }
     }
+<<<<<<< HEAD
   }, [form.watch('first_party_id'), employerParties])
 
   // When client is selected, auto-fill fields
@@ -161,13 +213,26 @@ export default function ContractGeneratorForm({
     if (form.watch('second_party_id') && clientParties) {
       const party = clientParties.find(p => p.id === form.watch('second_party_id'))
       setSelectedClient(party || null)
+=======
+  }, [form.watch('first_party_id'), clientParties])
+
+  // When Party B (Employer) is selected, auto-fill fields
+  useEffect(() => {
+    if (form.watch('second_party_id') && employerParties) {
+      const party = employerParties.find(p => p.id === form.watch('second_party_id'))
+      setSelectedEmployer(party || null)
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
       if (party) {
         form.setValue('second_party_name_en', party.name_en)
         form.setValue('second_party_name_ar', party.name_ar)
         form.setValue('second_party_crn', party.crn)
       }
     }
+<<<<<<< HEAD
   }, [form.watch('second_party_id'), clientParties])
+=======
+  }, [form.watch('second_party_id'), employerParties])
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
   // When promoter is selected, auto-fill fields
   useEffect(() => {
@@ -203,7 +268,11 @@ export default function ContractGeneratorForm({
   }, [employerPartiesError, clientPartiesError, promotersError, toast])
 
   // Mutation: call your API routes instead of supabase.from(...)
+<<<<<<< HEAD
   const { mutate: saveContract, isLoading: isSubmitting } = useMutation({
+=======
+  const mutation = useMutation({
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     mutationFn: async (values: ContractGeneratorFormData) => {
       const payload = {
         first_party_id: values.first_party_id,
@@ -214,7 +283,13 @@ export default function ContractGeneratorForm({
         email: values.email,
         job_title: values.job_title,
         work_location: values.work_location,
+<<<<<<< HEAD
 
+=======
+        department: values.department,
+        contract_type: values.contract_type,
+        currency: values.currency,
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
       }
 
       // UPDATE
@@ -256,6 +331,7 @@ export default function ContractGeneratorForm({
       queryClient.invalidateQueries({ queryKey: ["contracts"] })
       onFormSubmit?.()
 
+<<<<<<< HEAD
       // trigger webhook if needed
       const hookUrl = process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL
       if (hookUrl) {
@@ -268,6 +344,26 @@ export default function ContractGeneratorForm({
         } catch (err) {
           console.error("Make webhook error:", err)
         }
+=======
+      // trigger webhook processing using the new service
+      try {
+        // Import the webhook service dynamically to avoid SSR issues
+        const { WebhookService } = await import('@/lib/webhook-service')
+        
+        // Process contract through both webhooks
+        await WebhookService.processContract({
+          contract_id: data.id,
+          contract_number: data.contract_number,
+          client_name: data.client_name || 'N/A',
+          employer_name: data.employer_name || 'N/A',
+          status: 'processing'
+        })
+        
+        console.log('✅ Webhook processing initiated for contract:', data.id)
+      } catch (err) {
+        console.error('❌ Webhook processing error:', err)
+        // Don't fail the contract creation, just log the error
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
       }
     },
     onError: (error: any) => {
@@ -278,9 +374,30 @@ export default function ContractGeneratorForm({
       })
     },
   })
+<<<<<<< HEAD
 
   const onSubmit = (values: ContractGeneratorFormData) => {
     saveContract(values)
+=======
+  const { mutate: saveContract } = mutation
+  const isSubmitting = mutation.status === "pending"
+
+  const onSubmit = (values: ContractGeneratorFormData) => {
+    // Validate contract data before submission
+    const validation = validateContractData(values)
+    if (!validation.isValid) {
+      return toast({
+        title: "Validation Error",
+        description: validation.errors?.join("; ") || "Invalid contract data.",
+        variant: "destructive",
+      })
+    }
+
+    // Proceed with contract submission (no duration analysis)
+    saveContract({
+      ...values,
+    })
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   }
 
   const isLoadingInitialData =
@@ -314,7 +431,11 @@ export default function ContractGeneratorForm({
   }
 
   return (
+<<<<<<< HEAD
     <Form {...form}>
+=======
+    <Form {...form} reset={reset}>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
         {/* Contracting Parties */}
         <motion.div
@@ -332,6 +453,7 @@ export default function ContractGeneratorForm({
               name="first_party_id"
               render={({ field }) => (
                 <FormItem>
+<<<<<<< HEAD
                   <FormLabel>Party A (Employer)</FormLabel>
                   <Select
                     onValueChange={field.onChange}
@@ -383,6 +505,9 @@ export default function ContractGeneratorForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Party B (Client)</FormLabel>
+=======
+                  <FormLabel>Party A (Client)</FormLabel>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                   <Select
                     onValueChange={field.onChange}
                     value={field.value ?? ""}
@@ -390,7 +515,11 @@ export default function ContractGeneratorForm({
                   >
                     <FormControl>
                       <SelectTrigger
+<<<<<<< HEAD
                         className={getInputStateClasses("second_party_id")}
+=======
+                        className={getInputStateClasses("first_party_id")}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       >
                         <SelectValue
                           placeholder={
@@ -426,6 +555,59 @@ export default function ContractGeneratorForm({
                 </FormItem>
               )}
             />
+<<<<<<< HEAD
+=======
+
+            <FormField
+              control={form.control}
+              name="second_party_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Party B (Employer)</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? ""}
+                    disabled={isSubmitting || isLoadingEmployerParties}
+                  >
+                    <FormControl>
+                      <SelectTrigger
+                        className={getInputStateClasses("second_party_id")}
+                      >
+                        <SelectValue
+                          placeholder={
+                            isLoadingEmployerParties
+                              ? "Loading Employers..."
+                              : "Select Employer"
+                          }
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {isLoadingEmployerParties && (
+                        <SelectItem value="loading" disabled>
+                          Loading...
+                        </SelectItem>
+                      )}
+                      {!isLoadingEmployerParties &&
+                        employerParties?.length === 0 && (
+                          <SelectItem value="no-data" disabled>
+                            No employers found
+                          </SelectItem>
+                        )}
+                      {!isLoadingEmployerParties &&
+                        employerParties?.map((party: PartyType) => (
+                          <SelectItem key={party.id} value={party.id}>
+                            {party.name_en} / {party.name_ar}{" "}
+                            {party.crn && `(CRN: ${party.crn})`}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
           </div>
         </motion.div>
 
@@ -456,7 +638,10 @@ export default function ContractGeneratorForm({
                   searchPlaceholder="Search promoters..."
                   emptyStateMessage="No promoter found."
                   disabled={isSubmitting || isLoadingPromoters}
+<<<<<<< HEAD
                   inputClassName={getInputStateClasses("promoter_id")}
+=======
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 />
                 <FormMessage />
               </FormItem>
@@ -507,9 +692,12 @@ export default function ContractGeneratorForm({
                     dateFormat="dd-MM-yyyy"
                     placeholder="dd-MM-yyyy"
                     disabled={isSubmitting}
+<<<<<<< HEAD
                     inputClassName={getInputStateClasses(
                       "contract_start_date"
                     )}
+=======
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                   />
                   <FormMessage />
                 </FormItem>
@@ -533,9 +721,12 @@ export default function ContractGeneratorForm({
                           form.getValues("contract_start_date")!
                         : false) || isSubmitting
                     }
+<<<<<<< HEAD
                     inputClassName={getInputStateClasses(
                       "contract_end_date"
                     )}
+=======
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                   />
                   <FormMessage />
                 </FormItem>
@@ -565,7 +756,11 @@ export default function ContractGeneratorForm({
                     placeholder="contact@example.com"
                     {...field}
                     disabled={isSubmitting}
+<<<<<<< HEAD
                     className={getInputStateClasses("email")}
+=======
+                    className={getInputStateClasses("email") || ""}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                   />
                 </FormControl>
                 <FormDescription>
@@ -581,6 +776,7 @@ export default function ContractGeneratorForm({
             name="job_title"
             render={({ field }) => (
               <FormItem>
+<<<<<<< HEAD
                 <FormLabel>Job Title (Optional)</FormLabel>
                 <FormControl>
                   <Input
@@ -590,6 +786,110 @@ export default function ContractGeneratorForm({
                     className={getInputStateClasses("job_title")}
                   />
                 </FormControl>
+=======
+                <FormLabel>Job Title</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <FormControl>
+                    <SelectTrigger className={getInputStateClasses("job_title")}>
+                      <SelectValue placeholder="Select a job title" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {JOB_TITLES.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Choose the job title for this contract position
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="department"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Department</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <FormControl>
+                    <SelectTrigger className={getInputStateClasses("department")}>
+                      <SelectValue placeholder="Select a department" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {DEPARTMENTS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Choose the department this position belongs to
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="contract_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contract Type</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <FormControl>
+                    <SelectTrigger className={getInputStateClasses("contract_type")}>
+                      <SelectValue placeholder="Select contract type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {CONTRACT_TYPES.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Choose the type of employment contract
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="currency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Currency</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <FormControl>
+                    <SelectTrigger className={getInputStateClasses("currency")}>
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {CURRENCIES.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Choose the currency for this contract
+                </FormDescription>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 <FormMessage />
               </FormItem>
             )}
@@ -600,6 +900,7 @@ export default function ContractGeneratorForm({
             name="work_location"
             render={({ field }) => (
               <FormItem>
+<<<<<<< HEAD
                 <FormLabel>Work Location (Optional)</FormLabel>
                 <FormControl>
                   <Input
@@ -609,6 +910,26 @@ export default function ContractGeneratorForm({
                     className={getInputStateClasses("work_location")}
                   />
                 </FormControl>
+=======
+                <FormLabel>Work Location</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <FormControl>
+                    <SelectTrigger className={getInputStateClasses("work_location")}>
+                      <SelectValue placeholder="Select work location" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {WORK_LOCATIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Choose the primary work location for this position
+                </FormDescription>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 <FormMessage />
               </FormItem>
             )}

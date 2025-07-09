@@ -473,7 +473,11 @@ export default function UsersPage() {
                       <th
                         className="px-4 py-2 text-left cursor-pointer select-none"
                         onClick={() => handleSort("email")}
+<<<<<<< HEAD
                         aria-sort={sortBy === "email" ? sortDir : undefined}
+=======
+                        aria-sort={sortBy === "email" ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         tabIndex={0}
                       >
                         Email{" "}
@@ -487,7 +491,11 @@ export default function UsersPage() {
                       <th
                         className="px-4 py-2 text-left cursor-pointer select-none"
                         onClick={() => handleSort("role")}
+<<<<<<< HEAD
                         aria-sort={sortBy === "role" ? sortDir : undefined}
+=======
+                        aria-sort={sortBy === "role" ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         tabIndex={0}
                       >
                         Role{" "}
@@ -501,7 +509,11 @@ export default function UsersPage() {
                       <th
                         className="px-4 py-2 text-left cursor-pointer select-none"
                         onClick={() => handleSort("status")}
+<<<<<<< HEAD
                         aria-sort={sortBy === "status" ? sortDir : undefined}
+=======
+                        aria-sort={sortBy === "status" ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         tabIndex={0}
                       >
                         Status{" "}
@@ -515,7 +527,11 @@ export default function UsersPage() {
                       <th
                         className="px-4 py-2 text-left cursor-pointer select-none"
                         onClick={() => handleSort("created_at")}
+<<<<<<< HEAD
                         aria-sort={sortBy === "created_at" ? sortDir : undefined}
+=======
+                        aria-sort={sortBy === "created_at" ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         tabIndex={0}
                       >
                         Created At{" "}
@@ -529,7 +545,11 @@ export default function UsersPage() {
                       <th
                         className="px-4 py-2 text-left cursor-pointer select-none"
                         onClick={() => handleSort("last_login")}
+<<<<<<< HEAD
                         aria-sort={sortBy === "last_login" ? sortDir : undefined}
+=======
+                        aria-sort={sortBy === "last_login" ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         tabIndex={0}
                       >
                         Last Login{" "}

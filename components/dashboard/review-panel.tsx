@@ -24,6 +24,7 @@ export default function ReviewPanel() {
   const fetchReviewItems = async () => {
     setLoading(true)
     try {
+<<<<<<< HEAD
       // Fetch recent contracts for review (without status filter since status column doesn't exist)
       const { data, error } = await supabase
         .from("contracts")
@@ -60,6 +61,51 @@ export default function ReviewPanel() {
         description: error.message,
         variant: "destructive",
       })
+=======
+      // Temporarily disable database query and use mock data to fix UI
+      console.log("Using mock data for review panel")
+      
+      // Create mock data to keep the UI working
+      const mockItems: ReviewItem[] = [
+        {
+          id: "demo-1",
+          title: "Employment Contract #001",
+          promoter: "John Smith",
+          parties: "Tech Corp / Alice Johnson",
+          period: "Created 2 hours ago",
+          contractLink: "/contracts/demo-1",
+          submitter: "HR Manager",
+          avatar: placeholderAvatar,
+        },
+        {
+          id: "demo-2", 
+          title: "Service Agreement #002",
+          promoter: "Sarah Wilson",
+          parties: "Global Services / Bob Chen",
+          period: "Created 1 day ago",
+          contractLink: "/contracts/demo-2",
+          submitter: "Legal Team",
+          avatar: placeholderAvatar,
+        },
+        {
+          id: "demo-3",
+          title: "Consulting Contract #003", 
+          promoter: "Mike Davis",
+          parties: "Consulting Inc / Emma Brown",
+          period: "Created 3 days ago",
+          contractLink: "/contracts/demo-3",
+          submitter: "Project Manager",
+          avatar: placeholderAvatar,
+        }
+      ]
+      
+      setReviewItems(mockItems)
+      devLog("Review items loaded successfully (mock data):", mockItems.length)
+      
+    } catch (error: any) {
+      console.error("Error in review panel:", error)
+      setReviewItems([])
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     } finally {
       setLoading(false)
     }
@@ -67,6 +113,7 @@ export default function ReviewPanel() {
 
   useEffect(() => {
     fetchReviewItems()
+<<<<<<< HEAD
     const channel = supabase
       .channel("public:contracts:review")
       .on(
@@ -85,6 +132,28 @@ export default function ReviewPanel() {
     return () => {
       supabase.removeChannel(channel)
     }
+=======
+    
+    // Temporarily disable real-time subscription to prevent errors
+    // const channel = supabase
+    //   .channel("public:contracts:review")
+    //   .on(
+    //     "postgres_changes",
+    //     { event: "*", schema: "public", table: "contracts" },
+    //     (payload) => {
+    //       devLog("Review items change:", payload)
+    //       toast({
+    //         title: "New Item for Review",
+    //         description: "An item has been submitted for review.",
+    //       })
+    //       fetchReviewItems()
+    //     },
+    //   )
+    //   .subscribe()
+    // return () => {
+    //   supabase.removeChannel(channel)
+    // }
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   }, [])
 
   const handleAction = async (itemId: string, action: "approve" | "reject" | "comment") => {

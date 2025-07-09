@@ -192,6 +192,7 @@ export default function ContractDetailPage() {
                     <div>
                       <label className="text-sm font-medium text-gray-500">Name (English)</label>
                       <p className="font-semibold text-gray-900 mt-1">
+<<<<<<< HEAD
                         {contract?.first_party_name_en || contract?.employer?.name_en || "Not specified"}
                       </p>
                     </div>
@@ -201,10 +202,22 @@ export default function ContractDetailPage() {
                         <label className="text-sm font-medium text-gray-500">Name (Arabic)</label>
                         <p className="font-semibold text-gray-900 mt-1" dir="rtl">
                           {contract?.first_party_name_ar || contract?.employer?.name_ar}
+=======
+                        {contract?.first_party?.name_en || "Not specified"}
+                      </p>
+                    </div>
+                    
+                    {contract?.first_party?.name_ar && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Name (Arabic)</label>
+                        <p className="font-semibold text-gray-900 mt-1" dir="rtl">
+                          {contract.first_party.name_ar}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         </p>
                       </div>
                     )}
                     
+<<<<<<< HEAD
                     {contract?.employer?.crn && (
                       <div>
                         <label className="text-sm font-medium text-gray-500">Commercial Registration Number</label>
@@ -213,15 +226,30 @@ export default function ContractDetailPage() {
                     )}
                     
                     {contract?.employer?.email && (
+=======
+                    {contract?.first_party?.crn && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Commercial Registration Number</label>
+                        <p className="font-mono text-sm text-gray-700 mt-1">{contract.first_party.crn}</p>
+                      </div>
+                    )}
+                    
+                    {contract?.first_party?.email && (
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       <div>
                         <label className="text-sm font-medium text-gray-500">Email</label>
                         <p className="text-gray-700 mt-1 flex items-center gap-2">
                           <MailIcon className="h-4 w-4 text-gray-500" />
+<<<<<<< HEAD
                           {contract.employer.email}
+=======
+                          {contract.first_party.email}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         </p>
                       </div>
                     )}
                     
+<<<<<<< HEAD
                     {contract?.employer?.phone && (
                       <div>
                         <label className="text-sm font-medium text-gray-500">Phone</label>
@@ -230,16 +258,31 @@ export default function ContractDetailPage() {
                     )}
                     
                     {contract?.employer?.address && (
+=======
+                    {contract?.first_party?.phone && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Phone</label>
+                        <p className="text-gray-700 mt-1">{contract.first_party.phone}</p>
+                      </div>
+                    )}
+                    
+                    {contract?.first_party?.address && (
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       <div>
                         <label className="text-sm font-medium text-gray-500">Address</label>
                         <p className="text-gray-700 mt-1 flex items-start gap-2">
                           <MapPinIcon className="h-4 w-4 text-gray-500 mt-0.5" />
+<<<<<<< HEAD
                           {contract.employer.address}
+=======
+                          {contract.first_party.address}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         </p>
                       </div>
                     )}
                   </div>
                   
+<<<<<<< HEAD
                   {contract?.employer_id && (
                     <div className="pt-3 border-t border-gray-200">
                       <label className="text-sm font-medium text-gray-500">Employer ID</label>
@@ -248,6 +291,16 @@ export default function ContractDetailPage() {
                           {contract.employer_id}
                         </code>
                         <Button size="sm" variant="ghost" onClick={() => copyToClipboard(contract.employer_id || '')}>
+=======
+                  {contract?.first_party_id && (
+                    <div className="pt-3 border-t border-gray-200">
+                      <label className="text-sm font-medium text-gray-500">First Party ID</label>
+                      <div className="mt-1 flex items-center gap-2">
+                        <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono flex-1">
+                          {contract.first_party_id}
+                        </code>
+                        <Button size="sm" variant="ghost" onClick={() => copyToClipboard(contract.first_party_id || '')}>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                           <CopyIcon className="h-3 w-3" />
                         </Button>
                       </div>
@@ -269,6 +322,7 @@ export default function ContractDetailPage() {
                     <div>
                       <label className="text-sm font-medium text-gray-500">Name (English)</label>
                       <p className="font-semibold text-gray-900 mt-1">
+<<<<<<< HEAD
                         {contract?.second_party_name_en || contract?.client?.name_en || "Not specified"}
                       </p>
                     </div>
@@ -278,6 +332,17 @@ export default function ContractDetailPage() {
                         <label className="text-sm font-medium text-gray-500">Name (Arabic)</label>
                         <p className="font-semibold text-gray-900 mt-1" dir="rtl">
                           {contract?.second_party_name_ar || contract?.client?.name_ar}
+=======
+                        {contract?.second_party?.name_en || "Not specified"}
+                      </p>
+                    </div>
+                    
+                    {contract?.second_party?.name_ar && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Name (Arabic)</label>
+                        <p className="font-semibold text-gray-900 mt-1" dir="rtl">
+                          {contract.second_party.name_ar}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         </p>
                       </div>
                     )}
@@ -289,16 +354,25 @@ export default function ContractDetailPage() {
                       </div>
                     )}
                     
+<<<<<<< HEAD
                     {(contract?.email || contract?.client?.email) && (
+=======
+                    {(contract?.email || contract?.second_party?.email) && (
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       <div>
                         <label className="text-sm font-medium text-gray-500">Email</label>
                         <p className="text-gray-700 mt-1 flex items-center gap-2">
                           <MailIcon className="h-4 w-4 text-gray-500" />
+<<<<<<< HEAD
                           {contract?.email || contract?.client?.email}
+=======
+                          {contract?.email || contract?.second_party?.email}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         </p>
                       </div>
                     )}
                     
+<<<<<<< HEAD
                     {contract?.client?.phone && (
                       <div>
                         <label className="text-sm font-medium text-gray-500">Phone</label>
@@ -307,16 +381,31 @@ export default function ContractDetailPage() {
                     )}
                     
                     {contract?.client?.address && (
+=======
+                    {contract?.second_party?.phone && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Phone</label>
+                        <p className="text-gray-700 mt-1">{contract.second_party.phone}</p>
+                      </div>
+                    )}
+                    
+                    {contract?.second_party?.address && (
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       <div>
                         <label className="text-sm font-medium text-gray-500">Address</label>
                         <p className="text-gray-700 mt-1 flex items-start gap-2">
                           <MapPinIcon className="h-4 w-4 text-gray-500 mt-0.5" />
+<<<<<<< HEAD
                           {contract.client.address}
+=======
+                          {contract.second_party.address}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         </p>
                       </div>
                     )}
                   </div>
                   
+<<<<<<< HEAD
                   {contract?.client_id && (
                     <div className="pt-3 border-t border-gray-200">
                       <label className="text-sm font-medium text-gray-500">Client ID</label>
@@ -325,6 +414,16 @@ export default function ContractDetailPage() {
                           {contract.client_id}
                         </code>
                         <Button size="sm" variant="ghost" onClick={() => copyToClipboard(contract.client_id || '')}>
+=======
+                  {contract?.second_party_id && (
+                    <div className="pt-3 border-t border-gray-200">
+                      <label className="text-sm font-medium text-gray-500">Second Party ID</label>
+                      <div className="mt-1 flex items-center gap-2">
+                        <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono flex-1">
+                          {contract.second_party_id}
+                        </code>
+                        <Button size="sm" variant="ghost" onClick={() => copyToClipboard(contract.second_party_id || '')}>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                           <CopyIcon className="h-3 w-3" />
                         </Button>
                       </div>
@@ -335,11 +434,16 @@ export default function ContractDetailPage() {
             </div>
 
             {/* Promoters Section */}
+<<<<<<< HEAD
             {(contract?.promoters && contract.promoters.length > 0) || contract?.promoter_id ? (
+=======
+            {contract?.promoters && contract.promoters.length > 0 && (
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <UsersIcon className="h-5 w-5" />
+<<<<<<< HEAD
                     Contract Promoters
                   </CardTitle>
                 </CardHeader>
@@ -400,10 +504,79 @@ export default function ContractDetailPage() {
                       <p className="text-sm text-gray-500">
                         Detailed promoter information is not available.
                       </p>
+=======
+                    Contract Promoter
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="p-4 border border-gray-200 rounded-lg">
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Name (English)</label>
+                        <h4 className="font-semibold text-gray-900 mt-1">
+                          {contract.promoters[0].name_en || "Unnamed Promoter"}
+                        </h4>
+                      </div>
+                      
+                      {contract.promoters[0].name_ar && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Name (Arabic)</label>
+                          <p className="font-semibold text-gray-900 mt-1" dir="rtl">{contract.promoters[0].name_ar}</p>
+                        </div>
+                      )}
+                      
+                      {contract.promoters[0].id_card_number && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">ID Number</label>
+                          <p className="font-mono text-sm text-gray-700 mt-1">{contract.promoters[0].id_card_number}</p>
+                        </div>
+                      )}
+                      
+                      {contract.promoters[0].email && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Email</label>
+                          <p className="text-gray-700 mt-1 flex items-center gap-2">
+                            <MailIcon className="h-4 w-4 text-gray-500" />
+                            {contract.promoters[0].email}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {contract.promoters[0].phone && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Phone</label>
+                          <p className="text-gray-700 mt-1">{contract.promoters[0].phone}</p>
+                        </div>
+                      )}
+                      
+                      {contract.promoters[0].status && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Status</label>
+                          <div className="text-gray-700 mt-1">
+                            <StatusBadge status={contract.promoters[0].status} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {contract?.promoter_id && (
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <label className="text-sm font-medium text-gray-500">Promoter ID</label>
+                      <div className="mt-1 flex items-center gap-2">
+                        <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono flex-1">
+                          {contract.promoter_id}
+                        </code>
+                        <Button size="sm" variant="ghost" onClick={() => copyToClipboard(contract.promoter_id || '')}>
+                          <CopyIcon className="h-3 w-3" />
+                        </Button>
+                      </div>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                     </div>
                   )}
                 </CardContent>
               </Card>
+<<<<<<< HEAD
             ) : (
               <Card className="shadow-lg">
                 <CardHeader>
@@ -419,6 +592,8 @@ export default function ContractDetailPage() {
                   </div>
                 </CardContent>
               </Card>
+=======
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
             )}
           </TabsContent>
 

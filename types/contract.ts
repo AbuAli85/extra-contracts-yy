@@ -10,8 +10,13 @@ export interface ContractDetail {
   email?: string
   contract_number?: string
   id_card_number?: string
+<<<<<<< HEAD
   employer_id?: string
   client_id?: string
+=======
+  first_party_id?: string
+  second_party_id?: string
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   promoter_id?: string
   first_party_name_en?: string
   first_party_name_ar?: string
@@ -24,9 +29,39 @@ export interface ContractDetail {
   currency?: string
   contract_type?: string
   department?: string
+<<<<<<< HEAD
   employer?: Party
   client?: Party
   promoters?: Promoter[]
+=======
+  // New structure from query with relationships
+  first_party?: {
+    id: string
+    name_en: string
+    name_ar: string
+    crn: string
+    type?: "Employer" | "Client" | "Generic" | null
+  } | null
+  second_party?: {
+    id: string
+    name_en: string
+    name_ar: string
+    crn: string
+    type?: "Employer" | "Client" | "Generic" | null
+  } | null
+  promoters?: {
+    id: string
+    name_en: string
+    name_ar: string
+    id_card_number: string
+    id_card_url?: string | null
+    passport_url?: string | null
+    status?: string | null
+  } | null
+  // Legacy fields for backward compatibility
+  employer?: Party
+  client?: Party
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 }
 
 export interface Party {

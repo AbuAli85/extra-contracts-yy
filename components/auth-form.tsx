@@ -104,6 +104,10 @@ export default function AuthForm({ locale }: AuthFormProps) {
         console.error("Sign up error:", error)
       toast({ title: "Sign Up Error", description: error.message, variant: "destructive" })
     } else if (user) {
+<<<<<<< HEAD
+=======
+      const fullName = email.split('@')[0];
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
       // Insert into profiles
       const { error: profileError } = await supabase.from('profiles').insert([
         { id: user.id, full_name: fullName, role: 'user' }

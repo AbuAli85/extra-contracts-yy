@@ -14,9 +14,35 @@ import { useEffect } from "react"
 // Detailed contract type including joined relational data
 // This mirrors what the `fetchContracts` query selects
 export type ContractWithRelations = Database["public"]["Tables"]["contracts"]["Row"] & {
+<<<<<<< HEAD
   employer?: Database["public"]["Tables"]["parties"]["Row"] | null
   client?: Database["public"]["Tables"]["parties"]["Row"] | null
   promoters?: Database["public"]["Tables"]["promoters"]["Row"][] | null
+=======
+  first_party?: {
+    id: string
+    name_en: string
+    name_ar: string
+    crn: string
+    type?: "Employer" | "Client" | "Generic" | null
+  } | null
+  second_party?: {
+    id: string
+    name_en: string
+    name_ar: string
+    crn: string
+    type?: "Employer" | "Client" | "Generic" | null
+  } | null
+  promoters?: {
+    id: string
+    name_en: string
+    name_ar: string
+    id_card_number: string
+    id_card_url?: string | null
+    passport_url?: string | null
+    status?: string | null
+  } | null
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 }
 // Minimal fields required when creating a new contract
 export type ContractInsert = Database["public"]["Tables"]["contracts"]["Insert"]
@@ -24,22 +50,60 @@ export type ContractInsert = Database["public"]["Tables"]["contracts"]["Insert"]
 // --- Queries ---
 // Fetch all contracts with their related party and promoter info
 const fetchContracts = async (): Promise<ContractWithRelations[]> => {
-  const { data, error } = await supabase
+  // Try the new schema first (first_party_id, second_party_id)
+  let { data, error } = await supabase
     .from("contracts")
     .select(
       `
       *,
+<<<<<<< HEAD
       employer:parties!contracts_employer_id_fkey(id,name_en,name_ar),
       client:parties!contracts_client_id_fkey(id,name_en,name_ar),
       promoters(id,name_en,name_ar)
+=======
+      first_party:parties!contracts_first_party_id_fkey(id,name_en,name_ar,crn,type),
+      second_party:parties!contracts_second_party_id_fkey(id,name_en,name_ar,crn,type),
+      promoters(id,name_en,name_ar,id_card_number,id_card_url,passport_url,status)
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     `,
     )
     .order("created_at", { ascending: false })
+
+  // If the new schema fails, try the old schema (employer_id, client_id)
+  if (error && error.message.includes('foreign key')) {
+    devLog("New schema failed, trying old schema...")
+    const { data: oldData, error: oldError } = await supabase
+      .from("contracts")
+      .select(
+        `
+        *,
+        first_party:parties!contracts_employer_id_fkey(id,name_en,name_ar,crn,type),
+        second_party:parties!contracts_client_id_fkey(id,name_en,name_ar,crn,type),
+        promoters(id,name_en,name_ar,id_card_number,id_card_url,passport_url,status)
+      `,
+      )
+      .order("created_at", { ascending: false })
+    
+    if (oldError) {
+      devLog("Both schemas failed:", oldError)
+      throw new Error(oldError.message)
+    }
+
+    data = oldData as any
+    error = null
+  }
 
   if (error) {
     devLog("Error fetching contracts:", error)
     throw new Error(error.message)
   }
+  
+  // Debug: Log the fetched data to see what we're getting
+  devLog("📊 Fetched contracts data:", data)
+  if (data && data.length > 0) {
+    devLog("📊 Sample contract structure:", data[0])
+  }
+  
   return (data as ContractWithRelations[]) || []
 }
 

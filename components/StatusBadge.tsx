@@ -2,7 +2,11 @@ import { Badge } from '@/components/ui/badge'
 import { getStatusConfig } from '@/constants/status'
 
 interface StatusBadgeProps {
+<<<<<<< HEAD
   status?: string
+=======
+  status?: string | null
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   className?: string
 }
 

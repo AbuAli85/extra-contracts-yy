@@ -19,14 +19,22 @@ const fontLexend = Lexend({
   weight: ["400", "500", "600", "700"],
 })
 
+<<<<<<< HEAD
 export default async function ClientLayout({
+=======
+export default function ClientLayout({
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   children,
   params,
 }: {
   children: React.ReactNode
   params: Promise<{ locale: string }>
 }) {
+<<<<<<< HEAD
   const { locale } = await params
+=======
+  const { locale } = params
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   const dir = locale === "ar" ? "rtl" : "ltr"
 
   return (
@@ -38,6 +46,7 @@ export default async function ClientLayout({
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
           fontInter.variable,
+<<<<<<< HEAD
           fontLexend.variable,
         )}
         suppressHydrationWarning
@@ -57,6 +66,15 @@ export default async function ClientLayout({
             {/* FOOTER */}
             <ClientFooter />
           </div>
+=======
+          fontLexend.variable
+        )}
+      >
+        <ClientProviders>
+          <ClientHeader locale={locale} />
+          <Suspense fallback={<Loading />}>{children}</Suspense>
+          <ClientFooter />
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         </ClientProviders>
       </body>
     </html>

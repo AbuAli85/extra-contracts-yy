@@ -33,8 +33,8 @@ const fileSchemaOptional = createOptionalFileSchema(
 
 export const ContractFormSchema = z
   .object({
-    firstPartyId: z.string().min(1, "First party is required."),
-    secondPartyId: z.string().min(1, "Second party is required."),
+    firstPartyId: z.string().min(1, "Party A is required."),
+    secondPartyId: z.string().min(1, "Party B is required."),
     promoterId: z.string().min(1, "Promoter is required."),
 
     contractStartDate: dateSchemaDdMmYyyy,

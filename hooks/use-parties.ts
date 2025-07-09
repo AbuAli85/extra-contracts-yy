@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast"
 import { devLog } from "@/lib/dev-log"
 
 // Define the structure of a Party based on your select query
+<<<<<<< HEAD
 export type Party = Pick<
   Database["public"]["Tables"]["parties"]["Row"],
   "id" | "name_en" | "name_ar" | "crn" | "type" | "role" | "cr_expiry_date" | 
@@ -13,6 +14,11 @@ export type Party = Pick<
 >
 
 const fetchParties = async (partyType?: "Employer" | "Client" | "Both"): Promise<Party[]> => {
+=======
+export type Party = Database["public"]["Tables"]["parties"]["Row"]
+
+const fetchParties = async (partyType?: "Employer" | "Client"): Promise<Party[]> => {
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   let query = supabase
     .from("parties")
     .select(`
@@ -35,7 +41,11 @@ const fetchParties = async (partyType?: "Employer" | "Client" | "Both"): Promise
   return data || []
 }
 
+<<<<<<< HEAD
 export const useParties = (partyType?: "Employer" | "Client" | "Both") => {
+=======
+export const useParties = (partyType?: "Employer" | "Client") => {
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   const { toast } = useToast()
   return useQuery<Party[], Error>({
     queryKey: ["parties", partyType || "all"], // Unique query key based on type

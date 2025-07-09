@@ -12,7 +12,10 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+<<<<<<< HEAD
   ResponsiveContainer,
+=======
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   Cell,
 } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -77,6 +80,7 @@ export default function ChartsSection() {
   const fetchChartData = async () => {
     setLoading(true)
     try {
+<<<<<<< HEAD
       const { data: statusResult, error: statusError } = await supabase.rpc(
         "get_contract_status_counts",
       )
@@ -98,6 +102,60 @@ export default function ChartsSection() {
           monthAr: MONTH_MAP[m.month as keyof typeof MONTH_MAP] || m.month,
         })),
       )
+=======
+      // Query contracts directly for status counts
+      const { data: contractsData, error: contractsError } = await supabase
+        .from('contracts')
+        .select('status')
+      
+      if (contractsError) throw contractsError
+      
+      // Count statuses
+      const statusCounts = contractsData?.reduce((acc: any, contract: any) => {
+        const status = contract.status || 'Unknown'
+        acc[status] = (acc[status] || 0) + 1
+        return acc
+      }, {}) || {}
+      
+      const statusData = Object.entries(statusCounts).map(([name, count]) => ({
+        name: name as string,
+        count: count as number,
+        nameAr: chartConfig[name as keyof typeof chartConfig]?.labelAr || name,
+      }))
+      
+      setStatusData(statusData)
+
+      // Query contracts for monthly data
+      const { data: monthlyContractsData, error: monthlyError } = await supabase
+        .from('contracts')
+        .select('contract_start_date, contract_value')
+        .gte('contract_start_date', new Date(new Date().getFullYear(), 0, 1).toISOString())
+      
+      if (monthlyError) throw monthlyError
+      
+      // Group by month
+      const monthlyGroups = monthlyContractsData?.reduce((acc: any, contract: any) => {
+        if (contract.contract_start_date) {
+          const date = new Date(contract.contract_start_date)
+          const month = date.toLocaleDateString('en-US', { month: 'short' })
+          if (!acc[month]) {
+            acc[month] = { count: 0, revenue: 0 }
+          }
+          acc[month].count += 1
+          acc[month].revenue += contract.contract_value || 0
+        }
+        return acc
+      }, {}) || {}
+      
+      const monthlyData = Object.entries(monthlyGroups).map(([month, data]: [string, any]) => ({
+        month,
+        contracts: data.count,
+        revenue: data.revenue,
+        monthAr: MONTH_MAP[month as keyof typeof MONTH_MAP] || month,
+      }))
+      
+      setMonthlyData(monthlyData)
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     } catch (error: any) {
       console.error("Error fetching chart data:", error)
       toast({
@@ -163,6 +221,7 @@ export default function ChartsSection() {
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px] w-full">
+<<<<<<< HEAD
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={statusData} layout="vertical" margin={{ right: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
@@ -194,6 +253,37 @@ export default function ChartsSection() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+=======
+            <BarChart data={statusData} layout="vertical" margin={{ right: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+              <XAxis type="number" />
+              <YAxis
+                dataKey="name"
+                type="category"
+                tickLine={false}
+                axisLine={false}
+                width={100} // Adjusted width for potentially longer labels
+                tickFormatter={(value) =>
+                  chartConfig[value as keyof typeof chartConfig]?.label || value
+                }
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent indicator="dot" hideLabel />}
+              />
+              <Bar dataKey="count" radius={5}>
+                {statusData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={
+                      chartConfig[entry.name as keyof typeof chartConfig]?.color ||
+                      chartConfig.Draft.color
+                    }
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
           </ChartContainer>
         </CardContent>
       </Card>
@@ -208,6 +298,7 @@ export default function ChartsSection() {
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px] w-full">
+<<<<<<< HEAD
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={monthlyData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -247,6 +338,44 @@ export default function ChartsSection() {
                 />
               </LineChart>
             </ResponsiveContainer>
+=======
+            <LineChart data={monthlyData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="month"
+                tickFormatter={(value) => MONTH_MAP[value as keyof typeof MONTH_MAP] || value}
+              />
+              <YAxis yAxisId="left" stroke="var(--color-contracts)" />
+              <YAxis yAxisId="right" orientation="right" stroke="var(--color-revenue)" />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    labelFormatter={(label) =>
+                      MONTH_MAP[label as keyof typeof MONTH_MAP] || label
+                    }
+                  />
+                }
+              />
+              <Line
+                yAxisId="left"
+                type="monotone"
+                dataKey="contracts"
+                stroke="var(--color-contracts)"
+                name={chartConfig.contracts.label}
+                strokeWidth={2}
+                dot={false}
+              />
+              <Line
+                yAxisId="right"
+                type="monotone"
+                dataKey="revenue"
+                stroke="var(--color-revenue)"
+                name={chartConfig.revenue.label}
+                strokeWidth={2}
+                dot={false}
+              />
+            </LineChart>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
           </ChartContainer>
         </CardContent>
       </Card>

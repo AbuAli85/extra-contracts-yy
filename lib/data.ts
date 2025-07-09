@@ -12,9 +12,15 @@ export const getContract = async (contractId: string): Promise<ContractWithRelat
     .select(
       `
       *,
+<<<<<<< HEAD
       employer:parties!contracts_employer_id_fkey(id,name_en,name_ar),
       client:parties!contracts_client_id_fkey(id,name_en,name_ar),
       promoters(id,name_en,name_ar)
+=======
+      first_party:parties!contracts_first_party_id_fkey(id,name_en,name_ar,crn,type),
+      second_party:parties!contracts_second_party_id_fkey(id,name_en,name_ar,crn,type),
+      promoters(id,name_en,name_ar,id_card_number,id_card_url,passport_url,status)
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     `,
     )
     .eq("id", contractId)

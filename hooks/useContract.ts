@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+<<<<<<< HEAD
 import { ContractDetail, ActivityLog } from '@/types/contract'
+=======
+import { ContractDetail, ActivityLog, Party } from '@/lib/types'
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
 // Mock activity logs - replace with real data fetch later
 const mockActivityLogs: ActivityLog[] = [
@@ -55,6 +59,7 @@ export function useContract(contractId: string): UseContractResult {
       setLoading(true)
       setError(null)
 
+<<<<<<< HEAD
       // Fetch basic contract data
       const { data: basicData, error: basicError } = await supabase
         .from("contracts")
@@ -185,6 +190,95 @@ export function useContract(contractId: string): UseContractResult {
     } catch (err) {
       setError("Failed to load contract")
       console.error('Contract fetch error:', err)
+=======
+      // Use the same query structure as use-contracts.ts
+      let { data, error } = await supabase
+        .from("contracts")
+        .select(
+          `
+          *,
+          first_party:parties!contracts_first_party_id_fkey(id,name_en,name_ar,crn,type),
+          second_party:parties!contracts_second_party_id_fkey(id,name_en,name_ar,crn,type),
+          promoters(id,name_en,name_ar,id_card_number,id_card_url,passport_url,status)
+        `,
+        )
+        .eq("id", contractId)
+        .single()
+
+      // If the new schema fails, try the old schema (employer_id, client_id)
+      if (error && error.message.includes('foreign key')) {
+        console.log("New schema failed, trying old schema...")
+        const { data: oldData, error: oldError } = await supabase
+          .from("contracts")
+          .select(
+            `
+            *,
+            first_party:parties!contracts_employer_id_fkey(id,name_en,name_ar,crn,type),
+            second_party:parties!contracts_client_id_fkey(id,name_en,name_ar,crn,type),
+            promoters(id,name_en,name_ar,id_card_number,id_card_url,passport_url,status)
+          `,
+          )
+          .eq("id", contractId)
+          .single()
+        
+        if (oldError) {
+          console.log("Both schemas failed:", oldError)
+          throw new Error(oldError.message)
+        }
+        
+        // Instead of directly assigning oldData, validate and transform as with new schema
+        if (oldData) {
+          const promoter = Array.isArray(oldData.promoters) ? oldData.promoters[0] : oldData.promoters;
+          const validParty = (p: any): p is Party => !!p && typeof p === 'object' && 'id' in p && 'name_en' in p && 'name_ar' in p && 'crn' in p;
+          const firstPartyOld = validParty(oldData.first_party) ? oldData.first_party : null;
+          const secondPartyOld = validParty(oldData.second_party) ? oldData.second_party : null;
+          const transformedOldData: any = {
+            ...oldData,
+            parties: [firstPartyOld, secondPartyOld].filter(Boolean) as Party[],
+            promoters: Array.isArray(oldData.promoters) ? oldData.promoters : (oldData.promoters ? [oldData.promoters] : []),
+            promoter: promoter || null,
+          };
+          if (firstPartyOld) transformedOldData.first_party = firstPartyOld;
+          if (secondPartyOld) transformedOldData.second_party = secondPartyOld;
+          data = transformedOldData;
+        } else {
+          data = null;
+        }
+        error = null
+      }
+
+      if (error) {
+        console.log("Error fetching contract:", error)
+        throw new Error(error.message)
+      }
+
+      if (data) {
+        // Transform the data to match the ContractDetail type
+        const promoter = Array.isArray(data.promoters) ? data.promoters[0] : data.promoters;
+        // Ensure first_party and second_party are valid Party objects
+        const validParty = (p: any): p is Party => !!p && typeof p === 'object' && 'id' in p && 'name_en' in p && 'name_ar' in p && 'crn' in p;
+        const firstParty = validParty(data.first_party) ? data.first_party : null;
+        const secondParty = validParty(data.second_party) ? data.second_party : null;
+        const transformedData = {
+          ...data,
+          parties: [firstParty, secondParty].filter(Boolean) as Party[],
+          first_party: firstParty,
+          second_party: secondParty,
+          promoters: Array.isArray(data.promoters) ? data.promoters : (data.promoters ? [data.promoters] : []),
+          promoter: promoter || null,
+        } as unknown as ContractDetail;
+
+        setContract(transformedData);
+      } else {
+        setContract(null)
+      }
+
+      // Mock activity logs for now
+      setActivityLogs(mockActivityLogs)
+    } catch (err: any) {
+      console.error("Detailed fetch error:", err)
+      setError(err.message || "An unknown error occurred.")
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     } finally {
       setLoading(false)
     }

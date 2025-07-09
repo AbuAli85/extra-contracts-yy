@@ -26,6 +26,11 @@ import { LoadingSpinner } from "@/components/LoadingSpinner"
 import { ErrorCard } from "@/components/ErrorCard"
 import { OverviewTab } from "@/components/contract-tabs/OverviewTab"
 import { formatDate, calculateDuration, copyToClipboard } from "@/utils/format"
+<<<<<<< HEAD
+=======
+import { ContractDetail, Party, Promoter } from '@/lib/types';
+import { getContractById } from '@/app/actions/contracts';
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
 export default function ContractDetailPage() {
   const params = useParams()
@@ -186,6 +191,7 @@ export default function ContractDetailPage() {
                 <div className="space-y-4">
                   <div className="p-4 border border-gray-200 rounded-lg">
                     <h4 className="font-semibold text-gray-900">Employee</h4>
+<<<<<<< HEAD
                     <p className="text-gray-600">{contract?.employee_name || "Not specified"}</p>
                     <p className="text-sm text-gray-500">{contract?.employee_email || "No email provided"}</p>
                   </div>
@@ -194,6 +200,30 @@ export default function ContractDetailPage() {
                     <p className="text-gray-600">{contract?.employer_name || "Not specified"}</p>
                     <p className="text-sm text-gray-500">Company representative</p>
                   </div>
+=======
+                    <p className="text-gray-600">{contract?.promoters?.[0]?.name_en || contract?.promoter_name_en || "Not specified"}</p>
+                    <p className="text-sm text-gray-500">{contract?.promoters?.[0]?.email || contract?.email || "No email provided"}</p>
+                  </div>
+                  <div className="p-4 border border-gray-200 rounded-lg">
+                    <h4 className="font-semibold text-gray-900">Employer</h4>
+                    <p className="text-gray-600">{contract?.employer?.name_en || contract?.first_party_name_en || "Not specified"}</p>
+                    <p className="text-sm text-gray-500">Company representative</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Promoters</p>
+                      <p className="text-sm text-gray-900">
+                        {contract.promoters?.map((p: Promoter) => p.name_en).join(', ')}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Parties</p>
+                      <p className="text-sm text-gray-900">
+                        {contract.parties?.map((p: Party) => p.name_en).join(', ')}
+                      </p>
+                    </div>
+                  </div>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 </div>
               </CardContent>
             </Card>

@@ -5,9 +5,14 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { promoterProfileSchema, type PromoterProfileFormData } from "@/lib/promoter-profile-schema"
+<<<<<<< HEAD
 import { sampleEmployers, sampleClients, promoterStatuses } from "@/lib/fixtures/promoter-profile"
+=======
+import { promoterStatuses } from "@/lib/fixtures/promoter-profile"
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 import type { PromoterProfile } from "@/lib/types" // Assuming PromoterProfile is defined in lib/types.ts
 import { useToast } from "@/hooks/use-toast"
+import { useParties, type Party } from "@/hooks/use-parties" // Import useParties hook
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -40,7 +45,15 @@ interface PromoterProfileFormProps {
   onFormSubmitSuccess?: (data: PromoterProfileFormData) => void // Callback for successful submission
 }
 
+<<<<<<< HEAD
 type SubmissionData = Omit<PromoterProfileFormData, "id_card_image" | "passport_image"> & {
+=======
+// This type can be simplified or removed if your API call handles the data transformation
+type SubmissionData = Omit<
+  PromoterProfileFormData,
+  "id_card_image" | "passport_image" | "existing_id_card_url" | "existing_passport_url"
+> & {
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   id_card_url: string | null
   passport_url: string | null
   contract_valid_until: string | null
@@ -57,7 +70,15 @@ export default function PromoterProfileForm({
   const isEditMode = !!promoterToEdit
   const [isEditable, setIsEditable] = useState(!isEditMode) // Editable by default in add mode
 
+<<<<<<< HEAD
   const { reset, ...form } = useForm<PromoterProfileFormData>({
+=======
+  // Fetch parties for employer and client dropdowns
+  const { data: employers, isLoading: isLoadingEmployers } = useParties("Employer")
+  const { data: clients, isLoading: isLoadingClients } = useParties("Client")
+
+  const form = useForm<PromoterProfileFormData>({
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     resolver: zodResolver(promoterProfileSchema),
     defaultValues: {
       name_en: "",
@@ -89,7 +110,7 @@ export default function PromoterProfileForm({
         outsourced_to_id: promoterToEdit.outsourced_to_id || null,
         job_title: promoterToEdit.job_title || "",
         work_location: promoterToEdit.work_location || "",
-        status: promoterToEdit.status || "active",
+        status: (promoterToEdit.status as "active" | "inactive" | "suspended") || "active",
         contract_valid_until: promoterToEdit.contract_valid_until
           ? parseISO(promoterToEdit.contract_valid_until)
           : null,
@@ -106,7 +127,11 @@ export default function PromoterProfileForm({
         notes: promoterToEdit.notes || "",
       })
     }
+<<<<<<< HEAD
   }, [isEditMode, promoterToEdit, reset])
+=======
+  }, [isEditMode, promoterToEdit, form.reset])
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
   async function onSubmit(values: PromoterProfileFormData) {
     setIsSubmitting(true)
@@ -116,10 +141,27 @@ export default function PromoterProfileForm({
     await new Promise((resolve) => setTimeout(resolve, 1500))
 
     try {
-      // In a real app, you would handle file uploads here and then send data to your backend.
-      // For example, upload `values.id_card_image` and `values.passport_image` if they are File objects.
-      // Then, replace them with the returned URLs before saving to the database.
+      // This is a simulation. In a real app, you'd handle file uploads
+      // to a service like Supabase Storage and get back a URL.
+      const {
+        id_card_image,
+        passport_image,
+        existing_id_card_url,
+        existing_passport_url,
+        ...rest
+      } = values
 
+      // Determine final image URLs
+      const id_card_url =
+        id_card_image instanceof File
+          ? "new_file_placeholder_url_id_card.jpg" // Placeholder for new upload
+          : existing_id_card_url ?? null
+      const passport_url =
+        passport_image instanceof File
+          ? "new_file_placeholder_url_passport.jpg" // Placeholder for new upload
+          : existing_passport_url ?? null
+
+<<<<<<< HEAD
       const { id_card_image, passport_image, ...rest } = values
       const submissionData: SubmissionData = {
         ...rest,
@@ -135,6 +177,12 @@ export default function PromoterProfileForm({
           passport_image instanceof File
             ? "new_file_placeholder_url_passport.jpg" // Placeholder for new upload
             : values.existing_passport_url,
+=======
+      const submissionData = {
+        ...rest,
+        id_card_url,
+        passport_url,
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         contract_valid_until: values.contract_valid_until
           ? format(new Date(values.contract_valid_until), "yyyy-MM-dd")
           : null,
@@ -240,7 +288,12 @@ export default function PromoterProfileForm({
                     <FormItem>
                       <FormLabel>ID Card Number / رقم البطاقة الشخصية</FormLabel>
                       <FormControl>
-                        <Input placeholder="1012345678" {...field} disabled={formDisabled} />
+                        <Input
+                          placeholder="1012345678"
+                          {...field}
+                          disabled={formDisabled}
+                          value={field.value ?? ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -254,8 +307,13 @@ export default function PromoterProfileForm({
                       <FormLabel>Employer Agency</FormLabel>
                       <Select
                         onValueChange={field.onChange}
+<<<<<<< HEAD
                         value={field.value || ""}
                         disabled={formDisabled}
+=======
+                        value={field.value ?? ""}
+                        disabled={formDisabled || isLoadingEmployers}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -263,11 +321,17 @@ export default function PromoterProfileForm({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {sampleEmployers.map((emp) => (
-                            <SelectItem key={emp.value} value={emp.value}>
-                              {emp.label}
+                          {isLoadingEmployers ? (
+                            <SelectItem value="loading" disabled>
+                              Loading...
                             </SelectItem>
-                          ))}
+                          ) : (
+                            (employers || []).map((emp: Party) => (
+                              <SelectItem key={emp.id} value={emp.id}>
+                                {emp.name_en}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -282,8 +346,13 @@ export default function PromoterProfileForm({
                       <FormLabel>Currently Outsourced To (Client)</FormLabel>
                       <Select
                         onValueChange={field.onChange}
+<<<<<<< HEAD
                         value={field.value || ""}
                         disabled={formDisabled}
+=======
+                        value={field.value ?? ""}
+                        disabled={formDisabled || isLoadingClients}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -291,11 +360,17 @@ export default function PromoterProfileForm({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {sampleClients.map((client) => (
-                            <SelectItem key={client.value} value={client.value}>
-                              {client.label}
+                          {isLoadingClients ? (
+                            <SelectItem value="loading" disabled>
+                              Loading...
                             </SelectItem>
-                          ))}
+                          ) : (
+                            (clients || []).map((client: Party) => (
+                              <SelectItem key={client.id} value={client.id}>
+                                {client.name_en}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -307,17 +382,19 @@ export default function PromoterProfileForm({
                   name="id_card_image"
                   render={({ field: fileField }) => (
                     <FormItem>
-                      <ImageUploadField
-                        field={fileField}
-                        initialImageUrl={form.watch("existing_id_card_url")}
-                        label="ID Card Image"
-                        disabled={formDisabled}
-                        onImageRemove={() => {
-                          form.setValue("existing_id_card_url", null)
-                          // Ensure the file field itself is also cleared if it's not already by RHF
-                          form.setValue("id_card_image", null)
-                        }}
-                      />
+                      <FormLabel>ID Card Image</FormLabel>
+                      <FormControl>
+                        <ImageUploadField
+                          field={fileField}
+                          initialImageUrl={form.watch("existing_id_card_url")}
+                          disabled={formDisabled}
+                          onImageRemove={() => {
+                            form.setValue("existing_id_card_url", null)
+                            form.setValue("id_card_image", null)
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -325,12 +402,17 @@ export default function PromoterProfileForm({
                   control={form.control}
                   name="id_card_expiry_date"
                   render={({ field }) => (
-                    <DatePickerWithPresetsField
-                      field={field}
-                      label="ID Card Expiry Date"
-                      placeholder="Select ID card expiry"
-                      disabled={formDisabled}
-                    />
+                    <FormItem>
+                      <FormLabel>ID Card Expiry Date</FormLabel>
+                      <FormControl>
+                        <DatePickerWithPresetsField
+                          field={field}
+                          placeholder="Select ID card expiry"
+                          disabled={formDisabled}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
               </div>
@@ -344,7 +426,12 @@ export default function PromoterProfileForm({
                     <FormItem>
                       <FormLabel>Job Title / Position</FormLabel>
                       <FormControl>
-                        <Input placeholder="Sales Promoter" {...field} disabled={formDisabled} />
+                        <Input
+                          placeholder="Sales Promoter"
+                          {...field}
+                          disabled={formDisabled}
+                          value={field.value ?? ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -361,6 +448,10 @@ export default function PromoterProfileForm({
                           placeholder="e.g., City Mall, Main Branch"
                           {...field}
                           disabled={formDisabled}
+<<<<<<< HEAD
+=======
+                          value={field.value ?? ""}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         />
                       </FormControl>
                       <FormMessage />
@@ -399,12 +490,17 @@ export default function PromoterProfileForm({
                   control={form.control}
                   name="contract_valid_until"
                   render={({ field }) => (
-                    <DatePickerWithPresetsField
-                      field={field}
-                      label="Contract Valid Until"
-                      placeholder="Select contract end date"
-                      disabled={formDisabled}
-                    />
+                    <FormItem>
+                      <FormLabel>Contract Valid Until</FormLabel>
+                      <FormControl>
+                        <DatePickerWithPresetsField
+                          field={field}
+                          placeholder="Select contract end date"
+                          disabled={formDisabled}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
                 <FormField
@@ -412,16 +508,19 @@ export default function PromoterProfileForm({
                   name="passport_image"
                   render={({ field: fileField }) => (
                     <FormItem>
-                      <ImageUploadField
-                        field={fileField}
-                        initialImageUrl={form.watch("existing_passport_url")}
-                        label="Passport Image"
-                        disabled={formDisabled}
-                        onImageRemove={() => {
-                          form.setValue("existing_passport_url", null)
-                          form.setValue("passport_image", null)
-                        }}
-                      />
+                      <FormLabel>Passport Image</FormLabel>
+                      <FormControl>
+                        <ImageUploadField
+                          field={fileField}
+                          initialImageUrl={form.watch("existing_passport_url")}
+                          disabled={formDisabled}
+                          onImageRemove={() => {
+                            form.setValue("existing_passport_url", null)
+                            form.setValue("passport_image", null)
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -429,12 +528,17 @@ export default function PromoterProfileForm({
                   control={form.control}
                   name="passport_expiry_date"
                   render={({ field }) => (
-                    <DatePickerWithPresetsField
-                      field={field}
-                      label="Passport Expiry Date"
-                      placeholder="Select passport expiry"
-                      disabled={formDisabled}
-                    />
+                    <FormItem>
+                      <FormLabel>Passport Expiry Date</FormLabel>
+                      <FormControl>
+                        <DatePickerWithPresetsField
+                          field={field}
+                          placeholder="Select passport expiry"
+                          disabled={formDisabled}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
               </div>
@@ -453,6 +557,7 @@ export default function PromoterProfileForm({
                       className="min-h-[100px] resize-y"
                       {...field}
                       disabled={formDisabled}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />

@@ -1,7 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { KeyMetricCard } from '@/components/KeyMetricCard'
+<<<<<<< HEAD
 import { ContractDetail } from '@/types/contract'
+=======
+import { ContractDetail } from '@/lib/types'
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 import { formatCurrency, calculateDuration, formatDate, formatDateTime, copyToClipboard } from '@/utils/format'
 import { 
   CalendarIcon, 
@@ -12,12 +16,33 @@ import {
   MailIcon,
   CopyIcon
 } from 'lucide-react'
+<<<<<<< HEAD
 
 interface OverviewTabProps {
   contract: ContractDetail
 }
 
 export function OverviewTab({ contract }: OverviewTabProps) {
+=======
+import { 
+  JOB_TITLES, 
+  DEPARTMENTS, 
+  CONTRACT_TYPES, 
+  CURRENCIES, 
+  WORK_LOCATIONS,
+  getOptionLabel 
+} from '@/constants/contract-options'
+
+interface OverviewTabProps {
+  contract: ContractDetail | null
+}
+
+export function OverviewTab({ contract }: OverviewTabProps) {
+  if (!contract) {
+    return <div>No contract data available.</div>
+  }
+
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   return (
     <div className="space-y-6">
       {/* Key Metrics Cards */}
@@ -37,8 +62,13 @@ export function OverviewTab({ contract }: OverviewTabProps) {
         />
 
         <KeyMetricCard
+<<<<<<< HEAD
           title="Salary"
           value={formatCurrency(contract?.salary, contract?.currency)}
+=======
+          title="Value"
+          value={formatCurrency(contract?.contract_value ?? undefined, contract?.currency)}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
           icon={TagIcon}
           colorClass="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200"
         />
@@ -65,33 +95,81 @@ export function OverviewTab({ contract }: OverviewTabProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Job Title</label>
+<<<<<<< HEAD
                   <p className="font-semibold text-gray-900 mt-1">{contract?.job_title || "N/A"}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Department</label>
                   <p className="font-semibold text-gray-900 mt-1">{contract?.department || "N/A"}</p>
+=======
+                  <p className="font-semibold text-gray-900 mt-1">
+                    {contract?.job_title 
+                      ? getOptionLabel(JOB_TITLES, contract.job_title)
+                      : "Senior Software Engineer"}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Department</label>
+                  <p className="font-semibold text-gray-900 mt-1">
+                    {contract?.department 
+                      ? getOptionLabel(DEPARTMENTS, contract.department)
+                      : "Technology"}
+                  </p>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Contract Type</label>
+<<<<<<< HEAD
                   <p className="font-semibold text-gray-900 mt-1">{contract?.contract_type || "N/A"}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Currency</label>
                   <p className="font-semibold text-gray-900 mt-1">{contract?.currency || "N/A"}</p>
+=======
+                  <p className="font-semibold text-gray-900 mt-1">
+                    {contract?.contract_type 
+                      ? getOptionLabel(CONTRACT_TYPES, contract.contract_type)
+                      : "Full-time"}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Currency</label>
+                  <p className="font-semibold text-gray-900 mt-1">
+                    {contract?.currency 
+                      ? getOptionLabel(CURRENCIES, contract.currency)
+                      : "USD - US Dollar"}
+                  </p>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Start Date</label>
+<<<<<<< HEAD
                   <p className="font-semibold text-gray-900 mt-1">{formatDate(contract?.contract_start_date)}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">End Date</label>
                   <p className="font-semibold text-gray-900 mt-1">{formatDate(contract?.contract_end_date)}</p>
+=======
+                  <p className="font-semibold text-gray-900 mt-1">
+                    {formatDate(contract?.contract_start_date) !== "N/A" 
+                      ? formatDate(contract?.contract_start_date)
+                      : "01-01-2025"}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">End Date</label>
+                  <p className="font-semibold text-gray-900 mt-1">
+                    {formatDate(contract?.contract_end_date) !== "N/A" 
+                      ? formatDate(contract?.contract_end_date)
+                      : "01-01-2027"}
+                  </p>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 </div>
               </div>
 
@@ -99,7 +177,13 @@ export function OverviewTab({ contract }: OverviewTabProps) {
                 <label className="text-sm font-medium text-gray-500">Work Location</label>
                 <p className="font-semibold text-gray-900 mt-1 flex items-center gap-2">
                   <MapPinIcon className="h-4 w-4 text-gray-500" />
+<<<<<<< HEAD
                   {contract?.work_location || "N/A"}
+=======
+                  {contract?.work_location 
+                    ? getOptionLabel(WORK_LOCATIONS, contract.work_location)
+                    : "Dubai Office - Technology Center"}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 </p>
               </div>
 
@@ -107,7 +191,11 @@ export function OverviewTab({ contract }: OverviewTabProps) {
                 <label className="text-sm font-medium text-gray-500">Email</label>
                 <p className="font-semibold text-gray-900 mt-1 flex items-center gap-2">
                   <MailIcon className="h-4 w-4 text-gray-500" />
+<<<<<<< HEAD
                   {contract?.email || "N/A"}
+=======
+                  {contract?.email || "senior.engineer@alamri.com"}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 </p>
               </div>
 
@@ -147,6 +235,7 @@ export function OverviewTab({ contract }: OverviewTabProps) {
               
               <div className="grid grid-cols-1 gap-4">
                 <div>
+<<<<<<< HEAD
                   <label className="text-sm font-medium text-gray-500">Employer ID</label>
                   <p className="font-mono text-sm text-gray-700 mt-1">{contract?.employer_id || "N/A"}</p>
                 </div>
@@ -157,6 +246,24 @@ export function OverviewTab({ contract }: OverviewTabProps) {
                 <div>
                   <label className="text-sm font-medium text-gray-500">Promoter ID</label>
                   <p className="font-mono text-sm text-gray-700 mt-1">{contract?.promoter_id || "N/A"}</p>
+=======
+                  <label className="text-sm font-medium text-gray-500">Party A (Client)</label>
+                  <p className="font-mono text-sm text-gray-700 mt-1">
+                    {contract?.first_party?.name_en || contract?.first_party_id || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Party B (Employer)</label>
+                  <p className="font-mono text-sm text-gray-700 mt-1">
+                    {contract?.second_party?.name_en || contract?.second_party_id || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Promoter</label>
+                  <p className="font-mono text-sm text-gray-700 mt-1">
+                    {contract?.promoter?.name_en || contract?.promoter_id || "N/A"}
+                  </p>
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 </div>
               </div>
 

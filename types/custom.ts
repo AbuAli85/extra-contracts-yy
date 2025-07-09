@@ -3,7 +3,9 @@ import type { Database } from "./supabase" // Import from generated types
 
 // Re-export main types for convenience
 export type Party = Database["public"]["Tables"]["parties"]["Row"]
-export type Promoter = Database["public"]["Tables"]["promoters"]["Row"]
+export type Promoter = Database["public"]["Tables"]["promoters"]["Row"] & {
+  name_en?: string
+}
 export type Contract = Database["public"]["Tables"]["contracts"]["Row"]
 
 // Example Zod schema for a form (can be moved to a lib/validations folder)

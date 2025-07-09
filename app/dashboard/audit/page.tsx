@@ -21,6 +21,7 @@ import { Loader2, Search, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Dow
 import { supabase } from "@/lib/supabase";
 import { format } from "date-fns";
 import clsx from "clsx";
+<<<<<<< HEAD
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
@@ -180,6 +181,196 @@ export default function AuditLogsPage() {
     setPage(1);
   }, [searchTerm, pageSize]);
 
+=======
+
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+
+interface AuditLogItem {
+  id: string;
+  user_id?: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  details?: any;
+  created_at: string;
+  user_email?: string | null;
+  ip_address?: string | null;
+  timestamp: string;
+}
+
+// Define a type for the payload from Supabase
+interface AuditLogPayload {
+  new: {
+    id: string;
+    user_id?: string | null;
+    action: string;
+    entity_type: string;
+    entity_id: string;
+    details?: any;
+    created_at: string;
+  };
+}
+
+export default function AuditLogsPage() {
+  const [logs, setLogs] = useState<AuditLogItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortKey, setSortKey] = useState<keyof AuditLogItem>("created_at");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch logs
+  const fetchAuditLogs = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from("audit_logs")
+        .select("id, user_id, action, entity_type, entity_id, details, created_at")
+        .order(sortKey, { ascending: sortDirection === "asc" });
+      if (error) throw error;
+      
+      // Transform the data to add compatibility fields
+      const transformedData = (data || []).map(log => ({
+        ...log,
+        user_email: log.user_id || null, // For compatibility
+        ip_address: null, // Column doesn't exist in schema
+        timestamp: log.created_at // Map created_at to timestamp
+      }));
+      
+      setLogs(transformedData);
+    } catch (err: any) {
+      setError(err.message);
+      setLogs([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [sortKey, sortDirection]);
+
+  // Fetch logs when sort changes
+  useEffect(() => {
+    fetchAuditLogs();
+  }, [fetchAuditLogs]);
+
+  // Real-time subscription (once)
+  useEffect(() => {
+    const channel = supabase
+      .channel("public:audit_logs:feed")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "audit_logs" },
+        (payload: AuditLogPayload) => {
+          // Transform the new log data to match our expected format
+          const newLog: AuditLogItem = {
+            ...payload.new,
+            user_email: payload.new.user_id || null,
+            ip_address: null, // Column doesn't exist in schema
+            timestamp: payload.new.created_at, // Map created_at to timestamp
+          };
+          setLogs((prev) => [newLog, ...prev]);
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Filtering, sorting, and pagination
+  const filteredLogs = useMemo(() => {
+    let filtered = logs;
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (log) =>
+          (log.user_email || "System").toLowerCase().includes(searchTerm.toLowerCase()) ||
+          log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (log.entity_type && log.entity_type.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (log.entity_id && log.entity_id.toString().toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (log.details &&
+            typeof log.details === "string" &&
+            log.details.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (log.details &&
+            typeof log.details === "object" &&
+            JSON.stringify(log.details).toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    // Sort
+    filtered = [...filtered].sort((a, b) => {
+      let valA = a[sortKey];
+      let valB = b[sortKey];
+      if (sortKey === "created_at" || sortKey === "timestamp") {
+        valA = valA ? new Date(valA as string).getTime() : 0;
+        valB = valB ? new Date(valB as string).getTime() : 0;
+      }
+      if (typeof valA === "string" && typeof valB === "string") {
+        return sortDirection === "asc"
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
+      }
+      if (typeof valA === "number" && typeof valB === "number") {
+        return sortDirection === "asc" ? valA - valB : valB - valA;
+      }
+      return 0;
+    });
+    return filtered;
+  }, [logs, searchTerm, sortKey, sortDirection]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / pageSize));
+  const paginatedLogs = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredLogs.slice(start, start + pageSize);
+  }, [filteredLogs, page, pageSize]);
+
+  // Sorting
+  const handleSort = (key: keyof AuditLogItem) => {
+    if (sortKey === key) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDirection("asc");
+    }
+  };
+
+  // Export to CSV
+  const exportCSV = () => {
+    const headers = ["Timestamp", "User", "Action", "Entity Type", "Entity ID", "Details"];
+    const rows = filteredLogs.map((log) => [
+      log.timestamp,
+      log.user_email || "System",
+      log.action,
+      log.entity_type || "",
+      log.entity_id || "",
+      typeof log.details === "object" ? JSON.stringify(log.details) : log.details || "",
+    ]);
+    const csv =
+      [headers, ...rows]
+        .map((row) =>
+          row
+            .map((cell) =>
+              typeof cell === "string" && cell.includes(",")
+                ? `"${cell.replace(/"/g, '""')}"`
+                : cell
+            )
+            .join(",")
+        )
+        .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "audit_logs.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Reset page on filter/search/page size change
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, pageSize]);
+
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   return (
     <Card>
       <CardHeader>
@@ -225,42 +416,66 @@ export default function AuditLogsPage() {
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => handleSort("created_at")}
+<<<<<<< HEAD
                   aria-sort={sortKey === "created_at" ? sortDirection : undefined}
+=======
+                  aria-sort={sortKey === "created_at" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 >
                   Timestamp {sortKey === "created_at" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => handleSort("user_id")}
+<<<<<<< HEAD
                   aria-sort={sortKey === "user_id" ? sortDirection : undefined}
+=======
+                  aria-sort={sortKey === "user_id" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 >
                   User {sortKey === "user_id" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => handleSort("action")}
+<<<<<<< HEAD
                   aria-sort={sortKey === "action" ? sortDirection : undefined}
+=======
+                  aria-sort={sortKey === "action" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 >
                   Action {sortKey === "action" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => handleSort("entity_type")}
+<<<<<<< HEAD
                   aria-sort={sortKey === "entity_type" ? sortDirection : undefined}
+=======
+                  aria-sort={sortKey === "entity_type" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 >
                   Entity Type {sortKey === "entity_type" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => handleSort("entity_id")}
+<<<<<<< HEAD
                   aria-sort={sortKey === "entity_id" ? sortDirection : undefined}
+=======
+                  aria-sort={sortKey === "entity_id" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 >
                   Entity ID {sortKey === "entity_id" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => handleSort("details")}
+<<<<<<< HEAD
                   aria-sort={sortKey === "details" ? sortDirection : undefined}
+=======
+                  aria-sort={sortKey === "details" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
+>>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 >
                   Details {sortKey === "details" && (sortDirection === "asc" ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
                 </TableHead>
