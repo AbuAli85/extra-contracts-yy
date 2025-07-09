@@ -18,80 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-<<<<<<< HEAD
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-=======
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-<<<<<<< HEAD
 import { EditIcon, PlusCircleIcon, ArrowLeftIcon, BuildingIcon, Loader2, Search, Filter } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { format, parseISO } from "date-fns"
-
-export default function ManagePartiesPage() {
-  const [parties, setParties] = useState<Party[]>([])
-  const [filteredParties, setFilteredParties] = useState<Party[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [selectedParty, setSelectedParty] = useState<Party | null>(null)
-  const [showForm, setShowForm] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [typeFilter, setTypeFilter] = useState<string>("all")
-=======
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  EditIcon,
-  PlusCircleIcon,
-  ArrowLeftIcon,
-  BuildingIcon,
-  Loader2,
-  Search,
-  Filter,
-  MoreHorizontal,
-  Download,
-  Trash2,
-  RefreshCw,
-  Grid3x3,
-  List,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Calendar,
-  Users,
-  Activity,
-  TrendingUp,
-  Clock,
-  ArrowUpDown,
-  ChevronUp,
-  ChevronDown,
-  FileText,
-  Mail,
-  Phone,
-  MapPin,
-  CreditCard,
-  Shield,
-  Eye,
-  Building2,
-  Briefcase
-} from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 import { format, parseISO, differenceInDays } from "date-fns"
-import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
@@ -140,7 +70,6 @@ export default function ManagePartiesPage() {
   const [showStats, setShowStats] = useState(true)
   const [isExporting, setIsExporting] = useState(false)
   const [bulkActionLoading, setBulkActionLoading] = useState(false)
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   const { toast } = useToast()
   const isMountedRef = useRef(true)
 
@@ -669,11 +598,7 @@ export default function ManagePartiesPage() {
 
   if (isLoading) {
     return (
-<<<<<<< HEAD
       <div className="flex min-h-screen items-center justify-center">
-=======
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
         <p className="ml-3 text-lg text-slate-700 dark:text-slate-300">Loading parties...</p>
       </div>
@@ -682,15 +607,9 @@ export default function ManagePartiesPage() {
 
   if (showForm) {
     return (
-<<<<<<< HEAD
       <div className="min-h-screen bg-background px-4 py-8 sm:py-12">
         <div className="mx-auto max-w-6xl">
           <Button variant="outline" onClick={handleFormClose} className="mb-4">
-=======
-      <div className="min-h-screen bg-slate-50 px-4 py-8 dark:bg-slate-950 sm:py-12">
-        <div className="mx-auto max-w-6xl">
-          <Button variant="outline" onClick={handleFormClose} className="mb-6">
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
             <ArrowLeftIcon className="mr-2 h-4 w-4" />
             Back to Party List
           </Button>
@@ -701,7 +620,6 @@ export default function ManagePartiesPage() {
   }
 
   return (
-<<<<<<< HEAD
     <div className="min-h-screen bg-background px-4 py-8 sm:py-12">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center justify-between">
@@ -734,42 +652,31 @@ export default function ManagePartiesPage() {
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by status" />
-=======
-    <div className="min-h-screen bg-slate-50 px-4 py-8 dark:bg-slate-950 sm:py-12">
-      <div className="mx-auto max-w-screen-xl">
-        <div className="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
-              Manage Parties
-            </h1>
-            {isRefreshing && (
-              <RefreshCw className="h-5 w-5 animate-spin text-primary" />
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isRefreshing || isLoading}
-            >
-              <RefreshCw className={cn("mr-2 h-4 w-4", isRefreshing && "animate-spin")} />
-              Refresh
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/">
-                <ArrowLeftIcon className="mr-2 h-4 w-4" /> Back to Home
-              </Link>
-            </Button>
-            <Button
-              onClick={handleAddNew}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              <PlusCircleIcon className="mr-2 h-5 w-5" />
-              Add New Party
-            </Button>
-          </div>
-        </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Inactive">Inactive</SelectItem>
+                  <SelectItem value="Suspended">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="Employer">Employer</SelectItem>
+                  <SelectItem value="Client">Client</SelectItem>
+                  <SelectItem value="Both">Both</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="text-sm text-muted-foreground">
+                Showing {filteredParties.length} of {parties.length} parties
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Statistics Dashboard */}
         {showStats && (
@@ -896,7 +803,6 @@ export default function ManagePartiesPage() {
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Status" />
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
@@ -905,30 +811,16 @@ export default function ManagePartiesPage() {
                   <SelectItem value="Suspended">Suspended</SelectItem>
                 </SelectContent>
               </Select>
-<<<<<<< HEAD
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by type" />
-=======
 
               {/* Type Filter */}
               <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Type" />
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="Employer">Employer</SelectItem>
                   <SelectItem value="Client">Client</SelectItem>
-<<<<<<< HEAD
-                  <SelectItem value="Both">Both</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="text-sm text-muted-foreground">
-                Showing {filteredParties.length} of {parties.length} parties
-              </div>
-=======
                   <SelectItem value="Generic">Generic</SelectItem>
                 </SelectContent>
               </Select>
@@ -1013,31 +905,20 @@ export default function ManagePartiesPage() {
 
             <div className="text-sm text-muted-foreground">
               Showing {filteredParties.length} of {parties.length} parties
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
             </div>
           </CardContent>
         </Card>
 
         {filteredParties.length === 0 ? (
-<<<<<<< HEAD
-          <Card className="py-10 text-center">
-=======
           <Card className="bg-card py-12 text-center shadow-md">
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
             <CardHeader>
               <BuildingIcon className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
               <CardTitle className="text-2xl">No Parties Found</CardTitle>
             </CardHeader>
             <CardContent>
-<<<<<<< HEAD
-              <CardDescription>
-                {parties.length === 0 
-                  ? "Get started by adding your first party. Click the 'Add New Party' button."
-=======
               <CardDescription className="text-lg">
                 {parties.length === 0 
                   ? "Get started by adding your first party. Click the 'Add New Party' button above."
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                   : "No parties match your current filters. Try adjusting your search criteria."
                 }
               </CardDescription>
@@ -1071,42 +952,6 @@ export default function ManagePartiesPage() {
                 </div>
               </div>
             </CardHeader>
-<<<<<<< HEAD
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name (EN)</TableHead>
-                      <TableHead>Name (AR)</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>CRN</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Contact Person</TableHead>
-                      <TableHead>CR Expiry</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredParties.map((party) => (
-                      <TableRow key={party.id}>
-                        <TableCell className="font-medium">{party.name_en}</TableCell>
-                        <TableCell dir="rtl" className="text-right">{party.name_ar}</TableCell>
-                        <TableCell>{getTypeBadge(party.type)}</TableCell>
-                        <TableCell>{party.role || "N/A"}</TableCell>
-                        <TableCell className="font-mono">{party.crn}</TableCell>
-                        <TableCell>{getStatusBadge(party.status)}</TableCell>
-                        <TableCell>{party.contact_person || "N/A"}</TableCell>
-                        <TableCell>{formatDate(party.cr_expiry_date)}</TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="outline" size="sm" onClick={() => handleEdit(party)}>
-                            <EditIcon className="mr-1 h-4 w-4" /> Edit
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-=======
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <Table>
@@ -1344,7 +1189,6 @@ export default function ManagePartiesPage() {
                         </TableRow>
                       )
                     })}
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                   </TableBody>
                 </Table>
               </div>
@@ -1382,6 +1226,11 @@ export default function ManagePartiesPage() {
                           <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                             CRN: {party.crn}
                           </p>
+                          {party.role && (
+                            <div className="text-xs text-slate-400 dark:text-slate-500 truncate">
+                              Role: {party.role}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1517,7 +1366,6 @@ export default function ManagePartiesPage() {
             })}
           </div>
         )}
-<<<<<<< HEAD
         <div className="mt-8 text-center">
           <Button asChild variant="outline">
             <Link href="/">
@@ -1525,8 +1373,6 @@ export default function ManagePartiesPage() {
             </Link>
           </Button>
         </div>
-=======
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
       </div>
     </div>
   )
