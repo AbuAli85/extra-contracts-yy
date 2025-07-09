@@ -54,13 +54,6 @@ export default function ContractReportsTable() {
     setLoading(true)
     try {
       const { data, error } = await supabase
-<<<<<<< HEAD
-        .from("contracts_view")
-        .select(
-          "id, contract_id, promoter_name, employer_name, client_name, start_date, end_date, status",
-        )
-        .order(sortKey || "start_date", { ascending: sortDirection === "asc" })
-=======
         .from("contracts")
         .select(
           `id, 
@@ -73,7 +66,6 @@ export default function ContractReportsTable() {
            promoter:promoters!promoter_id(name_en)`
         )
         .order(sortKey === 'start_date' ? 'contract_start_date' : sortKey === 'end_date' ? 'contract_end_date' : sortKey || "contract_start_date", { ascending: sortDirection === "asc" })
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
       if (error) throw error
       

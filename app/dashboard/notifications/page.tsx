@@ -32,12 +32,8 @@ import {
 import { format, formatDistanceToNow, isAfter, isBefore, parseISO } from "date-fns"
 import clsx from "clsx"
 import { toast } from "@/hooks/use-toast"
-
-<<<<<<< HEAD
-=======
 import { NotificationItem } from "@/lib/dashboard-types"
 
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 const iconMap = {
   success: CheckCircle,
   error: XCircle,
@@ -46,11 +42,7 @@ const iconMap = {
   default: BellRing,
 }
 
-<<<<<<< HEAD
-const getIconColor = (type) => {
-=======
 const getIconColor = (type: string) => {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   if (type === "success") return "text-green-500"
   if (type === "error") return "text-red-500"
   if (type === "warning") return "text-orange-500"
@@ -60,15 +52,9 @@ const getIconColor = (type: string) => {
 const NOTIF_TYPES = ["success", "error", "warning", "info"]
 
 export default function NotificationsPage() {
-<<<<<<< HEAD
-  const [notifications, setNotifications] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-=======
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
   const [readFilter, setReadFilter] = useState("")
@@ -77,11 +63,7 @@ export default function NotificationsPage() {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [page, setPage] = useState(1)
   const [isUpdating, setIsUpdating] = useState(false)
-<<<<<<< HEAD
-  const [selectedNotif, setSelectedNotif] = useState(null)
-=======
   const [selectedNotif, setSelectedNotif] = useState<NotificationItem | null>(null)
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   const [showModal, setShowModal] = useState(false)
   const PAGE_SIZE = 10
 
@@ -103,21 +85,12 @@ export default function NotificationsPage() {
         const { data, error } = await supabase
           .from("notifications")
           .select(
-<<<<<<< HEAD
-            "id, type, message, created_at, user_email, related_contract_id, related_entity_id, related_entity_type, is_read"
-          )
-          .order("created_at", { ascending: false })
-        if (error) throw error
-        if (!ignore) setNotifications(data || [])
-      } catch (err) {
-=======
             "id, type, message, created_at, user_email, related_contract_id, is_read"
           )
           .order("created_at", { ascending: false })
         if (error) throw error
         if (!ignore) setNotifications((data || []) as NotificationItem[])
       } catch (err: any) {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         if (!ignore) {
           setError(err.message)
           toast({
@@ -140,15 +113,9 @@ export default function NotificationsPage() {
         (payload) => {
           setNotifications((prev) => {
             if (payload.eventType === "INSERT") {
-<<<<<<< HEAD
-              return [payload.new, ...prev]
-            } else if (payload.eventType === "UPDATE") {
-              return prev.map((n) => (n.id === payload.new.id ? payload.new : n))
-=======
               return [payload.new as NotificationItem, ...prev]
             } else if (payload.eventType === "UPDATE") {
               return prev.map((n) => (n.id === payload.new.id ? payload.new as NotificationItem : n))
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
             } else if (payload.eventType === "DELETE") {
               return prev.filter((n) => n.id !== payload.old.id)
             }
@@ -207,11 +174,7 @@ export default function NotificationsPage() {
   const totalPages = useMemo(() => Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)), [filtered.length])
 
   // Optimistic updates for better UX
-<<<<<<< HEAD
-  const toggleRead = async (notif) => {
-=======
   const toggleRead = async (notif: NotificationItem) => {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     setIsUpdating(true)
     setNotifications((prev) =>
       prev.map((n) =>
@@ -312,14 +275,10 @@ export default function NotificationsPage() {
       "is_read",
     ]
     const rows = filtered.map((n) =>
-<<<<<<< HEAD
-      headers.map((h) => (n[h] !== undefined && n[h] !== null ? n[h] : "")).join(",")
-=======
       headers.map((h) => {
         const value = (n as any)[h];
         return (value !== undefined && value !== null ? value : "");
       }).join(",")
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     )
     const csv = [headers.join(","), ...rows].join("\n")
     const blob = new Blob([csv], { type: "text/csv" })
@@ -642,129 +601,12 @@ export default function NotificationsPage() {
                         disabled={page === totalPages}
                         aria-label="Next page"
                       >
-<<<<<<< HEAD
-                        <ChevronRight className="h-4 w-4 ml-1" />
-                        Next
-=======
                         Next
                         <ChevronRight className="h-4 w-4 ml-1" />
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       </Button>
                     </div>
                   </div>
                 )}
-<<<<<<< HEAD
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        {/* Notification Details Modal */}
-        {selectedNotif && (
-          <Dialog open={showModal} onOpenChange={setShowModal}>
-            <DialogContent className="max-w-2xl p-6 rounded-lg shadow-lg">
-              <DialogHeader>
-                <DialogTitle className="text-lg font-semibold">
-                  Notification Details
-                </DialogTitle>
-                <DialogDescription className="text-sm text-muted-foreground">
-                  {format(new Date(selectedNotif.created_at), "MMMM dd, yyyy HH:mm:ss")}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="mt-4">
-                <p className="text-sm text-gray-900">
-                  {selectedNotif.message}
-                </p>
-                <div className="mt-4">
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Related To:
-                  </span>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {selectedNotif.related_contract_id && (
-                      <a
-                        href={`/contracts/${selectedNotif.related_contract_id}`}
-                        className="inline-flex items-center px-3 py-1 text-sm rounded-md bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
-                        onClick={e => e.stopPropagation()}
-                        onKeyDown={e => e.stopPropagation()}
-                        aria-label="View related contract"
-                      >
-                        <LinkIcon className="h-4 w-4 mr-1" />
-                        Contract
-                      </a>
-                    )}
-                    {selectedNotif.related_entity_id && (
-                      <a
-                        href={`/${selectedNotif.related_entity_type || "entity"}/${selectedNotif.related_entity_id}`}
-                        className="inline-flex items-center px-3 py-1 text-sm rounded-md bg-green-100 text-green-800 hover:bg-green-200 transition-colors"
-                        onClick={e => e.stopPropagation()}
-                        onKeyDown={e => e.stopPropagation()}
-                        aria-label="View related entity"
-                      >
-                        <LinkIcon className="h-4 w-4 mr-1" />
-                        {selectedNotif.related_entity_type || "Entity"}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowModal(false)}
-                  aria-label="Close"
-                >
-                  Close
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={async () => {
-                    if (confirm("Are you sure you want to delete this notification?")) {
-                      setIsUpdating(true)
-                      try {
-                        const { error } = await supabase
-                          .from("notifications")
-                          .delete()
-                          .eq("id", selectedNotif.id)
-                        if (error) throw error
-                        setNotifications((prev) => prev.filter((n) => n.id !== selectedNotif.id))
-                        setShowModal(false)
-                        toast({
-                          title: "Success",
-                          description: "Notification deleted.",
-                        })
-                      } catch (err) {
-                        toast({
-                          title: "Error",
-                          description: "Failed to delete notification.",
-                          variant: "destructive",
-                        })
-                      } finally {
-                        setIsUpdating(false)
-                      }
-                    }
-                  }}
-                  disabled={isUpdating}
-                  aria-label="Delete notification"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
-=======
-                {/* Summary */}
-                <div className="bg-gray-50 px-4 py-2 border-t">
-                  <div className="text-sm text-gray-600">
-                    Showing {paginated.length} of {filtered.length} notifications
-                    {search && ` matching "${search}"`}
-                    {typeFilter && ` of type "${typeFilter}"`}
-                    {readFilter && ` that are ${readFilter}`}
-                    {userFilter && ` for user ${userFilter}`}
-                    {startDate && ` from ${format(startDate, "yyyy-MM-dd")}`}
-                    {endDate && ` to ${format(endDate, "yyyy-MM-dd")}`}
-                  </div>
-                </div>
               </div>
             )}
             {/* Details Modal */}
@@ -798,7 +640,6 @@ export default function NotificationsPage() {
             </Dialog>
           </CardContent>
         </Card>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
       </div>
     </DashboardLayout>
   )

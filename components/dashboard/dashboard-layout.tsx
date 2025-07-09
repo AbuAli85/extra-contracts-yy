@@ -52,26 +52,20 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { theme, setTheme } = useTheme()
-  const pathname = usePathname()
-  const [mounted, setMounted] = useState(false)
-  const [currentYear, setCurrentYear] = useState("")
-
-<<<<<<< HEAD
-=======
+  const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+  const [currentYear, setCurrentYear] = useState("");
   // Extract locale from pathname
-  const locale = pathname && pathname.startsWith('/en/') ? 'en' : pathname && pathname.startsWith('/ar/') ? 'ar' : 'en'
-  
+  const locale = pathname && pathname.startsWith('/en/') ? 'en' : pathname && pathname.startsWith('/ar/') ? 'ar' : 'en';
   // Create locale-aware nav items
   const localeNavItems = navItems.map(item => ({
     ...item,
     href: `/${locale}${item.href}`
-  }))
-
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
+  }));
   useEffect(() => {
-    setMounted(true)
-    setCurrentYear(new Date().getFullYear().toString())
-  }, [])
+    setMounted(true);
+    setCurrentYear(new Date().getFullYear().toString());
+  }, []);
 
   const NavLink = ({ item, isMobile = false }: { item: NavItem; isMobile?: boolean }) => (
     <Link
