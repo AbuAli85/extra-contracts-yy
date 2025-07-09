@@ -1,6 +1,7 @@
 import './globals.css'
 import type React from "react"
 import type { Metadata } from "next"
+import { Providers } from "./providers"
 
 export const metadata: Metadata = {
   title: "Bilingual Contract Generator",
@@ -13,5 +14,5 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <>{children}</>
+  return <Providers>{children}</Providers>
 }
