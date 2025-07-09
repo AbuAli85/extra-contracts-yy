@@ -561,41 +561,6 @@ export default function ManagePartiesPage() {
     }
   }
 
-  const getStatusBadge = (status: string | null | undefined) => {
-    switch (status) {
-      case "Active":
-        return <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>
-      case "Inactive":
-        return <Badge variant="secondary">Inactive</Badge>
-      case "Suspended":
-        return <Badge variant="destructive">Suspended</Badge>
-      default:
-        return <Badge variant="outline">Unknown</Badge>
-    }
-  }
-
-  const getTypeBadge = (type: string | null | undefined) => {
-    switch (type) {
-      case "Employer":
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800">Employer</Badge>
-      case "Client":
-        return <Badge variant="outline" className="bg-purple-100 text-purple-800">Client</Badge>
-      case "Both":
-        return <Badge variant="outline" className="bg-orange-100 text-orange-800">Both</Badge>
-      default:
-        return <Badge variant="outline">Unknown</Badge>
-    }
-  }
-
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return "N/A"
-    try {
-      return format(parseISO(dateString), "dd-MM-yyyy")
-    } catch {
-      return "Invalid Date"
-    }
-  }
-
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
