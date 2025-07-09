@@ -9,10 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
-<<<<<<< HEAD
-=======
 import { Contract as ContractDetail, ActivityLog } from "@/lib/types"
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 import { 
   ArrowLeftIcon, 
   DownloadIcon, 
@@ -38,7 +35,6 @@ import {
   TagIcon
 } from "lucide-react"
 
-<<<<<<< HEAD
 interface ContractDetail {
   id: string
   status?: string
@@ -102,15 +98,11 @@ interface ActivityLog {
 
 export default function ContractDetailPage() {
   const params = useParams()
-=======
-export default function ContractDetailPage() {
-  const params = useParams()
 
   if (!params) {
     return <div>Loading page...</div>
   }
 
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   const contractId = params.id as string
   const [contract, setContract] = useState<ContractDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -152,11 +144,7 @@ export default function ContractDetailPage() {
 
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
 
-<<<<<<< HEAD
-  const getStatusColor = (status?: string) => {
-=======
   const getStatusColor = (status?: string | null) => {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     switch (status?.toLowerCase()) {
       case 'active': return 'bg-green-100 text-green-800 border-green-200'
       case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200'
@@ -168,11 +156,7 @@ export default function ContractDetailPage() {
     }
   }
 
-<<<<<<< HEAD
-  const getStatusIcon = (status?: string) => {
-=======
   const getStatusIcon = (status?: string | null) => {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     switch (status?.toLowerCase()) {
       case 'active': return <CheckCircleIcon className="h-4 w-4" />
       case 'completed': return <CheckCircleIcon className="h-4 w-4" />
@@ -184,11 +168,7 @@ export default function ContractDetailPage() {
     }
   }
 
-<<<<<<< HEAD
-  const formatCurrency = (amount?: number, currency?: string) => {
-=======
   const formatCurrency = (amount?: number | null, currency?: string | null) => {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     if (!amount) return 'N/A'
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -196,11 +176,7 @@ export default function ContractDetailPage() {
     }).format(amount)
   }
 
-<<<<<<< HEAD
-  const calculateDuration = (startDate?: string, endDate?: string) => {
-=======
   const calculateDuration = (startDate?: string | null, endDate?: string | null) => {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     if (!startDate || !endDate) return 'N/A'
     const start = new Date(startDate)
     const end = new Date(endDate)
@@ -220,11 +196,7 @@ export default function ContractDetailPage() {
         console.log("Fetching contract with ID:", contractId)
 
         // Fetch basic contract data
-<<<<<<< HEAD
-        const { data: basicData, error: basicError } = await supabase
-=======
         const { data, error: basicError } = await supabase
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
           .from("contracts")
           .select("*")
           .eq("id", contractId)
@@ -236,26 +208,17 @@ export default function ContractDetailPage() {
           return
         }
 
-<<<<<<< HEAD
-=======
-        const basicData = data as ContractDetail
-
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
-        console.log("Basic contract data:", basicData)
+        console.log("Basic contract data:", data)
 
         // Enhanced query with relations
-        let enhancedData = { ...basicData }
+        let enhancedData = { ...data }
         
         // Fetch related parties separately
-        if (basicData.employer_id) {
+        if (data.employer_id) {
           const { data: employerData } = await supabase
             .from("parties")
-<<<<<<< HEAD
-            .select("name_en, name_ar, crn, address, phone, email")
-=======
             .select("id, name_en, name_ar, crn, address_en, address_ar, contact_phone, contact_email")
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
-            .eq("id", basicData.employer_id)
+            .eq("id", data.employer_id)
             .single()
           
           if (employerData) {
@@ -263,15 +226,11 @@ export default function ContractDetailPage() {
           }
         }
         
-        if (basicData.client_id) {
+        if (data.client_id) {
           const { data: clientData } = await supabase
             .from("parties")
-<<<<<<< HEAD
-            .select("name_en, name_ar, crn, address, phone, email")
-=======
             .select("id, name_en, name_ar, crn, address_en, address_ar, contact_phone, contact_email")
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
-            .eq("id", basicData.client_id)
+            .eq("id", data.client_id)
             .single()
           
           if (clientData) {
@@ -279,22 +238,14 @@ export default function ContractDetailPage() {
           }
         }
         
-        if (basicData.promoter_id) {
-<<<<<<< HEAD
-          const { data: promoterData } = await supabase
-=======
+        if (data.promoter_id) {
           const { data: promoterData, error: promoterError } = await supabase
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
             .from("promoters")
             .select("id, name_en, name_ar, id_card_number, email, phone")
-            .eq("id", basicData.promoter_id)
+            .eq("id", data.promoter_id)
             .single()
           
-<<<<<<< HEAD
-          if (promoterData) {
-=======
           if (!promoterError && promoterData && typeof promoterData === 'object' && 'id' in promoterData) {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
             enhancedData.promoters = [promoterData]
           }
         }
@@ -703,54 +654,30 @@ export default function ContractDetailPage() {
                         <p className="font-mono text-sm text-gray-700 mt-1">{contract.employer.crn}</p>
                       </div>
                     )}
-<<<<<<< HEAD
-                    {contract?.employer?.email && (
-=======
                     {contract?.employer?.contact_email && (
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       <div>
                         <label className="text-sm font-medium text-gray-500">Email</label>
                         <p className="text-sm text-gray-700 mt-1 flex items-center gap-2">
                           <MailIcon className="h-4 w-4 text-gray-500" />
-<<<<<<< HEAD
-                          {contract.employer.email}
-                        </p>
-                      </div>
-                    )}
-                    {contract?.employer?.phone && (
-=======
                           {contract.employer.contact_email}
                         </p>
                       </div>
                     )}
                     {contract?.employer?.contact_phone && (
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       <div>
                         <label className="text-sm font-medium text-gray-500">Phone</label>
                         <p className="text-sm text-gray-700 mt-1 flex items-center gap-2">
                           <PhoneIcon className="h-4 w-4 text-gray-500" />
-<<<<<<< HEAD
-                          {contract.employer.phone}
-                        </p>
-                      </div>
-                    )}
-                    {contract?.employer?.address && (
-=======
                           {contract.employer.contact_phone}
                         </p>
                       </div>
                     )}
                     {contract?.employer?.address_en && (
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       <div>
                         <label className="text-sm font-medium text-gray-500">Address</label>
                         <p className="text-sm text-gray-700 mt-1 flex items-start gap-2">
                           <MapPinIcon className="h-4 w-4 text-gray-500 mt-0.5" />
-<<<<<<< HEAD
-                          {contract.employer.address}
-=======
                           {contract.employer.address_en}
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         </p>
                       </div>
                     )}
@@ -792,54 +719,30 @@ export default function ContractDetailPage() {
                         <p className="font-mono text-sm text-gray-700 mt-1">{contract.client.crn}</p>
                       </div>
                     )}
-<<<<<<< HEAD
-                    {contract?.client?.email && (
-=======
                     {contract?.client?.contact_email && (
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       <div>
                         <label className="text-sm font-medium text-gray-500">Email</label>
                         <p className="text-sm text-gray-700 mt-1 flex items-center gap-2">
                           <MailIcon className="h-4 w-4 text-gray-500" />
-<<<<<<< HEAD
-                          {contract.client.email}
-                        </p>
-                      </div>
-                    )}
-                    {contract?.client?.phone && (
-=======
                           {contract.client.contact_email}
                         </p>
                       </div>
                     )}
                     {contract?.client?.contact_phone && (
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       <div>
                         <label className="text-sm font-medium text-gray-500">Phone</label>
                         <p className="text-sm text-gray-700 mt-1 flex items-center gap-2">
                           <PhoneIcon className="h-4 w-4 text-gray-500" />
-<<<<<<< HEAD
-                          {contract.client.phone}
-                        </p>
-                      </div>
-                    )}
-                    {contract?.client?.address && (
-=======
                           {contract.client.contact_phone}
                         </p>
                       </div>
                     )}
                     {contract?.client?.address_en && (
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       <div>
                         <label className="text-sm font-medium text-gray-500">Address</label>
                         <p className="text-sm text-gray-700 mt-1 flex items-start gap-2">
                           <MapPinIcon className="h-4 w-4 text-gray-500 mt-0.5" />
-<<<<<<< HEAD
-                          {contract.client.address}
-=======
                           {contract.client.address_en}
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         </p>
                       </div>
                     )}

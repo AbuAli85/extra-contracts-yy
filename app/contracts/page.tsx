@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 import ContractsTable from '@/components/contracts/ContractsTable'
 
 export default function ContractsPage() {
@@ -10,7 +8,6 @@ export default function ContractsPage() {
   )
 }
 
-// Required exports to fix Next.js build error
 export const metadata = {
   title: 'Contracts Management',
   description: 'Manage contracts with updated party roles: Party A = Client, Party B = Employer'
@@ -18,4 +15,3 @@ export const metadata = {
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
