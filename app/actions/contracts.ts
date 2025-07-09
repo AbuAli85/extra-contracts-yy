@@ -18,14 +18,6 @@ export async function createContract(newContract: ContractInsert) {
        contract_end_date,
        status,
        pdf_url,
-<<<<<<< HEAD
-       first_party_id,
-       second_party_id,
-       promoter_id,
-       parties!contracts_employer_id_fkey (id, name_en, name_ar),
-       parties!contracts_client_id_fkey (id, name_en, name_ar),
-       promoters (id, name_en, name_ar)`,
-=======
        contract_number,
        contract_value,
        email,
@@ -34,8 +26,7 @@ export async function createContract(newContract: ContractInsert) {
        promoter_id,
        first_party:parties!contracts_first_party_id_fkey (id, name_en, name_ar, crn, type),
        second_party:parties!contracts_second_party_id_fkey (id, name_en, name_ar, crn, type),
-       promoters (id, name_en, name_ar, id_card_number, id_card_url, passport_url, status)`,
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
+       promoters (id, name_en, name_ar, id_card_number, id_card_url, passport_url, status)`
     )
     .single()
 
@@ -64,14 +55,6 @@ export async function updateContract(contractId: string, updatedContract: Partia
        contract_end_date,
        status,
        pdf_url,
-<<<<<<< HEAD
-       first_party_id,
-       second_party_id,
-       promoter_id,
-       parties!contracts_employer_id_fkey (id, name_en, name_ar),
-       parties!contracts_client_id_fkey (id, name_en, name_ar),
-       promoters (id, name_en, name_ar)`,
-=======
        contract_number,
        contract_value,
        email,
@@ -80,8 +63,7 @@ export async function updateContract(contractId: string, updatedContract: Partia
        promoter_id,
        first_party:parties!contracts_first_party_id_fkey (id, name_en, name_ar, crn, type),
        second_party:parties!contracts_second_party_id_fkey (id, name_en, name_ar, crn, type),
-       promoters (id, name_en, name_ar, id_card_number, id_card_url, passport_url, status)`,
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
+       promoters (id, name_en, name_ar, id_card_number, id_card_url, passport_url, status)`
     )
     .single()
 
@@ -89,8 +71,6 @@ export async function updateContract(contractId: string, updatedContract: Partia
   if (!data) throw new Error("Contract update failed, no data returned.")
   return data
 }
-<<<<<<< HEAD
-=======
 
 export async function getContractById(contractId: string) {
   const supabase = await createServerComponentClient()
@@ -112,7 +92,7 @@ export async function getContractById(contractId: string) {
        promoter_id,
        first_party:parties!contracts_first_party_id_fkey (id, name_en, name_ar, crn, type),
        second_party:parties!contracts_second_party_id_fkey (id, name_en, name_ar, crn, type),
-       promoters (id, name_en, name_ar, id_card_number, id_card_url, passport_url, status)`,
+       promoters (id, name_en, name_ar, id_card_number, id_card_url, passport_url, status)`
     )
     .eq("id", contractId)
     .single()
@@ -121,4 +101,3 @@ export async function getContractById(contractId: string) {
   if (!data) throw new Error(`Contract with id ${contractId} not found.`)
   return data
 }
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a

@@ -42,26 +42,6 @@ export default function NotificationSystem() {
         .limit(20)
 
       if (error) throw error
-<<<<<<< HEAD
-      setNotifications(
-        data.map((n: NotificationRow) => ({
-          id: n.id,
-          type: n.type as NotificationItem["type"],
-          message: n.message,
-          timestamp: n.created_at, // This is already an ISO string
-          user_email: n.user_email,
-          related_contract_id: n.related_contract_id,
-          isRead: n.is_read,
-          context: n.related_contract_id
-            ? `Contract ID: ${n.related_contract_id}`
-            : n.related_entity_id
-              ? `${n.related_entity_type || "Entity"} ID: ${n.related_entity_id}`
-              : n.user_email
-                ? `User: ${n.user_email}`
-                : undefined,
-        })),
-      )
-=======
       if (Array.isArray(data) && data.every(n => n && typeof n === 'object' && 'id' in n && 'type' in n && 'message' in n && 'created_at' in n && 'is_read' in n)) {
         setNotifications(
           data.map((n: NotificationRow) => ({
@@ -69,13 +49,13 @@ export default function NotificationSystem() {
             type: n.type as NotificationItem["type"],
             message: n.message,
             created_at: n.created_at,
-            timestamp: n.created_at, // For compatibility
+            timestamp: n.created_at,
             user_email: n.user_email ?? undefined,
             related_contract_id: n.related_contract_id ?? undefined,
             related_entity_id: n.related_entity_id ?? undefined,
             related_entity_type: n.related_entity_type ?? undefined,
             isRead: n.is_read,
-            is_read: n.is_read, // For compatibility
+            is_read: n.is_read,
             context: n.related_contract_id
               ? `Contract ID: ${n.related_contract_id}`
               : n.related_entity_id
@@ -88,7 +68,6 @@ export default function NotificationSystem() {
       } else {
         setNotifications([])
       }
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     } catch (error: any) {
       console.error("Error fetching notifications:", error)
       toast({
@@ -119,12 +98,6 @@ export default function NotificationSystem() {
                 id: newNotif.id,
                 type: newNotif.type as NotificationItem["type"],
                 message: newNotif.message,
-<<<<<<< HEAD
-                timestamp: newNotif.created_at,
-                user_email: newNotif.user_email,
-                related_contract_id: newNotif.related_contract_id,
-                isRead: newNotif.is_read,
-=======
                 created_at: newNotif.created_at,
                 timestamp: newNotif.created_at,
                 user_email: newNotif.user_email ?? undefined,
@@ -133,7 +106,6 @@ export default function NotificationSystem() {
                 related_entity_type: newNotif.related_entity_type ?? undefined,
                 isRead: newNotif.is_read,
                 is_read: newNotif.is_read,
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 context: newNotif.related_contract_id
                   ? `Contract ID: ${newNotif.related_contract_id}`
                   : newNotif.related_entity_id

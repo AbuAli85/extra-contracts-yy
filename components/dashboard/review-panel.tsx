@@ -24,48 +24,7 @@ export default function ReviewPanel() {
   const fetchReviewItems = async () => {
     setLoading(true)
     try {
-<<<<<<< HEAD
-      // Fetch recent contracts for review (without status filter since status column doesn't exist)
-      const { data, error } = await supabase
-        .from("contracts")
-        .select(
-          `
-          id, created_at,
-          employer:parties!contracts_employer_id_fkey(id,name_en,name_ar),
-          client:parties!contracts_client_id_fkey(id,name_en,name_ar),
-          promoters(id,name_en,name_ar)
-          `,
-        )
-        .order("created_at", { ascending: false })
-        .limit(10)
-
-      if (error) throw error
-
-      const formattedItems: ReviewItem[] = data.map((item: any) => ({
-        id: item.id,
-        title: `Contract: ${item.id}`,
-        promoter: item.promoters && item.promoters.length > 0 ? item.promoters[0].name_en || "N/A" : "N/A",
-        parties: `${item.client?.name_en || "Client"} / ${item.employer?.name_en || "Employer"}`,
-        period: `Submitted ${formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}`, // Example period
-        contractLink: `/contracts/${item.id}`, // Link to view the contract details
-        // You might need to fetch submitter details (user_id) separately if not directly available
-        submitter: "System",
-        // Use a static placeholder path without query params to avoid file system errors
-        avatar: placeholderAvatar,
-      }))
-      setReviewItems(formattedItems)
-    } catch (error: any) {
-      console.error("Error fetching review items:", error)
-      toast({
-        title: "Error Fetching Review Items",
-        description: error.message,
-        variant: "destructive",
-      })
-=======
-      // Temporarily disable database query and use mock data to fix UI
-      console.log("Using mock data for review panel")
-      
-      // Create mock data to keep the UI working
+      // Use mock data for review panel to keep UI working
       const mockItems: ReviewItem[] = [
         {
           id: "demo-1",
@@ -98,14 +57,11 @@ export default function ReviewPanel() {
           avatar: placeholderAvatar,
         }
       ]
-      
       setReviewItems(mockItems)
       devLog("Review items loaded successfully (mock data):", mockItems.length)
-      
     } catch (error: any) {
       console.error("Error in review panel:", error)
       setReviewItems([])
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     } finally {
       setLoading(false)
     }
@@ -113,26 +69,6 @@ export default function ReviewPanel() {
 
   useEffect(() => {
     fetchReviewItems()
-<<<<<<< HEAD
-    const channel = supabase
-      .channel("public:contracts:review")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "contracts" },
-        (payload) => {
-          devLog("Review items change:", payload)
-          toast({
-            title: "New Item for Review",
-            description: "An item has been submitted for review.",
-          })
-          fetchReviewItems()
-        },
-      )
-      .subscribe()
-    return () => {
-      supabase.removeChannel(channel)
-    }
-=======
     
     // Temporarily disable real-time subscription to prevent errors
     // const channel = supabase
@@ -153,7 +89,6 @@ export default function ReviewPanel() {
     // return () => {
     //   supabase.removeChannel(channel)
     // }
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   }, [])
 
   const handleAction = async (itemId: string, action: "approve" | "reject" | "comment") => {

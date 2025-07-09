@@ -12,10 +12,6 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-<<<<<<< HEAD
-  ResponsiveContainer,
-=======
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   Cell,
 } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -80,29 +76,6 @@ export default function ChartsSection() {
   const fetchChartData = async () => {
     setLoading(true)
     try {
-<<<<<<< HEAD
-      const { data: statusResult, error: statusError } = await supabase.rpc(
-        "get_contract_status_counts",
-      )
-      if (statusError) throw statusError
-      setStatusData(
-        statusResult.map((s: any) => ({
-          ...s,
-          nameAr: chartConfig[s.name as keyof typeof chartConfig]?.labelAr || s.name,
-        })),
-      )
-
-      const { data: monthlyResult, error: monthlyError } = await supabase.rpc(
-        "get_monthly_contract_revenue",
-      )
-      if (monthlyError) throw monthlyError
-      setMonthlyData(
-        monthlyResult.map((m: any) => ({
-          ...m,
-          monthAr: MONTH_MAP[m.month as keyof typeof MONTH_MAP] || m.month,
-        })),
-      )
-=======
       // Query contracts directly for status counts
       const { data: contractsData, error: contractsError } = await supabase
         .from('contracts')
@@ -155,7 +128,6 @@ export default function ChartsSection() {
       }))
       
       setMonthlyData(monthlyData)
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     } catch (error: any) {
       console.error("Error fetching chart data:", error)
       toast({
@@ -221,39 +193,6 @@ export default function ChartsSection() {
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px] w-full">
-<<<<<<< HEAD
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={statusData} layout="vertical" margin={{ right: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  tickLine={false}
-                  axisLine={false}
-                  width={100} // Adjusted width for potentially longer labels
-                  tickFormatter={(value) =>
-                    chartConfig[value as keyof typeof chartConfig]?.label || value
-                  }
-                />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="dot" hideLabel />}
-                />
-                <Bar dataKey="count" radius={5}>
-                  {statusData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={
-                        chartConfig[entry.name as keyof typeof chartConfig]?.color ||
-                        chartConfig.Draft.color
-                      }
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-=======
             <BarChart data={statusData} layout="vertical" margin={{ right: 20 }}>
               <CartesianGrid strokeDasharray="3 3" horizontal={false} />
               <XAxis type="number" />
@@ -283,7 +222,6 @@ export default function ChartsSection() {
                 ))}
               </Bar>
             </BarChart>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
           </ChartContainer>
         </CardContent>
       </Card>
@@ -298,47 +236,6 @@ export default function ChartsSection() {
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px] w-full">
-<<<<<<< HEAD
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="month"
-                  tickFormatter={(value) => MONTH_MAP[value as keyof typeof MONTH_MAP] || value}
-                />
-                <YAxis yAxisId="left" stroke="var(--color-contracts)" />
-                <YAxis yAxisId="right" orientation="right" stroke="var(--color-revenue)" />
-                <ChartTooltip
-                  content={
-                    <ChartTooltipContent
-                      labelFormatter={(label) =>
-                        MONTH_MAP[label as keyof typeof MONTH_MAP] || label
-                      }
-                    />
-                  }
-                />
-                <ChartLegend content={<ChartLegendContent />} />
-                <Line
-                  yAxisId="left"
-                  type="monotone"
-                  dataKey="contracts"
-                  stroke="var(--color-contracts)"
-                  name={chartConfig.contracts.label}
-                  strokeWidth={2}
-                  dot={false}
-                />
-                <Line
-                  yAxisId="right"
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="var(--color-revenue)"
-                  name={chartConfig.revenue.label}
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-=======
             <LineChart data={monthlyData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
@@ -375,7 +272,6 @@ export default function ChartsSection() {
                 dot={false}
               />
             </LineChart>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
           </ChartContainer>
         </CardContent>
       </Card>
