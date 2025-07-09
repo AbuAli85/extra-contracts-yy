@@ -10,6 +10,7 @@ import {
 } from "recharts/types/component/DefaultTooltipContent"
 
 import { cn } from "@/lib/utils"
+import { getLegendItemKey } from "./chart-helpers"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
@@ -339,7 +340,7 @@ const ChartLegendContent = React.forwardRef<
         )}
       >
         {payload.map((item) => {
-          const key = `${nameKey || item.payload?.dataKey || "value"}`
+          const key = `${nameKey || (item as any).dataKey || item.value || "value"}`
           const itemConfig = getPayloadConfigFromPayload(config, item, key)
 
           return (
