@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { KeyMetricCard } from '@/components/KeyMetricCard'
-import { ContractDetail } from '@/lib/types'
+import { ContractDetail } from '@/types/contract'
 import { formatCurrency, calculateDuration, formatDate, formatDateTime, copyToClipboard } from '@/utils/format'
 import { 
   CalendarIcon, 

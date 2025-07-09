@@ -7,7 +7,7 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className = '' }: StatusBadgeProps) {
-  const config = getStatusConfig(status)
+  const config = getStatusConfig(status ?? undefined)
   const Icon = config.icon
 
   return (

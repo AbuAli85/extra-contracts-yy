@@ -43,11 +43,7 @@ export const STATUS_CONFIG = {
 
 export type ContractStatus = keyof typeof STATUS_CONFIG
 
-<<<<<<< HEAD
-export const getStatusConfig = (status?: string) => {
-=======
 export const getStatusConfig = (status?: string | null) => {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   const normalizedStatus = status?.toLowerCase() as ContractStatus
   return STATUS_CONFIG[normalizedStatus] || STATUS_CONFIG.draft
 }

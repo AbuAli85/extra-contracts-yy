@@ -1,11 +1,7 @@
 // app/[locale]/generate-contract/page.tsx
 "use client"
 
-<<<<<<< HEAD
-import GenerateContractForm from "@/components/generate-contract-form"
-=======
 import { useState, useEffect } from "react"
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -308,19 +304,6 @@ export default function GenerateContractPage() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-<<<<<<< HEAD
-      className="mx-auto max-w-4xl" // Consistent container max-width
-    >
-      <div className="mb-10 text-center">
-        <h1 className="mb-3 font-heading text-3xl font-bold md:text-4xl">Create New Contract</h1>
-        <p className="text-md text-muted-foreground">
-          Fill in the details below to generate your bilingual contract.
-        </p>
-      </div>
-      {/* Form container with padding, rounded corners, and shadow */}
-      <div className="rounded-lg bg-card p-6 shadow-xl md:p-8">
-        <GenerateContractForm />
-=======
       className="mx-auto max-w-6xl space-y-6"
     >
       {/* Header */}
@@ -420,7 +403,6 @@ export default function GenerateContractPage() {
             </CardContent>
           </Card>
         </motion.div>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
       </div>
 
       {/* Insights and Form Sections Overview */}
