@@ -1,21 +1,40 @@
-node_modules
+# Node
+node_modules/
 
-# Next.js build output
-/.next/
-/out/
+# Next.js
+.next/
+out/
 
-# Local environment variables
-.env*.local
-
-# Log files
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Editor directories
-.vscode
-.idea
-
-# Other
+# OS
 .DS_Store
+Thumbs.db
+
+# Env
+.env*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Test coverage
+coverage/
+
+# Build
+build/
+dist/
+
+# Misc
+*.local
+*.log
+
+# Ignore lock files (optional, if you use only one package manager)
+# yarn.lock
+# package-lock.json
+# pnpm-lock.yaml
