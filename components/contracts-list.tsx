@@ -11,7 +11,7 @@ import { Download, RotateCcw, Plus } from "lucide-react"
 import { toast } from "sonner"
 
 export function ContractsList() {
-  const { contracts, loading, fetchContracts, retryContract, generateContract } = useContractsStore()
+  const { contracts, fetchContracts, retryContract, generateContract, isLoading } = useContractsStore()
 
   // Set up real-time subscriptions
   useRealtimeContracts()
@@ -42,10 +42,11 @@ export function ContractsList() {
     try {
       await generateContract({
         contract_name: `Contract ${Date.now()}`,
-        party_a: "Party A",
-        party_b: "Party B",
         contract_type: "Service Agreement",
         terms: "Standard terms and conditions",
+        first_party_id: "partyA-id-placeholder",
+        second_party_id: "partyB-id-placeholder",
+        promoter_id: "promoter-id-placeholder"
       })
       toast.success("Contract generation started")
     } catch (error) {
@@ -53,7 +54,7 @@ export function ContractsList() {
     }
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -87,7 +88,7 @@ export function ContractsList() {
               <TableRow key={contract.id}>
                 <TableCell className="font-medium">{contract.contract_name}</TableCell>
                 <TableCell>
-                  <ContractStatusIndicator status={contract.status} />
+                  <ContractStatusIndicator status={contract.status || "unknown"} />
                 </TableCell>
                 <TableCell>{new Date(contract.created_at).toLocaleDateString()}</TableCell>
                 <TableCell>
@@ -96,7 +97,7 @@ export function ContractsList() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDownload(contract.id, contract.contract_name)}
+                        onClick={() => handleDownload(contract.id, contract.contract_name || "Contract")}
                       >
                         <Download className="h-4 w-4" />
                       </Button>

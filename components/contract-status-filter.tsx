@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import React from "react"
 
 const STATUS_OPTIONS = [
   { label: "All Statuses", value: "all" },
@@ -18,19 +19,31 @@ const STATUS_OPTIONS = [
   { label: "Generation Error", value: "GENERATION_ERROR" },
 ]
 
-function ContractStatusFilter() {
+interface ContractStatusFilterProps {
+  onSelectStatus?: (status: string) => void
+  selectedStatus?: string
+}
+
+function ContractStatusFilter({
+  onSelectStatus,
+  selectedStatus,
+}: ContractStatusFilterProps = {}) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const currentStatus = searchParams?.get("status") || "all"
+  const currentStatus = selectedStatus || searchParams?.get("status") || "all"
 
   const handleStatusChange = (newStatus: string) => {
-    const params = new URLSearchParams(searchParams ? searchParams.toString() : "")
-    if (newStatus === "all") {
-      params.delete("status")
+    if (onSelectStatus) {
+      onSelectStatus(newStatus)
     } else {
-      params.set("status", newStatus)
+      const params = new URLSearchParams(searchParams ? searchParams.toString() : "")
+      if (newStatus === "all") {
+        params.delete("status")
+      } else {
+        params.set("status", newStatus)
+      }
+      router.push(`/contracts?${params.toString()}`)
     }
-    router.push(`/contracts?${params.toString()}`)
   }
 
   return (
