@@ -400,6 +400,7 @@ export default function ContractDetailPage() {
                       <p className="text-sm text-gray-500">
                         Detailed promoter information is not available.
                       </p>
+                    </div>
                   )}
                 </CardContent>
               </Card>
