@@ -634,23 +634,20 @@ export default function ContractsTable() {
                       <TableCell>
                         <div>
                           <div>ALL POSSIBLE NAMES:</div>
-                          <div>first_party_name: {String(contract.first_party_name)}</div>
                           <div>first_party_name_en: {String(contract.first_party_name_en)}</div>
-                          <div>first_party?.name_en: {String(contract.first_party?.name_en)}</div>
+                          <div>first_party_name_ar: {String(contract.first_party_name_ar)}</div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div>second_party_name: {String(contract.second_party_name)}</div>
                           <div>second_party_name_en: {String(contract.second_party_name_en)}</div>
-                          <div>second_party?.name_en: {String(contract.second_party?.name_en)}</div>
+                          <div>second_party_name_ar: {String(contract.second_party_name_ar)}</div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div>promoter_name: {String(contract.promoter_name)}</div>
                           <div>promoter_name_en: {String(contract.promoter_name_en)}</div>
-                          <div>promoter?.name_en: {String(contract.promoter?.name_en)}</div>
+                          <div>promoter_name_ar: {String(contract.promoter_name_ar)}</div>
                         </div>
                       </TableCell>
                       <TableCell>

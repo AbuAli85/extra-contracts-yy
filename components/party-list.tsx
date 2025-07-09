@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import PartyDetail from './party-detail'
+import type { Party } from '../lib/types'
 
 export default function PartyList() {
-  const [parties, setParties] = useState([])
+  const [parties, setParties] = useState<Party[]>([])
   const [search, setSearch] = useState('')
-  const [selectedParty, setSelectedParty] = useState(null)
+  const [selectedParty, setSelectedParty] = useState<string | null>(null)
 
   useEffect(() => {
     supabase.from('parties').select('*').then(({ data }) => setParties(data || []))
@@ -32,7 +33,7 @@ export default function PartyList() {
           </li>
         ))}
       </ul>
-      {selectedParty && <PartyDetail partyId={selectedParty} />}
+      {selectedParty && <PartyDetail partyId={Number(selectedParty)} />}
     </div>
   )
-} 
+}

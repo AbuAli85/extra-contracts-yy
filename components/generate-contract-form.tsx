@@ -45,6 +45,7 @@ import {
   WORK_LOCATIONS,
   getOptionLabel 
 } from "@/constants/contract-options"
+import { validateContractData } from "@/lib/contract-utils"
 
 interface ContractGeneratorFormProps {
   /** Existing contract when editing; new contract if undefined. */
@@ -217,7 +218,7 @@ export default function ContractGeneratorForm({
   }, [employerPartiesError, clientPartiesError, promotersError, toast])
 
   // Mutation: call your API routes instead of supabase.from(...)
-  const { mutate: saveContract, isLoading: isSubmitting } = useMutation({
+  const mutation = useMutation({
     mutationFn: async (values: ContractGeneratorFormData) => {
       const payload = {
         first_party_id: values.first_party_id,
@@ -300,40 +301,23 @@ export default function ContractGeneratorForm({
       })
     },
   })
+  const { mutate: saveContract } = mutation
+  const isSubmitting = mutation.status === "pending"
 
   const onSubmit = (values: ContractGeneratorFormData) => {
     // Validate contract data before submission
-    const validationError = validateContractData(values)
-    if (validationError) {
+    const validation = validateContractData(values)
+    if (!validation.isValid) {
       return toast({
         title: "Validation Error",
-        description: validationError,
+        description: validation.errors?.join("; ") || "Invalid contract data.",
         variant: "destructive",
       })
     }
 
-    // Analyze contract duration and adjust dates if necessary
-    const { startDate, endDate, error: durationError } = analyzeContractDuration(
-      values.contract_start_date,
-      values.contract_end_date
-    )
-    if (durationError) {
-      return toast({
-        title: "Duration Error",
-        description: durationError,
-        variant: "destructive",
-      })
-    }
-
-    // Format duration for display or storage
-    const formattedDuration = formatDuration(startDate, endDate)
-
-    // Proceed with contract submission
+    // Proceed with contract submission (no duration analysis)
     saveContract({
       ...values,
-      contract_start_date: startDate,
-      contract_end_date: endDate,
-      duration: formattedDuration, // Add duration to the payload
     })
   }
 
@@ -368,7 +352,7 @@ export default function ContractGeneratorForm({
   }
 
   return (
-    <Form {...form}>
+    <Form {...form} reset={reset}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
         {/* Contracting Parties */}
         <motion.div
@@ -510,7 +494,6 @@ export default function ContractGeneratorForm({
                   searchPlaceholder="Search promoters..."
                   emptyStateMessage="No promoter found."
                   disabled={isSubmitting || isLoadingPromoters}
-                  inputClassName={getInputStateClasses("promoter_id")}
                 />
                 <FormMessage />
               </FormItem>
@@ -561,9 +544,6 @@ export default function ContractGeneratorForm({
                     dateFormat="dd-MM-yyyy"
                     placeholder="dd-MM-yyyy"
                     disabled={isSubmitting}
-                    inputClassName={getInputStateClasses(
-                      "contract_start_date"
-                    )}
                   />
                   <FormMessage />
                 </FormItem>
@@ -587,9 +567,6 @@ export default function ContractGeneratorForm({
                           form.getValues("contract_start_date")!
                         : false) || isSubmitting
                     }
-                    inputClassName={getInputStateClasses(
-                      "contract_end_date"
-                    )}
                   />
                   <FormMessage />
                 </FormItem>
@@ -619,7 +596,7 @@ export default function ContractGeneratorForm({
                     placeholder="contact@example.com"
                     {...field}
                     disabled={isSubmitting}
-                    className={getInputStateClasses("email")}
+                    className={getInputStateClasses("email") || ""}
                   />
                 </FormControl>
                 <FormDescription>

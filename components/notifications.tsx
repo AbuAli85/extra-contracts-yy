@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import type { Notification } from '../lib/notification-types'
 
 export default function Notifications() {
   const [user, setUser] = useState<any>(null)
-  const [notifications, setNotifications] = useState([])
+  const [notifications, setNotifications] = useState<Notification[]>([])
 
   useEffect(() => {
     // Get current user
@@ -29,11 +30,16 @@ export default function Notifications() {
         .eq('user_id', user.id)
         .eq('read', false)
         .order('created_at', { ascending: false })
-        .then(({ data }) => setNotifications(data || []))
+        .then(({ data }) => setNotifications(
+          (data || []).map(n => ({
+            ...n,
+            read: n.read ?? false,
+          }))
+        ))
     }
   }, [user])
 
-  const markAsRead = async (id) => {
+  const markAsRead = async (id: string) => {
     await supabase.from('notifications').update({ read: true }).eq('id', id)
     setNotifications(notifications.filter(n => n.id !== id))
   }
@@ -53,4 +59,4 @@ export default function Notifications() {
       </ul>
     </div>
   )
-} 
+}
