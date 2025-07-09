@@ -50,7 +50,7 @@ export function OverviewTab({ contract }: OverviewTabProps) {
 
         <KeyMetricCard
           title="Value"
-          value={formatCurrency(contract?.contract_value, contract?.currency)}
+          value={formatCurrency(contract?.contract_value ?? undefined, contract?.currency)}
           icon={TagIcon}
           colorClass="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200"
         />

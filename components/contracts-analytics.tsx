@@ -352,4 +352,4 @@ export function ContractsAnalyticsDashboard() {
       </div>
     </div>
   )
-}Dashboard
+}

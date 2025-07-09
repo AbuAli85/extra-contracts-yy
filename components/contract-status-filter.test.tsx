@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react"
 import { ContractStatusFilter } from "./contract-status-filter"
 import { NextIntlClientProvider } from "next-intl"
-import messages from "@/messages/en.json" // Import your English messages file
+import messages from "@/i18n/messages/en.json" // Import your English messages file
 import { jest } from "@jest/globals" // Import jest globals
 
 // Mock next-intl useTranslations
