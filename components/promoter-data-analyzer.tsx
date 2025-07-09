@@ -94,7 +94,6 @@ export default function PromoterDataAnalyzer() {
         passport_expiry_date: row.passport_expiry_date,
         notify_days_before_id_expiry: row.notify_days_before_id_expiry,
         notify_days_before_passport_expiry: row.notify_days_before_passport_expiry,
-        notify_days_before_contract_expiry: row.notify_days_before_contract_expiry,
         notes: row.notes,
         created_at: row.created_at
       }))

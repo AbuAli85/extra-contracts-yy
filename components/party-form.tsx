@@ -109,11 +109,11 @@ export default function PartyForm({ partyToEdit, onFormSubmit }: PartyFormProps)
     setIsSubmitting(true)
     try {
       const partyData: Omit<Party, "id" | "created_at"> = {
-        name_en: values.name_en,
-        name_ar: values.name_ar,
-        crn: values.crn,
+        name_en: values.name_en || "",
+        name_ar: values.name_ar || "",
+        crn: values.crn || "",
         type: values.type as "Employer" | "Client",
-        role: values.role,
+        role: values.role || null,
         cr_expiry_date: values.cr_expiry_date ? format(values.cr_expiry_date, 'yyyy-MM-dd') : null,
         contact_person: values.contact_person || null,
         contact_email: values.contact_email || null,

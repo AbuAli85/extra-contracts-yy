@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { CheckCircle2, Clock, XCircle, AlertTriangle, FileText, Archive, Send, Eye } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export interface ContractStatus {
   value: string

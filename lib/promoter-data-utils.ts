@@ -21,7 +21,6 @@ export interface PromoterCSVRow {
   passport_expiry_date: string | null
   notify_days_before_id_expiry: number | null
   notify_days_before_passport_expiry: number | null
-  notify_days_before_contract_expiry: number | null
   notes: string | null
   created_at: string | null
   updated_at: string | null
@@ -52,7 +51,7 @@ export function parsePromoterCSV(csvText: string): PromoterCSVRow[] {
       }
       
       // Convert numeric fields
-      if (['notify_days_before_id_expiry', 'notify_days_before_passport_expiry', 'notify_days_before_contract_expiry'].includes(header)) {
+      if (['notify_days_before_id_expiry', 'notify_days_before_passport_expiry'].includes(header)) {
         entry[header] = value ? parseInt(value, 10) : null
       } else {
         entry[header] = value || null
@@ -72,7 +71,7 @@ export function exportPromoterCSV(promoters: Promoter[]): string {
     'employer_id', 'outsourced_to_id', 'job_title', 'work_location', 'status',
     'contract_valid_until', 'id_card_expiry_date', 'passport_expiry_date',
     'notify_days_before_id_expiry', 'notify_days_before_passport_expiry',
-    'notify_days_before_contract_expiry', 'notes', 'created_at', 'updated_at'
+    'notes', 'created_at', 'updated_at'
   ]
 
   const rows = promoters.map(promoter => [
@@ -92,7 +91,6 @@ export function exportPromoterCSV(promoters: Promoter[]): string {
     promoter.passport_expiry_date || '',
     promoter.notify_days_before_id_expiry || '',
     promoter.notify_days_before_passport_expiry || '',
-    promoter.notify_days_before_contract_expiry || '',
     promoter.notes || '',
     promoter.created_at || '',
     '' // updated_at not in Promoter interface
@@ -116,8 +114,7 @@ export function analyzePromoterData(promoters: PromoterCSVRow[]) {
     },
     notificationSettings: {
       idExpiry: {} as Record<number, number>,
-      passportExpiry: {} as Record<number, number>,
-      contractExpiry: {} as Record<number, number>
+      passportExpiry: {} as Record<number, number>
     },
     recentUpdates: [] as PromoterCSVRow[]
   }
@@ -147,11 +144,6 @@ export function analyzePromoterData(promoters: PromoterCSVRow[]) {
         (analysis.notificationSettings.passportExpiry[promoter.notify_days_before_passport_expiry] || 0) + 1
     }
     
-    if (promoter.notify_days_before_contract_expiry) {
-      analysis.notificationSettings.contractExpiry[promoter.notify_days_before_contract_expiry] = 
-        (analysis.notificationSettings.contractExpiry[promoter.notify_days_before_contract_expiry] || 0) + 1
-    }
-
     // Recent updates (last 30 days)
     if (promoter.updated_at) {
       const updateDate = new Date(promoter.updated_at)
@@ -212,7 +204,7 @@ export function validatePromoterData(promoter: PromoterCSVRow): { isValid: boole
   const dateFields = ['contract_valid_until', 'id_card_expiry_date', 'passport_expiry_date']
   dateFields.forEach(field => {
     const value = promoter[field as keyof PromoterCSVRow]
-    if (value && isNaN(Date.parse(value))) {
+    if (value && typeof value === 'string' && isNaN(Date.parse(value))) {
       errors.push(`${field} must be a valid date`)
     }
   })
@@ -220,8 +212,7 @@ export function validatePromoterData(promoter: PromoterCSVRow): { isValid: boole
   // Validate notification days
   const notificationFields = [
     'notify_days_before_id_expiry',
-    'notify_days_before_passport_expiry', 
-    'notify_days_before_contract_expiry'
+    'notify_days_before_passport_expiry'
   ]
   notificationFields.forEach(field => {
     const value = promoter[field as keyof PromoterCSVRow]
