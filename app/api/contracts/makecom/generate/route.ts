@@ -1,12 +1,19 @@
 // app/api/contracts/makecom/generate/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { generateContractWithMakecom, getEnhancedContractTypeConfig, getMakecomEnabledContractTypes } from "@/lib/contract-type-config"
-import { getMakecomTemplateConfig, generateMakecomBlueprint } from "@/lib/makecom-template-config"
+import {
+  generateContractWithMakecom,
+  getEnhancedContractTypeConfig,
+  getMakecomEnabledContractTypes,
+} from "@/lib/contract-type-config"
+import {
+  getMakecomTemplateConfig,
+  generateMakecomBlueprint,
+} from "@/lib/makecom-template-config"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
 // GET: List all Make.com enabled contract types
@@ -126,7 +133,7 @@ export async function POST(request: NextRequest) {
     // Generate contract with Make.com integration
     const { webhookPayload, templateConfig, validation } = generateContractWithMakecom(
       contractType,
-      contractData
+      contractData,
     )
 
     if (!validation.isValid) {
