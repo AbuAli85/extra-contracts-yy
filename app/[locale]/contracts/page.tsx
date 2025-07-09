@@ -1,17 +1,9 @@
 "use client"
 
-<<<<<<< HEAD
-import { useState, useMemo } from "react"
-import { useParams } from "next/navigation"
-import Link from "next/link"
-import { useContracts, useDeleteContractMutation } from "@/hooks/use-contracts"
-import type { Contract } from "@/types/custom"
-=======
 import { useState, useMemo, useCallback, useRef, useEffect } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { useContracts, useDeleteContractMutation, type ContractWithRelations } from "@/hooks/use-contracts"
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -48,14 +40,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-<<<<<<< HEAD
-import { format, parseISO } from "date-fns"
-=======
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { format, parseISO, differenceInDays } from "date-fns"
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 import {
   Loader2,
   Eye,
@@ -65,16 +53,6 @@ import {
   Filter,
   ArrowUpDown,
   Search,
-<<<<<<< HEAD
-} from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import DashboardLayout from "@/components/dashboard/dashboard-layout" // Assuming this is your main layout
-import { FileTextIcon } from "@radix-ui/react-icons"
-
-type ContractStatus = "Active" | "Expired" | "Upcoming" | "Unknown"
-
-const getContractStatus = (contract: Contract): ContractStatus => {
-=======
   RefreshCw,
   Grid3x3,
   List,
@@ -123,7 +101,6 @@ interface ContractStats {
 type ContractStatus = "Active" | "Expired" | "Upcoming" | "Unknown"
 
 const getContractStatus = (contract: ContractWithRelations): ContractStatus => {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   if (!contract.contract_start_date || !contract.contract_end_date) return "Unknown"
   const now = new Date()
   const startDate = parseISO(contract.contract_start_date)
@@ -169,11 +146,7 @@ const enhanceContract = (contract: ContractWithRelations): EnhancedContract => {
 
 export default function ContractsDashboardPage() {
   const params = useParams()
-<<<<<<< HEAD
-  const locale = (params.locale as string) || "en"
-=======
   const locale = (params?.locale as string) || "en"
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
   const { data: contracts, isLoading, error } = useContracts()
   const deleteContractMutation = useDeleteContractMutation()
@@ -254,7 +227,6 @@ export default function ContractsDashboardPage() {
       const matchesStatus = statusFilter === "all" || contractStatus === statusFilter
 
       const firstParty =
-<<<<<<< HEAD
         (contract.employer && typeof contract.employer === 'object' && 'name_en' in contract.employer
           ? contract.employer.name_en || contract.employer.name_ar
           : "") || ""
@@ -266,23 +238,6 @@ export default function ContractsDashboardPage() {
         ? (locale === "ar" 
             ? contract.promoters[0].name_ar || contract.promoters[0].name_en
             : contract.promoters[0].name_en || contract.promoters[0].name_ar)
-=======
-        (contract.first_party && typeof contract.first_party === 'object' && 'name_en' in contract.first_party
-          ? (locale === "ar" 
-              ? contract.first_party.name_ar || contract.first_party.name_en
-              : contract.first_party.name_en || contract.first_party.name_ar)
-          : "") || ""
-      const secondParty =
-        (contract.second_party && typeof contract.second_party === 'object' && 'name_en' in contract.second_party
-          ? (locale === "ar" 
-              ? contract.second_party.name_ar || contract.second_party.name_en
-              : contract.second_party.name_en || contract.second_party.name_ar)
-          : "") || ""
-      const promoterName = contract.promoters
-        ? (locale === "ar" 
-            ? contract.promoters.name_ar || contract.promoters.name_en
-            : contract.promoters.name_en || contract.promoters.name_ar)
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         : ""
 
       const matchesSearch =
@@ -291,13 +246,9 @@ export default function ContractsDashboardPage() {
         firstParty.toLowerCase().includes(searchTerm.toLowerCase()) ||
         secondParty.toLowerCase().includes(searchTerm.toLowerCase()) ||
         promoterName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-<<<<<<< HEAD
-        (contract.job_title && contract.job_title.toLowerCase().includes(searchTerm.toLowerCase()))
-=======
         (contract.job_title && contract.job_title.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (contract.contract_number && contract.contract_number.toLowerCase().includes(searchTerm.toLowerCase()))
       
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
       return matchesStatus && matchesSearch
     })
 
@@ -473,15 +424,9 @@ export default function ContractsDashboardPage() {
   const renderSortIcon = (column: keyof ContractWithRelations | "status") => {
     if (sortColumn === column) {
       return sortDirection === "asc" ? (
-<<<<<<< HEAD
-        <ArrowUpDown className="ml-2 inline h-4 w-4 rotate-180 transform" />
-      ) : (
-        <ArrowUpDown className="ml-2 inline h-4 w-4" />
-=======
         <ChevronUp className="ml-2 inline h-4 w-4" />
       ) : (
         <ChevronDown className="ml-2 inline h-4 w-4" />
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
       )
     }
     return <ArrowUpDown className="ml-2 inline h-4 w-4 opacity-50" />
@@ -637,14 +582,6 @@ export default function ContractsDashboardPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4 md:p-6">
-<<<<<<< HEAD
-        <Card>
-          <CardHeader>
-            <CardTitle>Contracts Dashboard</CardTitle>
-            <CardDescription>
-              View, manage, and track all your contracts in real-time.
-            </CardDescription>
-=======
         {/* Statistics Cards */}
         {showStats && (
           <div className="mb-6">
@@ -727,14 +664,10 @@ export default function ContractsDashboardPage() {
                 </Button>
               </div>
             </div>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
           </CardHeader>
           
           <CardContent className="space-y-4">
-<<<<<<< HEAD
-=======
             {/* Filters and Search */}
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
             <div className="flex flex-col items-center gap-4 md:flex-row">
               <div className="relative w-full flex-grow md:w-auto">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -764,14 +697,11 @@ export default function ContractsDashboardPage() {
                   </SelectContent>
                 </Select>
               </div>
-<<<<<<< HEAD
               <Button asChild>
                 <Link href={`/${locale}/generate-contract`}>
                   Create New Contract
                 </Link>
               </Button>
-=======
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
             </div>
 
             {/* Bulk Actions */}
@@ -810,11 +740,7 @@ export default function ContractsDashboardPage() {
                 </p>
                 {!(searchTerm || statusFilter !== "all") && (
                   <Button asChild className="mt-6">
-<<<<<<< HEAD
                     <Link href={`/${locale}/generate-contract`}>
-=======
-                    <Link href={`/${locale}/dashboard/generate-contract`}>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       Create New Contract
                     </Link>
                   </Button>
@@ -839,15 +765,9 @@ export default function ContractsDashboardPage() {
                       <TableHead>Promoter</TableHead>
                       <TableHead
                         className="cursor-pointer"
-<<<<<<< HEAD
-                        onClick={() => handleSort("contract_valid_from")}
-                      >
-                        Start Date {renderSortIcon("contract_valid_from")}
-=======
                         onClick={() => handleSort("contract_start_date")}
                       >
                         Start Date {renderSortIcon("contract_start_date")}
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       </TableHead>
                       <TableHead
                         className="cursor-pointer"
@@ -865,7 +785,6 @@ export default function ContractsDashboardPage() {
                   <TableBody>
                     {filteredAndSortedContracts.map((contract) => {
                       const contractStatus = getContractStatus(contract)
-<<<<<<< HEAD
                       const promoterName = contract.promoters && contract.promoters.length > 0 && contract.promoters[0]
                         ? (locale === "ar" 
                             ? contract.promoters[0].name_ar || contract.promoters[0].name_en
@@ -887,104 +806,27 @@ export default function ContractsDashboardPage() {
                               : "N/A"}
                           </TableCell>
                           <TableCell>{promoterName || "N/A"}</TableCell>
-=======
-                      const enhanced = enhanceContract(contract)
-                      const promoterName = contract.promoters
-                        ? (locale === "ar" 
-                            ? contract.promoters.name_ar || contract.promoters.name_en
-                            : contract.promoters.name_en || contract.promoters.name_ar)
-                        : ""
-                      return (
-                        <TableRow key={contract.id} className="group">
-                          <TableCell>
-                            <Checkbox
-                              checked={selectedContracts.includes(contract.id)}
-                              onCheckedChange={(checked) => handleSelectContract(contract.id, checked as boolean)}
-                            />
-                          </TableCell>
-                          <TableCell className="font-mono text-xs">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  {contract.id.substring(0, 8)}...
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  Full ID: {contract.id}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                                <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                              </div>
-                              <span>
-                                {contract.first_party && typeof contract.first_party === 'object' && 'name_en' in contract.first_party
-                                  ? (locale === "ar" 
-                                      ? contract.first_party.name_ar || contract.first_party.name_en || "N/A"
-                                      : contract.first_party.name_en || contract.first_party.name_ar || "N/A")
-                                  : "N/A"}
-                              </span>
-                            </div>
-                          </TableCell>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                                <Building2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-                              </div>
-                              <span>
-                                {contract.second_party && typeof contract.second_party === 'object' && 'name_en' in contract.second_party
-                                  ? (locale === "ar" 
-                                      ? contract.second_party.name_ar || contract.second_party.name_en || "N/A"
-                                      : contract.second_party.name_en || contract.second_party.name_ar || "N/A")
-                                  : "N/A"}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-                                <User className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                              </div>
-                              <span>{promoterName || "N/A"}</span>
-                            </div>
-                          </TableCell>
                           <TableCell>
                             {contract.contract_start_date
                               ? format(parseISO(contract.contract_start_date), "dd-MM-yyyy")
                               : "N/A"}
                           </TableCell>
                           <TableCell>
-<<<<<<< HEAD
-                            {contract.contract_end_date
-                              ? format(parseISO(contract.contract_end_date), "dd-MM-yyyy")
-                              : "N/A"}
-                          </TableCell>
-                          <TableCell>
-                            <span
-                              className={`rounded-full px-2 py-1 text-xs font-semibold ${contractStatus === "Active" ? "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100" : ""} ${contractStatus === "Expired" ? "bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100" : ""} ${contractStatus === "Upcoming" ? "bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-blue-100" : ""} ${contractStatus === "Unknown" ? "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-100" : ""}`}
-                            >
-                              {contractStatus}
-                            </span>
-=======
                             <div className="flex flex-col">
                               <span>
                                 {contract.contract_end_date
                                   ? format(parseISO(contract.contract_end_date), "dd-MM-yyyy")
                                   : "N/A"}
                               </span>
-                              {enhanced.days_until_expiry !== undefined && enhanced.days_until_expiry <= 30 && enhanced.days_until_expiry > 0 && (
+                              {contract.days_until_expiry !== undefined && contract.days_until_expiry <= 30 && contract.days_until_expiry > 0 && (
                                 <span className="text-xs text-amber-600 font-medium">
-                                  {enhanced.days_until_expiry} days left
+                                  {contract.days_until_expiry} days left
                                 </span>
                               )}
                             </div>
                           </TableCell>
                           <TableCell>
                             {getStatusBadge(contractStatus)}
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                           </TableCell>
                           <TableCell>
                             {contract.pdf_url ? (
@@ -1048,7 +890,6 @@ export default function ContractsDashboardPage() {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredAndSortedContracts.map((contract) => {
                   const contractStatus = getContractStatus(contract)
-                  const enhanced = enhanceContract(contract)
                   const promoterName = contract.promoters
                     ? (locale === "ar" 
                         ? contract.promoters.name_ar || contract.promoters.name_en
@@ -1132,9 +973,9 @@ export default function ContractsDashboardPage() {
                               {contract.contract_start_date && contract.contract_end_date && (
                                 <>
                                   {format(parseISO(contract.contract_start_date), "dd/MM/yy")} - {format(parseISO(contract.contract_end_date), "dd/MM/yy")}
-                                  {enhanced.days_until_expiry !== undefined && enhanced.days_until_expiry <= 30 && enhanced.days_until_expiry > 0 && (
+                                  {contract.days_until_expiry !== undefined && contract.days_until_expiry <= 30 && contract.days_until_expiry > 0 && (
                                     <div className="text-amber-600 font-medium">
-                                      {enhanced.days_until_expiry} days left
+                                      {contract.days_until_expiry} days left
                                     </div>
                                   )}
                                 </>
