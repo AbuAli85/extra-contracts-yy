@@ -23,11 +23,7 @@ export async function getParties(): Promise<Party[]> {
 export async function getPartyById(id: string): Promise<Party | null> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
-    .from("parties")
-    .select("*")
-    .eq("id", id)
-    .single()
+  const { data, error } = await supabase.from("parties").select("*").eq("id", id).single()
 
   if (error) {
     console.error("Error fetching party:", error)

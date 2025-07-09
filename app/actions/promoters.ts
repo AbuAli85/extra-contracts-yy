@@ -23,11 +23,7 @@ export async function getPromoters(): Promise<Promoter[]> {
 export async function getPromoterById(id: string): Promise<Promoter | null> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
-    .from("promoters")
-    .select("*")
-    .eq("id", id)
-    .single()
+  const { data, error } = await supabase.from("promoters").select("*").eq("id", id).single()
 
   if (error) {
     console.error("Error fetching promoter:", error)
