@@ -58,15 +58,16 @@ export async function updateParty(id: string, partyData: Partial<Party>) {
   return data
 }
 
-export async function deleteParty(id: string) {
+export async function deleteParty(id: string): Promise<{ success: boolean; message: string }> {
   const supabase = await createClient()
 
   const { error } = await supabase.from("parties").delete().eq("id", id)
 
   if (error) {
     console.error("Error deleting party:", error)
-    throw new Error("Failed to delete party")
+    return { success: false, message: "Failed to delete party" }
   }
 
   revalidatePath("/manage-parties")
+  return { success: true, message: "Party deleted successfully" }
 }
