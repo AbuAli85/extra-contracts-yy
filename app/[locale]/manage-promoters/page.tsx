@@ -1,9 +1,5 @@
 "use client"
-<<<<<<< HEAD
-import { useEffect, useState, useRef } from "react"
-=======
 import { useEffect, useState, useRef, useMemo, useCallback } from "react"
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 import type React from "react"
 
 import PromoterForm from "@/components/promoter-form"
@@ -22,8 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-<<<<<<< HEAD
-=======
 import {
   Select,
   SelectContent,
@@ -40,7 +34,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 import {
   EditIcon,
   PlusCircleIcon,
@@ -58,36 +51,16 @@ import {
   Settings,
   RefreshCw,
   Grid3x3,
-  List,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Calendar,
-  Users,
-  Activity,
-  Star,
-  Mail,
-  MessageSquare,
-  TrendingUp,
-  Clock,
-  ArrowUpDown,
-  ChevronUp,
   ChevronDown
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-<<<<<<< HEAD
-import { format } from "date-fns"
-=======
 import { format, parseISO, differenceInDays } from "date-fns"
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 import { getDocumentStatus } from "@/lib/document-status"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { SafeImage } from "@/components/ui/safe-image"
 import { cn } from "@/lib/utils"
 
-<<<<<<< HEAD
-=======
 // Enhanced Promoter interface
 interface EnhancedPromoter extends Promoter {
   id_card_status: "valid" | "expiring" | "expired" | "missing"
@@ -106,7 +79,6 @@ interface PromoterStats {
   total_contracts: number
 }
 
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 export default function ManagePromotersPage() {
   const [promoters, setPromoters] = useState<Promoter[]>([])
   const [filteredPromoters, setFilteredPromoters] = useState<EnhancedPromoter[]>([])
@@ -127,34 +99,6 @@ export default function ManagePromotersPage() {
   const { toast } = useToast()
   const isMountedRef = useRef(true)
 
-<<<<<<< HEAD
-  async function fetchPromotersWithContractCount() {
-    if (isMountedRef.current) setIsLoading(true)
-    const { data: promotersData, error: promotersError } = await supabase
-      .from("promoters")
-      .select("*")
-      .order("name_en")
-
-    if (promotersError) {
-      toast({
-        title: "Error fetching promoters",
-        description: promotersError.message,
-        variant: "destructive",
-      })
-      if (isMountedRef.current) {
-        setPromoters([])
-        setIsLoading(false)
-      }
-      return
-    }
-
-    if (!promotersData || promotersData.length === 0) {
-      if (isMountedRef.current) {
-        setPromoters([])
-        setIsLoading(false)
-      }
-      return
-=======
   // Helper functions for enhanced promoter data
   const getDocumentStatusType = (daysUntilExpiry: number | null, dateString: string | null): "valid" | "expiring" | "expired" | "missing" => {
     if (!dateString) return "missing"
@@ -176,7 +120,6 @@ export default function ManagePromotersPage() {
     
     if ((idExpiry !== null && idExpiry <= 30) || (passportExpiry !== null && passportExpiry <= 30)) {
       return "warning"
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     }
     
     return "active"
@@ -259,35 +202,6 @@ export default function ManagePromotersPage() {
       return
     }
 
-<<<<<<< HEAD
-    const todayStr = format(new Date(), "dd-MM-yyyy")
-
-    const promotersWithCounts = promotersData
-      .filter((promoter) => promoter.id) // Filter out promoters without IDs
-      .map((promoter) => {
-        const activeContracts = contractsData
-          ? contractsData.filter(
-              (c) =>
-                c.promoter_id === promoter.id &&
-                c.contract_end_date &&
-                c.contract_end_date >= todayStr,
-            ).length
-          : 0
-        return { ...promoter, active_contracts_count: activeContracts }
-      })
-
-    // Debug: Log any promoters without IDs
-    const promotersWithoutIds = promotersData.filter((promoter) => !promoter.id)
-    if (promotersWithoutIds.length > 0) {
-      console.warn("Found promoters without IDs:", promotersWithoutIds)
-    }
-
-    if (isMountedRef.current) {
-      setPromoters(promotersWithCounts)
-      setIsLoading(false)
-    }
-  }
-=======
     let filtered = promoters.filter(promoter => {
       // Search filter - enhanced to include passport number
       const searchMatch = !searchTerm || 
@@ -309,7 +223,6 @@ export default function ManagePromotersPage() {
       const idExpiryDays = promoter.id_card_expiry_date 
         ? differenceInDays(parseISO(promoter.id_card_expiry_date), new Date())
         : null
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
       const passportExpiryDays = promoter.passport_expiry_date
         ? differenceInDays(parseISO(promoter.passport_expiry_date), new Date())
@@ -392,39 +305,12 @@ export default function ManagePromotersPage() {
 
   // Initial data fetch and setup
   useEffect(() => {
-<<<<<<< HEAD
-    let isMounted = true
-    isMountedRef.current = true
-    fetchPromotersWithContractCount()
-    const promotersChannel = supabase
-      .channel("public:promoters:manage")
-      .on("postgres_changes", { event: "*", schema: "public", table: "promoters" }, () =>
-        fetchPromotersWithContractCount(),
-      )
-      .subscribe()
-
-    const contractsChannel = supabase
-      .channel("public:contracts:manage")
-      .on("postgres_changes", { event: "*", schema: "public", table: "contracts" }, () =>
-        fetchPromotersWithContractCount(),
-      )
-      .subscribe()
-
-    return () => {
-      isMounted = false
-      isMountedRef.current = false
-      supabase.removeChannel(promotersChannel)
-      supabase.removeChannel(contractsChannel)
-    }
-  }, [])
-=======
     isMountedRef.current = true
     fetchPromotersWithContractCount()
     return () => {
       isMountedRef.current = false
     }
   }, [fetchPromotersWithContractCount])
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
   // Apply filters whenever dependencies change
   useEffect(() => {
@@ -617,12 +503,6 @@ export default function ManagePromotersPage() {
     <div className="min-h-screen bg-slate-50 px-4 py-8 dark:bg-slate-950 sm:py-12">
       <div className="mx-auto max-w-screen-lg">
         <div className="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
-<<<<<<< HEAD
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
-            Manage Promoters
-          </h1>
-          <div className="flex gap-2">
-=======
           <div className="flex items-center gap-4">
             <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
               Manage Promoters
@@ -641,7 +521,6 @@ export default function ManagePromotersPage() {
               <RefreshCw className={cn("mr-2 h-4 w-4", isRefreshing && "animate-spin")} />
               Refresh
             </Button>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
             <Button asChild variant="outline">
               <Link href="/">
                 <ArrowLeftIcon className="mr-2 h-4 w-4" /> Back to Home
@@ -657,9 +536,6 @@ export default function ManagePromotersPage() {
           </div>
         </div>
 
-<<<<<<< HEAD
-        {promoters.length === 0 ? (
-=======
         {/* Statistics Dashboard */}
         {showStats && (
           <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -874,7 +750,6 @@ export default function ManagePromotersPage() {
         </Card>
 
         {filteredPromoters.length === 0 ? (
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
           <Card className="bg-card py-12 text-center shadow-md">
             <CardHeader>
               <UserIcon className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
@@ -887,15 +762,6 @@ export default function ManagePromotersPage() {
               </CardDescription>
             </CardContent>
           </Card>
-<<<<<<< HEAD
-        ) : (
-          <Card className="bg-card shadow-lg">
-            <CardHeader className="border-b">
-              <CardTitle className="text-xl">Promoter Directory</CardTitle>
-              <CardDescription>
-                View, add, or edit promoter details, documents, and contract status.
-              </CardDescription>
-=======
         ) : currentView === "table" ? (
           <Card className="bg-card shadow-lg">
             <CardHeader className="border-b">
@@ -923,7 +789,6 @@ export default function ManagePromotersPage() {
                   </Button>
                 </div>
               </div>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
@@ -937,12 +802,9 @@ export default function ManagePromotersPage() {
                           aria-label="Select all promoters"
                         />
                       </TableHead>
-<<<<<<< HEAD
-=======
                       <TableHead className="px-4 py-3 text-xs font-semibold uppercase tracking-wider">
                         Promoter Info
                       </TableHead>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       <TableHead className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">
                         ID Card Status
                       </TableHead>
@@ -952,12 +814,9 @@ export default function ManagePromotersPage() {
                       <TableHead className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">
                         Active Contracts
                       </TableHead>
-<<<<<<< HEAD
-=======
                       <TableHead className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">
                         Overall Status
                       </TableHead>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                       <TableHead className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider">
                         Actions
                       </TableHead>
@@ -972,14 +831,10 @@ export default function ManagePromotersPage() {
                       return (
                         <TableRow
                           key={promoter.id}
-<<<<<<< HEAD
-                          className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
-=======
                           className={cn(
                             "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors",
                             isSelected && "bg-blue-50 dark:bg-blue-950/20"
                           )}
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                         >
                           <TableCell className="px-4 py-3">
                             <Checkbox
@@ -1086,21 +941,6 @@ export default function ManagePromotersPage() {
                             </TooltipProvider>
                           </TableCell>
                           <TableCell className="px-4 py-3 text-center">
-<<<<<<< HEAD
-                            <Badge
-                              variant={
-                                (promoter.active_contracts_count || 0) > 0 ? "default" : "secondary"
-                              }
-                              className={
-                                (promoter.active_contracts_count || 0) > 0
-                                  ? "border-green-300 bg-green-100 text-green-700"
-                                  : "border-slate-300 bg-slate-100 text-slate-600"
-                              }
-                            >
-                              <BriefcaseIcon className="mr-1.5 h-3.5 w-3.5" />
-                              {promoter.active_contracts_count || 0}
-                            </Badge>
-=======
                             <div className="flex flex-col items-center gap-1">
                               <Badge
                                 variant={
@@ -1129,7 +969,6 @@ export default function ManagePromotersPage() {
                                 {promoter.overall_status.charAt(0).toUpperCase() + promoter.overall_status.slice(1)}
                               </Badge>
                             </div>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                           </TableCell>
                           <TableCell className="px-4 py-3 text-right">
                             <div className="flex justify-end gap-2">
