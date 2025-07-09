@@ -24,7 +24,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   },
   global: {
     headers: {
-      'X-Client-Info': 'supabase-js/2.x',
+      "X-Client-Info": "supabase-js/2.x",
     },
   },
 })
@@ -32,7 +32,9 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 // Utility function to check if user is authenticated
 export const isAuthenticated = async (): Promise<boolean> => {
   try {
-    const { data: { session } } = await supabase.auth.getSession()
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
     return !!session?.user
   } catch (error) {
     devLog("Error checking authentication status:", error)
@@ -58,23 +60,23 @@ export const getCurrentUser = async () => {
 // Utility function to handle realtime connection errors
 export const handleRealtimeError = (error: any, tableName: string) => {
   const message = error?.message ?? "Unknown channel error"
-  
+
   // Check for specific error types
   if (message.includes("JWT") || message.includes("auth") || message.includes("permission")) {
     devLog(`Authentication error for ${tableName}:`, message)
     return "AUTH_ERROR"
   }
-  
+
   if (message.includes("timeout") || message.includes("TIMED_OUT")) {
     devLog(`Timeout error for ${tableName}:`, message)
     return "TIMEOUT_ERROR"
   }
-  
+
   if (message.includes("network") || message.includes("connection")) {
     devLog(`Network error for ${tableName}:`, message)
     return "NETWORK_ERROR"
   }
-  
+
   devLog(`Unknown error for ${tableName}:`, message)
   return "UNKNOWN_ERROR"
 }
@@ -94,7 +96,7 @@ export const createRealtimeChannel = (tableName: string, callback: (payload: any
 // Utility function to safely subscribe to a channel
 export const subscribeToChannel = (channel: any, onStatusChange?: (status: string, error?: any) => void) => {
   if (!channel) return null
-  
+
   try {
     return channel.subscribe((status: string, error?: any) => {
       if (onStatusChange) {

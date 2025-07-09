@@ -116,4 +116,4 @@ export function extractIds(body: any): {
     employerId: body.second_party?.id || body.second_party_id,
     promoterId: body.promoter?.id || body.promoter_id,
   }
-} 
+}
