@@ -1,10 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-<<<<<<< HEAD
-import { ContractDetail, ActivityLog } from '@/types/contract'
-=======
 import { ContractDetail, ActivityLog, Party } from '@/lib/types'
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
 // Mock activity logs - replace with real data fetch later
 const mockActivityLogs: ActivityLog[] = [
@@ -58,139 +54,6 @@ export function useContract(contractId: string): UseContractResult {
     try {
       setLoading(true)
       setError(null)
-
-<<<<<<< HEAD
-      // Fetch basic contract data
-      const { data: basicData, error: basicError } = await supabase
-        .from("contracts")
-        .select("*")
-        .eq("id", contractId)
-        .single()
-
-      if (basicError) {
-        setError(basicError.message)
-        return
-      }
-
-      // Debug: Log the raw data to see what fields are available
-      console.log('Raw contract data from database:', basicData)
-
-      // Handle the data using any type to work with actual database schema
-      const data: any = basicData
-
-      // Enhanced query with relations - handle actual database structure
-      let enhancedData: ContractDetail = { 
-        id: data.id,
-        status: data.status || undefined,
-        created_at: data.created_at,
-        updated_at: data.updated_at,
-        
-        // Party IDs - use actual field names from your JSON data
-        employer_id: data.employer_id,
-        client_id: data.client_id,
-        promoter_id: data.promoter_id,
-        
-        // Party Names (handle null values from your JSON)
-        first_party_name_en: data.first_party_name_en || undefined,
-        first_party_name_ar: data.first_party_name_ar || undefined,
-        second_party_name_en: data.second_party_name_en || undefined,
-        second_party_name_ar: data.second_party_name_ar || undefined,
-        
-        // Contract Details (available in your JSON)
-        contract_start_date: data.contract_start_date || undefined,
-        contract_end_date: data.contract_end_date || undefined,
-        contract_type: data.contract_type || undefined,
-        contract_number: data.contract_number || undefined,
-        
-        // Employment Details - handle missing fields gracefully
-        job_title: data.job_title || undefined,
-        department: data.department || undefined,
-        work_location: data.work_location || undefined,
-        email: data.email || undefined,
-        id_card_number: data.id_card_number || undefined,
-        
-        // Financial
-        salary: data.salary || undefined,
-        currency: data.currency || undefined,
-        
-        // Documents
-        google_doc_url: data.google_doc_url || undefined,
-        pdf_url: data.pdf_url || undefined,
-        
-        // Error handling
-        error_details: data.error_details || undefined
-      }
-      
-      // Fetch related parties separately - use the IDs we have
-      if (enhancedData.employer_id) {
-        try {
-          const { data: employerData } = await supabase
-            .from("parties")
-            .select("id, name_en, name_ar, crn")
-            .eq("id", enhancedData.employer_id)
-            .single()
-          
-          if (employerData) {
-            enhancedData.employer = employerData
-            // If party names are not in contract, use party data
-            if (!enhancedData.first_party_name_en && employerData.name_en) {
-              enhancedData.first_party_name_en = employerData.name_en
-            }
-            if (!enhancedData.first_party_name_ar && employerData.name_ar) {
-              enhancedData.first_party_name_ar = employerData.name_ar
-            }
-          }
-        } catch (err) {
-          console.log('Could not fetch employer data:', err)
-        }
-      }
-      
-      if (enhancedData.client_id) {
-        try {
-          const { data: clientData } = await supabase
-            .from("parties")
-            .select("id, name_en, name_ar, crn")
-            .eq("id", enhancedData.client_id)
-            .single()
-          
-          if (clientData) {
-            enhancedData.client = clientData
-            // If party names are not in contract, use party data
-            if (!enhancedData.second_party_name_en && clientData.name_en) {
-              enhancedData.second_party_name_en = clientData.name_en
-            }
-            if (!enhancedData.second_party_name_ar && clientData.name_ar) {
-              enhancedData.second_party_name_ar = clientData.name_ar
-            }
-          }
-        } catch (err) {
-          console.log('Could not fetch client data:', err)
-        }
-      }
-      
-      if (data.promoter_id) {
-        try {
-          const { data: promoterData } = await supabase
-            .from("promoters")
-            .select("id, name_en, name_ar, id_card_number")
-            .eq("id", data.promoter_id)
-            .single()
-          
-          if (promoterData) {
-            enhancedData.promoters = [promoterData]
-          }
-        } catch (err) {
-          console.log('Could not fetch promoter data:', err)
-        }
-      }
-      
-      console.log('Enhanced contract data:', enhancedData)
-      setContract(enhancedData)
-      setActivityLogs(mockActivityLogs)
-    } catch (err) {
-      setError("Failed to load contract")
-      console.error('Contract fetch error:', err)
-=======
       // Use the same query structure as use-contracts.ts
       let { data, error } = await supabase
         .from("contracts")
@@ -204,7 +67,6 @@ export function useContract(contractId: string): UseContractResult {
         )
         .eq("id", contractId)
         .single()
-
       // If the new schema fails, try the old schema (employer_id, client_id)
       if (error && error.message.includes('foreign key')) {
         console.log("New schema failed, trying old schema...")
@@ -220,13 +82,10 @@ export function useContract(contractId: string): UseContractResult {
           )
           .eq("id", contractId)
           .single()
-        
         if (oldError) {
           console.log("Both schemas failed:", oldError)
           throw new Error(oldError.message)
         }
-        
-        // Instead of directly assigning oldData, validate and transform as with new schema
         if (oldData) {
           const promoter = Array.isArray(oldData.promoters) ? oldData.promoters[0] : oldData.promoters;
           const validParty = (p: any): p is Party => !!p && typeof p === 'object' && 'id' in p && 'name_en' in p && 'name_ar' in p && 'crn' in p;
@@ -246,16 +105,13 @@ export function useContract(contractId: string): UseContractResult {
         }
         error = null
       }
-
       if (error) {
         console.log("Error fetching contract:", error)
         throw new Error(error.message)
       }
-
       if (data) {
         // Transform the data to match the ContractDetail type
         const promoter = Array.isArray(data.promoters) ? data.promoters[0] : data.promoters;
-        // Ensure first_party and second_party are valid Party objects
         const validParty = (p: any): p is Party => !!p && typeof p === 'object' && 'id' in p && 'name_en' in p && 'name_ar' in p && 'crn' in p;
         const firstParty = validParty(data.first_party) ? data.first_party : null;
         const secondParty = validParty(data.second_party) ? data.second_party : null;
@@ -267,35 +123,28 @@ export function useContract(contractId: string): UseContractResult {
           promoters: Array.isArray(data.promoters) ? data.promoters : (data.promoters ? [data.promoters] : []),
           promoter: promoter || null,
         } as unknown as ContractDetail;
-
         setContract(transformedData);
       } else {
         setContract(null)
       }
-
-      // Mock activity logs for now
       setActivityLogs(mockActivityLogs)
     } catch (err: any) {
       console.error("Detailed fetch error:", err)
       setError(err.message || "An unknown error occurred.")
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     } finally {
       setLoading(false)
     }
   }
-
   const refetch = () => {
     if (contractId) {
       fetchContract()
     }
   }
-
   useEffect(() => {
     if (contractId) {
       fetchContract()
     }
   }, [contractId])
-
   return {
     contract,
     activityLogs,
