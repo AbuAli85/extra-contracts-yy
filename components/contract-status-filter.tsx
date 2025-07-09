@@ -18,13 +18,13 @@ const STATUS_OPTIONS = [
   { label: "Generation Error", value: "GENERATION_ERROR" },
 ]
 
-export default function ContractStatusFilter() {
+function ContractStatusFilter() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const currentStatus = searchParams.get("status") || "all"
+  const currentStatus = searchParams?.get("status") || "all"
 
   const handleStatusChange = (newStatus: string) => {
-    const params = new URLSearchParams(searchParams)
+    const params = new URLSearchParams(searchParams ? searchParams.toString() : "")
     if (newStatus === "all") {
       params.delete("status")
     } else {
@@ -53,3 +53,6 @@ export default function ContractStatusFilter() {
     </div>
   )
 }
+
+export default ContractStatusFilter
+export { ContractStatusFilter }

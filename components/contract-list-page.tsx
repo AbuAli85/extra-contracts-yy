@@ -9,7 +9,7 @@ import { format } from "date-fns"
 
 export default function EditPromoterPage() {
   const params = useParams()
-  const promoterId = params.id as string
+  const promoterId = params?.id ? String(params.id) : ""
 
   // Example date formatting for display
   const startDate = "01-07-2025"

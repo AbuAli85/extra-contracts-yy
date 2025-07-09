@@ -11,7 +11,7 @@ export default function ContractSearchInput() {
   const searchParams = useSearchParams()
 
   const handleSearch = useDebouncedCallback((term: string) => {
-    const params = new URLSearchParams(searchParams)
+    const params = new URLSearchParams(searchParams ? searchParams.toString() : "")
     if (term) {
       params.set("q", term)
     } else {
@@ -28,7 +28,7 @@ export default function ContractSearchInput() {
         placeholder="Search by party or promoter..."
         className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
         onChange={(e) => handleSearch(e.target.value)}
-        defaultValue={searchParams.get("q")?.toString()}
+        defaultValue={searchParams?.get("q")?.toString()}
       />
     </div>
   )
