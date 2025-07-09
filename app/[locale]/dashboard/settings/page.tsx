@@ -1,16 +1,3 @@
-<<<<<<< HEAD
-import { redirect } from 'next/navigation'
-
-export default async function LocaleSettingsPage({ 
-  params 
-}: { 
-  params: Promise<{ locale: string }> 
-}) {
-  const { locale } = await params
-  
-  // Redirect to the main dashboard settings page
-  redirect('/dashboard/settings')
-=======
 "use client"
 import DashboardLayout from "@/components/dashboard/dashboard-layout"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -21,11 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 
-export default function LocaleSettingsPage({ 
-  params 
-}: { 
-  params: Promise<{ locale: string }> 
-}) {
+export default function LocaleSettingsPage({ params }: { params: Promise<{ locale: string }> }) {
   const [locale, setLocale] = useState('en')
   const [supabaseStatus, setSupabaseStatus] = useState('Checking...')
   const [testing, setTesting] = useState(false)
@@ -261,5 +244,4 @@ export default function LocaleSettingsPage({
       </div>
     </DashboardLayout>
   )
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
-} 
+}

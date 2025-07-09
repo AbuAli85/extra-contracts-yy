@@ -14,11 +14,6 @@ import { useEffect } from "react"
 // Detailed contract type including joined relational data
 // This mirrors what the `fetchContracts` query selects
 export type ContractWithRelations = Database["public"]["Tables"]["contracts"]["Row"] & {
-<<<<<<< HEAD
-  employer?: Database["public"]["Tables"]["parties"]["Row"] | null
-  client?: Database["public"]["Tables"]["parties"]["Row"] | null
-  promoters?: Database["public"]["Tables"]["promoters"]["Row"][] | null
-=======
   first_party?: {
     id: string
     name_en: string
@@ -42,7 +37,6 @@ export type ContractWithRelations = Database["public"]["Tables"]["contracts"]["R
     passport_url?: string | null
     status?: string | null
   } | null
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 }
 // Minimal fields required when creating a new contract
 export type ContractInsert = Database["public"]["Tables"]["contracts"]["Insert"]
@@ -56,15 +50,9 @@ const fetchContracts = async (): Promise<ContractWithRelations[]> => {
     .select(
       `
       *,
-<<<<<<< HEAD
-      employer:parties!contracts_employer_id_fkey(id,name_en,name_ar),
-      client:parties!contracts_client_id_fkey(id,name_en,name_ar),
-      promoters(id,name_en,name_ar)
-=======
       first_party:parties!contracts_first_party_id_fkey(id,name_en,name_ar,crn,type),
       second_party:parties!contracts_second_party_id_fkey(id,name_en,name_ar,crn,type),
       promoters(id,name_en,name_ar,id_card_number,id_card_url,passport_url,status)
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     `,
     )
     .order("created_at", { ascending: false })
