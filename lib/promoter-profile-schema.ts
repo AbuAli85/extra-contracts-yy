@@ -26,16 +26,12 @@ export const promoterProfileSchema = z.object({
   name_en: z.string().min(1, "Name (English) is required."),
   name_ar: z.string().min(1, "Name (Arabic) is required."),
   id_card_number: z.string().min(1, "ID card number is required."),
-<<<<<<< HEAD
-  status: z.enum(["active", "inactive", "suspended"], { required_error: "Status is required." }),
-=======
   employer_id: z.string().nullable().optional(),
   outsourced_to_id: z.string().nullable().optional(),
   job_title: z.string().optional().nullable(),
   work_location: z.string().optional().nullable(),
   status: promoterStatuses.describe("Status is required."),
   contract_valid_until: dateOptionalNullableSchema,
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   id_card_image: fileSchema,
   passport_image: fileSchema,
   existing_id_card_url: z.string().optional().nullable(),

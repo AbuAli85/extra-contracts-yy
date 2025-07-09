@@ -3,11 +3,7 @@
 // These will be provided by the parent FormField.
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-<<<<<<< HEAD
-import Image from "next/image"
-=======
 import { SafeImage } from "@/components/ui/safe-image"
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
 // Use a direct path string so Next.js doesn't try to read from the filesystem
 // during the build phase. Importing the file caused errors like
@@ -97,25 +93,18 @@ export default function ImageUploadField({
       >
         {displayPreviewUrl ? (
           <>
-<<<<<<< HEAD
-            <Image
-              // Use a simple placeholder path without query parameters
-=======
             <SafeImage
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
+              // Use a simple placeholder path without query parameters
               src={displayPreviewUrl || placeholderSrc}
               alt={`Preview`}
               className="h-full w-full rounded-md object-contain p-1"
               key={displayPreviewUrl}
-<<<<<<< HEAD
               onError={() => {
                 // This handles browser-side loading errors for the src
                 // The 400 error is likely from the Next.js optimization step before this
                 // Fall back to a static placeholder without query params
                 setPreview(placeholderSrc)
               }}
-=======
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
             />
             {!disabled && (
               <Button

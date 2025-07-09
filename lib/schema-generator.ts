@@ -7,26 +7,6 @@ export const contractGeneratorSchema = z
     first_party_id: z.string().uuid("Please select Party A (Client)."),
     second_party_id: z.string().uuid("Please select Party B (Employer)."),
     promoter_id: z.string().uuid("Please select the promoter."),
-<<<<<<< HEAD
-    contract_start_date: z.date({ required_error: "Contract start date is required." }),
-    contract_end_date: z.date({ required_error: "Contract end date is required." }),
-    email: z
-      .string()
-      .email("Please enter a valid email address for notifications.")
-      .min(1, "Email is required."),
-    job_title: z.string().optional(),
-    work_location: z.string().optional(),
-  })
-  .refine((data) => data.contract_end_date >= data.contract_start_date, {
-    message: "Contract end date must be on or after the start date.",
-    path: ["contract_end_date"],
-  })
-  .refine((data) => data.first_party_id !== data.second_party_id, {
-    message: "First and Second Party cannot be the same.",
-    path: ["second_party_id"],
-  })
-=======
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 
     // Auto-filled party data (hidden fields)
     first_party_name_en: z.string().optional(),
@@ -165,7 +145,7 @@ export const contractGeneratorSchema = z
     non_compete_signed: z.boolean().optional(),
 
     // Document upload URLs
-    contract_document_url: z.string().url("Invalid URL format for contract document."),
+    contract_document_url: z.string().url("Invalid URL format for contract document.").optional(),
     annexures_urls: z.array(z.string().url("Invalid URL format for annexure.")).optional(),
 
     // Payment details
@@ -251,3 +231,5 @@ export const CONTRACT_FORM_SECTIONS = [
 export function getRequiredFields() {
   return CONTRACT_FORM_SECTIONS.filter((section) => section.required).flatMap((section) => section.fields)
 }
+
+// Add any additional validation or helper exports as needed
