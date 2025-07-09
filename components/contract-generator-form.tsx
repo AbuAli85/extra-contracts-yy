@@ -1,6 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
 import { useEffect, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -18,10 +17,24 @@ import { Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { type GenerateContractFormValues, generateContractFormSchema } from "@/lib/generate-contract-form-schema"
-import type { Contract } from "@/lib/types"
+import type { Party, Promoter } from "@/lib/types"
 
 interface ContractGeneratorFormProps {
-  contract?: Contract // Optional prop for editing existing contracts
+  contract?: {
+    id: string;
+    contract_type?: string;
+    party_a_id?: string;
+    party_b_id?: string;
+    promoter_id?: string;
+    effective_date?: string;
+    termination_date?: string;
+    contract_value?: number;
+    payment_terms?: string;
+    content_english?: string;
+    content_spanish?: string;
+    contract_name?: string;
+    // add other fields as needed
+  }
 }
 
 export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) {
@@ -52,25 +65,18 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
     },
   })
 
-  const { data: partiesData, isLoading: isLoadingParties, isError: isErrorParties, error: partiesError } = useParties()
-  const {
-    data: promotersData,
-    isLoading: isLoadingPromoters,
-    isError: isErrorPromoters,
-    error: promotersError,
-  } = usePromoters()
+  const { data: partiesData = [] } = useParties()
+  const { data: promotersData = [] } = usePromoters()
 
-  const partyOptions =
-    partiesData?.data?.map((party) => ({
-      value: party.id,
-      label: party.name,
-    })) || []
+  const partyOptions = (Array.isArray(partiesData) ? partiesData : []).map((party: Party) => ({
+    value: party.id,
+    label: party.name_en || party.name_ar || party.id,
+  }))
 
-  const promoterOptions =
-    promotersData?.data?.map((promoter) => ({
-      value: promoter.id,
-      label: promoter.name,
-    })) || []
+  const promoterOptions = (Array.isArray(promotersData) ? promotersData : []).map((promoter: Promoter) => ({
+    value: promoter.id,
+    label: promoter.name_en || promoter.name_ar || promoter.id,
+  }))
 
   useEffect(() => {
     if (actionState.message) {
@@ -95,28 +101,29 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
   }, [actionState, toast, t, router, form])
 
   const onSubmit = (data: GenerateContractFormValues) => {
-    const formData = new FormData()
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (value instanceof Date) {
-          formData.append(key, value.toISOString())
-        } else if (typeof value === "number") {
-          formData.append(key, value.toString())
-        } else {
-          formData.append(key, value)
-        }
-      }
-    })
-
+    // Map form values to backend fields
+    const mapped = {
+      contract_name: data.contractName,
+      contract_type: data.contractType,
+      first_party_id: data.partyA,
+      second_party_id: data.partyB,
+      promoter_id: data.promoter,
+      effective_date: data.effectiveDate ? data.effectiveDate.toISOString() : null,
+      termination_date: data.terminationDate ? data.terminationDate.toISOString() : null,
+      contract_value: data.contractValue,
+      payment_terms: data.paymentTerms,
+      content_english: data.contentEnglish,
+      content_spanish: data.contentSpanish,
+    }
     startTransition(async () => {
       try {
         let result
-    if (contract) {
-          result = await updateContract(contract.id, formData)
-    } else {
-          result = await createContract(formData)
-    }
-        setActionState(result)
+        if (contract) {
+          result = await updateContract(contract.id, mapped)
+        } else {
+          result = await createContract(mapped)
+        }
+        setActionState(result as any)
       } catch (error) {
         setActionState({
           success: false,
@@ -126,19 +133,11 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
     })
   }
 
-  if (isLoadingParties || isLoadingPromoters) {
+  if (isPending) {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin" />
         <span className="ml-2">{t("loadingParties")}</span>
-      </div>
-    )
-  }
-
-  if (isErrorParties || isErrorPromoters) {
-    return (
-      <div className="p-8 text-red-500">
-        {t("errorMessage")}: {partiesError?.message || promotersError?.message || t("unknownError")}
       </div>
     )
   }
@@ -180,12 +179,11 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
               <FormLabel>Client (Party A)</FormLabel>
               <FormControl>
                 <ComboboxField
+                  field={field}
                   options={partyOptions}
-                  value={field.value}
-                  onValueChange={field.onChange}
                   placeholder={t("selectParty")}
                   searchPlaceholder={t("searchParties")}
-                  emptyMessage={t("noPartiesFound")}
+                  emptyStateMessage={t("noPartiesFound")}
                   disabled={isPending}
                 />
               </FormControl>
@@ -201,12 +199,11 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
               <FormLabel>Employer (Party B)</FormLabel>
               <FormControl>
                 <ComboboxField
+                  field={field}
                   options={partyOptions}
-                  value={field.value}
-                  onValueChange={field.onChange}
                   placeholder={t("selectParty")}
                   searchPlaceholder={t("searchParties")}
-                  emptyMessage={t("noPartiesFound")}
+                  emptyStateMessage={t("noPartiesFound")}
                   disabled={isPending}
                 />
               </FormControl>
@@ -222,12 +219,11 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
               <FormLabel>{t("promoterLabel")}</FormLabel>
               <FormControl>
                 <ComboboxField
+                  field={field}
                   options={promoterOptions}
-                  value={field.value || ""} // Ensure it's a string for combobox
-                  onValueChange={field.onChange}
                   placeholder={t("selectPromoter")}
                   searchPlaceholder={t("searchPromoters")}
-                  emptyMessage={t("noPromotersFound")}
+                  emptyStateMessage={t("noPromotersFound")}
                   disabled={isPending}
                 />
               </FormControl>
@@ -243,10 +239,10 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
               <FormLabel>{t("effectiveDateLabel")}</FormLabel>
               <FormControl>
                 <DatePickerWithManualInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={isPending}
+                  date={field.value}
+                  setDate={field.onChange}
                   placeholder={t("datePickerPlaceholder")}
+                  disabled={isPending}
                 />
               </FormControl>
               <FormMessage />
@@ -261,10 +257,10 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
               <FormLabel>{t("terminationDateLabel")}</FormLabel>
               <FormControl>
                 <DatePickerWithManualInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={isPending}
+                  date={field.value}
+                  setDate={field.onChange}
                   placeholder={t("datePickerPlaceholder")}
+                  disabled={isPending}
                 />
               </FormControl>
               <FormMessage />
@@ -341,256 +337,3 @@ export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) 
 }
 
 export default ContractGeneratorForm
-=======
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { ContractDetail, Party, Promoter } from "@/lib/types";
-import { useParties } from "@/hooks/use-parties";
-import { usePromoters } from "@/hooks/use-promoters";
-import { ComboboxField } from "./combobox-field";
-import { DatePickerWithManualInput } from "./date-picker-with-manual-input";
-import { createContract, updateContract, ContractInsert } from "@/app/actions/contracts";
-
-const contractFormSchema = z.object({
-  first_party_id: z.string().min(1, "First party is required."),
-  second_party_id: z.string().min(1, "Second party is required."),
-  promoter_id: z.string().min(1, "Promoter is required."),
-  contract_start_date: z.date({ required_error: "Start date is required." }),
-  contract_end_date: z.date({ required_error: "End date is required." }),
-  contract_value: z.coerce.number().min(0, "Contract value must be a positive number.").optional(),
-  job_title: z.string().optional(),
-  work_location: z.string().optional(),
-});
-
-type ContractFormValues = z.infer<typeof contractFormSchema>;
-
-interface ContractGeneratorFormProps {
-  contract?: ContractDetail;
-}
-
-export function ContractGeneratorForm({ contract }: ContractGeneratorFormProps) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const { data: parties, isLoading: partiesLoading } = useParties();
-  const { data: promoters, isLoading: promotersLoading } = usePromoters();
-  const [error, setError] = useState<string | null>(null);
-
-  const defaultValues: Partial<ContractFormValues> = contract
-    ? {
-        first_party_id: contract.first_party_id,
-        second_party_id: contract.second_party_id,
-        promoter_id: contract.promoter_id,
-        contract_start_date: contract.contract_start_date ? new Date(contract.contract_start_date) : undefined,
-        contract_end_date: contract.contract_end_date ? new Date(contract.contract_end_date) : undefined,
-        contract_value: contract.contract_value ?? undefined,
-        job_title: contract.job_title ?? undefined,
-        work_location: contract.work_location ?? undefined,
-      }
-    : {};
-
-  const form = useForm<ContractFormValues>({
-    resolver: zodResolver(contractFormSchema),
-    defaultValues,
-  });
-
-  const onSubmit = (data: ContractFormValues) => {
-    setError(null);
-    startTransition(async () => {
-      try {
-        const payload: Partial<ContractInsert> = {
-          ...data,
-          contract_start_date: data.contract_start_date.toISOString(),
-          contract_end_date: data.contract_end_date.toISOString(),
-        };
-
-        if (contract) {
-          await updateContract(contract.id, payload);
-          toast.success("Contract updated successfully!");
-        } else {
-          await createContract(payload as ContractInsert);
-          toast.success("Contract created successfully!");
-        }
-        router.push("/contracts");
-        router.refresh();
-      } catch (e) {
-        const errorMessage = e instanceof Error ? e.message : "An unexpected error occurred.";
-        setError(errorMessage);
-        toast.error(errorMessage);
-      }
-    });
-  };
-
-  const partyOptions =
-    parties?.map((party) => ({
-      value: party.id.toString(),
-      label: party.name_en,
-    })) || [];
-
-  const promoterOptions =
-    promoters?.map((promoter) => ({
-      value: promoter.id.toString(),
-      label: `${promoter.name_en} (${promoter.name_ar})`,
-    })) || [];
-
-  return (
-    <div className="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
-      <h1 className="text-2xl font-bold mb-6">
-        {contract ? "Edit Contract" : "Generate New Contract"}
-      </h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="first_party_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>First Party (e.g., Client)</FormLabel>
-                <FormControl>
-                  <ComboboxField
-                    field={field}
-                    options={partyOptions}
-                    placeholder="Select a party"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="second_party_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Second Party (e.g., Employer)</FormLabel>
-                <FormControl>
-                  <ComboboxField
-                    field={field}
-                    options={partyOptions}
-                    placeholder="Select a party"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="promoter_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Promoter</FormLabel>
-                <FormControl>
-                  <ComboboxField
-                    field={field}
-                    options={promoterOptions}
-                    placeholder="Select a promoter"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="contract_start_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Start Date</FormLabel>
-                <FormControl>
-                  <DatePickerWithManualInput
-                    date={field.value}
-                    setDate={field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="contract_end_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>End Date</FormLabel>
-                <FormControl>
-                  <DatePickerWithManualInput
-                    date={field.value}
-                    setDate={field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="contract_value"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contract Value</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="Enter contract value" 
-                    {...field} 
-                    onChange={event => field.onChange(event.target.value === '' ? null : +event.target.value)}
-                    value={field.value ?? ''}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-           <FormField
-            control={form.control}
-            name="job_title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Job Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter job title" {...field} value={field.value ?? ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-           <FormField
-            control={form.control}
-            name="work_location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Work Location</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter work location" {...field} value={field.value ?? ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {error && <p className="text-sm font-medium text-destructive">{error}</p>}
-          <Button type="submit" disabled={isPending}>
-            {isPending ? (contract ? "Updating..." : "Creating...") : (contract ? "Update Contract" : "Create Contract")}
-          </Button>
-        </form>
-      </Form>
-    </div>
-  );
-}
-
-export default ContractGeneratorForm;
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
