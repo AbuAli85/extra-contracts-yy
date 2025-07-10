@@ -89,11 +89,7 @@ export interface AuditLogRow {
   details?: string | object | null
 }
 
-<<<<<<< HEAD
 export interface ContractsByStatusDataPoint {
-=======
-export interface ContractsByStatusData {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   name: string
   nameAr: string
   count: number

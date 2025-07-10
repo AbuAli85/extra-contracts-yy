@@ -45,22 +45,14 @@ export const summaryWidgetsData: SummaryWidgetData[] = [
   {
     title: "Total Promoters",
     titleAr: "إجمالي المروجين",
-<<<<<<< HEAD
     value: 250,
-=======
-    value: "250",
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     icon: Users,
     color: "text-purple-500",
   },
   {
     title: "Total Companies",
     titleAr: "إجمالي الشركات",
-<<<<<<< HEAD
     value: 150,
-=======
-    value: "150",
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
     icon: Building,
     color: "text-teal-500",
   },
@@ -153,7 +145,6 @@ export const contractsMissingDocuments: ReviewItem[] = [
 export const notificationItemsData: NotificationItem[] = [
   {
     id: "n1",
-<<<<<<< HEAD
     related_contract_id: "CON-003",
     promoterName: "Fatima Khan",
     clientName: "Beta Group",
@@ -167,21 +158,6 @@ export const notificationItemsData: NotificationItem[] = [
     clientName: "Epsilon Solutions",
     daysUntilExpiry: 28,
     expiryDate: "2024-08-02",
-=======
-    type: "warning",
-    message: "Contract CON-003 for Beta Group (promoter: Fatima Khan) will expire in 20 days.",
-    created_at: new Date().toISOString(),
-    is_read: false,
-    related_contract_id: "CON-003",
-  },
-  {
-    id: "n2",
-    type: "warning",
-    message: "Contract CON-006 for Epsilon Solutions (promoter: Maria Garcia) will expire in 28 days.",
-    created_at: new Date().toISOString(),
-    is_read: false,
-    related_contract_id: "CON-006",
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   },
 ]
 
