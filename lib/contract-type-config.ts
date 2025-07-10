@@ -1,11 +1,5 @@
 // lib/contract-type-config.ts
-import { z } from "zod"
-import { 
-  getMakecomTemplateConfig, 
-  generateMakecomWebhookPayload,
-  validateMakecomTemplateData,
-  type MakecomTemplateConfig 
-} from './makecom-template-config'
+import { getMakecomTemplateConfig } from "./makecom-template-config"
 
 export interface ContractTypeConfig {
   id: string
@@ -40,17 +34,17 @@ export const CONTRACT_TYPE_CONFIGS: Record<string, ContractTypeConfig> = {
     description: "Standard Oman unlimited duration employment contract with full benefits",
     category: "Oman Labor Law",
     requiredFields: [
-      "first_party_id", "second_party_id", "promoter_id", 
-      "contract_start_date", "job_title", "department", 
+      "first_party_id", "second_party_id", "promoter_id",
+      "contract_start_date", "job_title", "department",
       "basic_salary", "currency", "work_location", "email"
     ],
     optionalFields: [
-      "contract_end_date", "probation_period", "allowances", 
+      "contract_end_date", "probation_period", "allowances",
       "working_hours", "notice_period", "special_terms"
     ],
     templatePlaceholders: [
-      "{{employee_name}}", "{{employer_name}}", "{{job_title}}", 
-      "{{salary}}", "{{start_date}}", "{{work_location}}", 
+      "{{employee_name}}", "{{employer_name}}", "{{job_title}}",
+      "{{salary}}", "{{start_date}}", "{{work_location}}",
       "{{probation_period}}", "{{benefits}}"
     ],
     validationRules: {
@@ -76,24 +70,24 @@ export const CONTRACT_TYPE_CONFIGS: Record<string, ContractTypeConfig> = {
     allowsProbation: true,
     allowsRemoteWork: true
   },
-  
+
   "limited-contract": {
-    id: "limited-contract", 
+    id: "limited-contract",
     name: "Limited Contract (Fixed-term)",
     description: "Fixed-term employment contract with specified end date",
     category: "Oman Labor Law",
     requiredFields: [
       "first_party_id", "second_party_id", "promoter_id",
-      "contract_start_date", "contract_end_date", "job_title", 
+      "contract_start_date", "contract_end_date", "job_title",
       "department", "basic_salary", "currency", "work_location", "email"
     ],
     optionalFields: [
-      "probation_period", "allowances", "working_hours", 
+      "probation_period", "allowances", "working_hours",
       "notice_period", "special_terms"
     ],
     templatePlaceholders: [
-      "{{employee_name}}", "{{employer_name}}", "{{job_title}}", 
-      "{{salary}}", "{{start_date}}", "{{end_date}}", 
+      "{{employee_name}}", "{{employer_name}}", "{{job_title}}",
+      "{{salary}}", "{{start_date}}", "{{end_date}}",
       "{{work_location}}", "{{contract_duration}}"
     ],
     validationRules: {
@@ -135,8 +129,8 @@ export const CONTRACT_TYPE_CONFIGS: Record<string, ContractTypeConfig> = {
       "basic_salary", "allowances", "working_hours", "special_terms"
     ],
     templatePlaceholders: [
-      "{{intern_name}}", "{{company_name}}", "{{position}}", 
-      "{{start_date}}", "{{end_date}}", "{{supervisor}}", 
+      "{{intern_name}}", "{{company_name}}", "{{position}}",
+      "{{start_date}}", "{{end_date}}", "{{supervisor}}",
       "{{learning_objectives}}", "{{stipend}}"
     ],
     validationRules: {
@@ -173,12 +167,12 @@ export const CONTRACT_TYPE_CONFIGS: Record<string, ContractTypeConfig> = {
       "contract_start_date", "job_title", "work_location", "email"
     ],
     optionalFields: [
-      "contract_end_date", "basic_salary", "allowances", 
+      "contract_end_date", "basic_salary", "allowances",
       "working_hours", "special_terms"
     ],
     templatePlaceholders: [
-      "{{consultant_name}}", "{{client_name}}", "{{service_description}}", 
-      "{{deliverables}}", "{{timeline}}", "{{fees}}", 
+      "{{consultant_name}}", "{{client_name}}", "{{service_description}}",
+      "{{deliverables}}", "{{timeline}}", "{{fees}}",
       "{{payment_terms}}", "{{intellectual_property}}"
     ],
     validationRules: {
@@ -191,7 +185,7 @@ export const CONTRACT_TYPE_CONFIGS: Record<string, ContractTypeConfig> = {
     },
     businessRules: [
       "Define clear scope of work",
-      "Specify deliverables and timeline", 
+      "Specify deliverables and timeline",
       "Include intellectual property clauses",
       "Payment terms must be defined",
       "Comply with Oman commercial regulations"
@@ -205,7 +199,7 @@ export const CONTRACT_TYPE_CONFIGS: Record<string, ContractTypeConfig> = {
 
   "project-based": {
     id: "project-based",
-    name: "Project-based Contract", 
+    name: "Project-based Contract",
     description: "Contract for specific project completion",
     category: "Project Work",
     requiredFields: [
@@ -217,8 +211,8 @@ export const CONTRACT_TYPE_CONFIGS: Record<string, ContractTypeConfig> = {
       "basic_salary", "allowances", "working_hours", "special_terms"
     ],
     templatePlaceholders: [
-      "{{contractor_name}}", "{{client_name}}", "{{project_name}}", 
-      "{{project_scope}}", "{{milestones}}", "{{completion_date}}", 
+      "{{contractor_name}}", "{{client_name}}", "{{project_name}}",
+      "{{project_scope}}", "{{milestones}}", "{{completion_date}}",
       "{{payment_schedule}}", "{{success_criteria}}"
     ],
     validationRules: {
@@ -255,12 +249,12 @@ export const CONTRACT_TYPE_CONFIGS: Record<string, ContractTypeConfig> = {
       "working_hours", "basic_salary", "currency", "work_location", "email"
     ],
     optionalFields: [
-      "contract_end_date", "probation_period", "allowances", 
+      "contract_end_date", "probation_period", "allowances",
       "notice_period", "special_terms"
     ],
     templatePlaceholders: [
-      "{{employee_name}}", "{{employer_name}}", "{{job_title}}", 
-      "{{part_time_hours}}", "{{salary}}", "{{schedule}}", 
+      "{{employee_name}}", "{{employer_name}}", "{{job_title}}",
+      "{{part_time_hours}}", "{{salary}}", "{{schedule}}",
       "{{benefits_eligibility}}"
     ],
     validationRules: {
@@ -299,8 +293,8 @@ export const CONTRACT_TYPE_CONFIGS: Record<string, ContractTypeConfig> = {
       "working_hours", "notice_period", "special_terms", "work_location"
     ],
     templatePlaceholders: [
-      "{{employee_name}}", "{{employer_name}}", "{{job_title}}", 
-      "{{remote_work_policy}}", "{{communication_tools}}", 
+      "{{employee_name}}", "{{employer_name}}", "{{job_title}}",
+      "{{remote_work_policy}}", "{{communication_tools}}",
       "{{performance_metrics}}", "{{equipment_provision}}"
     ],
     validationRules: {
@@ -341,9 +335,9 @@ export const CONTRACT_TYPE_CONFIGS: Record<string, ContractTypeConfig> = {
       "notice_period", "special_terms"
     ],
     templatePlaceholders: [
-      "{{executive_name}}", "{{company_name}}", "{{title}}", 
-      "{{compensation_package}}", "{{equity_options}}", 
-      "{{performance_bonuses}}", "{{termination_clauses}}", 
+      "{{executive_name}}", "{{company_name}}", "{{title}}",
+      "{{compensation_package}}", "{{equity_options}}",
+      "{{performance_bonuses}}", "{{termination_clauses}}",
       "{{confidentiality_terms}}"
     ],
     validationRules: {
@@ -373,7 +367,7 @@ export const CONTRACT_TYPE_CONFIGS: Record<string, ContractTypeConfig> = {
 // Enhanced contract type configs with Make.com integration
 export const ENHANCED_CONTRACT_TYPE_CONFIGS: Record<string, EnhancedContractTypeConfig> = {
   ...CONTRACT_TYPE_CONFIGS,
-  
+
   // Add Make.com integrated contract types
   "oman-unlimited-makecom": {
     ...CONTRACT_TYPE_CONFIGS["unlimited-contract"],
@@ -383,16 +377,16 @@ export const ENHANCED_CONTRACT_TYPE_CONFIGS: Record<string, EnhancedContractType
     makecomTemplateId: "oman-unlimited-contract",
     makecomIntegration: true
   },
-  
+
   "oman-fixed-term-makecom": {
     ...CONTRACT_TYPE_CONFIGS["fixed-term-contract"],
-    id: "oman-fixed-term-makecom", 
+    id: "oman-fixed-term-makecom",
     name: "Oman Fixed-Term Contract (Make.com Automated)",
     description: "Automated fixed-term contract with Make.com PDF generation",
     makecomTemplateId: "oman-fixed-term-contract",
     makecomIntegration: true
   },
-  
+
   "oman-part-time-makecom": {
     id: "oman-part-time-makecom",
     name: "Oman Part-Time Contract (Make.com Automated)",
@@ -471,21 +465,21 @@ export function isOmanCompliant(contractType: string): boolean {
 
 export function getContractTypesByCategory(): Record<string, ContractTypeConfig[]> {
   const categories: Record<string, ContractTypeConfig[]> = {}
-  
+
   Object.values(CONTRACT_TYPE_CONFIGS).forEach(config => {
     if (!categories[config.category]) {
       categories[config.category] = []
     }
     categories[config.category].push(config)
   })
-  
+
   return categories
 }
 
-export function validateContractTypeData(contractType: string, formData: any): { 
-  isValid: boolean; 
-  errors: string[]; 
-  warnings: string[] 
+export function validateContractTypeData(contractType: string, formData: any): {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[]
 } {
   const config = getContractTypeConfig(contractType)
   if (!config) {
@@ -507,7 +501,7 @@ export function validateContractTypeData(contractType: string, formData: any): {
     const startDate = new Date(formData.contract_start_date)
     const endDate = new Date(formData.contract_end_date)
     const durationMonths = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)
-    
+
     if (durationMonths > config.maxDuration) {
       errors.push(`Contract duration cannot exceed ${config.maxDuration} months for ${config.name}`)
     }
@@ -535,7 +529,7 @@ export function generateContractWithMakecom(
   contractData: any
 ): { webhookPayload: any; templateConfig: MakecomTemplateConfig | null; validation: any } {
   const contractConfig = getEnhancedContractTypeConfig(contractTypeId)
-  const templateConfig = contractConfig?.makecomTemplateId 
+  const templateConfig = contractConfig?.makecomTemplateId
     ? getMakecomTemplateConfig(contractConfig.makecomTemplateId)
     : null
 
@@ -558,7 +552,7 @@ export function generateContractWithMakecom(
   }
 
   // Generate Make.com webhook payload
-  const webhookPayload = combinedValidation.isValid 
+  const webhookPayload = combinedValidation.isValid
     ? generateMakecomWebhookPayload(contractConfig.makecomTemplateId!, contractData)
     : null
 
@@ -571,13 +565,13 @@ export function generateContractWithMakecom(
 
 export function getMakecomContractTypesByCategory(): Record<string, EnhancedContractTypeConfig[]> {
   const categories: Record<string, EnhancedContractTypeConfig[]> = {}
-  
+
   getMakecomEnabledContractTypes().forEach(config => {
     if (!categories[config.category]) {
       categories[config.category] = []
     }
     categories[config.category].push(config)
   })
-  
+
   return categories
 }
