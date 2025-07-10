@@ -1,13 +1,5 @@
 // Custom image loader for Supabase images
-export default function supabaseLoader({
-  src,
-  width,
-  quality,
-}: {
-  src: string
-  width: number
-  quality?: number
-}) {
+export default function supabaseLoader({ src }: { src: string }) {
   // For Supabase storage URLs, return as-is since they're already optimized
   if (src.includes("supabase.co/storage")) {
     return src
