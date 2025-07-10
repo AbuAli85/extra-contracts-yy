@@ -18,13 +18,8 @@ export interface CreateContractRequest {
 
 export interface UpdateContractRequest {
   id: string
-<<<<<<< HEAD
-  client_id?: string
-  employer_id?: string
-=======
   first_party_id?: string // Updated: was client_id
   second_party_id?: string // Updated: was employer_id
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   promoter_id?: string
   job_title?: string
   work_location?: string
@@ -33,11 +28,8 @@ export interface UpdateContractRequest {
   email?: string
   contract_number?: string
   pdf_url?: string
-<<<<<<< HEAD
-=======
   contract_value?: number
   status?: string
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 }
 
 // API Response Types
@@ -78,8 +70,4 @@ export interface ValidationError {
 export interface ValidationResult {
   isValid: boolean
   errors: ValidationError[]
-<<<<<<< HEAD
-} 
-=======
 }
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a

@@ -9,19 +9,11 @@ export function validateCreateContractRequest(body: any): ValidationResult {
   const hasPromoterId = body.promoter_id || body.promoter?.id
   
   if (!hasFirstPartyId) {
-<<<<<<< HEAD
-    errors.push({ field: "first_party_id", message: "First party ID is required" })
-  }
-  
-  if (!hasSecondPartyId) {
-    errors.push({ field: "second_party_id", message: "Second party ID is required" })
-=======
     errors.push({ field: "first_party_id", message: "Party A ID is required" })
   }
   
   if (!hasSecondPartyId) {
     errors.push({ field: "second_party_id", message: "Party B ID is required" })
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   }
   
   if (!hasPromoterId) {
@@ -124,8 +116,4 @@ export function extractIds(body: any): {
     employerId: body.second_party?.id || body.second_party_id,
     promoterId: body.promoter?.id || body.promoter_id,
   }
-<<<<<<< HEAD
-} 
-=======
 }
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a

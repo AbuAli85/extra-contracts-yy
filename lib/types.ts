@@ -3,11 +3,7 @@ export interface Party {
   name_en: string
   name_ar: string
   crn: string
-<<<<<<< HEAD
-  type?: "Employer" | "Client" | "Both" | null
-=======
-  type?: 'Employer' | 'Client' | 'Generic' | null
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
+  type?: "Employer" | "Client" | "Generic" | null
   role?: string | null
   cr_expiry_date?: string | null
   contact_person?: string | null
@@ -18,11 +14,6 @@ export interface Party {
   tax_number?: string | null
   license_number?: string | null
   license_expiry_date?: string | null
-<<<<<<< HEAD
-  status?: "Active" | "Inactive" | "Suspended" | null
-  notes?: string | null
-  created_at?: string | null
-=======
   status?: string | null
   notes?: string | null
   created_at?: string | null
@@ -30,7 +21,6 @@ export interface Party {
   email?: string | null
   phone?: string | null
   address?: string | null
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
 }
 
 export interface Promoter {
@@ -48,8 +38,6 @@ export interface Promoter {
   notes?: string | null
   created_at?: string | null
   active_contracts_count?: number
-<<<<<<< HEAD
-=======
   employer_id?: string | null
   outsourced_to_id?: string | null
   job_title?: string | null
@@ -126,24 +114,11 @@ export interface Contract {
   client_id?: string | null
 }
 
-export interface ContractDetail extends Contract {
-  // This can be used to enforce non-optional properties for detail views
-  // For now, it will just be an alias for Contract
-}
-
-export interface SimpleContract extends Contract {
-  // This can be used for simpler contract views
-  // For now, it will just be an alias for Contract
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
-}
-
+export interface ContractDetail extends Contract {}
+export interface SimpleContract extends Contract {}
 export interface PromoterProfile extends Promoter {}
 
-<<<<<<< HEAD
-export interface ContractRecord<Extra extends Record<string, unknown> = {}> extends Extra {
-=======
 export interface ContractRecord {
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   id: string
   created_at?: string | null
   first_party_name_en?: string | null
@@ -157,19 +132,6 @@ export interface ContractRecord {
 }
 
 export interface BilingualPdfData {
-<<<<<<< HEAD
-  first_party_name_en?: string
-  first_party_name_ar?: string
-  first_party_crn?: string
-  second_party_name_en?: string
-  second_party_name_ar?: string
-  second_party_crn?: string
-  promoter_name_en?: string
-  promoter_name_ar?: string
-  id_card_number?: string
-  promoter_id_card_url?: string
-  promoter_passport_url?: string
-=======
   first_party_name_en?: string | null
   first_party_name_ar?: string | null
   first_party_crn?: string | null
@@ -181,17 +143,11 @@ export interface BilingualPdfData {
   id_card_number?: string | null
   promoter_id_card_url?: string | null
   promoter_passport_url?: string | null
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
   contract_start_date: string | null
   contract_end_date: string | null
   job_title?: string | null
   work_location?: string | null
   email: string | null
-<<<<<<< HEAD
-  contract_number?: string
-  pdf_url?: string
-}
-=======
   contract_number?: string | null
   pdf_url?: string | null
 }
@@ -238,5 +194,4 @@ export interface PartyFile {
   created_at: string
 }
 
-export type ContractStatus = 'draft' | 'pending' | 'active' | 'completed' | 'cancelled' | 'expired' | 'failed' | 'generating'
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
+export type ContractStatus = "draft" | "pending" | "active" | "completed" | "cancelled" | "expired" | "failed" | "generating"
