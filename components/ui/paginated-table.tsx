@@ -11,15 +11,21 @@ import {
 } from "@/components/ui/table"
 import {
   Pagination,
-  PaginationContent,
+  PaginationList,
   PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
+  PaginationListItem,
+  PaginationButton,
   PaginationNext,
   PaginationPrevious,
   usePagination,
 } from "@/components/ui/pagination"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface PaginatedTableProps<T> {
@@ -80,7 +86,10 @@ export function PaginatedTable<T>({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <span className="text-sm text-muted-foreground">Show</span>
-              <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
+              <Select
+                value={itemsPerPage.toString()}
+                onValueChange={handleItemsPerPageChange}
+              >
                 <SelectTrigger className="w-20">
                   <SelectValue />
                 </SelectTrigger>
@@ -95,7 +104,8 @@ export function PaginatedTable<T>({
               <span className="text-sm text-muted-foreground">entries</span>
             </div>
             <div className="text-sm text-muted-foreground">
-              Showing {pagination.startIndex + 1} to {pagination.endIndex} of {data.length} entries
+              Showing {pagination.startIndex + 1} to {pagination.endIndex} of{" "}
+              {data.length} entries
             </div>
           </div>
 
@@ -112,7 +122,10 @@ export function PaginatedTable<T>({
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={columns.length} className="text-center py-8">
+                    <TableCell
+                      colSpan={columns.length}
+                      className="text-center py-8"
+                    >
                       <div className="flex items-center justify-center">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                         <span className="ml-2">Loading...</span>
@@ -121,7 +134,10 @@ export function PaginatedTable<T>({
                   </TableRow>
                 ) : currentData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={columns.length} className="text-center py-8">
+                    <TableCell
+                      colSpan={columns.length}
+                      className="text-center py-8"
+                    >
                       {emptyMessage}
                     </TableCell>
                   </TableRow>
@@ -130,7 +146,9 @@ export function PaginatedTable<T>({
                     <TableRow key={index}>
                       {columns.map((column) => (
                         <TableCell key={column.key}>
-                          {column.render ? column.render(item) : (item as any)[column.key]}
+                          {column.render
+                            ? column.render(item)
+                            : (item as any)[column.key]}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -147,36 +165,44 @@ export function PaginatedTable<T>({
                 Page {currentPage} of {pagination.totalPages}
               </div>
               <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
+                <PaginationList>
+                  <PaginationListItem>
                     <PaginationPrevious
                       onClick={pagination.goToPreviousPage}
-                      className={!pagination.hasPreviousPage ? "pointer-events-none opacity-50" : ""}
+                      className={
+                        !pagination.hasPreviousPage
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
                     />
-                  </PaginationItem>
-                  
+                  </PaginationListItem>
+
                   {pagination.getVisiblePages().map((page, index) => (
-                    <PaginationItem key={index}>
+                    <PaginationListItem key={index}>
                       {page === "..." ? (
                         <PaginationEllipsis />
                       ) : (
-                        <PaginationLink
+                        <PaginationButton
                           isActive={page === currentPage}
                           onClick={() => pagination.goToPage(page as number)}
                         >
                           {page}
-                        </PaginationLink>
+                        </PaginationButton>
                       )}
-                    </PaginationItem>
+                    </PaginationListItem>
                   ))}
-                  
-                  <PaginationItem>
+
+                  <PaginationListItem>
                     <PaginationNext
                       onClick={pagination.goToNextPage}
-                      className={!pagination.hasNextPage ? "pointer-events-none opacity-50" : ""}
+                      className={
+                        !pagination.hasNextPage
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
                     />
-                  </PaginationItem>
-                </PaginationContent>
+                  </PaginationListItem>
+                </PaginationList>
               </Pagination>
             </div>
           )}
@@ -184,4 +210,4 @@ export function PaginatedTable<T>({
       </CardContent>
     </Card>
   )
-} 
+}
