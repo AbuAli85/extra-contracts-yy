@@ -32,16 +32,16 @@ export async function fetchPartiesWithContractCount(): Promise<Party[]> {
 
           return {
             ...party,
-            contract_count: contractCount || 0
+            contract_count: contractCount || 0,
           }
         } catch (error) {
           console.warn(`Error processing party ${party.id}:`, error)
           return {
             ...party,
-            contract_count: 0
+            contract_count: 0,
           }
         }
-      })
+      }),
     )
 
     return enhancedData
@@ -55,10 +55,7 @@ export async function fetchPartiesWithContractCount(): Promise<Party[]> {
  * Delete multiple parties by IDs
  */
 export async function deleteParties(partyIds: string[]): Promise<void> {
-  const { error } = await supabase
-    .from("parties")
-    .delete()
-    .in("id", partyIds)
+  const { error } = await supabase.from("parties").delete().in("id", partyIds)
 
   if (error) {
     throw new Error(`Error deleting parties: ${error.message}`)
@@ -69,10 +66,7 @@ export async function deleteParties(partyIds: string[]): Promise<void> {
  * Update party status - DISABLED: status field not available in current schema
  * TODO: Add status field to parties table or remove this function
  */
-export async function updatePartyStatus(
-  partyId: string, 
-  status: string
-): Promise<void> {
+export async function updatePartyStatus(): Promise<void> {
   // Commented out until status field is added to database schema
   // const { error } = await supabase
   //   .from("parties")
@@ -82,18 +76,15 @@ export async function updatePartyStatus(
   // if (error) {
   //   throw new Error(`Error updating party status: ${error.message}`)
   // }
-  
+
   console.warn("updatePartyStatus is disabled - status field not available in database schema")
 }
 
 /**
- * Bulk update party statuses - DISABLED: status field not available in current schema  
+ * Bulk update party statuses - DISABLED: status field not available in current schema
  * TODO: Add status field to parties table or remove this function
  */
-export async function bulkUpdatePartyStatus(
-  partyIds: string[], 
-  status: string
-): Promise<void> {
+export async function bulkUpdatePartyStatus(): Promise<void> {
   // Commented out until status field is added to database schema
   // const { error } = await supabase
   //   .from("parties")
@@ -103,29 +94,26 @@ export async function bulkUpdatePartyStatus(
   // if (error) {
   //   throw new Error(`Error bulk updating party status: ${error.message}`)
   // }
-  
+
   console.warn("bulkUpdatePartyStatus is disabled - status field not available in database schema")
 }
 
 /**
  * Get parties with expiring documents
  */
-export async function getPartiesWithExpiringDocuments(
-  daysAhead: number = 30
-): Promise<Party[]> {
+export async function getPartiesWithExpiringDocuments(daysAhead: number = 30): Promise<Party[]> {
   const futureDate = new Date()
   futureDate.setDate(futureDate.getDate() + daysAhead)
-  
   const { data, error } = await supabase
     .from("parties")
     .select("*")
-    .or(`cr_expiry_date.lte.${futureDate.toISOString()},license_expiry_date.lte.${futureDate.toISOString()}`)
+    .or(
+      `cr_expiry_date.lte.${futureDate.toISOString()},license_expiry_date.lte.${futureDate.toISOString()}`,
+    )
     .order("cr_expiry_date", { ascending: true })
-
   if (error) {
     throw new Error(`Error fetching parties with expiring documents: ${error.message}`)
   }
-
   return data || []
 }
 
@@ -136,13 +124,13 @@ export async function searchParties(searchTerm: string): Promise<Party[]> {
   const { data, error } = await supabase
     .from("parties")
     .select("*")
-    .or(`name_en.ilike.%${searchTerm}%,name_ar.ilike.%${searchTerm}%,crn.ilike.%${searchTerm}%,contact_person.ilike.%${searchTerm}%`)
+    .or(
+      `name_en.ilike.%${searchTerm}%,name_ar.ilike.%${searchTerm}%,crn.ilike.%${searchTerm}%,contact_person.ilike.%${searchTerm}%`,
+    )
     .order("name_en")
-
   if (error) {
     throw new Error(`Error searching parties: ${error.message}`)
   }
-
   return data || []
 }
 
@@ -184,7 +172,7 @@ export async function getPartyActivitySummary(partyId: string) {
     }
 
     const statusCounts = (contractsByStatus || []).reduce((acc, contract) => {
-      acc[contract.status || 'unknown'] = (acc[contract.status || 'unknown'] || 0) + 1
+      acc[contract.status || "unknown"] = (acc[contract.status || "unknown"] || 0) + 1
       return acc
     }, {} as Record<string, number>)
 
@@ -217,7 +205,7 @@ export async function getPartiesByType(): Promise<Record<string, number>> {
     }
 
     const typeCounts = (data || []).reduce((acc, party) => {
-      const type = party.type || 'unknown'
+      const type = party.type || "unknown"
       acc[type] = (acc[type] || 0) + 1
       return acc
     }, {} as Record<string, number>)
@@ -236,7 +224,7 @@ export async function getDocumentExpiryAlerts(daysAhead: number = 30) {
   try {
     const futureDate = new Date()
     futureDate.setDate(futureDate.getDate() + daysAhead)
-    
+
     const { data: crExpiring, error: crError } = await supabase
       .from("parties")
       .select("id, name_en, name_ar, crn, cr_expiry_date")

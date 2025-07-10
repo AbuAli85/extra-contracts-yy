@@ -192,6 +192,7 @@ export const filterParties = (
       party.crn.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (party.role && party.role.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (party.contact_person && party.contact_person.toLowerCase().includes(searchTerm.toLowerCase())) ||
+
       (party.contact_email && party.contact_email.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (party.notes && party.notes.toLowerCase().includes(searchTerm.toLowerCase()))
     // Status filter
