@@ -1,6 +1,4 @@
 import type {
-  CreateContractRequest,
-  UpdateContractRequest,
   ValidationResult,
   ValidationError,
 } from "@/lib/types/api"
