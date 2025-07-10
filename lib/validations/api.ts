@@ -1,7 +1,4 @@
-import type {
-  ValidationResult,
-  ValidationError,
-} from "@/lib/types/api"
+import type { ValidationResult, ValidationError } from "@/lib/types/api"
 
 export function validateCreateContractRequest(body: any): ValidationResult {
   const errors: ValidationError[] = []
