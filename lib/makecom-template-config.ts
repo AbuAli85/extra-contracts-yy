@@ -90,12 +90,7 @@ export const MAKECOM_TEMPLATE_CONFIGS: Record<string, MakecomTemplateConfig> = {
     allowsProbation: true,
     allowsRemoteWork: false,
     makecomModuleConfig: {
-      webhookTriggerFields: [
-        "contract_number",
-        "promoter_id",
-        "first_party_id",
-        "second_party_id",
-      ],
+      webhookTriggerFields: ["contract_number", "promoter_id", "first_party_id", "second_party_id"],
       templateVariables: {
         employee_name_en: "{{1.promoter_name_en.trim()}}",
         employee_name_ar: "{{1.promoter_name_ar.trim()}}",
@@ -112,7 +107,7 @@ export const MAKECOM_TEMPLATE_CONFIGS: Record<string, MakecomTemplateConfig> = {
       outputFormat: "pdf",
       googleDriveSettings: {
         folderId: "1GOOGLE_DRIVE_FOLDER_ID",
-        naming: "{{contract_number}}_{{employee_name_en.replace(/ /g, "_")}}_Unlimited_Contract",
+        naming: '{{contract_number}}_{{employee_name_en.replace(/ /g, "_")}}_Unlimited_Contract',
       },
     },
   },
@@ -175,12 +170,7 @@ export const MAKECOM_TEMPLATE_CONFIGS: Record<string, MakecomTemplateConfig> = {
     allowsProbation: true,
     allowsRemoteWork: false,
     makecomModuleConfig: {
-      webhookTriggerFields: [
-        "contract_number",
-        "promoter_id",
-        "first_party_id",
-        "second_party_id",
-      ],
+      webhookTriggerFields: ["contract_number", "promoter_id", "first_party_id", "second_party_id"],
       templateVariables: {
         employee_name_en: "{{1.promoter_name_en.trim()}}",
         employee_name_ar: "{{1.promoter_name_ar.trim()}}",
@@ -194,7 +184,7 @@ export const MAKECOM_TEMPLATE_CONFIGS: Record<string, MakecomTemplateConfig> = {
       outputFormat: "pdf",
       googleDriveSettings: {
         folderId: "2GOOGLE_DRIVE_FOLDER_ID",
-        naming: "{{contract_number}}_{{employee_name_en.replace(/ /g, "_")}}_Fixed_Term_Contract",
+        naming: '{{contract_number}}_{{employee_name_en.replace(/ /g, "_")}}_Fixed_Term_Contract',
       },
     },
   },
@@ -250,12 +240,7 @@ export const MAKECOM_TEMPLATE_CONFIGS: Record<string, MakecomTemplateConfig> = {
     allowsProbation: false,
     allowsRemoteWork: true,
     makecomModuleConfig: {
-      webhookTriggerFields: [
-        "contract_number",
-        "promoter_id",
-        "first_party_id",
-        "second_party_id",
-      ],
+      webhookTriggerFields: ["contract_number", "promoter_id", "first_party_id", "second_party_id"],
       templateVariables: {
         working_hours_per_week: "{{1.working_hours_per_week}}",
         hourly_rate: "{{1.hourly_rate}}",
@@ -276,12 +261,12 @@ export function getAllMakecomTemplateConfigs(): MakecomTemplateConfig[] {
 }
 
 export function getMakecomTemplatesByCategory(category: string): MakecomTemplateConfig[] {
-  return Object.values(MAKECOM_TEMPLATE_CONFIGS).filter(config => config.category === category)
+  return Object.values(MAKECOM_TEMPLATE_CONFIGS).filter((config) => config.category === category)
 }
 
 export function generateMakecomWebhookPayload(
   contractTypeId: string,
-  contractData: any
+  contractData: any,
 ): Record<string, any> | null {
   const config = getMakecomTemplateConfig(contractTypeId)
   if (!config) return null
@@ -289,7 +274,7 @@ export function generateMakecomWebhookPayload(
   const payload: Record<string, any> = {
     contract_type: contractTypeId,
     template_id: config.googleDocsTemplateId,
-    ...contractData
+    ...contractData,
   }
 
   // Add template-specific processing
@@ -305,7 +290,7 @@ export function generateMakecomWebhookPayload(
 
 export function validateMakecomTemplateData(
   contractTypeId: string,
-  data: any
+  data: any,
 ): { isValid: boolean; errors: string[]; warnings: string[] } {
   const config = getMakecomTemplateConfig(contractTypeId)
   if (!config) {
@@ -316,7 +301,7 @@ export function validateMakecomTemplateData(
   const warnings: string[] = []
 
   // Check required fields
-  config.requiredFields.forEach(field => {
+  config.requiredFields.forEach((field) => {
     if (!data[field] || data[field] === "") {
       errors.push(`${field} is required for ${config.name}`)
     }
@@ -327,7 +312,7 @@ export function validateMakecomTemplateData(
     const startDate = new Date(data.contract_start_date)
     const endDate = new Date(data.contract_end_date)
     const durationMonths = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)
-    
+
     if (durationMonths > config.maxDuration) {
       errors.push(`Contract duration cannot exceed ${config.maxDuration} months for ${config.name}`)
     }
@@ -338,11 +323,11 @@ export function validateMakecomTemplateData(
     if (data.basic_salary && data.currency === "OMR" && data.basic_salary < 325) {
       warnings.push("Salary below Oman minimum wage (325 OMR)")
     }
-    
+
     if (data.working_hours_per_week && data.working_hours_per_week > 45) {
       errors.push("Working hours cannot exceed 45 hours per week (Oman Labor Law)")
     }
-    
+
     if (data.probation_period && data.probation_period > 3) {
       errors.push("Probation period cannot exceed 3 months (Oman Labor Law)")
     }
@@ -365,8 +350,8 @@ export function generateMakecomBlueprint(contractTypeId: string): any {
         type: "webhook_receive",
         parameters: {
           hook: "contract_webhook",
-          trigger_fields: config.makecomModuleConfig.webhookTriggerFields
-        }
+          trigger_fields: config.makecomModuleConfig.webhookTriggerFields,
+        },
       },
       {
         id: 2,
@@ -374,8 +359,8 @@ export function generateMakecomBlueprint(contractTypeId: string): any {
         type: "http_get",
         parameters: {
           url: "/api/contracts/{{1.contract_number}}",
-          method: "GET"
-        }
+          method: "GET",
+        },
       },
       {
         id: 3,
@@ -383,8 +368,8 @@ export function generateMakecomBlueprint(contractTypeId: string): any {
         type: "create_document_from_template",
         parameters: {
           template_id: config.googleDocsTemplateId,
-          variables: config.makecomModuleConfig.templateVariables
-        }
+          variables: config.makecomModuleConfig.templateVariables,
+        },
       },
       {
         id: 4,
@@ -392,8 +377,8 @@ export function generateMakecomBlueprint(contractTypeId: string): any {
         type: "export_document",
         parameters: {
           document_id: "{{3.document_id}}",
-          format: config.makecomModuleConfig.outputFormat
-        }
+          format: config.makecomModuleConfig.outputFormat,
+        },
       },
       {
         id: 5,
@@ -402,8 +387,8 @@ export function generateMakecomBlueprint(contractTypeId: string): any {
         parameters: {
           bucket: "contracts",
           file_data: "{{4.data}}",
-          file_name: "{{1.contract_number}}.pdf"
-        }
+          file_name: "{{1.contract_number}}.pdf",
+        },
       },
       {
         id: 6,
@@ -414,10 +399,10 @@ export function generateMakecomBlueprint(contractTypeId: string): any {
           method: "PATCH",
           body: {
             pdf_url: "{{5.url}}",
-            status: "completed"
-          }
-        }
-      }
-    ]
+            status: "completed",
+          },
+        },
+      },
+    ],
   }
 }
