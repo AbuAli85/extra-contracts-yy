@@ -165,21 +165,21 @@ export function validateContractData(data: Partial<ContractGeneratorFormData>): 
 
   // Required fields check
   const requiredFields = [
-    'first_party_id',
-    'second_party_id', 
-    'promoter_id',
-    'contract_start_date',
-    'contract_end_date',
-    'email',
-    'job_title',
-    'department',
-    'contract_type',
-    'currency',
-    'work_location'
+    "first_party_id",
+    "second_party_id",
+    "promoter_id",
+    "contract_start_date",
+    "contract_end_date",
+    "email",
+    "job_title",
+    "department",
+    "contract_type",
+    "currency",
+    "work_location",
   ] as const
 
-  requiredFields.forEach(field => {
-    if (!data[field] || data[field] === '') {
+  requiredFields.forEach((field) => {
+    if (!data[field] || data[field] === "") {
       missingFields.push(field)
     }
   })
@@ -307,38 +307,38 @@ export function getContractAge(createdAt: string | Date): string {
  */
 export function exportContractsToCSV(contracts: ContractRow[]): string {
   const headers = [
-    'ID',
-    'Contract Number',
-    'Client ID',
-    'Employer ID', 
-    'Promoter ID',
-    'Job Title',
-    'Start Date',
-    'End Date',
-    'Status',
-    'Work Location',
-    'Email',
-    'Created At'
+    "ID",
+    "Contract Number",
+    "Client ID",
+    "Employer ID",
+    "Promoter ID",
+    "Job Title",
+    "Start Date",
+    "End Date",
+    "Status",
+    "Work Location",
+    "Email",
+    "Created At",
   ]
 
-  const rows = contracts.map(contract => [
+  const rows = contracts.map((contract) => [
     contract.id,
-    contract.contract_number || '',
-    contract.first_party_id || '',
-    contract.second_party_id || '',
-    contract.promoter_id || '',
-    contract.job_title || '',
-    contract.contract_start_date || '',
-    contract.contract_end_date || '',
-    contract.status || '',
-    contract.work_location || '',
-    contract.email || '',
-    contract.created_at || ''
+    contract.contract_number || "",
+    contract.first_party_id || "",
+    contract.second_party_id || "",
+    contract.promoter_id || "",
+    contract.job_title || "",
+    contract.contract_start_date || "",
+    contract.contract_end_date || "",
+    contract.status || "",
+    contract.work_location || "",
+    contract.email || "",
+    contract.created_at || "",
   ])
 
   const csvContent = [headers, ...rows]
-    .map(row => row.map(field => `"${field}"`).join(','))
-    .join('\n')
+    .map((row) => row.map((field) => `"${field}"`).join(","))
+    .join("\n")
 
   return csvContent
 }
@@ -347,14 +347,13 @@ export function exportContractsToCSV(contracts: ContractRow[]): string {
  * Download CSV file
  */
 export function downloadCSV(csvContent: string, filename: string): void {
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
-  
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+  const link = document.createElement("a")
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob)
-    link.setAttribute('href', url)
-    link.setAttribute('download', filename)
-    link.style.visibility = 'hidden'
+    link.setAttribute("href", url)
+    link.setAttribute("download", filename)
+    link.style.visibility = "hidden"
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
