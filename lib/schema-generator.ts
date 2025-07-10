@@ -41,11 +41,7 @@ export const contractGeneratorSchema = z
       .max(255, "Email address is too long."),
 
     // Required employment details
-    job_title: z
-      .string()
-      .min(1, "Job title is required.")
-      .max(100, "Job title is too long."),
-
+    job_title: z.string().min(1, "Job title is required.").max(100, "Job title is too long."),
     department: z
       .string()
       .min(1, "Department is required.")
@@ -91,15 +87,11 @@ export const contractGeneratorSchema = z
           return validTypes.includes(value)
         },
         {
-          message:
-            "Please select a valid contract type from the available options.",
-        }
+          message: "Please select a valid contract type from the available options.",
+        },
       ),
 
-    currency: z
-      .string()
-      .min(1, "Currency is required.")
-      .max(10, "Currency code is too long."),
+    currency: z.string().min(1, "Currency is required.").max(10, "Currency code is too long."),
 
     work_location: z
       .string()
@@ -157,10 +149,7 @@ export const contractGeneratorSchema = z
     // Review and approval status
     reviewed_by: z.string().optional(),
     approved_by: z.string().optional(),
-    status: z
-      .string()
-      .min(1, "Status is required.")
-      .max(50, "Status description is too long."),
+    status: z.string().min(1, "Status is required.").max(50, "Status description is too long."),
 
     // Timestamps
     created_at: z.date().optional(),
@@ -178,19 +167,20 @@ export const contractGeneratorSchema = z
     {
       message: "Contract end date must be after the start date.",
       path: ["contract_end_date"],
-    }
+    },
   )
   .refine(
     (data) => {
       // Ensure at least one form of ID is provided for the promoter
       const idCardUrl = typeof data.promoter_id_card_url === "string" ? data.promoter_id_card_url : ""
+
       const passportUrl = typeof data.promoter_passport_url === "string" ? data.promoter_passport_url : ""
       return idCardUrl.length > 0 || passportUrl.length > 0
     },
     {
       message: "Please provide at least one form of ID for the promoter.",
       path: ["promoter_id_card_url", "promoter_passport_url"],
-    }
+    },
   )
   .refine(
     (data) => {
@@ -204,7 +194,7 @@ export const contractGeneratorSchema = z
     {
       message: "Email domain is not allowed.",
       path: ["email"],
-    }
+    },
   )
 
 // Example contract form sections (update as needed for your form)
@@ -229,7 +219,9 @@ export const CONTRACT_FORM_SECTIONS = [
 
 // Returns all required fields from CONTRACT_FORM_SECTIONS
 export function getRequiredFields() {
-  return CONTRACT_FORM_SECTIONS.filter((section) => section.required).flatMap((section) => section.fields)
+  return CONTRACT_FORM_SECTIONS.filter((section) => section.required).flatMap(
+    (section) => section.fields,
+  )
 }
 
 // Add any additional validation or helper exports as needed

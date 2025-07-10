@@ -194,4 +194,12 @@ export interface PartyFile {
   created_at: string
 }
 
-export type ContractStatus = "draft" | "pending" | "active" | "completed" | "cancelled" | "expired" | "failed" | "generating"
+export type ContractStatus =
+  | "draft"
+  | "pending"
+  | "active"
+  | "completed"
+  | "cancelled"
+  | "expired"
+  | "failed"
+  | "generating"

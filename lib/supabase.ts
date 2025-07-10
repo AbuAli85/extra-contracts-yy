@@ -45,7 +45,10 @@ export const isAuthenticated = async (): Promise<boolean> => {
 // Utility function to get current user
 export const getCurrentUser = async () => {
   try {
-    const { data: { user }, error } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser()
     if (error) {
       devLog("Error getting current user:", error)
       return null
@@ -82,7 +85,7 @@ export const handleRealtimeError = (error: any, tableName: string) => {
 }
 
 // Utility function to safely create a realtime channel
-export const createRealtimeChannel = (tableName: string, callback: (payload: any) => void) => {
+export const createRealtimeChannel = (tableName: string, callback: () => void) => {
   try {
     return supabase
       .channel(`public-${tableName}-realtime`)
@@ -94,17 +97,12 @@ export const createRealtimeChannel = (tableName: string, callback: (payload: any
 }
 
 // Utility function to safely subscribe to a channel
-export const subscribeToChannel = (channel: any, onStatusChange?: (status: string, error?: any) => void) => {
+export const subscribeToChannel = (channel: any) => {
   if (!channel) return null
-
   try {
-    return channel.subscribe((status: string, error?: any) => {
-      if (onStatusChange) {
-        onStatusChange(status, error)
-      }
-    })
-  } catch (error) {
-    devLog("Error subscribing to channel:", error)
+    return channel.subscribe()
+  } catch (e) {
+    devLog("Error subscribing to channel:", e)
     return null
   }
 }

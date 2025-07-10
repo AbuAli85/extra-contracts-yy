@@ -16,12 +16,10 @@ interface ContractsStore {
   error: string | null
   isLoading: boolean
   fetchContracts: () => Promise<void>
-  generateContract: (
-    contractData: Omit<Contract, "id" | "created_at" | "updated_at">
-  ) => Promise<void>
-  retryContract: (contractId: string) => Promise<void>
+  generateContract: () => Promise<void>
+  retryContract: () => Promise<void>
   clearError: () => void
-  getContractById: (id: string) => Contract | undefined
+  getContractById: () => Contract | undefined
   updateStats: () => void
 }
 
@@ -54,7 +52,7 @@ const createContractStore: StateCreator<ContractsStore> = (set, get) => ({
     }
   },
 
-  generateContract: async (contractData) => {
+  generateContract: async () => {
     set({ isLoading: true })
     try {
       // Simulate API call
@@ -63,7 +61,6 @@ const createContractStore: StateCreator<ContractsStore> = (set, get) => ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(contractData),
       })
 
       if (!response.ok) {
@@ -79,8 +76,8 @@ const createContractStore: StateCreator<ContractsStore> = (set, get) => ({
     }
   },
 
-  retryContract: async (contractId: string) => {
-    console.log("Retrying contract:", contractId)
+  retryContract: async () => {
+    console.log("Retrying contract")
     // In a real app, you'd call an API to retry the contract generation
     // For now, we'll just move it back to 'pending'
     const updatedContracts = get().contracts.map((contract) =>
@@ -103,7 +100,7 @@ const createContractStore: StateCreator<ContractsStore> = (set, get) => ({
 
   clearError: () => set({ error: null }),
 
-  getContractById: (id: string) => {
+  getContractById: () => {
     return get().contracts.find((c) => c.id === id)
   },
 })

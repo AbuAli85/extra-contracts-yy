@@ -116,5 +116,8 @@ export const getStatusColors = (status: string) => {
  * Get document status color classes
  */
 export const getDocumentStatusColors = (status: string) => {
-  return DOCUMENT_STATUS_COLORS[status as keyof typeof DOCUMENT_STATUS_COLORS] || DOCUMENT_STATUS_COLORS.missing
+  return (
+    DOCUMENT_STATUS_COLORS[status as keyof typeof DOCUMENT_STATUS_COLORS] ||
+    DOCUMENT_STATUS_COLORS.missing
+  )
 }

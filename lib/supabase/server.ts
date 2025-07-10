@@ -33,6 +33,6 @@ export async function createClient() {
           }
         },
       },
-    }
+    },
   )
 }
