@@ -13,4 +13,4 @@ CREATE TABLE notifications (
   read BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
 >>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
-); 
+);

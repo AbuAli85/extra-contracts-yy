@@ -55,4 +55,4 @@ CREATE TABLE party_activities (
 
 -- Assign parties to users
 >>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
-ALTER TABLE parties ADD COLUMN owner_id UUID REFERENCES auth.users(id); 
+ALTER TABLE parties ADD COLUMN owner_id UUID REFERENCES auth.users(id);

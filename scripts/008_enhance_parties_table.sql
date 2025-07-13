@@ -145,4 +145,4 @@ CREATE POLICY "Allow authenticated users to delete parties"
 ON public.parties
 FOR DELETE
 >>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
-USING (auth.role() = 'authenticated'); 
+USING (auth.role() = 'authenticated');

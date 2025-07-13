@@ -5,18 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
-import { 
-  ArrowLeftIcon, 
-  DownloadIcon, 
-  EditIcon, 
-  EyeIcon, 
+import {
+  ArrowLeftIcon,
+  DownloadIcon,
+  EditIcon,
+  EyeIcon,
   SendIcon,
   UsersIcon,
   FileTextIcon,
   ClockIcon,
   HistoryIcon,
   MoreHorizontalIcon,
-  CopyIcon
+  CopyIcon,
 } from "lucide-react"
 
 // Import our refactored components
@@ -26,15 +26,11 @@ import { LoadingSpinner } from "@/components/LoadingSpinner"
 import { ErrorCard } from "@/components/ErrorCard"
 import { OverviewTab } from "@/components/contract-tabs/OverviewTab"
 import { formatDate, calculateDuration, copyToClipboard } from "@/utils/format"
-<<<<<<< HEAD
-=======
-import { ContractDetail, Party, Promoter } from '@/lib/types';
-import { getContractById } from '@/app/actions/contracts';
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
+import type { Party, Promoter } from "@/lib/types"
 
 export default function ContractDetailPage() {
   const params = useParams()
-  const contractId = (params?.id as string) || ''
+  const contractId = (params?.id as string) || ""
   const { contract, loading, error, refetch } = useContract(contractId)
 
   if (loading) {
@@ -86,7 +82,7 @@ export default function ContractDetailPage() {
               <span className="text-gray-900 font-medium">Contract Details</span>
             </nav>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -94,7 +90,7 @@ export default function ContractDetailPage() {
                   <h1 className="text-3xl font-bold text-gray-900">Contract Details</h1>
                   <StatusBadge status={contract?.status} />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                   <div>
                     <label className="font-medium text-gray-500">Contract ID</label>
@@ -115,11 +111,13 @@ export default function ContractDetailPage() {
                   </div>
                   <div>
                     <label className="font-medium text-gray-500">Duration</label>
-                    <p className="text-gray-900 mt-1">{calculateDuration(contract?.contract_start_date, contract?.contract_end_date)}</p>
+                    <p className="text-gray-900 mt-1">
+                      {calculateDuration(contract?.contract_start_date, contract?.contract_end_date)}
+                    </p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2 ml-6">
                 <Button variant="outline" size="sm">
                   <DownloadIcon className="mr-2 h-4 w-4" />
@@ -191,39 +189,34 @@ export default function ContractDetailPage() {
                 <div className="space-y-4">
                   <div className="p-4 border border-gray-200 rounded-lg">
                     <h4 className="font-semibold text-gray-900">Employee</h4>
-<<<<<<< HEAD
-                    <p className="text-gray-600">{contract?.employee_name || "Not specified"}</p>
-                    <p className="text-sm text-gray-500">{contract?.employee_email || "No email provided"}</p>
+                    <p className="text-gray-600">
+                      {contract?.promoters?.[0]?.name_en || contract?.promoter_name_en || "Not specified"}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {contract?.promoters?.[0]?.email || contract?.email || "No email provided"}
+                    </p>
                   </div>
                   <div className="p-4 border border-gray-200 rounded-lg">
                     <h4 className="font-semibold text-gray-900">Employer</h4>
-                    <p className="text-gray-600">{contract?.employer_name || "Not specified"}</p>
-                    <p className="text-sm text-gray-500">Company representative</p>
-                  </div>
-=======
-                    <p className="text-gray-600">{contract?.promoters?.[0]?.name_en || contract?.promoter_name_en || "Not specified"}</p>
-                    <p className="text-sm text-gray-500">{contract?.promoters?.[0]?.email || contract?.email || "No email provided"}</p>
-                  </div>
-                  <div className="p-4 border border-gray-200 rounded-lg">
-                    <h4 className="font-semibold text-gray-900">Employer</h4>
-                    <p className="text-gray-600">{contract?.employer?.name_en || contract?.first_party_name_en || "Not specified"}</p>
+                    <p className="text-gray-600">
+                      {contract?.employer?.name_en || contract?.first_party_name_en || "Not specified"}
+                    </p>
                     <p className="text-sm text-gray-500">Company representative</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm font-medium text-gray-500">Promoters</p>
                       <p className="text-sm text-gray-900">
-                        {contract.promoters?.map((p: Promoter) => p.name_en).join(', ')}
+                        {contract.promoters?.map((p: Promoter) => p.name_en).join(", ")}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Parties</p>
                       <p className="text-sm text-gray-900">
-                        {contract.parties?.map((p: Party) => p.name_en).join(', ')}
+                        {contract.parties?.map((p: Party) => p.name_en).join(", ")}
                       </p>
                     </div>
                   </div>
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
                 </div>
               </CardContent>
             </Card>
@@ -364,9 +357,13 @@ export default function ContractDetailPage() {
                     <DownloadIcon className="mr-2 h-4 w-4" />
                     Download PDF
                   </Button>
-                  <Button variant="outline">
-                    <EyeIcon className="mr-2 h-4 w-4" />
-                    Preview Contract
+                  <Button asChild variant="outline">
+                    <Link href={contract?.google_doc_url || "#"}>
+                      {" "}
+                      {/* Assuming preview links to google_doc_url, or a placeholder */}
+                      <EyeIcon className="mr-2 h-4 w-4" />
+                      Preview Contract
+                    </Link>
                   </Button>
                 </div>
               </CardContent>

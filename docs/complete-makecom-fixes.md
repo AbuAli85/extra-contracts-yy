@@ -11,30 +11,30 @@
 ### **1. Image Replacement Fix**
 
 **Current (Broken) Code:**
-```javascript
+\`\`\`javascript
 {{if(exists(4.id); "https://drive.google.com/uc?id=" + 4.id; "")}}
 {{if(exists(5.id); "https://drive.google.com/uc?id=" + 5.id; "")}}
-```
+\`\`\`
 
 **Fixed Code:**
-```javascript
+\`\`\`javascript
 {{if(4.id; "https://drive.google.com/uc?id=" + 4.id; "")}}
 {{if(5.id; "https://drive.google.com/uc?id=" + 5.id; "")}}
-```
+\`\`\`
 
 ### **2. Alternative Simple Fix (Recommended):**
 
 Instead of complex conditional logic, use this simpler approach:
 
 **ID Card Image URL:**
-```javascript
+\`\`\`javascript
 https://drive.google.com/uc?id={{4.id}}
-```
+\`\`\`
 
 **Passport Image URL:**
-```javascript
+\`\`\`javascript
 https://drive.google.com/uc?id={{5.id}}
-```
+\`\`\`
 
 ## 📋 **Step-by-Step Instructions**
 
@@ -67,9 +67,9 @@ https://drive.google.com/uc?id={{5.id}}
 Here's what your Google Docs module should look like:
 
 **Title:**
-```
+\`\`\`
 {{1.contract_number}}-{{1.promoter_name_en}}.pdf
-```
+\`\`\`
 
 **Image Replacements:**
 - **ID_CARD_IMAGE**: `https://drive.google.com/uc?id={{4.id}}`

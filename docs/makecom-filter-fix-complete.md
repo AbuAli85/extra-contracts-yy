@@ -19,16 +19,16 @@
 - Both new contract and existing contract response paths updated
 
 **Before (causing errors)**:
-```typescript
+\`\`\`typescript
 promoter_id_card_url: promoter_id_card_url || null,
 promoter_passport_url: promoter_passport_url || null,
-```
+\`\`\`
 
 **After (fixed)**:
-```typescript
+\`\`\`typescript
 promoter_id_card_url: (promoter_id_card_url || "").toString(),
 promoter_passport_url: (promoter_passport_url || "").toString(),
-```
+\`\`\`
 
 ### 2. Test Results ✅
 
@@ -48,25 +48,25 @@ The filter showing "Status code Equal to [empty]" needs to be updated.
 **For Image Processing Filters:**
 
 **Option 1 - Simple check**:
-```
+\`\`\`
 Field: promoter_passport_url
 Operator: not equal
 Value: ""
-```
+\`\`\`
 
 **Option 2 - Double validation**:
-```
+\`\`\`
 Condition 1: promoter_passport_url "not equal" ""
 AND
 Condition 2: length(promoter_passport_url) "greater" 0
-```
+\`\`\`
 
 **Option 3 - URL validation**:
-```
+\`\`\`
 Field: promoter_passport_url
 Operator: contains
 Value: "http"
-```
+\`\`\`
 
 ### Filter Behavior:
 - **Empty URLs** (`""`): Filter SKIPS → No image processing
@@ -88,17 +88,17 @@ Value: "http"
 ### Test the fix with these payloads:
 
 **No Images (should skip image processing)**:
-```json
+\`\`\`json
 {
   "contract_number": "TEST-001",
   "promoter_name_en": "Test User",
   "first_party_name_en": "Test Company",
   "second_party_name_en": "Test Employer"
 }
-```
+\`\`\`
 
 **With Images (should process images)**:
-```json
+\`\`\`json
 {
   "contract_number": "TEST-002",
   "promoter_name_en": "Test User", 
@@ -106,7 +106,7 @@ Value: "http"
   "first_party_name_en": "Test Company",
   "second_party_name_en": "Test Employer"
 }
-```
+\`\`\`
 
 ## 📊 Expected Results
 
@@ -132,14 +132,14 @@ Value: "http"
 
 ## 🔍 Verification Commands
 
-```bash
+\`\`\`bash
 # Test webhook response format
 cd "c:\Users\HP\Documents\GitHub\extra-contracts-yy-main"
 node scripts\verify-webhook-fix.js
 
 # View complete fix documentation
 type docs\makecom-filter-fix-guide.md
-```
+\`\`\`
 
 ## 📞 Support
 
