@@ -52,12 +52,6 @@ export interface Database {
           promoter_id: string
           contract_valid_from?: string | null
           contract_valid_until?: string | null
-<<<<<<< HEAD
-          job_title?: string | null
-          status?: string | null
-          work_location?: string | null
-=======
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
           contract_start_date?: string | null
           contract_end_date?: string | null
           contract_value?: number | null
@@ -88,12 +82,6 @@ export interface Database {
           promoter_id?: string
           contract_valid_from?: string | null
           contract_valid_until?: string | null
-<<<<<<< HEAD
-          job_title?: string | null
-          status?: string | null
-          work_location?: string | null
-=======
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
           contract_start_date?: string | null
           contract_end_date?: string | null
           contract_value?: number | null
@@ -219,15 +207,11 @@ export interface Database {
           notify_days_before_passport_expiry?: number | null
           notes?: string | null
           created_at?: string | null
-<<<<<<< HEAD
-          // ... other fields
-=======
           employer_id?: string | null
           outsourced_to_id?: string | null
           job_title?: string | null
           work_location?: string | null
           contract_valid_until?: string | null
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         }
         Insert: {
           id?: string
@@ -243,15 +227,11 @@ export interface Database {
           notify_days_before_passport_expiry?: number | null
           notes?: string | null
           created_at?: string | null
-<<<<<<< HEAD
-          // ... other fields
-=======
           employer_id?: string | null
           outsourced_to_id?: string | null
           job_title?: string | null
           work_location?: string | null
           contract_valid_until?: string | null
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         }
         Update: {
           id?: string
@@ -267,9 +247,6 @@ export interface Database {
           notify_days_before_passport_expiry?: number | null
           notes?: string | null
           created_at?: string | null
-<<<<<<< HEAD
-          // ... other fields
-=======
           employer_id?: string | null
           outsourced_to_id?: string | null
           job_title?: string | null
@@ -512,7 +489,6 @@ export interface Database {
           details?: string
           created_at?: string
           user_id?: string | null
->>>>>>> 2ca6fc48d74debda61bb0a128c96bc1d81dbb86a
         }
         Relationships: []
       }
@@ -542,7 +518,6 @@ export interface Database {
 }
 
 // Helper types (optional, but can be useful)
-export type Tables<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Row"]
+export type Tables<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"]
 export type Enums<T extends keyof Database["public"]["Enums"]> = Database["public"]["Enums"][T]
 // ... more helpers if needed

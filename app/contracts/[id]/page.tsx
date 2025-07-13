@@ -9,14 +9,14 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
-import { Contract as ContractDetail, ActivityLog } from "@/lib/types"
-import { 
-  ArrowLeftIcon, 
-  DownloadIcon, 
-  EditIcon, 
-  EyeIcon, 
-  SendIcon, 
-  PrinterIcon, 
+import type { Contract as ContractDetailType, ActivityLog as ActivityLogType } from "@/lib/types"
+import {
+  ArrowLeftIcon,
+  DownloadIcon,
+  EditIcon,
+  EyeIcon,
+  SendIcon,
+  PrinterIcon,
   ShareIcon,
   HistoryIcon,
   FileTextIcon,
@@ -32,7 +32,7 @@ import {
   MapPinIcon,
   MailIcon,
   PhoneIcon,
-  TagIcon
+  TagIcon,
 } from "lucide-react"
 
 interface ContractDetail {
@@ -65,17 +65,19 @@ interface ContractDetail {
     name_en: string
     name_ar?: string
     crn?: string
-    address?: string
-    phone?: string
-    email?: string
+    address_en?: string
+    address_ar?: string
+    contact_phone?: string
+    contact_email?: string
   }
   client?: {
     name_en: string
     name_ar?: string
     crn?: string
-    address?: string
-    phone?: string
-    email?: string
+    address_en?: string
+    address_ar?: string
+    contact_phone?: string
+    contact_email?: string
   }
   promoters?: Array<{
     id: string
@@ -98,91 +100,104 @@ interface ActivityLog {
 
 export default function ContractDetailPage() {
   const params = useParams()
+  const [contract, setContract] = useState<ContractDetailType | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("overview")
+  const [activityLogs, setActivityLogs] = useState<ActivityLogType[]>([])
 
   if (!params) {
     return <div>Loading page...</div>
   }
 
   const contractId = params.id as string
-  const [contract, setContract] = useState<ContractDetail | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState("overview")
 
-  const mockActivityLogs: ActivityLog[] = [
+  const mockActivityLogs: ActivityLogType[] = [
     {
-      id: '1',
-      action: 'created',
-      description: 'Contract was created and initialized',
-      created_at: new Date(Date.now() - 86400000 * 3).toISOString()
+      id: "1",
+      action: "created",
+      description: "Contract was created and initialized",
+      created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
     },
     {
-      id: '2',
-      action: 'generated',
-      description: 'Google document was generated successfully',
-      created_at: new Date(Date.now() - 86400000 * 2).toISOString()
+      id: "2",
+      action: "generated",
+      description: "Google document was generated successfully",
+      created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
     },
     {
-      id: '3',
-      action: 'reviewed',
-      description: 'Contract was reviewed by legal team',
-      created_at: new Date(Date.now() - 86400000 * 1).toISOString()
+      id: "3",
+      action: "reviewed",
+      description: "Contract was reviewed by legal team",
+      created_at: new Date(Date.now() - 86400000 * 1).toISOString(),
     },
     {
-      id: '4',
-      action: 'sent',
-      description: 'Contract was sent to parties for review',
-      created_at: new Date(Date.now() - 3600000 * 6).toISOString()
+      id: "4",
+      action: "sent",
+      description: "Contract was sent to parties for review",
+      created_at: new Date(Date.now() - 3600000 * 6).toISOString(),
     },
     {
-      id: '5',
-      action: 'downloaded',
-      description: 'PDF document was downloaded',
-      created_at: new Date(Date.now() - 3600000 * 2).toISOString()
-    }
+      id: "5",
+      action: "downloaded",
+      description: "PDF document was downloaded",
+      created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+    },
   ]
-
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
 
   const getStatusColor = (status?: string | null) => {
     switch (status?.toLowerCase()) {
-      case 'active': return 'bg-green-100 text-green-800 border-green-200'
-      case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'draft': return 'bg-gray-100 text-gray-800 border-gray-200'
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200'
-      case 'expired': return 'bg-orange-100 text-orange-800 border-orange-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case "active":
+        return "bg-green-100 text-green-800 border-green-200"
+      case "completed":
+        return "bg-blue-100 text-blue-800 border-blue-200"
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+      case "draft":
+        return "bg-gray-100 text-gray-800 border-gray-200"
+      case "cancelled":
+        return "bg-red-100 text-red-800 border-red-200"
+      case "expired":
+        return "bg-orange-100 text-orange-800 border-orange-200"
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200"
     }
   }
 
   const getStatusIcon = (status?: string | null) => {
     switch (status?.toLowerCase()) {
-      case 'active': return <CheckCircleIcon className="h-4 w-4" />
-      case 'completed': return <CheckCircleIcon className="h-4 w-4" />
-      case 'pending': return <ClockIcon className="h-4 w-4" />
-      case 'draft': return <FileTextIcon className="h-4 w-4" />
-      case 'cancelled': return <AlertCircleIcon className="h-4 w-4" />
-      case 'expired': return <AlertCircleIcon className="h-4 w-4" />
-      default: return <FileTextIcon className="h-4 w-4" />
+      case "active":
+        return <CheckCircleIcon className="h-4 w-4" />
+      case "completed":
+        return <CheckCircleIcon className="h-4 w-4" />
+      case "pending":
+        return <ClockIcon className="h-4 w-4" />
+      case "draft":
+        return <FileTextIcon className="h-4 w-4" />
+      case "cancelled":
+        return <AlertCircleIcon className="h-4 w-4" />
+      case "expired":
+        return <AlertCircleIcon className="h-4 w-4" />
+      default:
+        return <FileTextIcon className="h-4 w-4" />
     }
   }
 
   const formatCurrency = (amount?: number | null, currency?: string | null) => {
-    if (!amount) return 'N/A'
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency || 'USD'
+    if (!amount) return "N/A"
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency || "USD",
     }).format(amount)
   }
 
   const calculateDuration = (startDate?: string | null, endDate?: string | null) => {
-    if (!startDate || !endDate) return 'N/A'
+    if (!startDate || !endDate) return "N/A"
     const start = new Date(startDate)
     const end = new Date(endDate)
     const diffTime = Math.abs(end.getTime() - start.getTime())
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
+
     if (diffDays < 30) return `${diffDays} days`
     if (diffDays < 365) return `${Math.round(diffDays / 30)} months`
     return `${Math.round(diffDays / 365)} years`
@@ -196,11 +211,7 @@ export default function ContractDetailPage() {
         console.log("Fetching contract with ID:", contractId)
 
         // Fetch basic contract data
-        const { data, error: basicError } = await supabase
-          .from("contracts")
-          .select("*")
-          .eq("id", contractId)
-          .single()
+        const { data, error: basicError } = await supabase.from("contracts").select("*").eq("id", contractId).single()
 
         if (basicError) {
           console.error("Basic query error:", basicError)
@@ -211,8 +222,8 @@ export default function ContractDetailPage() {
         console.log("Basic contract data:", data)
 
         // Enhanced query with relations
-        let enhancedData = { ...data }
-        
+        const enhancedData = { ...data }
+
         // Fetch related parties separately
         if (data.employer_id) {
           const { data: employerData } = await supabase
@@ -220,38 +231,38 @@ export default function ContractDetailPage() {
             .select("id, name_en, name_ar, crn, address_en, address_ar, contact_phone, contact_email")
             .eq("id", data.employer_id)
             .single()
-          
+
           if (employerData) {
             enhancedData.employer = employerData
           }
         }
-        
+
         if (data.client_id) {
           const { data: clientData } = await supabase
             .from("parties")
             .select("id, name_en, name_ar, crn, address_en, address_ar, contact_phone, contact_email")
             .eq("id", data.client_id)
             .single()
-          
+
           if (clientData) {
             enhancedData.client = clientData
           }
         }
-        
+
         if (data.promoter_id) {
           const { data: promoterData, error: promoterError } = await supabase
             .from("promoters")
             .select("id, name_en, name_ar, id_card_number, email, phone")
             .eq("id", data.promoter_id)
             .single()
-          
-          if (!promoterError && promoterData && typeof promoterData === 'object' && 'id' in promoterData) {
+
+          if (!promoterError && promoterData && typeof promoterData === "object" && "id" in promoterData) {
             enhancedData.promoters = [promoterData]
           }
         }
-        
+
         console.log("Enhanced contract data:", enhancedData)
-        setContract(enhancedData)
+        setContract(enhancedData as ContractDetailType)
         setActivityLogs(mockActivityLogs)
       } catch (err) {
         console.error("Exception:", err)
@@ -302,9 +313,7 @@ export default function ContractDetailPage() {
                     Back to Contracts
                   </Link>
                 </Button>
-                <Button onClick={() => window.location.reload()}>
-                  Try Again
-                </Button>
+                <Button onClick={() => window.location.reload()}>Try Again</Button>
               </div>
             </CardContent>
           </Card>
@@ -354,18 +363,20 @@ export default function ContractDetailPage() {
               <span className="text-gray-900 font-medium">Contract Details</span>
             </nav>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-4">
                   <h1 className="text-3xl font-bold text-gray-900">Contract Details</h1>
-                  <Badge className={`${getStatusColor(contract?.status)} flex items-center gap-1 px-3 py-1 text-sm font-medium`}>
+                  <Badge
+                    className={`${getStatusColor(contract?.status)} flex items-center gap-1 px-3 py-1 text-sm font-medium`}
+                  >
                     {getStatusIcon(contract?.status)}
-                    {contract?.status || 'Unknown'}
+                    {contract?.status || "Unknown"}
                   </Badge>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                   <div>
                     <label className="font-medium text-gray-500">Contract ID</label>
@@ -378,46 +389,50 @@ export default function ContractDetailPage() {
                   </div>
                   <div>
                     <label className="font-medium text-gray-500">Created</label>
-                    <p className="mt-1">{contract.created_at ? new Date(contract.created_at).toLocaleDateString() : 'N/A'}</p>
+                    <p className="mt-1">
+                      {contract.created_at ? new Date(contract.created_at).toLocaleDateString() : "N/A"}
+                    </p>
                   </div>
                   <div>
                     <label className="font-medium text-gray-500">Duration</label>
-                    <p className="mt-1">{calculateDuration(contract.contract_start_date, contract.contract_end_date)}</p>
+                    <p className="mt-1">
+                      {calculateDuration(contract.contract_start_date, contract.contract_end_date)}
+                    </p>
                   </div>
                   <div>
                     <label className="font-medium text-gray-500">Type</label>
-                    <p className="mt-1">{contract.contract_type || 'Standard'}</p>
+                    <p className="mt-1">{contract.contract_type || "Standard"}</p>
                   </div>
                 </div>
               </div>
-              
+
               {/* Quick Actions */}
               <div className="flex items-center gap-2 ml-8">
                 {contract?.google_doc_url && (
-                  <Button asChild size="sm" variant="outline" className="gap-2">
+                  <Button asChild size="sm" variant="outline" className="gap-2 bg-transparent">
                     <a href={contract.google_doc_url} target="_blank" rel="noopener noreferrer">
                       <EyeIcon className="h-4 w-4" />
                       View
                     </a>
                   </Button>
                 )}
-                
-                <Button asChild size="sm" variant="outline" className="gap-2">
+
+                <Button asChild size="sm" variant="outline" className="gap-2 bg-transparent">
                   <Link href={`/edit-contract/${contractId}`}>
                     <EditIcon className="h-4 w-4" />
                     Edit
                   </Link>
                 </Button>
-                
+
                 {contract?.pdf_url && (
-                  <Button asChild size="sm" variant="outline" className="gap-2">
+                  <Button asChild size="sm" variant="outline" className="gap-2 bg-transparent">
                     <a href={contract.pdf_url} download>
                       <DownloadIcon className="h-4 w-4" />
                       Download
                     </a>
                   </Button>
                 )}
-                
+
                 <Button size="sm" className="gap-2">
                   <SendIcon className="h-4 w-4" />
                   Send
@@ -431,12 +446,24 @@ export default function ContractDetailPage() {
         <Tabs defaultValue="overview" className="space-y-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-1">
             <TabsList className="grid w-full grid-cols-6 bg-transparent">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Overview</TabsTrigger>
-              <TabsTrigger value="parties" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Parties</TabsTrigger>
-              <TabsTrigger value="documents" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Documents</TabsTrigger>
-              <TabsTrigger value="timeline" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Timeline</TabsTrigger>
-              <TabsTrigger value="history" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">History</TabsTrigger>
-              <TabsTrigger value="actions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Actions</TabsTrigger>
+              <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="parties" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                Parties
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                Documents
+              </TabsTrigger>
+              <TabsTrigger value="timeline" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                Timeline
+              </TabsTrigger>
+              <TabsTrigger value="history" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                History
+              </TabsTrigger>
+              <TabsTrigger value="actions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                Actions
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -449,7 +476,7 @@ export default function ContractDetailPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-blue-700 text-sm font-medium">Contract Status</p>
-                      <p className="text-2xl font-bold text-blue-900 capitalize">{contract?.status || 'Unknown'}</p>
+                      <p className="text-2xl font-bold text-blue-900 capitalize">{contract?.status || "Unknown"}</p>
                     </div>
                     <div className="h-12 w-12 bg-blue-200 rounded-lg flex items-center justify-center">
                       {getStatusIcon(contract?.status)}
@@ -463,7 +490,9 @@ export default function ContractDetailPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-green-700 text-sm font-medium">Duration</p>
-                      <p className="text-2xl font-bold text-green-900">{calculateDuration(contract?.contract_start_date, contract?.contract_end_date)}</p>
+                      <p className="text-2xl font-bold text-green-900">
+                        {calculateDuration(contract?.contract_start_date, contract?.contract_end_date)}
+                      </p>
                     </div>
                     <div className="h-12 w-12 bg-green-200 rounded-lg flex items-center justify-center">
                       <CalendarIcon className="h-6 w-6 text-green-700" />
@@ -477,7 +506,9 @@ export default function ContractDetailPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-purple-700 text-sm font-medium">Salary</p>
-                      <p className="text-2xl font-bold text-purple-900">{formatCurrency(contract?.salary, contract?.currency)}</p>
+                      <p className="text-2xl font-bold text-purple-900">
+                        {formatCurrency(contract?.salary, contract?.currency)}
+                      </p>
                     </div>
                     <div className="h-12 w-12 bg-purple-200 rounded-lg flex items-center justify-center">
                       <TagIcon className="h-6 w-6 text-purple-700" />
@@ -524,18 +555,22 @@ export default function ContractDetailPage() {
                         <p className="font-semibold text-gray-900 mt-1">{contract?.department || "N/A"}</p>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm font-medium text-gray-500">Start Date</label>
                         <p className="font-semibold text-gray-900 mt-1">
-                          {contract?.contract_start_date ? new Date(contract.contract_start_date).toLocaleDateString() : "N/A"}
+                          {contract?.contract_start_date
+                            ? new Date(contract.contract_start_date).toLocaleDateString()
+                            : "N/A"}
                         </p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-500">End Date</label>
                         <p className="font-semibold text-gray-900 mt-1">
-                          {contract?.contract_end_date ? new Date(contract.contract_end_date).toLocaleDateString() : "N/A"}
+                          {contract?.contract_end_date
+                            ? new Date(contract.contract_end_date).toLocaleDateString()
+                            : "N/A"}
                         </p>
                       </div>
                     </div>
@@ -576,13 +611,19 @@ export default function ContractDetailPage() {
                     <div>
                       <label className="text-sm font-medium text-gray-500">Contract ID</label>
                       <div className="mt-1 flex items-center gap-2">
-                        <code className="bg-gray-100 px-3 py-2 rounded-lg text-sm font-mono flex-1">{contract?.id}</code>
-                        <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(contract?.id || '')}>
+                        <code className="bg-gray-100 px-3 py-2 rounded-lg text-sm font-mono flex-1">
+                          {contract?.id}
+                        </code>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigator.clipboard.writeText(contract?.id || "")}
+                        >
                           <CopyIcon className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 gap-4">
                       <div>
                         <label className="text-sm font-medium text-gray-500">Employer ID</label>
@@ -640,12 +681,16 @@ export default function ContractDetailPage() {
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium text-gray-500">Company Name (English)</label>
-                      <p className="font-semibold text-gray-900 mt-1">{contract?.employer?.name_en || contract?.first_party_name_en || "Not specified"}</p>
+                      <p className="font-semibold text-gray-900 mt-1">
+                        {contract?.employer?.name_en || contract?.first_party_name_en || "Not specified"}
+                      </p>
                     </div>
                     {(contract?.employer?.name_ar || contract?.first_party_name_ar) && (
                       <div>
                         <label className="text-sm font-medium text-gray-500">Company Name (Arabic)</label>
-                        <p className="font-semibold text-gray-900 mt-1" dir="rtl">{contract?.employer?.name_ar || contract?.first_party_name_ar}</p>
+                        <p className="font-semibold text-gray-900 mt-1" dir="rtl">
+                          {contract?.employer?.name_ar || contract?.first_party_name_ar}
+                        </p>
                       </div>
                     )}
                     {contract?.employer?.crn && (
@@ -681,12 +726,10 @@ export default function ContractDetailPage() {
                         </p>
                       </div>
                     )}
-                    
+
                     <div className="pt-4 border-t">
-                      <Button asChild variant="outline" size="sm" className="w-full">
-                        <Link href={`/manage-parties`}>
-                          View Details
-                        </Link>
+                      <Button asChild variant="outline" size="sm" className="w-full bg-transparent">
+                        <Link href={`/manage-parties`}>View Details</Link>
                       </Button>
                     </div>
                   </div>
@@ -705,12 +748,16 @@ export default function ContractDetailPage() {
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium text-gray-500">Name (English)</label>
-                      <p className="font-semibold text-gray-900 mt-1">{contract?.client?.name_en || contract?.second_party_name_en || "Not specified"}</p>
+                      <p className="font-semibold text-gray-900 mt-1">
+                        {contract?.client?.name_en || contract?.second_party_name_en || "Not specified"}
+                      </p>
                     </div>
                     {(contract?.client?.name_ar || contract?.second_party_name_ar) && (
                       <div>
                         <label className="text-sm font-medium text-gray-500">Name (Arabic)</label>
-                        <p className="font-semibold text-gray-900 mt-1" dir="rtl">{contract?.client?.name_ar || contract?.second_party_name_ar}</p>
+                        <p className="font-semibold text-gray-900 mt-1" dir="rtl">
+                          {contract?.client?.name_ar || contract?.second_party_name_ar}
+                        </p>
                       </div>
                     )}
                     {contract?.client?.crn && (
@@ -746,12 +793,10 @@ export default function ContractDetailPage() {
                         </p>
                       </div>
                     )}
-                    
+
                     <div className="pt-4 border-t">
-                      <Button asChild variant="outline" size="sm" className="w-full">
-                        <Link href={`/manage-parties`}>
-                          View Details
-                        </Link>
+                      <Button asChild variant="outline" size="sm" className="w-full bg-transparent">
+                        <Link href={`/manage-parties`}>View Details</Link>
                       </Button>
                     </div>
                   </div>
@@ -777,13 +822,17 @@ export default function ContractDetailPage() {
                         {contract.promoters[0].name_ar && (
                           <div>
                             <label className="text-sm font-medium text-gray-500">Name (Arabic)</label>
-                            <p className="font-semibold text-gray-900 mt-1" dir="rtl">{contract.promoters[0].name_ar}</p>
+                            <p className="font-semibold text-gray-900 mt-1" dir="rtl">
+                              {contract.promoters[0].name_ar}
+                            </p>
                           </div>
                         )}
                         {contract.promoters[0].id_card_number && (
                           <div>
                             <label className="text-sm font-medium text-gray-500">ID Card Number</label>
-                            <p className="font-mono text-sm text-gray-700 mt-1">{contract.promoters[0].id_card_number}</p>
+                            <p className="font-mono text-sm text-gray-700 mt-1">
+                              {contract.promoters[0].id_card_number}
+                            </p>
                           </div>
                         )}
                         {contract.promoters[0].email && (
@@ -812,11 +861,11 @@ export default function ContractDetailPage() {
                         <p className="text-gray-400 text-sm">This contract doesn't have an assigned promoter.</p>
                       </div>
                     )}
-                    
+
                     <div className="pt-4 border-t">
-                      <Button asChild variant="outline" size="sm" className="w-full">
+                      <Button asChild variant="outline" size="sm" className="w-full bg-transparent">
                         <Link href={`/promoters`}>
-                          {contract?.promoters && contract.promoters.length > 0 ? 'View Details' : 'Assign Promoter'}
+                          {contract?.promoters && contract.promoters.length > 0 ? "View Details" : "Assign Promoter"}
                         </Link>
                       </Button>
                     </div>
@@ -949,30 +998,30 @@ export default function ContractDetailPage() {
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="space-y-3">
-                    <Button className="w-full justify-start gap-2" variant="outline">
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <FileTextIcon className="h-4 w-4" />
                       Generate New Version
                     </Button>
-                    <Button className="w-full justify-start gap-2" variant="outline">
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <SendIcon className="h-4 w-4" />
                       Send via Email
                     </Button>
-                    <Button className="w-full justify-start gap-2" variant="outline">
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <ShareIcon className="h-4 w-4" />
                       Share Link
                     </Button>
-                    <Button className="w-full justify-start gap-2" variant="outline">
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <PrinterIcon className="h-4 w-4" />
                       Print Document
                     </Button>
-                    
+
                     <Separator className="my-4" />
-                    
-                    <Button className="w-full justify-start gap-2" variant="outline">
+
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <DownloadIcon className="h-4 w-4" />
                       Download All
                     </Button>
-                    <Button className="w-full justify-start gap-2" variant="outline">
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <CopyIcon className="h-4 w-4" />
                       Duplicate Contract
                     </Button>
@@ -994,7 +1043,7 @@ export default function ContractDetailPage() {
               <CardContent className="p-6">
                 <div className="relative">
                   <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-                  
+
                   <div className="space-y-8">
                     <div className="relative flex items-start gap-6">
                       <div className="flex-shrink-0 w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center relative z-10 shadow-lg">
@@ -1004,7 +1053,7 @@ export default function ContractDetailPage() {
                         <h4 className="font-semibold text-gray-900">Contract Created</h4>
                         <p className="text-gray-600 text-sm mt-1">Initial contract generation and setup</p>
                         <p className="text-gray-500 text-xs mt-2">
-                          {contract?.created_at ? new Date(contract.created_at).toLocaleString() : 'Date not available'}
+                          {contract?.created_at ? new Date(contract.created_at).toLocaleString() : "Date not available"}
                         </p>
                       </div>
                     </div>
@@ -1031,10 +1080,10 @@ export default function ContractDetailPage() {
                         </div>
                         <div className="flex-1 bg-white p-4 rounded-lg border shadow-sm">
                           <h4 className="font-semibold text-gray-900">Document Generated</h4>
-                          <p className="text-gray-600 text-sm mt-1">Google document was created and is available for viewing</p>
-                          <p className="text-gray-500 text-xs mt-2">
-                            Document available
+                          <p className="text-gray-600 text-sm mt-1">
+                            Google document was created and is available for viewing
                           </p>
+                          <p className="text-gray-500 text-xs mt-2">Document available</p>
                         </div>
                       </div>
                     )}
@@ -1062,7 +1111,9 @@ export default function ContractDetailPage() {
                         <h4 className="font-semibold text-gray-900">Last Updated</h4>
                         <p className="text-gray-600 text-sm mt-1">Most recent modification to the contract</p>
                         <p className="text-gray-500 text-xs mt-2">
-                          {contract?.updated_at ? new Date(contract.updated_at).toLocaleString() : 'No updates recorded'}
+                          {contract?.updated_at
+                            ? new Date(contract.updated_at).toLocaleString()
+                            : "No updates recorded"}
                         </p>
                       </div>
                     </div>
@@ -1087,19 +1138,17 @@ export default function ContractDetailPage() {
                     <div key={log.id} className="flex items-start gap-4 p-4 rounded-lg border bg-gray-50">
                       <div className="flex-shrink-0">
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          {log.action === 'created' && <FileTextIcon className="h-5 w-5 text-blue-600" />}
-                          {log.action === 'generated' && <CheckCircleIcon className="h-5 w-5 text-green-600" />}
-                          {log.action === 'reviewed' && <EyeIcon className="h-5 w-5 text-purple-600" />}
-                          {log.action === 'sent' && <SendIcon className="h-5 w-5 text-orange-600" />}
-                          {log.action === 'downloaded' && <DownloadIcon className="h-5 w-5 text-gray-600" />}
+                          {log.action === "created" && <FileTextIcon className="h-5 w-5 text-blue-600" />}
+                          {log.action === "generated" && <CheckCircleIcon className="h-5 w-5 text-green-600" />}
+                          {log.action === "reviewed" && <EyeIcon className="h-5 w-5 text-purple-600" />}
+                          {log.action === "sent" && <SendIcon className="h-5 w-5 text-orange-600" />}
+                          {log.action === "downloaded" && <DownloadIcon className="h-5 w-5 text-gray-600" />}
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-gray-900 capitalize">{log.action}</p>
                         <p className="text-gray-600 text-sm mt-1">{log.description}</p>
-                        <p className="text-gray-500 text-xs mt-2">
-                          {new Date(log.created_at).toLocaleString()}
-                        </p>
+                        <p className="text-gray-500 text-xs mt-2">{new Date(log.created_at).toLocaleString()}</p>
                       </div>
                     </div>
                   ))}
@@ -1126,18 +1175,18 @@ export default function ContractDetailPage() {
                       </Button>
                     )}
                     {contract?.pdf_url && (
-                      <Button asChild className="w-full justify-start gap-2" variant="outline">
+                      <Button asChild className="w-full justify-start gap-2 bg-transparent" variant="outline">
                         <a href={contract.pdf_url} download>
                           <DownloadIcon className="h-4 w-4" />
                           Download PDF
                         </a>
                       </Button>
                     )}
-                    <Button className="w-full justify-start gap-2" variant="outline">
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <PrinterIcon className="h-4 w-4" />
                       Print Document
                     </Button>
-                    <Button className="w-full justify-start gap-2" variant="outline">
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <FileTextIcon className="h-4 w-4" />
                       Regenerate
                     </Button>
@@ -1155,15 +1204,15 @@ export default function ContractDetailPage() {
                       <SendIcon className="h-4 w-4" />
                       Send via Email
                     </Button>
-                    <Button className="w-full justify-start gap-2" variant="outline">
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <ShareIcon className="h-4 w-4" />
                       Share Link
                     </Button>
-                    <Button className="w-full justify-start gap-2" variant="outline">
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <MailIcon className="h-4 w-4" />
                       Send Reminder
                     </Button>
-                    <Button className="w-full justify-start gap-2" variant="outline">
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <MoreHorizontalIcon className="h-4 w-4" />
                       More Options
                     </Button>
@@ -1183,17 +1232,17 @@ export default function ContractDetailPage() {
                         Edit Contract
                       </Link>
                     </Button>
-                    <Button className="w-full justify-start gap-2" variant="outline">
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <CopyIcon className="h-4 w-4" />
                       Duplicate Contract
                     </Button>
-                    <Button className="w-full justify-start gap-2" variant="outline">
+                    <Button className="w-full justify-start gap-2 bg-transparent" variant="outline">
                       <HistoryIcon className="h-4 w-4" />
                       View History
                     </Button>
-                    
+
                     <Separator className="my-3" />
-                    
+
                     <Button className="w-full justify-start gap-2" variant="destructive">
                       <AlertCircleIcon className="h-4 w-4" />
                       Cancel Contract
