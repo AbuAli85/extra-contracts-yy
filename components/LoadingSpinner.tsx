@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent } from '@/components/ui/card'
 
 interface LoadingSpinnerProps {
   title?: string
@@ -6,10 +6,10 @@ interface LoadingSpinnerProps {
   className?: string
 }
 
-export function LoadingSpinner({
+export function LoadingSpinner({ 
   title = "Loading Contract Details",
   description = "Please wait while we fetch the contract information...",
-  className = "",
+  className = ""
 }: LoadingSpinnerProps) {
   return (
     <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-8 ${className}`}>

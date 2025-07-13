@@ -358,9 +358,9 @@ export default function ContractDetailPage() {
                     Download PDF
                   </Button>
                   <Button asChild variant="outline">
-                    <Link href={contract?.google_doc_url || "#"}>
+                    <Link href={contract?.pdf_url || "#"} target="_blank">
                       {" "}
-                      {/* Assuming preview links to google_doc_url, or a placeholder */}
+                      {/* Added a fallback href */}
                       <EyeIcon className="mr-2 h-4 w-4" />
                       Preview Contract
                     </Link>

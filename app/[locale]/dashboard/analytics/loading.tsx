@@ -1,8 +1,8 @@
-import LoadingSpinner from "@/components/LoadingSpinner"
+import { LoadingSpinner } from "@/components/LoadingSpinner"
 
 export default function AnalyticsLoading() {
   return (
-    <div className="flex h-full w-full items-center justify-center">
+    <div className="flex h-full items-center justify-center">
       <LoadingSpinner />
     </div>
   )

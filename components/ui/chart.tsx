@@ -256,7 +256,7 @@ const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipContent
 )
 ChartTooltipContent.displayName = "ChartTooltipContent"
 
-const ChartLegend = RechartsPrimitive.Legend
+export const ChartLegend = RechartsPrimitive.Legend
 
 interface ChartLegendContentProps extends React.ComponentProps<"div"> {
   hideIcon?: boolean
@@ -265,7 +265,7 @@ interface ChartLegendContentProps extends React.ComponentProps<"div"> {
   verticalAlign?: "top" | "middle" | "bottom"
 }
 
-const ChartLegendContent = React.forwardRef<HTMLDivElement, ChartLegendContentProps>(
+export const ChartLegendContent = React.forwardRef<HTMLDivElement, ChartLegendContentProps>(
   ({ className, hideIcon = false, payload, verticalAlign = "bottom", nameKey }, ref) => {
     const { config } = useChart()
 
@@ -307,4 +307,4 @@ const ChartLegendContent = React.forwardRef<HTMLDivElement, ChartLegendContentPr
 )
 ChartLegendContent.displayName = "ChartLegendContent"
 
-export { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent }
+export { ChartContainer, ChartTooltip, ChartTooltipContent }
